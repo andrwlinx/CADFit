@@ -28,6 +28,7 @@ import tqdm
 import numpy as np
 import trimesh
 import matplotlib
+from profiling import log_event
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -602,8 +603,10 @@ def execute_cadquery_script(script_content: str, output_stl_path: str, save_scri
         
         # Execute the script in the parent's Python interpreter.
         import sys as _sys
+        _t0 = time.time()
         result = subprocess.run([_sys.executable, script_path],
                               capture_output=True, text=True, timeout=60)
+        log_event("cq_exec", duration=time.time() - _t0, ok=result.returncode == 0)
         
         # Clean up temporary script if it was temporary
         if not save_script_path:
@@ -649,7 +652,10 @@ def compute_iou(gt_path: str, gen_path: str, normalize: bool = True) -> float:
         if os.path.getsize(gt_path) == 0 or os.path.getsize(gen_path) == 0:
             print(f"Empty files: gt={os.path.getsize(gt_path)}, gen={os.path.getsize(gen_path)}")
             return 0.0
-        return mesh_iou_cpu_boolean(gt_path, gen_path, normalize=normalize)
+        _t0 = time.time()
+        _iou = mesh_iou_cpu_boolean(gt_path, gen_path, normalize=normalize)
+        log_event("iou", duration=time.time() - _t0)
+        return _iou
     except Exception as e:
         print(f"IoU computation failed: {e}")
         return 0.0
@@ -1822,7 +1828,8 @@ def _test_removal_worker(args):
         return idx, None, str(e)
 
 
-def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.01, batch_removal=False, num_workers: int = 15):
+def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.01, batch_removal=False, num_workers: int = 15,
+                             fast_prune: bool = False):
     """
     Greedy pruning based on IoU values:
     1. Start with the extrusion having the highest individual IoU
@@ -1833,6 +1840,10 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
     
     Args:
         batch_removal: If True, remove all candidates with iou_gain > -0.005 in one batch
+        fast_prune: If True, read a candidate's volume from the STL already built
+            during evaluation (when that STL matches the candidate's actions)
+            instead of re-running CadQuery, and reuse one worker pool for the
+            whole removal loop. Intended to leave the selection unchanged.
     """
     import os, pickle, json
     
@@ -1885,7 +1896,8 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
                     'insts': insts,
                     'height': sketch['pos_h'],
                     'individual_iou': sketch['pos_iou'],
-                    'type': 'pos'
+                    'type': 'pos',
+                    'stl_path': sketch.get('pos_stl')
                 })
             
             # Add negative extrusion if available
@@ -1909,7 +1921,8 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
                 'revolve_angle': sketch['revolve_angle'],
                 'revolve_axis_start': sketch['revolve_axis_start'],
                 'revolve_axis_end': sketch['revolve_axis_end'],
-                'revolve_axis_angle': sketch.get('revolve_axis_angle')
+                'revolve_axis_angle': sketch.get('revolve_axis_angle'),
+                'stl_path': sketch.get('revolve_stl')
             })
 
     if not extrusion_candidates:
@@ -1924,14 +1937,21 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
 
     # Calculate volumes for all candidates first
     print(f"Found {len(extrusion_candidates)} extrusion candidates, calculating volumes...")
+    _t_phase = time.time()
     for i, candidate in enumerate(extrusion_candidates):
         try:
-            volume = calculate_extrusion_volume(candidate)
+            stl_path = candidate.pop('stl_path', None)
+            if fast_prune and stl_path and os.path.exists(stl_path):
+                volume = abs(trimesh.load(stl_path, force='mesh').volume)
+            else:
+                volume = calculate_extrusion_volume(candidate)
             candidate['volume'] = volume
             print(f"  Candidate {i}: Sketch {candidate['sketch_idx']} ({candidate['type']}): IoU={candidate['individual_iou']:.6f}, h={candidate['height']:.3f}, vol={volume:.6f}")
         except Exception as e:
             print(f"  Candidate {i}: Volume calculation failed ({e}), using volume=0.0")
             candidate['volume'] = 0.0
+
+    log_event("prune_phase", phase="volume_pass", duration=time.time() - _t_phase, n=len(extrusion_candidates))
 
     # Filter out candidates with negligible volume (< 1e-4) to avoid division by zero
     original_count = len(extrusion_candidates)
@@ -1967,6 +1987,7 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
     early_stop = False
     
     print("\nStarting greedy selection process (testing from largest IoU to smallest)...")
+    _t_phase = time.time()
     
     # Start with the largest IoU extrusion
     selected_groups.append(extrusion_candidates[0])
@@ -2014,6 +2035,9 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
         
         final_groups = selected_groups
 
+    log_event("prune_phase", phase="forward", duration=time.time() - _t_phase,
+              n=len(extrusion_candidates), selected=len(final_groups))
+    _t_phase = time.time()
     print(f"\nGreedy selection completed:")
     print(f"  Selected {len(final_groups)} out of {len(extrusion_candidates)} extrusions")
     print(f"  Final IoU: {best_iou:.6f}")
@@ -2038,6 +2062,7 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
         current_iou = best_iou
         removed_count = 0
         iteration = 0
+        shared_pool = mp.Pool(max(1, min(len(current_groups), num_workers))) if fast_prune else None
         
         while len(current_groups) > 1:
             iteration += 1
@@ -2051,8 +2076,11 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
                 worker_args.append((idx, groups_before, groups_after, gt_mesh, output_folder, iteration, alpha))
             
             # Test all removals in parallel (cap at num_workers).
-            with mp.Pool(max(1, min(len(worker_args), num_workers))) as pool:
-                results = pool.map(_test_removal_worker, worker_args)
+            if shared_pool is not None:
+                results = shared_pool.map(_test_removal_worker, worker_args)
+            else:
+                with mp.Pool(max(1, min(len(worker_args), num_workers))) as pool:
+                    results = pool.map(_test_removal_worker, worker_args)
             batch_removal=False
             # Find best removal or collect all candidates for batch removal
             if batch_removal:
@@ -2130,6 +2158,9 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
                     print(f"  ✗ No removal improves IoU, stopping post-processing")
                     break
         
+        if shared_pool is not None:
+            shared_pool.close()
+            shared_pool.join()
         print(f"\n  Post-processing completed: removed {removed_count} out of {len(final_groups)} extrusions")
         print(f"  Final IoU after post-processing: {current_iou:.6f} (improvement: {current_iou - best_iou:.6f})")
         
@@ -2141,6 +2172,12 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
 
     
     
+    log_event("prune_phase", phase="backward", duration=time.time() - _t_phase, selected=len(final_groups))
+    # The stock keep_mask / 'selected' flags are not reliable, so record the selection here.
+    log_event("prune_result", output_folder=output_folder,
+              selected=[[g.get('sketch_idx'), g.get('type'), g.get('height'), g.get('individual_iou')]
+                        for g in final_groups])
+
     # Build final mesh
     try:
         final_iou, final_executed = run_instruction_groups(final_groups, gt_mesh, output_folder, "tmp", alpha)

@@ -1,0 +1,8 @@
+{
+  "final_iou": 0.9938979630542789,
+  "stl_id": "l_bracket_1",
+  "ground_truth": "bench/synthetic/l_bracket_1.stl",
+  "reconstruction": "bench/runs/stock_synth/l_bracket_1/best_greedy_parallel_iterative.stl",
+  "num_iterations": 1,
+  "duration": 10.257883787155151
+}

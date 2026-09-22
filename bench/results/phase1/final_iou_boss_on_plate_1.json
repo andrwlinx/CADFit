@@ -1,0 +1,8 @@
+{
+  "final_iou": 0.8534337368018377,
+  "stl_id": "boss_on_plate_1",
+  "ground_truth": "bench/synthetic/boss_on_plate_1.stl",
+  "reconstruction": "bench/runs/stock_synth/boss_on_plate_1/best_greedy_parallel_iterative.stl",
+  "num_iterations": 1,
+  "duration": 454.0314860343933
+}

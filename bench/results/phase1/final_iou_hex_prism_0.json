@@ -1,0 +1,8 @@
+{
+  "final_iou": 0.9940188848164228,
+  "stl_id": "hex_prism_0",
+  "ground_truth": "bench/synthetic/hex_prism_0.stl",
+  "reconstruction": "bench/runs/stock_synth/hex_prism_0/best_greedy_parallel_iterative.stl",
+  "num_iterations": 1,
+  "duration": 15.992360830307007
+}

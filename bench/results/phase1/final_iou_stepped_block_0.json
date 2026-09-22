@@ -1,0 +1,8 @@
+{
+  "final_iou": 0.9829583104190992,
+  "stl_id": "stepped_block_0",
+  "ground_truth": "bench/synthetic/stepped_block_0.stl",
+  "reconstruction": "bench/runs/stock_synth/stepped_block_0/best_greedy_parallel_iterative.stl",
+  "num_iterations": 1,
+  "duration": 2167.1172201633453
+}

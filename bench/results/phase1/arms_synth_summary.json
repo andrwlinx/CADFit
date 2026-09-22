@@ -1,0 +1,4216 @@
+{
+  "summary": {
+    "fast": {
+      "n": 30,
+      "failures": 0,
+      "mean_iou": 1.0665428333333333,
+      "mean_d_iou": 0.0,
+      "d_iou_ci95": [
+        0.0,
+        0.0
+      ],
+      "worst_d_iou": 0.0,
+      "identical_selection": 29,
+      "wall_total": 1401,
+      "wall_ratio_vs_stock": 0.32423050219856514,
+      "cq_exec_total": 1217,
+      "iou_calls_total": 1130,
+      "n_ops_mean": 1.9333333333333333,
+      "single_fallback": 3,
+      "phase_totals": {
+        "backward": 190.5,
+        "evaluate": 196.1,
+        "forward": 738.9,
+        "volume_pass": 17.0
+      }
+    },
+    "full": {
+      "n": 30,
+      "failures": 0,
+      "mean_iou": 1.0596043,
+      "mean_d_iou": -0.006938533333333333,
+      "d_iou_ci95": [
+        -0.020803666666666665,
+        0.0
+      ],
+      "worst_d_iou": -0.20787999999999995,
+      "identical_selection": 28,
+      "wall_total": 1639,
+      "wall_ratio_vs_stock": 0.3793103448275862,
+      "cq_exec_total": 1026,
+      "iou_calls_total": 944,
+      "n_ops_mean": 1.9,
+      "single_fallback": 3,
+      "phase_totals": {
+        "backward": 195.4,
+        "evaluate": 156.8,
+        "forward": 764.8,
+        "ranking": 238.7,
+        "volume_pass": 16.0
+      }
+    },
+    "rank1": {
+      "n": 30,
+      "failures": 0,
+      "mean_iou": 1.0596043,
+      "mean_d_iou": -0.006938533333333333,
+      "d_iou_ci95": [
+        -0.020803666666666665,
+        0.0
+      ],
+      "worst_d_iou": -0.20787999999999995,
+      "identical_selection": 28,
+      "wall_total": 2044,
+      "wall_ratio_vs_stock": 0.4730386484610044,
+      "cq_exec_total": 1347,
+      "iou_calls_total": 994,
+      "n_ops_mean": 1.9,
+      "single_fallback": 3,
+      "phase_totals": {
+        "backward": 213.1,
+        "evaluate": 173.6,
+        "forward": 757.5,
+        "ranking": 240.8,
+        "volume_pass": 390.4
+      }
+    },
+    "stock": {
+      "n": 30,
+      "failures": 0,
+      "mean_iou": 1.0665428333333333,
+      "mean_d_iou": 0.0,
+      "d_iou_ci95": [
+        0.0,
+        0.0
+      ],
+      "worst_d_iou": 0.0,
+      "identical_selection": 30,
+      "wall_total": 4321,
+      "wall_ratio_vs_stock": 1.0,
+      "cq_exec_total": 1469,
+      "iou_calls_total": 1118,
+      "n_ops_mean": 1.9333333333333333,
+      "single_fallback": 3,
+      "phase_totals": {
+        "backward": 222.8,
+        "evaluate": 1169.5,
+        "forward": 715.6,
+        "volume_pass": 364.1
+      }
+    }
+  },
+  "runs": {
+    "full": {
+      "l_bracket_0": {
+        "wall": 16,
+        "exit": 0,
+        "final_iou": 0.985665,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "1374001b005d23e59a8b818ac468ba7f"
+            ]
+          ],
+          [
+            [
+              "1",
+              "5",
+              "",
+              ""
+            ]
+          ],
+          []
+        ],
+        "cq_exec": 11,
+        "iou_calls": 11,
+        "phases": {
+          "ranking": 0.9012799263000488,
+          "evaluate": 1.9281432628631592,
+          "volume_pass": 0.00273895263671875,
+          "forward": 8.335940837860107,
+          "backward": 0.00012111663818359375
+        },
+        "n_in": 5,
+        "n_eval": 5,
+        "n_ops": 1,
+        "single_fallback": false
+      },
+      "box_with_pocket_2": {
+        "wall": 79,
+        "exit": 0,
+        "final_iou": 0.846071,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "2333ef11278569f6b85bb133a0eb739c"
+            ]
+          ],
+          [
+            [
+              "8",
+              "19",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "2",
+              "8"
+            ]
+          ],
+          [
+            "0.829405"
+          ]
+        ],
+        "cq_exec": 60,
+        "iou_calls": 60,
+        "phases": {
+          "ranking": 0.8644750118255615,
+          "evaluate": 6.527613878250122,
+          "volume_pass": 0.007622957229614258,
+          "forward": 45.06784415245056,
+          "backward": 14.650778770446777
+        },
+        "n_in": 21,
+        "n_eval": 19,
+        "n_ops": 6,
+        "single_fallback": true
+      },
+      "l_bracket_1": {
+        "wall": 5,
+        "exit": 0,
+        "final_iou": 0.993898,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 5,
+        "iou_calls": 5,
+        "phases": {
+          "ranking": 0.46027088165283203,
+          "evaluate": 1.893563985824585
+        },
+        "n_in": 5,
+        "n_eval": 5,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "pulley_2": {
+        "wall": 102,
+        "exit": 0,
+        "final_iou": 0.523799,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "649d3d668ce796a194325f9aa7305af5"
+            ]
+          ],
+          [
+            [
+              "14",
+              "17",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "1",
+              "14"
+            ]
+          ],
+          [
+            "0.523799"
+          ]
+        ],
+        "cq_exec": 62,
+        "iou_calls": 62,
+        "phases": {
+          "ranking": 12.932733297348022,
+          "evaluate": 4.89466118812561,
+          "volume_pass": 0.012133121490478516,
+          "forward": 51.11102604866028,
+          "backward": 21.54851508140564
+        },
+        "n_in": 33,
+        "n_eval": 17,
+        "n_ops": 13,
+        "single_fallback": false
+      },
+      "hex_prism_2": {
+        "wall": 17,
+        "exit": 0,
+        "final_iou": 0.99782,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 15,
+        "iou_calls": 15,
+        "phases": {
+          "ranking": 6.1769859790802,
+          "evaluate": 4.909114122390747
+        },
+        "n_in": 15,
+        "n_eval": 15,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_shaft_2": {
+        "wall": 61,
+        "exit": 0,
+        "final_iou": 0.983794,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "0b780f96360743295e49e00e8c27e693"
+            ]
+          ],
+          [
+            [
+              "3",
+              "13",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "3"
+            ]
+          ],
+          [
+            "0.983794"
+          ]
+        ],
+        "cq_exec": 30,
+        "iou_calls": 30,
+        "phases": {
+          "ranking": 11.797454118728638,
+          "evaluate": 5.937028169631958,
+          "volume_pass": 0.009006023406982422,
+          "forward": 31.33778190612793,
+          "backward": 3.415621042251587
+        },
+        "n_in": 22,
+        "n_eval": 13,
+        "n_ops": 3,
+        "single_fallback": false
+      },
+      "plate_with_holes_2": {
+        "wall": 66,
+        "exit": 0,
+        "final_iou": 0.993331,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 12,
+        "iou_calls": 12,
+        "phases": {
+          "ranking": 55.981383323669434,
+          "evaluate": 4.54422402381897
+        },
+        "n_in": 14,
+        "n_eval": 12,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_block_1": {
+        "wall": 47,
+        "exit": 0,
+        "final_iou": 0.986722,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "a627ecfcd5d34a04bfc5fab426916e6c"
+            ]
+          ],
+          [
+            [
+              "2",
+              "17",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "0.986722"
+          ]
+        ],
+        "cq_exec": 37,
+        "iou_calls": 37,
+        "phases": {
+          "ranking": 0.5654609203338623,
+          "evaluate": 5.151453018188477,
+          "volume_pass": 0.00715327262878418,
+          "forward": 32.61687898635864,
+          "backward": 2.182417869567871
+        },
+        "n_in": 18,
+        "n_eval": 17,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "flange_0": {
+        "wall": 113,
+        "exit": 0,
+        "final_iou": 0.949538,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "9507e4318b6f3c86fc8de752bbfa26af"
+            ],
+            [
+              "greedy_tmp_revolve_0.py",
+              "9b6126adf1da21b42384fe4ce92da11b"
+            ]
+          ],
+          [
+            [
+              "5",
+              "15",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "0.949538"
+          ]
+        ],
+        "cq_exec": 69,
+        "iou_calls": 45,
+        "phases": {
+          "ranking": 4.96663498878479,
+          "evaluate": 5.33959698677063,
+          "volume_pass": 2.7943360805511475,
+          "forward": 68.15119886398315,
+          "backward": 18.36994194984436
+        },
+        "n_in": 21,
+        "n_eval": 15,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "flange_1": {
+        "wall": 85,
+        "exit": 0,
+        "final_iou": 1.511677,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "26c9090392f423dfa546f321063a24cc"
+            ]
+          ],
+          [
+            [
+              "3",
+              "21",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "1",
+              "3"
+            ]
+          ],
+          [
+            "1.511677"
+          ]
+        ],
+        "cq_exec": 52,
+        "iou_calls": 48,
+        "phases": {
+          "ranking": 4.852305173873901,
+          "evaluate": 6.914252042770386,
+          "volume_pass": 2.975775957107544,
+          "forward": 54.10697793960571,
+          "backward": 5.120175838470459
+        },
+        "n_in": 31,
+        "n_eval": 21,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "stepped_block_0": {
+        "wall": 57,
+        "exit": 0,
+        "final_iou": 0.982958,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "e4ef52e09c3ec367d359850c6b320f87"
+            ]
+          ],
+          [
+            [
+              "2",
+              "20",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "0.982958"
+          ]
+        ],
+        "cq_exec": 43,
+        "iou_calls": 43,
+        "phases": {
+          "ranking": 0.7665259838104248,
+          "evaluate": 6.299721002578735,
+          "volume_pass": 0.007989883422851562,
+          "forward": 36.12531518936157,
+          "backward": 1.9680900573730469
+        },
+        "n_in": 22,
+        "n_eval": 20,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "u_channel_0": {
+        "wall": 23,
+        "exit": 0,
+        "final_iou": 0.998081,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 22,
+        "iou_calls": 22,
+        "phases": {
+          "ranking": 0.8555209636688232,
+          "evaluate": 7.237088918685913
+        },
+        "n_in": 26,
+        "n_eval": 22,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "boss_on_plate_1": {
+        "wall": 149,
+        "exit": 0,
+        "final_iou": 0.954411,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "f7a3d5d48ef64835ad91e2740e218421"
+            ],
+            [
+              "greedy_tmp_revolve_0.py",
+              "50c8d0ba83c916accb490de7c971de18"
+            ]
+          ],
+          [
+            [
+              "5",
+              "15",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "0.954411"
+          ]
+        ],
+        "cq_exec": 68,
+        "iou_calls": 45,
+        "phases": {
+          "ranking": 6.862514019012451,
+          "evaluate": 6.348366737365723,
+          "volume_pass": 2.855942964553833,
+          "forward": 95.03727006912231,
+          "backward": 22.31516695022583
+        },
+        "n_in": 17,
+        "n_eval": 15,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "u_channel_1": {
+        "wall": 9,
+        "exit": 0,
+        "final_iou": 0.998072,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 13,
+        "iou_calls": 13,
+        "phases": {
+          "ranking": 0.7925858497619629,
+          "evaluate": 4.698650121688843
+        },
+        "n_in": 17,
+        "n_eval": 13,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "boss_on_plate_0": {
+        "wall": 142,
+        "exit": 0,
+        "final_iou": 0.977061,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "df17046bd054393d2fe7bc4b57bb96b3"
+            ],
+            [
+              "greedy_tmp_revolve_0.py",
+              "f2eef9b15bcd91c754c579254d30fa45"
+            ]
+          ],
+          [
+            [
+              "5",
+              "15",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "0.977061"
+          ]
+        ],
+        "cq_exec": 69,
+        "iou_calls": 45,
+        "phases": {
+          "ranking": 9.050021886825562,
+          "evaluate": 7.48048210144043,
+          "volume_pass": 2.993913173675537,
+          "forward": 81.60140705108643,
+          "backward": 24.212196826934814
+        },
+        "n_in": 19,
+        "n_eval": 15,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "box_with_pocket_0": {
+        "wall": 57,
+        "exit": 0,
+        "final_iou": 1.392315,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "b87dac70b0330c25df7deb7a86c004c9"
+            ]
+          ],
+          [
+            [
+              "5",
+              "18",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "1.392315"
+          ]
+        ],
+        "cq_exec": 51,
+        "iou_calls": 51,
+        "phases": {
+          "ranking": 0.5218250751495361,
+          "evaluate": 5.138456106185913,
+          "volume_pass": 0.00775599479675293,
+          "forward": 36.22947597503662,
+          "backward": 8.897608995437622
+        },
+        "n_in": 23,
+        "n_eval": 18,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "box_with_pocket_1": {
+        "wall": 55,
+        "exit": 0,
+        "final_iou": 1.191223,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "1e03ccb623bd078f14a5f70adf80f475"
+            ]
+          ],
+          [
+            [
+              "5",
+              "18",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "1.191223"
+          ]
+        ],
+        "cq_exec": 51,
+        "iou_calls": 51,
+        "phases": {
+          "ranking": 0.4950571060180664,
+          "evaluate": 5.057866811752319,
+          "volume_pass": 0.007941246032714844,
+          "forward": 34.13070631027222,
+          "backward": 9.617914915084839
+        },
+        "n_in": 18,
+        "n_eval": 18,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "l_bracket_2": {
+        "wall": 21,
+        "exit": 0,
+        "final_iou": 0.657133,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "393e1a26f925104bf687517febb55cb4"
+            ]
+          ],
+          [
+            [
+              "4",
+              "4",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "4"
+            ]
+          ],
+          [
+            "0.657133"
+          ]
+        ],
+        "cq_exec": 13,
+        "iou_calls": 13,
+        "phases": {
+          "ranking": 1.6248817443847656,
+          "evaluate": 1.9028699398040771,
+          "volume_pass": 0.002212047576904297,
+          "forward": 7.075571060180664,
+          "backward": 3.039160966873169
+        },
+        "n_in": 6,
+        "n_eval": 4,
+        "n_ops": 4,
+        "single_fallback": false
+      },
+      "pulley_1": {
+        "wall": 24,
+        "exit": 0,
+        "final_iou": 0.994515,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 26,
+        "iou_calls": 26,
+        "phases": {
+          "ranking": 2.692234992980957,
+          "evaluate": 9.375289916992188
+        },
+        "n_in": 42,
+        "n_eval": 26,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "hex_prism_1": {
+        "wall": 9,
+        "exit": 0,
+        "final_iou": 0.999166,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 7,
+        "iou_calls": 7,
+        "phases": {
+          "ranking": 2.1437859535217285,
+          "evaluate": 3.2972352504730225
+        },
+        "n_in": 7,
+        "n_eval": 7,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_shaft_0": {
+        "wall": 91,
+        "exit": 0,
+        "final_iou": 0.987401,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "eba855bf9a8281f2a34ed6452f909018"
+            ]
+          ],
+          [
+            [
+              "7",
+              "16",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "4",
+              "7"
+            ]
+          ],
+          [
+            "0.979378"
+          ]
+        ],
+        "cq_exec": 62,
+        "iou_calls": 58,
+        "phases": {
+          "ranking": 12.568039894104004,
+          "evaluate": 6.236398935317993,
+          "volume_pass": 2.7505321502685547,
+          "forward": 37.412312030792236,
+          "backward": 15.181724071502686
+        },
+        "n_in": 34,
+        "n_eval": 16,
+        "n_ops": 3,
+        "single_fallback": true
+      },
+      "stepped_shaft_1": {
+        "wall": 96,
+        "exit": 0,
+        "final_iou": 0.987188,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "868068bfb43b5c40cb3fc15a2c728a82"
+            ]
+          ],
+          [
+            [
+              "9",
+              "16",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "6",
+              "9"
+            ]
+          ],
+          [
+            "0.980897"
+          ]
+        ],
+        "cq_exec": 78,
+        "iou_calls": 75,
+        "phases": {
+          "ranking": 10.415297985076904,
+          "evaluate": 6.725125074386597,
+          "volume_pass": 1.517200231552124,
+          "forward": 41.42220973968506,
+          "backward": 24.62074613571167
+        },
+        "n_in": 30,
+        "n_eval": 16,
+        "n_ops": 3,
+        "single_fallback": true
+      },
+      "hex_prism_0": {
+        "wall": 7,
+        "exit": 0,
+        "final_iou": 0.994019,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 5,
+        "iou_calls": 5,
+        "phases": {
+          "ranking": 1.820375919342041,
+          "evaluate": 1.909041166305542
+        },
+        "n_in": 5,
+        "n_eval": 5,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "pulley_0": {
+        "wall": 22,
+        "exit": 0,
+        "final_iou": 0.994767,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 22,
+        "iou_calls": 22,
+        "phases": {
+          "ranking": 3.471827983856201,
+          "evaluate": 6.524763822555542
+        },
+        "n_in": 37,
+        "n_eval": 22,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_block_2": {
+        "wall": 56,
+        "exit": 0,
+        "final_iou": 0.982905,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "06e024c1cc5d2e166c72c1acbab98837"
+            ]
+          ],
+          [
+            [
+              "2",
+              "17",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "0.982905"
+          ]
+        ],
+        "cq_exec": 39,
+        "iou_calls": 39,
+        "phases": {
+          "ranking": 1.2184340953826904,
+          "evaluate": 7.825288772583008,
+          "volume_pass": 0.008155107498168945,
+          "forward": 34.90390491485596,
+          "backward": 1.9046471118927002
+        },
+        "n_in": 21,
+        "n_eval": 19,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "plate_with_holes_1": {
+        "wall": 7,
+        "exit": 0,
+        "final_iou": 0.999473,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 4,
+        "iou_calls": 4,
+        "phases": {
+          "ranking": 2.0804481506347656,
+          "evaluate": 2.3810510635375977
+        },
+        "n_in": 16,
+        "n_eval": 4,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "flange_2": {
+        "wall": 108,
+        "exit": 0,
+        "final_iou": 1.548912,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "0fe0eb1614e10792fca3063e4d87808c"
+            ]
+          ],
+          [
+            [
+              "3",
+              "12",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "1",
+              "3"
+            ]
+          ],
+          [
+            "1.548912"
+          ]
+        ],
+        "cq_exec": 31,
+        "iou_calls": 31,
+        "phases": {
+          "ranking": 48.205878019332886,
+          "evaluate": 6.911740064620972,
+          "volume_pass": 0.012871026992797852,
+          "forward": 33.48625683784485,
+          "backward": 5.663235902786255
+        },
+        "n_in": 28,
+        "n_eval": 13,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "plate_with_holes_0": {
+        "wall": 19,
+        "exit": 0,
+        "final_iou": 1.838019,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "05160065f33c51bd120e2ebf12a7a721"
+            ]
+          ],
+          [
+            [
+              "2",
+              "4",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "1.838019"
+          ]
+        ],
+        "cq_exec": 11,
+        "iou_calls": 11,
+        "phases": {
+          "ranking": 1.944397211074829,
+          "evaluate": 2.1375479698181152,
+          "volume_pass": 0.004233121871948242,
+          "forward": 7.023161172866821,
+          "backward": 1.89689302444458
+        },
+        "n_in": 22,
+        "n_eval": 4,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "boss_on_plate_2": {
+        "wall": 80,
+        "exit": 0,
+        "final_iou": 1.543859,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "9e6c3293a4dc6bb7e6b2fe00911c360a"
+            ]
+          ],
+          [
+            [
+              "5",
+              "12",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "1.543859"
+          ]
+        ],
+        "cq_exec": 39,
+        "iou_calls": 39,
+        "phases": {
+          "ranking": 27.32337784767151,
+          "evaluate": 5.091278076171875,
+          "volume_pass": 0.007919073104858398,
+          "forward": 29.61799120903015,
+          "backward": 10.779137134552002
+        },
+        "n_in": 17,
+        "n_eval": 12,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "u_channel_2": {
+        "wall": 16,
+        "exit": 0,
+        "final_iou": 0.994336,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 19,
+        "iou_calls": 19,
+        "phases": {
+          "ranking": 4.386783123016357,
+          "evaluate": 6.179537296295166
+        },
+        "n_in": 23,
+        "n_eval": 19,
+        "n_ops": 0,
+        "single_fallback": false
+      }
+    },
+    "fast": {
+      "l_bracket_0": {
+        "wall": 15,
+        "exit": 0,
+        "final_iou": 0.985665,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "1374001b005d23e59a8b818ac468ba7f"
+            ]
+          ],
+          [
+            [
+              "1",
+              "5",
+              "",
+              ""
+            ]
+          ],
+          []
+        ],
+        "cq_exec": 11,
+        "iou_calls": 11,
+        "phases": {
+          "evaluate": 1.8622238636016846,
+          "volume_pass": 0.0025260448455810547,
+          "forward": 8.294197082519531,
+          "backward": 0.00011110305786132812
+        },
+        "n_in": null,
+        "n_eval": 5,
+        "n_ops": 1,
+        "single_fallback": false
+      },
+      "box_with_pocket_2": {
+        "wall": 72,
+        "exit": 0,
+        "final_iou": 0.846071,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "2333ef11278569f6b85bb133a0eb739c"
+            ]
+          ],
+          [
+            [
+              "8",
+              "19",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "2",
+              "8"
+            ]
+          ],
+          [
+            "0.829405"
+          ]
+        ],
+        "cq_exec": 62,
+        "iou_calls": 62,
+        "phases": {
+          "evaluate": 6.2949113845825195,
+          "volume_pass": 0.008002996444702148,
+          "forward": 43.18901991844177,
+          "backward": 13.567247152328491
+        },
+        "n_in": null,
+        "n_eval": 21,
+        "n_ops": 6,
+        "single_fallback": true
+      },
+      "l_bracket_1": {
+        "wall": 4,
+        "exit": 0,
+        "final_iou": 0.993898,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 5,
+        "iou_calls": 5,
+        "phases": {
+          "evaluate": 1.876237154006958
+        },
+        "n_in": null,
+        "n_eval": 5,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "pulley_2": {
+        "wall": 100,
+        "exit": 0,
+        "final_iou": 0.731679,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "241632959c6b84fd31c231c0afb8de6c"
+            ]
+          ],
+          [
+            [
+              "15",
+              "17",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "1",
+              "15"
+            ]
+          ],
+          [
+            "0.731679"
+          ]
+        ],
+        "cq_exec": 80,
+        "iou_calls": 80,
+        "phases": {
+          "evaluate": 9.66404676437378,
+          "volume_pass": 0.011680126190185547,
+          "forward": 55.12808394432068,
+          "backward": 23.52419877052307
+        },
+        "n_in": null,
+        "n_eval": 33,
+        "n_ops": 14,
+        "single_fallback": false
+      },
+      "hex_prism_2": {
+        "wall": 11,
+        "exit": 0,
+        "final_iou": 0.99782,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 15,
+        "iou_calls": 15,
+        "phases": {
+          "evaluate": 4.876569747924805
+        },
+        "n_in": null,
+        "n_eval": 15,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_shaft_2": {
+        "wall": 51,
+        "exit": 0,
+        "final_iou": 0.983794,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "0b780f96360743295e49e00e8c27e693"
+            ]
+          ],
+          [
+            [
+              "3",
+              "13",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "3"
+            ]
+          ],
+          [
+            "0.983794"
+          ]
+        ],
+        "cq_exec": 39,
+        "iou_calls": 39,
+        "phases": {
+          "evaluate": 7.13702392578125,
+          "volume_pass": 0.008501052856445312,
+          "forward": 31.681493043899536,
+          "backward": 3.446688175201416
+        },
+        "n_in": null,
+        "n_eval": 22,
+        "n_ops": 3,
+        "single_fallback": false
+      },
+      "plate_with_holes_2": {
+        "wall": 9,
+        "exit": 0,
+        "final_iou": 0.993331,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 14,
+        "iou_calls": 12,
+        "phases": {
+          "evaluate": 4.787196159362793
+        },
+        "n_in": null,
+        "n_eval": 14,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_block_1": {
+        "wall": 43,
+        "exit": 0,
+        "final_iou": 0.986722,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "a627ecfcd5d34a04bfc5fab426916e6c"
+            ]
+          ],
+          [
+            [
+              "2",
+              "17",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "0.986722"
+          ]
+        ],
+        "cq_exec": 38,
+        "iou_calls": 38,
+        "phases": {
+          "evaluate": 5.0799338817596436,
+          "volume_pass": 0.00745701789855957,
+          "forward": 29.932313919067383,
+          "backward": 1.8303542137145996
+        },
+        "n_in": null,
+        "n_eval": 18,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "flange_0": {
+        "wall": 107,
+        "exit": 0,
+        "final_iou": 0.949538,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "9507e4318b6f3c86fc8de752bbfa26af"
+            ],
+            [
+              "greedy_tmp_revolve_0.py",
+              "9b6126adf1da21b42384fe4ce92da11b"
+            ]
+          ],
+          [
+            [
+              "5",
+              "15",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "0.949538"
+          ]
+        ],
+        "cq_exec": 75,
+        "iou_calls": 51,
+        "phases": {
+          "evaluate": 6.527554273605347,
+          "volume_pass": 2.657646894454956,
+          "forward": 65.94685983657837,
+          "backward": 17.96032190322876
+        },
+        "n_in": null,
+        "n_eval": 21,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "flange_1": {
+        "wall": 79,
+        "exit": 0,
+        "final_iou": 1.511677,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "26c9090392f423dfa546f321063a24cc"
+            ]
+          ],
+          [
+            [
+              "3",
+              "21",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "1",
+              "3"
+            ]
+          ],
+          [
+            "1.511677"
+          ]
+        ],
+        "cq_exec": 62,
+        "iou_calls": 58,
+        "phases": {
+          "evaluate": 9.419413089752197,
+          "volume_pass": 2.906106948852539,
+          "forward": 51.711145877838135,
+          "backward": 4.846081018447876
+        },
+        "n_in": null,
+        "n_eval": 31,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "stepped_block_0": {
+        "wall": 56,
+        "exit": 0,
+        "final_iou": 0.982958,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "e4ef52e09c3ec367d359850c6b320f87"
+            ]
+          ],
+          [
+            [
+              "2",
+              "20",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "0.982958"
+          ]
+        ],
+        "cq_exec": 45,
+        "iou_calls": 45,
+        "phases": {
+          "evaluate": 6.599391937255859,
+          "volume_pass": 0.008133888244628906,
+          "forward": 35.681989908218384,
+          "backward": 1.8231470584869385
+        },
+        "n_in": null,
+        "n_eval": 22,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "u_channel_0": {
+        "wall": 28,
+        "exit": 0,
+        "final_iou": 0.998081,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 26,
+        "iou_calls": 26,
+        "phases": {
+          "evaluate": 11.395995855331421
+        },
+        "n_in": null,
+        "n_eval": 26,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "boss_on_plate_1": {
+        "wall": 132,
+        "exit": 0,
+        "final_iou": 0.954411,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "f7a3d5d48ef64835ad91e2740e218421"
+            ],
+            [
+              "greedy_tmp_revolve_0.py",
+              "50c8d0ba83c916accb490de7c971de18"
+            ]
+          ],
+          [
+            [
+              "5",
+              "15",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "0.954411"
+          ]
+        ],
+        "cq_exec": 70,
+        "iou_calls": 47,
+        "phases": {
+          "evaluate": 4.865223169326782,
+          "volume_pass": 2.7813220024108887,
+          "forward": 89.96751523017883,
+          "backward": 20.80943012237549
+        },
+        "n_in": null,
+        "n_eval": 17,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "u_channel_1": {
+        "wall": 8,
+        "exit": 0,
+        "final_iou": 0.998072,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 17,
+        "iou_calls": 17,
+        "phases": {
+          "evaluate": 4.95100998878479
+        },
+        "n_in": null,
+        "n_eval": 17,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "boss_on_plate_0": {
+        "wall": 122,
+        "exit": 0,
+        "final_iou": 0.977061,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "df17046bd054393d2fe7bc4b57bb96b3"
+            ],
+            [
+              "greedy_tmp_revolve_0.py",
+              "f2eef9b15bcd91c754c579254d30fa45"
+            ]
+          ],
+          [
+            [
+              "5",
+              "15",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "0.977061"
+          ]
+        ],
+        "cq_exec": 73,
+        "iou_calls": 49,
+        "phases": {
+          "evaluate": 6.187204122543335,
+          "volume_pass": 2.8371057510375977,
+          "forward": 75.3823869228363,
+          "backward": 22.808894157409668
+        },
+        "n_in": null,
+        "n_eval": 19,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "box_with_pocket_0": {
+        "wall": 55,
+        "exit": 0,
+        "final_iou": 1.392315,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "b87dac70b0330c25df7deb7a86c004c9"
+            ]
+          ],
+          [
+            [
+              "5",
+              "18",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "1.392315"
+          ]
+        ],
+        "cq_exec": 56,
+        "iou_calls": 56,
+        "phases": {
+          "evaluate": 6.304741144180298,
+          "volume_pass": 0.007460117340087891,
+          "forward": 33.40381908416748,
+          "backward": 8.550844192504883
+        },
+        "n_in": null,
+        "n_eval": 23,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "box_with_pocket_1": {
+        "wall": 51,
+        "exit": 0,
+        "final_iou": 1.191223,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "1e03ccb623bd078f14a5f70adf80f475"
+            ]
+          ],
+          [
+            [
+              "5",
+              "18",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "1.191223"
+          ]
+        ],
+        "cq_exec": 51,
+        "iou_calls": 51,
+        "phases": {
+          "evaluate": 4.827214956283569,
+          "volume_pass": 0.007241964340209961,
+          "forward": 32.98560094833374,
+          "backward": 8.52179217338562
+        },
+        "n_in": null,
+        "n_eval": 18,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "l_bracket_2": {
+        "wall": 20,
+        "exit": 0,
+        "final_iou": 0.657133,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "393e1a26f925104bf687517febb55cb4"
+            ]
+          ],
+          [
+            [
+              "4",
+              "4",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "4"
+            ]
+          ],
+          [
+            "0.657133"
+          ]
+        ],
+        "cq_exec": 15,
+        "iou_calls": 15,
+        "phases": {
+          "evaluate": 1.8971152305603027,
+          "volume_pass": 0.002309083938598633,
+          "forward": 6.991947174072266,
+          "backward": 3.0236458778381348
+        },
+        "n_in": null,
+        "n_eval": 6,
+        "n_ops": 4,
+        "single_fallback": false
+      },
+      "pulley_1": {
+        "wall": 27,
+        "exit": 0,
+        "final_iou": 0.994515,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 42,
+        "iou_calls": 42,
+        "phases": {
+          "evaluate": 14.194813013076782
+        },
+        "n_in": null,
+        "n_eval": 42,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "hex_prism_1": {
+        "wall": 6,
+        "exit": 0,
+        "final_iou": 0.999166,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 7,
+        "iou_calls": 7,
+        "phases": {
+          "evaluate": 3.2891979217529297
+        },
+        "n_in": null,
+        "n_eval": 7,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_shaft_0": {
+        "wall": 81,
+        "exit": 0,
+        "final_iou": 0.987483,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "eba855bf9a8281f2a34ed6452f909018"
+            ]
+          ],
+          [
+            [
+              "7",
+              "16",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "4",
+              "7"
+            ]
+          ],
+          [
+            "0.979378"
+          ]
+        ],
+        "cq_exec": 80,
+        "iou_calls": 76,
+        "phases": {
+          "evaluate": 10.363967895507812,
+          "volume_pass": 2.8523781299591064,
+          "forward": 35.87738084793091,
+          "backward": 15.029335021972656
+        },
+        "n_in": null,
+        "n_eval": 34,
+        "n_ops": 3,
+        "single_fallback": true
+      },
+      "stepped_shaft_1": {
+        "wall": 93,
+        "exit": 0,
+        "final_iou": 0.987382,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "868068bfb43b5c40cb3fc15a2c728a82"
+            ]
+          ],
+          [
+            [
+              "9",
+              "16",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "6",
+              "9"
+            ]
+          ],
+          [
+            "0.980897"
+          ]
+        ],
+        "cq_exec": 92,
+        "iou_calls": 89,
+        "phases": {
+          "evaluate": 12.19002389907837,
+          "volume_pass": 1.415402889251709,
+          "forward": 42.87550187110901,
+          "backward": 25.54343867301941
+        },
+        "n_in": null,
+        "n_eval": 30,
+        "n_ops": 3,
+        "single_fallback": true
+      },
+      "hex_prism_0": {
+        "wall": 6,
+        "exit": 0,
+        "final_iou": 0.994019,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 5,
+        "iou_calls": 5,
+        "phases": {
+          "evaluate": 1.8870010375976562
+        },
+        "n_in": null,
+        "n_eval": 5,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "pulley_0": {
+        "wall": 24,
+        "exit": 0,
+        "final_iou": 0.994767,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 37,
+        "iou_calls": 37,
+        "phases": {
+          "evaluate": 11.17920708656311
+        },
+        "n_in": null,
+        "n_eval": 37,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_block_2": {
+        "wall": 49,
+        "exit": 0,
+        "final_iou": 0.982905,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "06e024c1cc5d2e166c72c1acbab98837"
+            ]
+          ],
+          [
+            [
+              "2",
+              "17",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "0.982905"
+          ]
+        ],
+        "cq_exec": 41,
+        "iou_calls": 39,
+        "phases": {
+          "evaluate": 6.36151909828186,
+          "volume_pass": 0.007832765579223633,
+          "forward": 32.87711310386658,
+          "backward": 1.8534648418426514
+        },
+        "n_in": null,
+        "n_eval": 21,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "plate_with_holes_1": {
+        "wall": 7,
+        "exit": 0,
+        "final_iou": 0.999473,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 16,
+        "iou_calls": 16,
+        "phases": {
+          "evaluate": 4.879823207855225
+        },
+        "n_in": null,
+        "n_eval": 16,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "flange_2": {
+        "wall": 60,
+        "exit": 0,
+        "final_iou": 1.548912,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "0fe0eb1614e10792fca3063e4d87808c"
+            ]
+          ],
+          [
+            [
+              "3",
+              "12",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "1",
+              "3"
+            ]
+          ],
+          [
+            "1.548912"
+          ]
+        ],
+        "cq_exec": 46,
+        "iou_calls": 46,
+        "phases": {
+          "evaluate": 9.235180139541626,
+          "volume_pass": 0.012614965438842773,
+          "forward": 32.70773196220398,
+          "backward": 5.589157819747925
+        },
+        "n_in": null,
+        "n_eval": 28,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "plate_with_holes_0": {
+        "wall": 20,
+        "exit": 0,
+        "final_iou": 1.838019,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "05160065f33c51bd120e2ebf12a7a721"
+            ]
+          ],
+          [
+            [
+              "2",
+              "4",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "1.838019"
+          ]
+        ],
+        "cq_exec": 29,
+        "iou_calls": 29,
+        "phases": {
+          "evaluate": 6.375274658203125,
+          "volume_pass": 0.003582000732421875,
+          "forward": 6.506304979324341,
+          "backward": 1.859757900238037
+        },
+        "n_in": null,
+        "n_eval": 22,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "boss_on_plate_2": {
+        "wall": 51,
+        "exit": 0,
+        "final_iou": 1.543859,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "9e6c3293a4dc6bb7e6b2fe00911c360a"
+            ]
+          ],
+          [
+            [
+              "5",
+              "12",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "1.543859"
+          ]
+        ],
+        "cq_exec": 45,
+        "iou_calls": 44,
+        "phases": {
+          "evaluate": 5.004741191864014,
+          "volume_pass": 1.5119221210479736,
+          "forward": 27.786749124526978,
+          "backward": 9.901725769042969
+        },
+        "n_in": null,
+        "n_eval": 17,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "u_channel_2": {
+        "wall": 14,
+        "exit": 0,
+        "final_iou": 0.994336,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 23,
+        "iou_calls": 23,
+        "phases": {
+          "evaluate": 6.619210243225098
+        },
+        "n_in": null,
+        "n_eval": 23,
+        "n_ops": 0,
+        "single_fallback": false
+      }
+    },
+    "rank1": {
+      "l_bracket_0": {
+        "wall": 23,
+        "exit": 0,
+        "final_iou": 0.985665,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "1374001b005d23e59a8b818ac468ba7f"
+            ]
+          ],
+          [
+            [
+              "1",
+              "5",
+              "",
+              ""
+            ]
+          ],
+          []
+        ],
+        "cq_exec": 16,
+        "iou_calls": 11,
+        "phases": {
+          "ranking": 0.8981389999389648,
+          "evaluate": 1.907315969467163,
+          "volume_pass": 7.215389966964722,
+          "forward": 8.751809120178223,
+          "backward": 0.00013709068298339844
+        },
+        "n_in": 5,
+        "n_eval": 5,
+        "n_ops": 1,
+        "single_fallback": false
+      },
+      "box_with_pocket_2": {
+        "wall": 105,
+        "exit": 0,
+        "final_iou": 0.846071,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "2333ef11278569f6b85bb133a0eb739c"
+            ]
+          ],
+          [
+            [
+              "8",
+              "19",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "2",
+              "8"
+            ]
+          ],
+          [
+            "0.829405"
+          ]
+        ],
+        "cq_exec": 79,
+        "iou_calls": 60,
+        "phases": {
+          "ranking": 0.8523702621459961,
+          "evaluate": 6.456115007400513,
+          "volume_pass": 26.54422688484192,
+          "forward": 45.60384774208069,
+          "backward": 16.154030799865723
+        },
+        "n_in": 21,
+        "n_eval": 19,
+        "n_ops": 6,
+        "single_fallback": true
+      },
+      "l_bracket_1": {
+        "wall": 6,
+        "exit": 0,
+        "final_iou": 0.993898,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 5,
+        "iou_calls": 5,
+        "phases": {
+          "ranking": 0.4767129421234131,
+          "evaluate": 2.0612761974334717
+        },
+        "n_in": 5,
+        "n_eval": 5,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "pulley_2": {
+        "wall": 134,
+        "exit": 0,
+        "final_iou": 0.523799,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "649d3d668ce796a194325f9aa7305af5"
+            ]
+          ],
+          [
+            [
+              "14",
+              "17",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "1",
+              "14"
+            ]
+          ],
+          [
+            "0.523799"
+          ]
+        ],
+        "cq_exec": 81,
+        "iou_calls": 64,
+        "phases": {
+          "ranking": 13.760886907577515,
+          "evaluate": 7.444344997406006,
+          "volume_pass": 24.071399927139282,
+          "forward": 52.492727756500244,
+          "backward": 23.077265977859497
+        },
+        "n_in": 33,
+        "n_eval": 19,
+        "n_ops": 13,
+        "single_fallback": false
+      },
+      "hex_prism_2": {
+        "wall": 18,
+        "exit": 0,
+        "final_iou": 0.99782,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 15,
+        "iou_calls": 15,
+        "phases": {
+          "ranking": 6.3765082359313965,
+          "evaluate": 5.459527969360352
+        },
+        "n_in": 15,
+        "n_eval": 15,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_shaft_2": {
+        "wall": 80,
+        "exit": 0,
+        "final_iou": 0.983794,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "0b780f96360743295e49e00e8c27e693"
+            ]
+          ],
+          [
+            [
+              "3",
+              "13",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "3"
+            ]
+          ],
+          [
+            "0.983794"
+          ]
+        ],
+        "cq_exec": 45,
+        "iou_calls": 32,
+        "phases": {
+          "ranking": 11.912442922592163,
+          "evaluate": 6.259483814239502,
+          "volume_pass": 17.659813165664673,
+          "forward": 31.433372259140015,
+          "backward": 3.324122905731201
+        },
+        "n_in": 22,
+        "n_eval": 15,
+        "n_ops": 3,
+        "single_fallback": false
+      },
+      "plate_with_holes_2": {
+        "wall": 69,
+        "exit": 0,
+        "final_iou": 0.993331,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 13,
+        "iou_calls": 12,
+        "phases": {
+          "ranking": 57.48856019973755,
+          "evaluate": 6.07879114151001
+        },
+        "n_in": 14,
+        "n_eval": 13,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_block_1": {
+        "wall": 69,
+        "exit": 0,
+        "final_iou": 0.986722,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "a627ecfcd5d34a04bfc5fab426916e6c"
+            ]
+          ],
+          [
+            [
+              "2",
+              "17",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "0.986722"
+          ]
+        ],
+        "cq_exec": 54,
+        "iou_calls": 37,
+        "phases": {
+          "ranking": 0.5554661750793457,
+          "evaluate": 5.044816017150879,
+          "volume_pass": 23.810378074645996,
+          "forward": 31.65952730178833,
+          "backward": 1.9608159065246582
+        },
+        "n_in": 18,
+        "n_eval": 17,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "flange_0": {
+        "wall": 134,
+        "exit": 0,
+        "final_iou": 0.949538,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "9507e4318b6f3c86fc8de752bbfa26af"
+            ],
+            [
+              "greedy_tmp_revolve_0.py",
+              "9b6126adf1da21b42384fe4ce92da11b"
+            ]
+          ],
+          [
+            [
+              "5",
+              "15",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "0.949538"
+          ]
+        ],
+        "cq_exec": 83,
+        "iou_calls": 46,
+        "phases": {
+          "ranking": 5.101213216781616,
+          "evaluate": 6.666466951370239,
+          "volume_pass": 21.0646231174469,
+          "forward": 68.47842979431152,
+          "backward": 19.66659712791443
+        },
+        "n_in": 21,
+        "n_eval": 16,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "flange_1": {
+        "wall": 113,
+        "exit": 0,
+        "final_iou": 1.511677,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "26c9090392f423dfa546f321063a24cc"
+            ]
+          ],
+          [
+            [
+              "3",
+              "21",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "1",
+              "3"
+            ]
+          ],
+          [
+            "1.511677"
+          ]
+        ],
+        "cq_exec": 72,
+        "iou_calls": 49,
+        "phases": {
+          "ranking": 4.895737648010254,
+          "evaluate": 7.003561973571777,
+          "volume_pass": 30.504592180252075,
+          "forward": 53.7820782661438,
+          "backward": 5.370606899261475
+        },
+        "n_in": 31,
+        "n_eval": 22,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "stepped_block_0": {
+        "wall": 88,
+        "exit": 0,
+        "final_iou": 0.982958,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "e4ef52e09c3ec367d359850c6b320f87"
+            ]
+          ],
+          [
+            [
+              "2",
+              "20",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "0.982958"
+          ]
+        ],
+        "cq_exec": 63,
+        "iou_calls": 43,
+        "phases": {
+          "ranking": 0.7950468063354492,
+          "evaluate": 7.419230937957764,
+          "volume_pass": 27.804729223251343,
+          "forward": 37.849072217941284,
+          "backward": 1.8520758152008057
+        },
+        "n_in": 22,
+        "n_eval": 20,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "u_channel_0": {
+        "wall": 24,
+        "exit": 0,
+        "final_iou": 0.998081,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 22,
+        "iou_calls": 22,
+        "phases": {
+          "ranking": 0.8740761280059814,
+          "evaluate": 7.45605206489563
+        },
+        "n_in": 26,
+        "n_eval": 22,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "boss_on_plate_1": {
+        "wall": 161,
+        "exit": 0,
+        "final_iou": 0.954411,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "f7a3d5d48ef64835ad91e2740e218421"
+            ],
+            [
+              "greedy_tmp_revolve_0.py",
+              "50c8d0ba83c916accb490de7c971de18"
+            ]
+          ],
+          [
+            [
+              "5",
+              "15",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "0.954411"
+          ]
+        ],
+        "cq_exec": 81,
+        "iou_calls": 45,
+        "phases": {
+          "ranking": 6.470452070236206,
+          "evaluate": 5.608351945877075,
+          "volume_pass": 20.247776985168457,
+          "forward": 91.90797305107117,
+          "backward": 23.011577129364014
+        },
+        "n_in": 17,
+        "n_eval": 15,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "u_channel_1": {
+        "wall": 8,
+        "exit": 0,
+        "final_iou": 0.998072,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 13,
+        "iou_calls": 13,
+        "phases": {
+          "ranking": 0.8008739948272705,
+          "evaluate": 4.816040992736816
+        },
+        "n_in": 17,
+        "n_eval": 13,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "boss_on_plate_0": {
+        "wall": 155,
+        "exit": 0,
+        "final_iou": 0.977061,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "df17046bd054393d2fe7bc4b57bb96b3"
+            ],
+            [
+              "greedy_tmp_revolve_0.py",
+              "f2eef9b15bcd91c754c579254d30fa45"
+            ]
+          ],
+          [
+            [
+              "5",
+              "15",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "0.977061"
+          ]
+        ],
+        "cq_exec": 82,
+        "iou_calls": 45,
+        "phases": {
+          "ranking": 8.120352029800415,
+          "evaluate": 6.10178279876709,
+          "volume_pass": 21.02384901046753,
+          "forward": 79.00199484825134,
+          "backward": 25.060054063796997
+        },
+        "n_in": 19,
+        "n_eval": 15,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "box_with_pocket_0": {
+        "wall": 80,
+        "exit": 0,
+        "final_iou": 1.392315,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "b87dac70b0330c25df7deb7a86c004c9"
+            ]
+          ],
+          [
+            [
+              "5",
+              "18",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "1.392315"
+          ]
+        ],
+        "cq_exec": 69,
+        "iou_calls": 51,
+        "phases": {
+          "ranking": 0.5140058994293213,
+          "evaluate": 4.896759033203125,
+          "volume_pass": 24.247218132019043,
+          "forward": 34.19212007522583,
+          "backward": 10.33031177520752
+        },
+        "n_in": 23,
+        "n_eval": 18,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "box_with_pocket_1": {
+        "wall": 82,
+        "exit": 0,
+        "final_iou": 1.191223,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "1e03ccb623bd078f14a5f70adf80f475"
+            ]
+          ],
+          [
+            [
+              "5",
+              "18",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "1.191223"
+          ]
+        ],
+        "cq_exec": 69,
+        "iou_calls": 51,
+        "phases": {
+          "ranking": 0.4912271499633789,
+          "evaluate": 4.932265996932983,
+          "volume_pass": 25.350840091705322,
+          "forward": 34.8693311214447,
+          "backward": 10.510918855667114
+        },
+        "n_in": 18,
+        "n_eval": 18,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "l_bracket_2": {
+        "wall": 27,
+        "exit": 0,
+        "final_iou": 0.657133,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "393e1a26f925104bf687517febb55cb4"
+            ]
+          ],
+          [
+            [
+              "4",
+              "4",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "4"
+            ]
+          ],
+          [
+            "0.657133"
+          ]
+        ],
+        "cq_exec": 18,
+        "iou_calls": 14,
+        "phases": {
+          "ranking": 1.69944429397583,
+          "evaluate": 1.965651273727417,
+          "volume_pass": 5.53761887550354,
+          "forward": 7.087862968444824,
+          "backward": 2.8643341064453125
+        },
+        "n_in": 6,
+        "n_eval": 5,
+        "n_ops": 4,
+        "single_fallback": false
+      },
+      "pulley_1": {
+        "wall": 26,
+        "exit": 0,
+        "final_iou": 0.994515,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 27,
+        "iou_calls": 27,
+        "phases": {
+          "ranking": 2.812772035598755,
+          "evaluate": 9.901817083358765
+        },
+        "n_in": 42,
+        "n_eval": 27,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "hex_prism_1": {
+        "wall": 9,
+        "exit": 0,
+        "final_iou": 0.999166,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 7,
+        "iou_calls": 7,
+        "phases": {
+          "ranking": 2.2018141746520996,
+          "evaluate": 3.346141815185547
+        },
+        "n_in": 7,
+        "n_eval": 7,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_shaft_0": {
+        "wall": 114,
+        "exit": 0,
+        "final_iou": 0.987401,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "eba855bf9a8281f2a34ed6452f909018"
+            ]
+          ],
+          [
+            [
+              "7",
+              "16",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "4",
+              "7"
+            ]
+          ],
+          [
+            "0.979378"
+          ]
+        ],
+        "cq_exec": 79,
+        "iou_calls": 61,
+        "phases": {
+          "ranking": 13.978729963302612,
+          "evaluate": 7.43609881401062,
+          "volume_pass": 21.63531804084778,
+          "forward": 36.027161836624146,
+          "backward": 17.730616807937622
+        },
+        "n_in": 34,
+        "n_eval": 19,
+        "n_ops": 3,
+        "single_fallback": true
+      },
+      "stepped_shaft_1": {
+        "wall": 120,
+        "exit": 0,
+        "final_iou": 0.987188,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "868068bfb43b5c40cb3fc15a2c728a82"
+            ]
+          ],
+          [
+            [
+              "9",
+              "16",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "6",
+              "9"
+            ]
+          ],
+          [
+            "0.980897"
+          ]
+        ],
+        "cq_exec": 96,
+        "iou_calls": 78,
+        "phases": {
+          "ranking": 10.139389038085938,
+          "evaluate": 7.477589130401611,
+          "volume_pass": 21.507339000701904,
+          "forward": 40.15420174598694,
+          "backward": 29.422893047332764
+        },
+        "n_in": 30,
+        "n_eval": 19,
+        "n_ops": 3,
+        "single_fallback": true
+      },
+      "hex_prism_0": {
+        "wall": 8,
+        "exit": 0,
+        "final_iou": 0.994019,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 5,
+        "iou_calls": 5,
+        "phases": {
+          "ranking": 1.9108202457427979,
+          "evaluate": 2.0391170978546143
+        },
+        "n_in": 5,
+        "n_eval": 5,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "pulley_0": {
+        "wall": 24,
+        "exit": 0,
+        "final_iou": 0.994767,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 23,
+        "iou_calls": 23,
+        "phases": {
+          "ranking": 3.689709186553955,
+          "evaluate": 6.828850984573364
+        },
+        "n_in": 37,
+        "n_eval": 23,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_block_2": {
+        "wall": 80,
+        "exit": 0,
+        "final_iou": 0.982905,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "06e024c1cc5d2e166c72c1acbab98837"
+            ]
+          ],
+          [
+            [
+              "2",
+              "17",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "0.982905"
+          ]
+        ],
+        "cq_exec": 59,
+        "iou_calls": 39,
+        "phases": {
+          "ranking": 1.1667680740356445,
+          "evaluate": 6.426367998123169,
+          "volume_pass": 26.46057891845703,
+          "forward": 34.171791076660156,
+          "backward": 2.9105019569396973
+        },
+        "n_in": 21,
+        "n_eval": 20,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "plate_with_holes_1": {
+        "wall": 10,
+        "exit": 0,
+        "final_iou": 0.999473,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 16,
+        "iou_calls": 16,
+        "phases": {
+          "ranking": 2.1399450302124023,
+          "evaluate": 5.3560240268707275
+        },
+        "n_in": 16,
+        "n_eval": 16,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "flange_2": {
+        "wall": 132,
+        "exit": 0,
+        "final_iou": 1.548912,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "0fe0eb1614e10792fca3063e4d87808c"
+            ]
+          ],
+          [
+            [
+              "3",
+              "12",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "1",
+              "3"
+            ]
+          ],
+          [
+            "1.548912"
+          ]
+        ],
+        "cq_exec": 51,
+        "iou_calls": 35,
+        "phases": {
+          "ranking": 48.696816205978394,
+          "evaluate": 7.225394010543823,
+          "volume_pass": 22.921645641326904,
+          "forward": 33.96300911903381,
+          "backward": 6.010319948196411
+        },
+        "n_in": 28,
+        "n_eval": 17,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "plate_with_holes_0": {
+        "wall": 30,
+        "exit": 0,
+        "final_iou": 1.838019,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "05160065f33c51bd120e2ebf12a7a721"
+            ]
+          ],
+          [
+            [
+              "2",
+              "4",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "1.838019"
+          ]
+        ],
+        "cq_exec": 33,
+        "iou_calls": 29,
+        "phases": {
+          "ranking": 2.214974880218506,
+          "evaluate": 6.925330877304077,
+          "volume_pass": 6.0305328369140625,
+          "forward": 7.109851121902466,
+          "backward": 1.9048733711242676
+        },
+        "n_in": 22,
+        "n_eval": 22,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "boss_on_plate_2": {
+        "wall": 97,
+        "exit": 0,
+        "final_iou": 1.543859,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "9e6c3293a4dc6bb7e6b2fe00911c360a"
+            ]
+          ],
+          [
+            [
+              "5",
+              "12",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "1.543859"
+          ]
+        ],
+        "cq_exec": 52,
+        "iou_calls": 40,
+        "phases": {
+          "ranking": 25.30111813545227,
+          "evaluate": 6.272906064987183,
+          "volume_pass": 16.81113600730896,
+          "forward": 29.001930713653564,
+          "backward": 11.941082239151001
+        },
+        "n_in": 17,
+        "n_eval": 13,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "u_channel_2": {
+        "wall": 18,
+        "exit": 0,
+        "final_iou": 0.994336,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 19,
+        "iou_calls": 19,
+        "phases": {
+          "ranking": 4.435215711593628,
+          "evaluate": 6.836148023605347
+        },
+        "n_in": 23,
+        "n_eval": 19,
+        "n_ops": 0,
+        "single_fallback": false
+      }
+    },
+    "stock": {
+      "l_bracket_0": {
+        "wall": 21,
+        "exit": 0,
+        "final_iou": 0.985665,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "1374001b005d23e59a8b818ac468ba7f"
+            ]
+          ],
+          [
+            [
+              "1",
+              "5",
+              "",
+              ""
+            ]
+          ],
+          []
+        ],
+        "cq_exec": 16,
+        "iou_calls": 11,
+        "phases": {
+          "evaluate": 1.8691320419311523,
+          "volume_pass": 6.6896071434021,
+          "forward": 8.17701506614685,
+          "backward": 0.00012493133544921875
+        },
+        "n_in": null,
+        "n_eval": 5,
+        "n_ops": 1,
+        "single_fallback": false
+      },
+      "box_with_pocket_2": {
+        "wall": 99,
+        "exit": 0,
+        "final_iou": 0.846071,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "2333ef11278569f6b85bb133a0eb739c"
+            ]
+          ],
+          [
+            [
+              "8",
+              "19",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "2",
+              "8"
+            ]
+          ],
+          [
+            "0.829405"
+          ]
+        ],
+        "cq_exec": 81,
+        "iou_calls": 62,
+        "phases": {
+          "evaluate": 6.311728000640869,
+          "volume_pass": 25.24418616294861,
+          "forward": 43.21677207946777,
+          "backward": 14.924611806869507
+        },
+        "n_in": null,
+        "n_eval": 21,
+        "n_ops": 6,
+        "single_fallback": true
+      },
+      "l_bracket_1": {
+        "wall": 8,
+        "exit": 0,
+        "final_iou": 0.993898,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 5,
+        "iou_calls": 5,
+        "phases": {
+          "evaluate": 3.0696592330932617
+        },
+        "n_in": null,
+        "n_eval": 5,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "pulley_2": {
+        "wall": 144,
+        "exit": 0,
+        "final_iou": 0.731679,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "241632959c6b84fd31c231c0afb8de6c"
+            ]
+          ],
+          [
+            [
+              "15",
+              "17",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "1",
+              "15"
+            ]
+          ],
+          [
+            "0.731679"
+          ]
+        ],
+        "cq_exec": 97,
+        "iou_calls": 80,
+        "phases": {
+          "evaluate": 16.932793855667114,
+          "volume_pass": 22.41800618171692,
+          "forward": 53.99092078208923,
+          "backward": 35.20491170883179
+        },
+        "n_in": null,
+        "n_eval": 33,
+        "n_ops": 14,
+        "single_fallback": false
+      },
+      "hex_prism_2": {
+        "wall": 10,
+        "exit": 0,
+        "final_iou": 0.99782,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 15,
+        "iou_calls": 15,
+        "phases": {
+          "evaluate": 4.850780010223389
+        },
+        "n_in": null,
+        "n_eval": 15,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_shaft_2": {
+        "wall": 68,
+        "exit": 0,
+        "final_iou": 0.983794,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "0b780f96360743295e49e00e8c27e693"
+            ]
+          ],
+          [
+            [
+              "3",
+              "13",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "3"
+            ]
+          ],
+          [
+            "0.983794"
+          ]
+        ],
+        "cq_exec": 52,
+        "iou_calls": 39,
+        "phases": {
+          "evaluate": 6.984399795532227,
+          "volume_pass": 17.696177005767822,
+          "forward": 31.48144793510437,
+          "backward": 3.370386838912964
+        },
+        "n_in": null,
+        "n_eval": 22,
+        "n_ops": 3,
+        "single_fallback": false
+      },
+      "plate_with_holes_2": {
+        "wall": 16,
+        "exit": 0,
+        "final_iou": 0.993331,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 14,
+        "iou_calls": 12,
+        "phases": {
+          "evaluate": 7.898674964904785
+        },
+        "n_in": null,
+        "n_eval": 14,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_block_1": {
+        "wall": 969,
+        "exit": 0,
+        "final_iou": 0.986722,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "a627ecfcd5d34a04bfc5fab426916e6c"
+            ]
+          ],
+          [
+            [
+              "2",
+              "11",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "0.986722"
+          ]
+        ],
+        "cq_exec": 38,
+        "iou_calls": 26,
+        "phases": {
+          "evaluate": 927.1570920944214,
+          "volume_pass": 14.660547971725464,
+          "forward": 19.070183992385864,
+          "backward": 1.9909460544586182
+        },
+        "n_in": null,
+        "n_eval": 18,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "flange_0": {
+        "wall": 125,
+        "exit": 0,
+        "final_iou": 0.949538,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "9507e4318b6f3c86fc8de752bbfa26af"
+            ],
+            [
+              "greedy_tmp_revolve_0.py",
+              "9b6126adf1da21b42384fe4ce92da11b"
+            ]
+          ],
+          [
+            [
+              "5",
+              "15",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "0.949538"
+          ]
+        ],
+        "cq_exec": 88,
+        "iou_calls": 51,
+        "phases": {
+          "evaluate": 6.431341886520386,
+          "volume_pass": 19.964195013046265,
+          "forward": 66.17781686782837,
+          "backward": 19.545002222061157
+        },
+        "n_in": null,
+        "n_eval": 21,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "flange_1": {
+        "wall": 105,
+        "exit": 0,
+        "final_iou": 1.511677,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "26c9090392f423dfa546f321063a24cc"
+            ]
+          ],
+          [
+            [
+              "3",
+              "21",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "1",
+              "3"
+            ]
+          ],
+          [
+            "1.511677"
+          ]
+        ],
+        "cq_exec": 81,
+        "iou_calls": 58,
+        "phases": {
+          "evaluate": 9.45413613319397,
+          "volume_pass": 28.184608936309814,
+          "forward": 51.3944628238678,
+          "backward": 5.060583829879761
+        },
+        "n_in": null,
+        "n_eval": 31,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "stepped_block_0": {
+        "wall": 91,
+        "exit": 0,
+        "final_iou": 0.982958,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "e4ef52e09c3ec367d359850c6b320f87"
+            ]
+          ],
+          [
+            [
+              "2",
+              "20",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "0.982958"
+          ]
+        ],
+        "cq_exec": 65,
+        "iou_calls": 45,
+        "phases": {
+          "evaluate": 11.691769123077393,
+          "volume_pass": 26.33796787261963,
+          "forward": 34.82457971572876,
+          "backward": 1.7409310340881348
+        },
+        "n_in": null,
+        "n_eval": 22,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "u_channel_0": {
+        "wall": 26,
+        "exit": 0,
+        "final_iou": 0.998081,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 26,
+        "iou_calls": 26,
+        "phases": {
+          "evaluate": 9.699256658554077
+        },
+        "n_in": null,
+        "n_eval": 26,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "boss_on_plate_1": {
+        "wall": 150,
+        "exit": 0,
+        "final_iou": 0.954411,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "f7a3d5d48ef64835ad91e2740e218421"
+            ],
+            [
+              "greedy_tmp_revolve_0.py",
+              "50c8d0ba83c916accb490de7c971de18"
+            ]
+          ],
+          [
+            [
+              "5",
+              "15",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "0.954411"
+          ]
+        ],
+        "cq_exec": 83,
+        "iou_calls": 47,
+        "phases": {
+          "evaluate": 4.900321006774902,
+          "volume_pass": 19.874521017074585,
+          "forward": 90.03452825546265,
+          "backward": 22.49382495880127
+        },
+        "n_in": null,
+        "n_eval": 17,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "u_channel_1": {
+        "wall": 8,
+        "exit": 0,
+        "final_iou": 0.998072,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 17,
+        "iou_calls": 17,
+        "phases": {
+          "evaluate": 4.87035608291626
+        },
+        "n_in": null,
+        "n_eval": 17,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "boss_on_plate_0": {
+        "wall": 141,
+        "exit": 0,
+        "final_iou": 0.977061,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "df17046bd054393d2fe7bc4b57bb96b3"
+            ],
+            [
+              "greedy_tmp_revolve_0.py",
+              "f2eef9b15bcd91c754c579254d30fa45"
+            ]
+          ],
+          [
+            [
+              "5",
+              "15",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "0.977061"
+          ]
+        ],
+        "cq_exec": 86,
+        "iou_calls": 49,
+        "phases": {
+          "evaluate": 7.206781387329102,
+          "volume_pass": 19.827305793762207,
+          "forward": 74.05427026748657,
+          "backward": 24.39433193206787
+        },
+        "n_in": null,
+        "n_eval": 19,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "box_with_pocket_0": {
+        "wall": 80,
+        "exit": 0,
+        "final_iou": 1.392315,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "b87dac70b0330c25df7deb7a86c004c9"
+            ]
+          ],
+          [
+            [
+              "5",
+              "18",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "1.392315"
+          ]
+        ],
+        "cq_exec": 74,
+        "iou_calls": 56,
+        "phases": {
+          "evaluate": 6.3204779624938965,
+          "volume_pass": 24.04646897315979,
+          "forward": 33.223812103271484,
+          "backward": 10.093379020690918
+        },
+        "n_in": null,
+        "n_eval": 23,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "box_with_pocket_1": {
+        "wall": 76,
+        "exit": 0,
+        "final_iou": 1.191223,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "1e03ccb623bd078f14a5f70adf80f475"
+            ]
+          ],
+          [
+            [
+              "5",
+              "18",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "1.191223"
+          ]
+        ],
+        "cq_exec": 69,
+        "iou_calls": 51,
+        "phases": {
+          "evaluate": 4.905818700790405,
+          "volume_pass": 23.939643144607544,
+          "forward": 32.681551933288574,
+          "backward": 10.068103075027466
+        },
+        "n_in": null,
+        "n_eval": 18,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "l_bracket_2": {
+        "wall": 29,
+        "exit": 0,
+        "final_iou": 0.657133,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "393e1a26f925104bf687517febb55cb4"
+            ]
+          ],
+          [
+            [
+              "4",
+              "4",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "4"
+            ]
+          ],
+          [
+            "0.657133"
+          ]
+        ],
+        "cq_exec": 19,
+        "iou_calls": 15,
+        "phases": {
+          "evaluate": 3.600579261779785,
+          "volume_pass": 6.188009023666382,
+          "forward": 7.011051177978516,
+          "backward": 2.8932619094848633
+        },
+        "n_in": null,
+        "n_eval": 6,
+        "n_ops": 4,
+        "single_fallback": false
+      },
+      "pulley_1": {
+        "wall": 41,
+        "exit": 0,
+        "final_iou": 0.994515,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 42,
+        "iou_calls": 42,
+        "phases": {
+          "evaluate": 22.575355052947998
+        },
+        "n_in": null,
+        "n_eval": 42,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "hex_prism_1": {
+        "wall": 7,
+        "exit": 0,
+        "final_iou": 0.999166,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 7,
+        "iou_calls": 7,
+        "phases": {
+          "evaluate": 3.235365867614746
+        },
+        "n_in": null,
+        "n_eval": 7,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_shaft_0": {
+        "wall": 106,
+        "exit": 0,
+        "final_iou": 0.987483,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "eba855bf9a8281f2a34ed6452f909018"
+            ]
+          ],
+          [
+            [
+              "7",
+              "16",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "4",
+              "7"
+            ]
+          ],
+          [
+            "0.979378"
+          ]
+        ],
+        "cq_exec": 94,
+        "iou_calls": 76,
+        "phases": {
+          "evaluate": 12.812344789505005,
+          "volume_pass": 20.698283195495605,
+          "forward": 34.64461326599121,
+          "backward": 21.30734610557556
+        },
+        "n_in": null,
+        "n_eval": 34,
+        "n_ops": 3,
+        "single_fallback": true
+      },
+      "stepped_shaft_1": {
+        "wall": 779,
+        "exit": 0,
+        "final_iou": 0.987382,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "868068bfb43b5c40cb3fc15a2c728a82"
+            ]
+          ],
+          [
+            [
+              "9",
+              "16",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "6",
+              "9"
+            ]
+          ],
+          [
+            "0.980897"
+          ]
+        ],
+        "cq_exec": 107,
+        "iou_calls": 89,
+        "phases": {
+          "evaluate": 15.641392230987549,
+          "volume_pass": 20.47744607925415,
+          "forward": 38.4640109539032,
+          "backward": 28.878309726715088
+        },
+        "n_in": null,
+        "n_eval": 30,
+        "n_ops": 3,
+        "single_fallback": true
+      },
+      "hex_prism_0": {
+        "wall": 5,
+        "exit": 0,
+        "final_iou": 0.994019,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 5,
+        "iou_calls": 5,
+        "phases": {
+          "evaluate": 1.8747460842132568
+        },
+        "n_in": null,
+        "n_eval": 5,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "pulley_0": {
+        "wall": 38,
+        "exit": 0,
+        "final_iou": 0.994767,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 37,
+        "iou_calls": 37,
+        "phases": {
+          "evaluate": 19.55710506439209
+        },
+        "n_in": null,
+        "n_eval": 37,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "stepped_block_2": {
+        "wall": 971,
+        "exit": 0,
+        "final_iou": 0.982905,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "06e024c1cc5d2e166c72c1acbab98837"
+            ]
+          ],
+          [
+            [
+              "2",
+              "17",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "0.982905"
+          ]
+        ],
+        "cq_exec": 60,
+        "iou_calls": 39,
+        "phases": {
+          "evaluate": 9.755851984024048,
+          "volume_pass": 23.44050097465515,
+          "forward": 30.206876754760742,
+          "backward": 1.6646342277526855
+        },
+        "n_in": null,
+        "n_eval": 21,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "plate_with_holes_1": {
+        "wall": 12,
+        "exit": 0,
+        "final_iou": 0.999473,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 16,
+        "iou_calls": 16,
+        "phases": {
+          "evaluate": 8.542458772659302
+        },
+        "n_in": null,
+        "n_eval": 16,
+        "n_ops": 0,
+        "single_fallback": false
+      },
+      "flange_2": {
+        "wall": 82,
+        "exit": 0,
+        "final_iou": 1.548912,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "0fe0eb1614e10792fca3063e4d87808c"
+            ]
+          ],
+          [
+            [
+              "3",
+              "12",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "1",
+              "3"
+            ]
+          ],
+          [
+            "1.548912"
+          ]
+        ],
+        "cq_exec": 62,
+        "iou_calls": 46,
+        "phases": {
+          "evaluate": 9.262916088104248,
+          "volume_pass": 21.448542833328247,
+          "forward": 32.66731786727905,
+          "backward": 5.801637887954712
+        },
+        "n_in": null,
+        "n_eval": 28,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "plate_with_holes_0": {
+        "wall": 33,
+        "exit": 0,
+        "final_iou": 1.838019,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "05160065f33c51bd120e2ebf12a7a721"
+            ]
+          ],
+          [
+            [
+              "2",
+              "4",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "0",
+              "2"
+            ]
+          ],
+          [
+            "1.838019"
+          ]
+        ],
+        "cq_exec": 33,
+        "iou_calls": 29,
+        "phases": {
+          "evaluate": 10.701519966125488,
+          "volume_pass": 5.493652105331421,
+          "forward": 6.470798015594482,
+          "backward": 1.7930219173431396
+        },
+        "n_in": null,
+        "n_eval": 22,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "boss_on_plate_2": {
+        "wall": 69,
+        "exit": 0,
+        "final_iou": 1.543859,
+        "selected": [
+          [
+            [
+              "greedy_tmp_extrude.py",
+              "9e6c3293a4dc6bb7e6b2fe00911c360a"
+            ]
+          ],
+          [
+            [
+              "5",
+              "12",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "3",
+              "5"
+            ]
+          ],
+          [
+            "1.543859"
+          ]
+        ],
+        "cq_exec": 57,
+        "iou_calls": 44,
+        "phases": {
+          "evaluate": 5.052129030227661,
+          "volume_pass": 17.452601671218872,
+          "forward": 27.760486125946045,
+          "backward": 11.542170763015747
+        },
+        "n_in": null,
+        "n_eval": 17,
+        "n_ops": 2,
+        "single_fallback": false
+      },
+      "u_channel_2": {
+        "wall": 12,
+        "exit": 0,
+        "final_iou": 0.994336,
+        "selected": [
+          [],
+          [],
+          []
+        ],
+        "cq_exec": 23,
+        "iou_calls": 23,
+        "phases": {
+          "evaluate": 6.31158185005188
+        },
+        "n_in": null,
+        "n_eval": 23,
+        "n_ops": 0,
+        "single_fallback": false
+      }
+    }
+  }
+}

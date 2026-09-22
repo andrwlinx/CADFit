@@ -23,6 +23,7 @@ import multiprocessing as mp
 from functools import partial
 from fit_primitives import build_action_instances_from_entry
 from iou import normalize_mesh
+from profiling import log_event
 from cadquery_ops import (
     greedy_iou_based_pruning,
     execute_cadquery_script,
@@ -151,7 +152,14 @@ def create_extrusion_from_translation(entry: Dict, translation_data: Dict, sketc
                 'xdir': entry.get('xdir', [1, 0, 0]),
                 'source': f'interval_{iv_idx}',
                 't_min': t_min,
-                't_max': t_max
+                't_max': t_max,
+                # Ranker-only metadata; stripped before serialization/evaluation.
+                '_rank': {
+                    'profile_3d': entry.get('loops_3d'),
+                    'mean_cd': interval.get('mean_cd'),
+                    'min_cd': interval.get('min_cd'),
+                    'max_cd': interval.get('max_cd'),
+                },
             })
     
     return extrusions
@@ -362,6 +370,12 @@ def create_revolve_from_analysis(entry: Dict, revolve_configs: List[Dict], sketc
             'axis_idx': config.get('axis_idx', 'unknown'),
             'rotation_type': config.get('rotation_type', 'unknown'),
             'split_profile': split_used,
+            # Ranker-only metadata; stripped before serialization/evaluation.
+            '_rank': {
+                'profile_3d': split_entry.get('loops_3d'),
+                'axis_point': np.asarray(mp_for_axis).tolist(),
+                'axis_dir': np.asarray(ad_for_axis).tolist(),
+            },
         })
 
     return revolves
@@ -504,6 +518,9 @@ def precompute_operations_from_analysis(
     
     print(f"Total revolves: {revolve_count}")
     print(f"Total operations: {len(all_operations)}")
+
+    # Detach ranker-only metadata so the saved/evaluated operations are unchanged.
+    rank_meta = [op.pop('_rank', None) for op in all_operations]
     
     # Save precomputed operations
     precomp_data = {
@@ -518,7 +535,8 @@ def precompute_operations_from_analysis(
         json.dump(precomp_data, f, indent=2)
     
     print(f"\nSaved precomputed operations to {precomp_path}")
-    
+
+    precomp_data['rank_meta'] = rank_meta
     return precomp_data
 
 
@@ -649,7 +667,13 @@ def run_greedy_search(
     output_folder: str = "search_precomputed",
     alpha: float = 0.01,
     normalize: bool = True,
-    num_workers: int = 8
+    num_workers: int = 8,
+    candidate_ranking: bool = False,
+    candidate_per_group: int = 1,
+    candidate_top_k: Optional[int] = None,
+    candidate_keep_ratio: Optional[float] = None,
+    candidate_drop_tau: Optional[float] = None,
+    fast_prune: bool = False,
 ):
     """
     Run CAD reconstruction using pre-computed analysis results.
@@ -664,6 +688,12 @@ def run_greedy_search(
         alpha: Alpha for IoU computation
         normalize: Whether to normalize meshes
         num_workers: Number of parallel workers
+        candidate_ranking: CADFit++ — rank candidates with a kernel-free proxy
+            IoU and only evaluate the retained ones (see candidate_ranker.py)
+        candidate_per_group: candidates kept per (type, sketch) group
+        candidate_top_k / candidate_keep_ratio: optional global budget
+        candidate_drop_tau: drop whole groups whose best proxy IoU is below this
+        fast_prune: output-preserving speedups inside greedy pruning
     """
     os.makedirs(output_folder, exist_ok=True)
     
@@ -704,6 +734,24 @@ def run_greedy_search(
     
     # CPU boolean IoU does not need sample-point precomputation
     inside_gt, points = None, None
+
+    # CADFit++: cheap candidate ranking before kernel evaluation
+    ranking_rows = None
+    if candidate_ranking:
+        import time as _time
+        from candidate_ranker import build_context, rank_candidates
+        _t0 = _time.time()
+        original_count = len(operations)
+        ctx = build_context(gt_mesh)
+        all_operations = operations
+        operations, ranking_rows = rank_candidates(
+            all_operations, precomp_data['rank_meta'], ctx,
+            per_group_m=candidate_per_group, top_k=candidate_top_k,
+            keep_ratio=candidate_keep_ratio, drop_tau=candidate_drop_tau,
+        )
+        print(f"CADFit++ ranking: {original_count} -> {len(operations)} candidates "
+              f"({_time.time() - _t0:.1f}s)")
+        log_event("ranking", duration=_time.time() - _t0, n_in=original_count, n_out=len(operations))
     
     # Evaluate each operation in parallel
     print(f"\nEvaluating operations in parallel (using {num_workers} workers)...")
@@ -714,11 +762,28 @@ def run_greedy_search(
     
     # Was previously capped at 8 to avoid GPU contention during IoU sampling.
     # IoU is fully CPU now, so let it scale with the requested worker count.
+    import time as _time
+    _t_eval = _time.time()
     with mp.Pool(max(1, num_workers)) as pool:
         results = pool.map(_evaluate_operation_worker, eval_args)
     
     # Filter out None results
     evaluated_operations = [r for r in results if r is not None]
+    log_event("evaluate", duration=_time.time() - _t_eval, n=len(operations), n_ok=len(evaluated_operations))
+
+    if ranking_rows is not None:
+        # Record what happened to every candidate, including the ones that were
+        # never evaluated or that evaluation discarded (failed/timeout/IoU floor).
+        evaluated_iter = iter(results)
+        for row in ranking_rows:
+            if not row['retained']:
+                row.update(status='not_evaluated', true_iou=None)
+                continue
+            r = next(evaluated_iter)
+            row.update(status='ok' if r is not None else 'discarded',
+                       true_iou=None if r is None else r.get('iou'))
+        with open(os.path.join(output_folder, 'candidate_ranking.json'), 'w') as f:
+            json.dump(ranking_rows, f, indent=2)
     
     print(f"\nSuccessfully evaluated {len(evaluated_operations)}/{len(operations)} operations (filtered IoU >= 0.0005)")
     
@@ -799,6 +864,7 @@ def run_greedy_search(
                     sketches_by_idx[sketch_idx]['pos_h'] = height
                     sketches_by_idx[sketch_idx]['pos_iou'] = iou_value
                     sketches_by_idx[sketch_idx]['pos_actions'] = result['actions']  # Store this operation's actions
+                    sketches_by_idx[sketch_idx]['pos_stl'] = result.get('stl_path')
                     sketches_by_idx[sketch_idx]['zero_only'] = False
             else:
                 # Keep the best negative extrusion (allow IoU >= 0)
@@ -817,6 +883,7 @@ def run_greedy_search(
                 sketches_by_idx[sketch_idx]['revolve_axis_start'] = result['axis_start']
                 sketches_by_idx[sketch_idx]['revolve_axis_end'] = result['axis_end']
                 sketches_by_idx[sketch_idx]['revolve_actions'] = result['actions']  # Store this operation's actions
+                sketches_by_idx[sketch_idx]['revolve_stl'] = result.get('stl_path')
                 sketches_by_idx[sketch_idx]['is_symmetric'] = True
                 sketches_by_idx[sketch_idx]['zero_only'] = False
                 
@@ -832,8 +899,12 @@ def run_greedy_search(
     for sketch_idx, sketch_data in sketches_by_idx.items():
         if sketch_data['use_revolve'] and sketch_data['revolve_actions'] is not None:
             sketch_data['insts'] = sketch_data['revolve_actions']
+            # The extrusion candidate will be rebuilt from these (revolve) actions,
+            # so its evaluated STL no longer describes it.
+            sketch_data['pos_stl'] = None
         elif sketch_data['pos_iou'] >= sketch_data['neg_iou'] and sketch_data['pos_actions'] is not None:
             sketch_data['insts'] = sketch_data['pos_actions']
+            sketch_data['revolve_stl'] = None
         elif sketch_data['neg_actions'] is not None:
             sketch_data['insts'] = sketch_data['neg_actions']
         # If all are None, keep the default empty actions
@@ -870,6 +941,7 @@ def run_greedy_search(
         output_folder=output_folder,
         alpha=alpha,
         num_workers=num_workers,
+        fast_prune=fast_prune,
     )
     
     # `greedy_tmp.stl` was built via manifold3d's robust union on each
@@ -929,6 +1001,17 @@ if __name__ == '__main__':
     parser.add_argument('--alpha', type=float, default=0.01, help='Alpha for IoU computation')
     parser.add_argument('--normalize', action='store_true', help='Normalize meshes')
     parser.add_argument('--num-workers', type=int, default=20, help='Number of parallel workers')
+    parser.add_argument('--candidate-ranking', action='store_true',
+                        help='CADFit++: rank candidates with a proxy IoU and evaluate only the retained ones')
+    parser.add_argument('--candidate-per-group', type=int, default=1,
+                        help='Candidates kept per (type, sketch) group (default: 1)')
+    parser.add_argument('--candidate-top-k', type=int, default=None, help='Optional global candidate budget')
+    parser.add_argument('--candidate-keep-ratio', type=float, default=None,
+                        help='Optional global candidate budget as a fraction of all candidates')
+    parser.add_argument('--candidate-drop-tau', type=float, default=None,
+                        help='Drop whole groups whose best proxy IoU is below this value')
+    parser.add_argument('--fast-prune', action='store_true',
+                        help='Output-preserving speedups inside greedy pruning')
     
     args = parser.parse_args()
     
@@ -941,5 +1024,11 @@ if __name__ == '__main__':
         output_folder=args.output_folder,
         alpha=args.alpha,
         normalize=args.normalize,
-        num_workers=args.num_workers
+        num_workers=args.num_workers,
+        candidate_ranking=args.candidate_ranking,
+        candidate_per_group=args.candidate_per_group,
+        candidate_top_k=args.candidate_top_k,
+        candidate_keep_ratio=args.candidate_keep_ratio,
+        candidate_drop_tau=args.candidate_drop_tau,
+        fast_prune=args.fast_prune,
     )

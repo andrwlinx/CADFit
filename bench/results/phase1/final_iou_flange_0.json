@@ -1,0 +1,8 @@
+{
+  "final_iou": 0.6505039276501869,
+  "stl_id": "flange_0",
+  "ground_truth": "bench/synthetic/flange_0.stl",
+  "reconstruction": "bench/runs/stock_synth/flange_0/best_greedy_parallel_iterative.stl",
+  "num_iterations": 1,
+  "duration": 357.83340525627136
+}

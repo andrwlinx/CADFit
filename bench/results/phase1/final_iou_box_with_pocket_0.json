@@ -1,0 +1,8 @@
+{
+  "final_iou": 0.9020838468119722,
+  "stl_id": "box_with_pocket_0",
+  "ground_truth": "bench/synthetic/box_with_pocket_0.stl",
+  "reconstruction": "bench/runs/stock_synth/box_with_pocket_0/best_greedy_parallel_iterative.stl",
+  "num_iterations": 1,
+  "duration": 93.39608931541443
+}

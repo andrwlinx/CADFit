@@ -1,0 +1,8 @@
+{
+  "final_iou": 0.9980720163185405,
+  "stl_id": "u_channel_1",
+  "ground_truth": "bench/synthetic/u_channel_1.stl",
+  "reconstruction": "bench/runs/stock_synth/u_channel_1/best_greedy_parallel_iterative.stl",
+  "num_iterations": 1,
+  "duration": 17.89232301712036
+}

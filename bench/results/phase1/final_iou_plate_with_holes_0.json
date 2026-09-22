@@ -1,0 +1,8 @@
+{
+  "final_iou": 0.9637460805263054,
+  "stl_id": "plate_with_holes_0",
+  "ground_truth": "bench/synthetic/plate_with_holes_0.stl",
+  "reconstruction": "bench/runs/stock_synth/plate_with_holes_0/best_greedy_parallel_iterative.stl",
+  "num_iterations": 1,
+  "duration": 160.6464068889618
+}

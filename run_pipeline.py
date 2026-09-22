@@ -29,6 +29,7 @@ import matplotlib  # noqa: F401
 import xml.parsers.expat  # noqa: F401
 
 from iou import normalize_mesh, mesh_iou_cpu_boolean
+from profiling import log_event
 from greedy_search import run_greedy_search
 from refine_edges import optimize_edges, render_refined_script, load_solid_from_script
 
@@ -149,6 +150,7 @@ def run_command(cmd, description="", timeout=None):
         result = subprocess.run(cmd, timeout=timeout, env=_release_env())
         duration = time.time() - start_time
         
+        log_event("step", step=description, duration=duration, ok=result.returncode == 0)
         if result.returncode == 0:
             print(f"✓ SUCCESS ({duration:.1f}s)")
             if result.stdout:
@@ -162,6 +164,7 @@ def run_command(cmd, description="", timeout=None):
             
     except subprocess.TimeoutExpired:
         duration = time.time() - start_time
+        log_event("step", step=description, duration=duration, ok=False, timeout=True)
         print(f"✗ TIMEOUT after {duration:.1f}s")
         return False
     except Exception as e:
@@ -548,7 +551,8 @@ def refine_with_fillet_chamfer(src_script: str, src_stl: str, gt_stl: str,
 
 def run_analysis_steps(stl_path, output_folder, n_slices=5, delta=0.05, normalize=True,
                         filter_sketches=False, filter_threshold=None,
-                        filter_model_path=None, filter_norm_path=None):
+                        filter_model_path=None, filter_norm_path=None,
+                        greedy_args=None):
     """Run analysis steps to generate translation and revolve analysis.
 
     If `filter_sketches=True`, runs the DINOv2+MLP loop classifier between
@@ -737,6 +741,8 @@ def run_analysis_steps(stl_path, output_folder, n_slices=5, delta=0.05, normaliz
             "--num-workers", str(inner_workers)]
     if normalize:
         cmd7.append("--normalize")
+    if greedy_args:
+        cmd7.extend(greedy_args)
     if not run_command(cmd7, "Greedy CAD reconstruction", timeout=3000):
         return False
     
@@ -813,7 +819,8 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
                                    over_threshold=0.02, under_threshold=0.01, max_iterations=5,
                                    apply_fillet_chamfer=False, keep_history=False,
                                    filter_sketches=False, filter_threshold=None,
-                                   filter_model_path=None, filter_norm_path=None):
+                                   filter_model_path=None, filter_norm_path=None,
+                                   greedy_args=None):
     """Process a single STL file with iterative refinement using precomputed analysis"""
     stl_name = os.path.basename(stl_path)
     stl_id = os.path.splitext(stl_name)[0]
@@ -825,6 +832,7 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
     print(f"{'#'*80}")
 
     total_start_time = time.time()
+    log_event("stl_start", stl=stl_path)
 
     # Get the output folder path
     output_folder = f"{folder_name}/{stl_id}"
@@ -863,7 +871,8 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
                                 filter_sketches=filter_sketches,
                                 filter_threshold=filter_threshold,
                                 filter_model_path=filter_model_path,
-                                filter_norm_path=filter_norm_path):
+                                filter_norm_path=filter_norm_path,
+                                greedy_args=greedy_args):
         print(f"✗ Failed to complete analysis steps for {stl_name}")
         return
     
@@ -924,7 +933,8 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
             # Run analysis on over-reconstruction
             over_output = f"{output_folder}/refine_over_{iteration}"
             
-            if not run_analysis_steps(over_recon_path, over_output, normalize=False):
+            if not run_analysis_steps(over_recon_path, over_output, normalize=False,
+                                      greedy_args=greedy_args):
                 print("✗ Failed to analyze over-reconstruction")
                 break
             
@@ -984,7 +994,8 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
             # Run analysis on under-reconstruction
             under_output = f"{output_folder}/refine_under_{iteration}"
             
-            if not run_analysis_steps(under_recon_path, under_output, normalize=False):
+            if not run_analysis_steps(under_recon_path, under_output, normalize=False,
+                                      greedy_args=greedy_args):
                 print("✗ Failed to analyze under-reconstruction")
                 # Continue anyway to try next iteration
                 continue
@@ -1114,6 +1125,8 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
     print(f"✓ Final IoU: {final_iou:.6f}  (CPU boolean took {iou_duration:.2f}s)")
 
     total_duration = time.time() - total_start_time
+    log_event("stl_done", stl=stl_path, duration=total_duration, final_iou=final_iou,
+              final_check_duration=iou_duration)
 
     # Save IoU to JSON file
     iou_output_path = f"{output_folder}/final_iou.json"
@@ -1214,7 +1227,33 @@ def main():
     parser.add_argument('--filter-norm', default=None,
                         help='Path to a local normalization.npz. If omitted, '
                              'downloads from HuggingFace Hub.')
+    parser.add_argument('--candidate-ranking', action='store_true',
+                        help='CADFit++: rank candidates with a kernel-free proxy IoU and only '
+                             'evaluate the retained ones (see candidate_ranker.py).')
+    parser.add_argument('--candidate-per-group', type=int, default=1,
+                        help='Candidates kept per (type, sketch) group (default: 1).')
+    parser.add_argument('--candidate-top-k', type=int, default=None,
+                        help='Optional global candidate budget.')
+    parser.add_argument('--candidate-keep-ratio', type=float, default=None,
+                        help='Optional global candidate budget as a fraction of all candidates.')
+    parser.add_argument('--candidate-drop-tau', type=float, default=None,
+                        help='Drop whole groups whose best proxy IoU is below this value.')
+    parser.add_argument('--fast-prune', action='store_true',
+                        help='Output-preserving speedups inside greedy pruning.')
     args = parser.parse_args()
+
+    # Flags forwarded verbatim to greedy_search.py (main pass and refine passes).
+    greedy_args = []
+    if args.candidate_ranking:
+        greedy_args += ['--candidate-ranking', '--candidate-per-group', str(args.candidate_per_group)]
+        if args.candidate_top_k is not None:
+            greedy_args += ['--candidate-top-k', str(args.candidate_top_k)]
+        if args.candidate_keep_ratio is not None:
+            greedy_args += ['--candidate-keep-ratio', str(args.candidate_keep_ratio)]
+        if args.candidate_drop_tau is not None:
+            greedy_args += ['--candidate-drop-tau', str(args.candidate_drop_tau)]
+    if args.fast_prune:
+        greedy_args.append('--fast-prune')
 
     in_dir = args.input_folder.rstrip('/')
     if not os.path.isdir(in_dir):
@@ -1274,6 +1313,7 @@ def main():
                 filter_threshold=args.filter_threshold,
                 filter_model_path=args.filter_model,
                 filter_norm_path=args.filter_norm,
+                greedy_args=greedy_args,
             )
             successful += 1
         except Exception as e:

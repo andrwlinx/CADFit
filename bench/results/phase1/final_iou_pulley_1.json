@@ -1,0 +1,8 @@
+{
+  "final_iou": 0.994514853238468,
+  "stl_id": "pulley_1",
+  "ground_truth": "bench/synthetic/pulley_1.stl",
+  "reconstruction": "bench/runs/stock_synth/pulley_1/best_greedy_parallel_iterative.stl",
+  "num_iterations": 1,
+  "duration": 207.93078899383545
+}

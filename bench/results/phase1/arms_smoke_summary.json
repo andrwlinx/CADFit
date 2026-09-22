@@ -1,0 +1,174 @@
+{
+  "summary": {
+    "fast": {
+      "n": 1,
+      "failures": 0,
+      "mean_iou": 0.961365,
+      "mean_d_iou": 0.0,
+      "d_iou_ci95": null,
+      "worst_d_iou": 0.0,
+      "identical_selection": 0,
+      "wall_total": 133,
+      "wall_ratio_vs_stock": 0.5298804780876494,
+      "cq_exec_total": 88,
+      "iou_calls_total": 86,
+      "n_selected_mean": 1.0,
+      "phase_totals": {
+        "backward": 7.5,
+        "evaluate": 14.0,
+        "forward": 91.6,
+        "volume_pass": 0.0
+      }
+    },
+    "full": {
+      "n": 1,
+      "failures": 0,
+      "mean_iou": 0.961365,
+      "mean_d_iou": 0.0,
+      "d_iou_ci95": null,
+      "worst_d_iou": 0.0,
+      "identical_selection": 0,
+      "wall_total": 135,
+      "wall_ratio_vs_stock": 0.5378486055776892,
+      "cq_exec_total": 68,
+      "iou_calls_total": 66,
+      "n_selected_mean": 1.0,
+      "phase_totals": {
+        "backward": 7.5,
+        "evaluate": 10.1,
+        "forward": 90.6,
+        "ranking": 6.5,
+        "volume_pass": 0.0
+      }
+    },
+    "rank1": {
+      "n": 1,
+      "failures": 0,
+      "mean_iou": 0.961365,
+      "mean_d_iou": 0.0,
+      "d_iou_ci95": null,
+      "worst_d_iou": 0.0,
+      "identical_selection": 1,
+      "wall_total": 248,
+      "wall_ratio_vs_stock": 0.9880478087649402,
+      "cq_exec_total": 141,
+      "iou_calls_total": 77,
+      "n_selected_mean": 0.0,
+      "phase_totals": {
+        "backward": 20.0,
+        "evaluate": 10.6,
+        "forward": 149.7,
+        "ranking": 6.7,
+        "volume_pass": 39.9
+      }
+    },
+    "stock": {
+      "n": 1,
+      "failures": 0,
+      "mean_iou": 0.961365,
+      "mean_d_iou": 0.0,
+      "d_iou_ci95": null,
+      "worst_d_iou": 0.0,
+      "identical_selection": 1,
+      "wall_total": 251,
+      "wall_ratio_vs_stock": 1.0,
+      "cq_exec_total": 159,
+      "iou_calls_total": 95,
+      "n_selected_mean": 0.0,
+      "phase_totals": {
+        "backward": 19.8,
+        "evaluate": 15.4,
+        "forward": 153.2,
+        "volume_pass": 41.5
+      }
+    }
+  },
+  "runs": {
+    "full": {
+      "test_flange": {
+        "wall": 135,
+        "exit": 0,
+        "final_iou": 0.961365,
+        "selected": [
+          [
+            24,
+            "pos",
+            0.2
+          ]
+        ],
+        "cq_exec": 68,
+        "iou_calls": 66,
+        "phases": {
+          "ranking": 6.502670049667358,
+          "evaluate": 10.102048873901367,
+          "volume_pass": 0.027285099029541016,
+          "forward": 90.57982897758484,
+          "backward": 7.516730785369873
+        },
+        "n_in": 50,
+        "n_eval": 30
+      }
+    },
+    "fast": {
+      "test_flange": {
+        "wall": 133,
+        "exit": 0,
+        "final_iou": 0.961365,
+        "selected": [
+          [
+            24,
+            "pos",
+            0.2
+          ]
+        ],
+        "cq_exec": 88,
+        "iou_calls": 86,
+        "phases": {
+          "evaluate": 13.970754861831665,
+          "volume_pass": 0.02725386619567871,
+          "forward": 91.64773201942444,
+          "backward": 7.516188383102417
+        },
+        "n_in": null,
+        "n_eval": 50
+      }
+    },
+    "rank1": {
+      "test_flange": {
+        "wall": 248,
+        "exit": 0,
+        "final_iou": 0.961365,
+        "selected": [],
+        "cq_exec": 141,
+        "iou_calls": 77,
+        "phases": {
+          "ranking": 6.675461053848267,
+          "evaluate": 10.598498106002808,
+          "volume_pass": 39.90377187728882,
+          "forward": 149.73824310302734,
+          "backward": 20.019898176193237
+        },
+        "n_in": 50,
+        "n_eval": 32
+      }
+    },
+    "stock": {
+      "test_flange": {
+        "wall": 251,
+        "exit": 0,
+        "final_iou": 0.961365,
+        "selected": [],
+        "cq_exec": 159,
+        "iou_calls": 95,
+        "phases": {
+          "evaluate": 15.367339849472046,
+          "volume_pass": 41.51533579826355,
+          "forward": 153.22857904434204,
+          "backward": 19.838170051574707
+        },
+        "n_in": null,
+        "n_eval": 50
+      }
+    }
+  }
+}
