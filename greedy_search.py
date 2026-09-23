@@ -547,7 +547,7 @@ def _evaluate_operation_worker(args):
     def timeout_handler(signum, frame):
         raise TimeoutError("Operation evaluation timed out")
     
-    # Set 4 second timeout
+    # Per-operation watchdog
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.alarm(30)
     
@@ -571,7 +571,7 @@ def _evaluate_operation_worker(args):
         return None
     except TimeoutError:
         signal.alarm(0)  # Cancel the alarm
-        print(f"  ⏱️  Operation timed out after 4 seconds, skipping...")
+        print(f"  ⏱️  Operation timed out after 30 seconds, skipping...")
         return None
     except Exception as e:
         signal.alarm(0)  # Cancel the alarm
@@ -658,6 +658,144 @@ def evaluate_single_operation(operation: Dict, gt_mesh_path: str, output_folder:
         return None
 
 
+def collapse_evaluated_operations(evaluated_operations, fix_sketch_identity=False):
+    """Collapse evaluated candidates into the per-sketch dicts that
+    `greedy_iou_based_pruning` expects (best extrusion / best revolve per key).
+
+    Stock keys by the int `sketch_idx` even though extrusion and revolve indices
+    address different loop files; `fix_sketch_identity` keys by (type, idx).
+    """
+    # Convert to format expected by greedy_iou_based_pruning
+    # The function expects a list of dicts, one per sketch, with fields:
+    # insts, pos_h, pos_iou, neg_h, neg_iou, revolve_angle, revolve_iou, etc.
+    
+    # First, group by sketch_idx
+    # IMPORTANT: Store actions separately for each operation since each has different translated origins
+    sketches_by_idx = {}
+    for result in evaluated_operations:
+        is_rev = result['type'] == 'revolve'
+        # With the identity fix, extrusions and revolves never share an entry.
+        sketch_idx = ('R' if is_rev else 'E', result['sketch_idx']) if fix_sketch_identity else result['sketch_idx']
+        if result['iou'] < 0.0005:
+            continue
+        
+        if sketch_idx not in sketches_by_idx:
+            sketches_by_idx[sketch_idx] = {
+                'insts': result['actions'],  # Will be overwritten with best operation's actions
+                'faces_idx': sketch_idx,
+                'sketch_idx': result['sketch_idx'],
+                'sketch_id': f"{'R' if is_rev else 'E'}{result['sketch_idx']}",
+                'pos_h': None,
+                'pos_iou': 0.0,
+                'pos_actions': None,  # Store actions specific to positive extrusion
+                'neg_h': None,
+                'neg_iou': 0.0,
+                'neg_actions': None,  # Store actions specific to negative extrusion
+                'revolve_angle': None,
+                'revolve_iou': 0.0,
+                'revolve_axis_start': None,
+                'revolve_axis_end': None,
+                'revolve_actions': None,  # Store actions specific to revolve
+                'is_symmetric': False,
+                'use_revolve': False,
+                'zero_only': True
+            }
+        
+        if result['type'] == 'extrude':
+            # Determine if positive or negative based on height
+            height = result['height']
+            iou_value = result['iou']
+            
+            if height > 0:
+                # Keep the best positive extrusion (allow IoU >= 0)
+                if sketches_by_idx[sketch_idx]['pos_h'] is None or sketches_by_idx[sketch_idx]['pos_iou'] < iou_value:
+                    sketches_by_idx[sketch_idx]['pos_h'] = height
+                    sketches_by_idx[sketch_idx]['pos_iou'] = iou_value
+                    sketches_by_idx[sketch_idx]['pos_actions'] = result['actions']  # Store this operation's actions
+                    sketches_by_idx[sketch_idx]['pos_stl'] = result.get('stl_path')
+                    sketches_by_idx[sketch_idx]['zero_only'] = False
+            else:
+                # Keep the best negative extrusion (allow IoU >= 0)
+                if sketches_by_idx[sketch_idx]['neg_h'] is None or sketches_by_idx[sketch_idx]['neg_iou'] < iou_value:
+                    sketches_by_idx[sketch_idx]['neg_h'] = abs(height)
+                    sketches_by_idx[sketch_idx]['neg_iou'] = iou_value
+                    sketches_by_idx[sketch_idx]['neg_actions'] = result['actions']  # Store this operation's actions
+                    sketches_by_idx[sketch_idx]['zero_only'] = False
+        
+        else:  # revolve
+            iou_value = result['iou']
+            # Keep the best revolve operation (allow IoU >= 0)
+            if sketches_by_idx[sketch_idx]['revolve_angle'] is None or sketches_by_idx[sketch_idx]['revolve_iou'] < iou_value:
+                sketches_by_idx[sketch_idx]['revolve_angle'] = result['angle']
+                sketches_by_idx[sketch_idx]['revolve_iou'] = iou_value
+                sketches_by_idx[sketch_idx]['revolve_axis_start'] = result['axis_start']
+                sketches_by_idx[sketch_idx]['revolve_axis_end'] = result['axis_end']
+                sketches_by_idx[sketch_idx]['revolve_actions'] = result['actions']  # Store this operation's actions
+                sketches_by_idx[sketch_idx]['revolve_stl'] = result.get('stl_path')
+                if fix_sketch_identity:
+                    # Frame the revolve was evaluated in; pruning rebuilds it identically.
+                    sketches_by_idx[sketch_idx]['revolve_origin'] = result.get('origin')
+                    sketches_by_idx[sketch_idx]['revolve_normal'] = result.get('normal')
+                    sketches_by_idx[sketch_idx]['revolve_xdir'] = result.get('xdir')
+                sketches_by_idx[sketch_idx]['is_symmetric'] = True
+                sketches_by_idx[sketch_idx]['zero_only'] = False
+                
+                # Use revolve if it's better than extrusions
+                best_extrude_iou = max(
+                    sketches_by_idx[sketch_idx]['pos_iou'],
+                    sketches_by_idx[sketch_idx]['neg_iou']
+                )
+                if iou_value > best_extrude_iou:
+                    sketches_by_idx[sketch_idx]['use_revolve'] = True
+    
+    # Now determine which actions to use based on best operation
+    for sketch_idx, sketch_data in sketches_by_idx.items():
+        if sketch_data['use_revolve'] and sketch_data['revolve_actions'] is not None:
+            sketch_data['insts'] = sketch_data['revolve_actions']
+            # Stock: the extrusion candidate will be rebuilt from these (revolve)
+            # actions, so its evaluated STL no longer describes it. With the
+            # identity fix each entry holds one type, so the STL stays valid.
+            if not fix_sketch_identity:
+                sketch_data['pos_stl'] = None
+        elif sketch_data['pos_iou'] >= sketch_data['neg_iou'] and sketch_data['pos_actions'] is not None:
+            sketch_data['insts'] = sketch_data['pos_actions']
+            if not fix_sketch_identity:
+                sketch_data['revolve_stl'] = None
+        elif sketch_data['neg_actions'] is not None:
+            sketch_data['insts'] = sketch_data['neg_actions']
+        # If all are None, keep the default empty actions
+    
+    # Convert to list (sorted by sketch_idx)
+    precomp_for_greedy = []
+    if fix_sketch_identity:
+        # One entry per (type, sketch); no positional dummies needed.
+        precomp_for_greedy = [sketches_by_idx[k] for k in sorted(sketches_by_idx)]
+    max_sketch_idx = max(sketches_by_idx.keys()) if sketches_by_idx and not fix_sketch_identity else -1
+    
+    for idx in range(max_sketch_idx + 1):
+        if idx in sketches_by_idx:
+            precomp_for_greedy.append(sketches_by_idx[idx])
+        else:
+            # Add dummy entry for missing sketches
+            precomp_for_greedy.append({
+                'insts': [],
+                'faces_idx': idx,
+                'pos_h': None,
+                'pos_iou': 0.0,
+                'neg_h': None,
+                'neg_iou': 0.0,
+                'revolve_angle': None,
+                'revolve_iou': 0.0,
+                'revolve_axis_start': None,
+                'revolve_axis_end': None,
+                'is_symmetric': False,
+                'use_revolve': False,
+                'zero_only': True
+            })
+    
+    return precomp_for_greedy
+
+
 def run_greedy_search(
     loops_split_path: str,
     loops_split_revolve_path: str,
@@ -674,6 +812,11 @@ def run_greedy_search(
     candidate_keep_ratio: Optional[float] = None,
     candidate_drop_tau: Optional[float] = None,
     fast_prune: bool = False,
+    fix_sketch_identity: bool = False,
+    fix_iou_validity: bool = False,
+    cache_volumes: bool = False,
+    persistent_pool: bool = False,
+    cache_solids: bool = False,
 ):
     """
     Run CAD reconstruction using pre-computed analysis results.
@@ -694,8 +837,14 @@ def run_greedy_search(
         candidate_top_k / candidate_keep_ratio: optional global budget
         candidate_drop_tau: drop whole groups whose best proxy IoU is below this
         fast_prune: output-preserving speedups inside greedy pruning
+        fix_sketch_identity: keep extrusion and revolve candidates apart. Their
+            `sketch_idx` values index different loop files, and stock CADFit merges
+            them under one int and rebuilds the loser from the winner's sketch.
     """
     os.makedirs(output_folder, exist_ok=True)
+    if fix_iou_validity:
+        # Read by iou.py in this process and in every pool worker.
+        os.environ["CADFIT_IOU_VALIDATE"] = "1"
     
     # Step 1: Load pre-computed operations
     print("="*80)
@@ -821,119 +970,8 @@ def run_greedy_search(
     print("STEP 3: Running greedy IoU-based pruning")
     print("="*80)
     
-    # Convert to format expected by greedy_iou_based_pruning
-    # The function expects a list of dicts, one per sketch, with fields:
-    # insts, pos_h, pos_iou, neg_h, neg_iou, revolve_angle, revolve_iou, etc.
-    
-    # First, group by sketch_idx
-    # IMPORTANT: Store actions separately for each operation since each has different translated origins
-    sketches_by_idx = {}
-    for result in evaluated_operations:
-        sketch_idx = result['sketch_idx']
-        if result['iou'] < 0.0005:
-            continue
-        
-        if sketch_idx not in sketches_by_idx:
-            sketches_by_idx[sketch_idx] = {
-                'insts': result['actions'],  # Will be overwritten with best operation's actions
-                'faces_idx': sketch_idx,
-                'pos_h': None,
-                'pos_iou': 0.0,
-                'pos_actions': None,  # Store actions specific to positive extrusion
-                'neg_h': None,
-                'neg_iou': 0.0,
-                'neg_actions': None,  # Store actions specific to negative extrusion
-                'revolve_angle': None,
-                'revolve_iou': 0.0,
-                'revolve_axis_start': None,
-                'revolve_axis_end': None,
-                'revolve_actions': None,  # Store actions specific to revolve
-                'is_symmetric': False,
-                'use_revolve': False,
-                'zero_only': True
-            }
-        
-        if result['type'] == 'extrude':
-            # Determine if positive or negative based on height
-            height = result['height']
-            iou_value = result['iou']
-            
-            if height > 0:
-                # Keep the best positive extrusion (allow IoU >= 0)
-                if sketches_by_idx[sketch_idx]['pos_h'] is None or sketches_by_idx[sketch_idx]['pos_iou'] < iou_value:
-                    sketches_by_idx[sketch_idx]['pos_h'] = height
-                    sketches_by_idx[sketch_idx]['pos_iou'] = iou_value
-                    sketches_by_idx[sketch_idx]['pos_actions'] = result['actions']  # Store this operation's actions
-                    sketches_by_idx[sketch_idx]['pos_stl'] = result.get('stl_path')
-                    sketches_by_idx[sketch_idx]['zero_only'] = False
-            else:
-                # Keep the best negative extrusion (allow IoU >= 0)
-                if sketches_by_idx[sketch_idx]['neg_h'] is None or sketches_by_idx[sketch_idx]['neg_iou'] < iou_value:
-                    sketches_by_idx[sketch_idx]['neg_h'] = abs(height)
-                    sketches_by_idx[sketch_idx]['neg_iou'] = iou_value
-                    sketches_by_idx[sketch_idx]['neg_actions'] = result['actions']  # Store this operation's actions
-                    sketches_by_idx[sketch_idx]['zero_only'] = False
-        
-        else:  # revolve
-            iou_value = result['iou']
-            # Keep the best revolve operation (allow IoU >= 0)
-            if sketches_by_idx[sketch_idx]['revolve_angle'] is None or sketches_by_idx[sketch_idx]['revolve_iou'] < iou_value:
-                sketches_by_idx[sketch_idx]['revolve_angle'] = result['angle']
-                sketches_by_idx[sketch_idx]['revolve_iou'] = iou_value
-                sketches_by_idx[sketch_idx]['revolve_axis_start'] = result['axis_start']
-                sketches_by_idx[sketch_idx]['revolve_axis_end'] = result['axis_end']
-                sketches_by_idx[sketch_idx]['revolve_actions'] = result['actions']  # Store this operation's actions
-                sketches_by_idx[sketch_idx]['revolve_stl'] = result.get('stl_path')
-                sketches_by_idx[sketch_idx]['is_symmetric'] = True
-                sketches_by_idx[sketch_idx]['zero_only'] = False
-                
-                # Use revolve if it's better than extrusions
-                best_extrude_iou = max(
-                    sketches_by_idx[sketch_idx]['pos_iou'],
-                    sketches_by_idx[sketch_idx]['neg_iou']
-                )
-                if iou_value > best_extrude_iou:
-                    sketches_by_idx[sketch_idx]['use_revolve'] = True
-    
-    # Now determine which actions to use based on best operation
-    for sketch_idx, sketch_data in sketches_by_idx.items():
-        if sketch_data['use_revolve'] and sketch_data['revolve_actions'] is not None:
-            sketch_data['insts'] = sketch_data['revolve_actions']
-            # The extrusion candidate will be rebuilt from these (revolve) actions,
-            # so its evaluated STL no longer describes it.
-            sketch_data['pos_stl'] = None
-        elif sketch_data['pos_iou'] >= sketch_data['neg_iou'] and sketch_data['pos_actions'] is not None:
-            sketch_data['insts'] = sketch_data['pos_actions']
-            sketch_data['revolve_stl'] = None
-        elif sketch_data['neg_actions'] is not None:
-            sketch_data['insts'] = sketch_data['neg_actions']
-        # If all are None, keep the default empty actions
-    
-    # Convert to list (sorted by sketch_idx)
-    precomp_for_greedy = []
-    max_sketch_idx = max(sketches_by_idx.keys()) if sketches_by_idx else 0
-    
-    for idx in range(max_sketch_idx + 1):
-        if idx in sketches_by_idx:
-            precomp_for_greedy.append(sketches_by_idx[idx])
-        else:
-            # Add dummy entry for missing sketches
-            precomp_for_greedy.append({
-                'insts': [],
-                'faces_idx': idx,
-                'pos_h': None,
-                'pos_iou': 0.0,
-                'neg_h': None,
-                'neg_iou': 0.0,
-                'revolve_angle': None,
-                'revolve_iou': 0.0,
-                'revolve_axis_start': None,
-                'revolve_axis_end': None,
-                'is_symmetric': False,
-                'use_revolve': False,
-                'zero_only': True
-            })
-    
+    precomp_for_greedy = collapse_evaluated_operations(evaluated_operations, fix_sketch_identity)
+
     # Run greedy pruning
     final_iou, final_mesh, final_actions = greedy_iou_based_pruning(
         precomp=precomp_for_greedy,
@@ -942,6 +980,9 @@ def run_greedy_search(
         alpha=alpha,
         num_workers=num_workers,
         fast_prune=fast_prune,
+        cache_volumes=cache_volumes,
+        persistent_pool=persistent_pool,
+        cache_solids=cache_solids,
     )
     
     # `greedy_tmp.stl` was built via manifold3d's robust union on each
@@ -1012,8 +1053,24 @@ if __name__ == '__main__':
                         help='Drop whole groups whose best proxy IoU is below this value')
     parser.add_argument('--fast-prune', action='store_true',
                         help='Output-preserving speedups inside greedy pruning')
+    parser.add_argument('--cache-volumes', action=argparse.BooleanOptionalAction, default=True,
+                        help='Read candidate volumes from the STLs built during evaluation (part of --fast-prune)')
+    parser.add_argument('--persistent-pool', action=argparse.BooleanOptionalAction, default=True,
+                        help='Reuse one worker pool across removal iterations (part of --fast-prune)')
+    parser.add_argument('--cache-solids', action=argparse.BooleanOptionalAction, default=True,
+                        help='Build pruning subsets by concatenating the candidate STLs from evaluation '
+                             'instead of re-running CadQuery (requires --fix-sketch-identity)')
+    parser.add_argument('--fix-iou-validity', action=argparse.BooleanOptionalAction, default=True,
+                        help='Only trust direct manifold conversion for genuine volumes; alpha-wrap otherwise '
+                             '(stock can return IoU > 1 on self-overlapping compounds)')
+    parser.add_argument('--fix-sketch-identity', action=argparse.BooleanOptionalAction, default=True,
+                        help='Keep extrusion and revolve candidates apart in pruning (stock merges '
+                             'them by int index and rebuilds the loser from the winner\'s sketch)')
     
     args = parser.parse_args()
+    if args.cache_solids and not args.fix_sketch_identity:
+        parser.error('--cache-solids requires --fix-sketch-identity (stock rebuilds losers from the winner\'s sketch, '
+                     'so the evaluated STL would not match)')
     
     run_greedy_search(
         loops_split_path=args.loops_split,
@@ -1031,4 +1088,9 @@ if __name__ == '__main__':
         candidate_keep_ratio=args.candidate_keep_ratio,
         candidate_drop_tau=args.candidate_drop_tau,
         fast_prune=args.fast_prune,
+        fix_sketch_identity=args.fix_sketch_identity,
+        fix_iou_validity=args.fix_iou_validity,
+        cache_volumes=args.cache_volumes,
+        persistent_pool=args.persistent_pool,
+        cache_solids=args.cache_solids,
     )

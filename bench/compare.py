@@ -41,8 +41,12 @@ def load_run(folder):
     out['single_fallback'] = 'using individual instead' in log
     p = os.path.join(folder, 'profile.jsonl')
     if os.path.exists(p):
+        # A zero-event hole longer than any single CadQuery/IoU call should be
+        # means the machine slept; wall time for this run is then not trustworthy.
+        ts = []
         for line in open(p):
             e = json.loads(line)
+            ts.append(e['t'])
             if e['kind'] == 'cq_exec':
                 out['cq_exec'] += 1
             elif e['kind'] == 'iou':
@@ -55,6 +59,18 @@ def load_run(folder):
                 out['n_in'] = e['n_in']
             elif e['kind'] == 'prune_phase':
                 out['phases'][e['phase']] = e['duration']
+            elif e['kind'] == 'solid_cache':
+                out['solid_cache_hits'] = out.get('solid_cache_hits', 0) + int(bool(e.get('hit')))
+        ts.sort()
+        out['max_gap'] = max((b - a for a, b in zip(ts, ts[1:])), default=0.0)
+        if ts:
+            # Sleep before the first / after the last event shows up as wall
+            # time not covered by the event span (plus interpreter start-up).
+            out['outside_span'] = out['wall'] - (ts[-1] - ts[0])
+    # Interpreter start-up plus final writes is ~5-20 s; anything beyond that,
+    # or any zero-event hole longer than a CadQuery call, means the machine
+    # was asleep or starved.
+    out['tainted'] = out.get('max_gap', 0.0) > 60.0 or out.get('outside_span', 0.0) > 45.0
     return out
 
 
@@ -71,20 +87,39 @@ def main():
     ap = argparse.ArgumentParser(description='Compare greedy-search arms against stock')
     ap.add_argument('arms_dir')
     ap.add_argument('--out', default=None)
+    ap.add_argument('--base', default='stock', help='arm to compare against (default: stock)')
+    ap.add_argument('--scores', default=None, help='bench/score.py --out file; if given, IoU columns use it')
     args = ap.parse_args()
+    scores = json.load(open(args.scores)) if args.scores else None
 
     runs = {}
     for done in glob.glob(os.path.join(args.arms_dir, '*', '*', 'done')):
         folder = os.path.dirname(done)
         arm, stl = folder.split(os.sep)[-2:]
         runs.setdefault(arm, {})[stl] = load_run(folder)
-    if 'stock' not in runs:
-        raise SystemExit('no stock arm found')
+    # Relative taint: dead time (outside the event span) far above the same
+    # part's median across arms means that run was slept or starved.
+    parts = {stl for by_stl in runs.values() for stl in by_stl}
+    for stl in parts:
+        vals = [runs[a][stl].get('outside_span', 0.0) for a in runs if stl in runs[a]]
+        med = float(np.median(vals)) if vals else 0.0
+        for a in runs:
+            if stl in runs[a] and runs[a][stl].get('outside_span', 0.0) > max(15.0, 2.5 * med):
+                runs[a][stl]['tainted'] = True
+
+    base = args.base
+    if base not in runs:
+        raise SystemExit(f'no {base} arm found')
+    if scores:
+        for arm, by_stl in runs.items():
+            for stl, r in by_stl.items():
+                sc = scores.get(arm, {}).get(stl)
+                r['final_iou'] = None if sc is None else sc['iou']
 
     summary = {}
     for arm, by_stl in sorted(runs.items()):
-        ids = sorted(set(by_stl) & set(runs['stock']))
-        rows = [(by_stl[i], runs['stock'][i]) for i in ids]
+        ids = sorted(set(by_stl) & set(runs[base]))
+        rows = [(by_stl[i], runs[base][i]) for i in ids]
         ok = [(a, s) for a, s in rows if a['final_iou'] is not None and s['final_iou'] is not None]
         d_iou = [a['final_iou'] - s['final_iou'] for a, s in ok]
         phases = sorted({k for a, _ in rows for k in a['phases']})
@@ -97,7 +132,11 @@ def main():
             'worst_d_iou': float(min(d_iou)) if ok else None,
             'identical_selection': sum(a['selected'] == s['selected'] for a, s in rows),
             'wall_total': sum(a['wall'] for a, _ in rows),
-            'wall_ratio_vs_stock': (sum(a['wall'] for a, _ in rows) / max(1, sum(s['wall'] for _, s in rows))),
+            # Wall ratio over pairs where neither run slept.
+            'wall_ratio_vs_stock': (sum(a['wall'] for a, s in rows if not (a['tainted'] or s['tainted'])) /
+                                    max(1, sum(s['wall'] for a, s in rows if not (a['tainted'] or s['tainted'])))),
+            'tainted': sum(a['tainted'] or s['tainted'] for a, s in rows),
+            'solid_cache_hits': sum(a.get('solid_cache_hits', 0) for a, _ in rows),
             'cq_exec_total': sum(a['cq_exec'] for a, _ in rows),
             'iou_calls_total': sum(a['iou_calls'] for a, _ in rows),
             'n_ops_mean': float(np.mean([a['n_ops'] for a, _ in rows])),
@@ -105,13 +144,13 @@ def main():
             'phase_totals': {k: round(sum(a['phases'].get(k, 0.0) for a, _ in rows), 1) for k in phases},
         }
 
-    hdr = f"{'arm':<10} {'n':>3} {'fail':>4} {'IoU':>7} {'dIoU':>8} {'worst':>8} {'same':>5} {'wall':>7} {'x stock':>8} {'cq':>6} {'iou':>6}  phases"
+    hdr = f"{'arm':<13} {'n':>3} {'fail':>4} {'IoU':>7} {'dIoU':>8} {'worst':>8} {'same':>5} {'wall':>7} {'x base':>7} {'taint':>5} {'cq':>6} {'iou':>6}  phases"
     print(hdr)
     for arm, s in summary.items():
         f = lambda v, spec: '-' if v is None else format(v, spec)
-        print(f"{arm:<10} {s['n']:>3} {s['failures']:>4} {f(s['mean_iou'], '.4f'):>7} {f(s['mean_d_iou'], '+.4f'):>8} "
+        print(f"{arm:<13} {s['n']:>3} {s['failures']:>4} {f(s['mean_iou'], '.4f'):>7} {f(s['mean_d_iou'], '+.4f'):>8} "
               f"{f(s['worst_d_iou'], '+.4f'):>8} {s['identical_selection']:>5} {s['wall_total']:>7} "
-              f"{s['wall_ratio_vs_stock']:>8.2f} {s['cq_exec_total']:>6} {s['iou_calls_total']:>6}  {s['phase_totals']}")
+              f"{s['wall_ratio_vs_stock']:>7.2f} {s['tainted']:>5} {s['cq_exec_total']:>6} {s['iou_calls_total']:>6}  {s['phase_totals']}")
 
     if args.out:
         with open(args.out, 'w') as f:

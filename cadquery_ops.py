@@ -15,6 +15,7 @@ os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 
 import argparse
+import builtins as _builtins
 import json
 import pickle
 import glob
@@ -604,8 +605,20 @@ def execute_cadquery_script(script_content: str, output_stl_path: str, save_scri
         # Execute the script in the parent's Python interpreter.
         import sys as _sys
         _t0 = time.time()
-        result = subprocess.run([_sys.executable, script_path],
-                              capture_output=True, text=True, timeout=60)
+        # Own session so a timeout can kill the whole process group (a child
+        # holding the stdout pipe would otherwise block `communicate`).
+        proc = subprocess.Popen([_sys.executable, script_path], stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, text=True, start_new_session=True)
+        try:
+            out, err = proc.communicate(timeout=60)
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except Exception:
+                proc.kill()
+            proc.communicate()
+            raise
+        result = subprocess.CompletedProcess(proc.args, proc.returncode, out, err)
         log_event("cq_exec", duration=time.time() - _t0, ok=result.returncode == 0)
         
         # Clean up temporary script if it was temporary
@@ -634,6 +647,10 @@ def execute_cadquery_script(script_content: str, output_stl_path: str, save_scri
     except subprocess.TimeoutExpired:
         print(f"✗ CadQuery script execution timed out after 60 seconds")
         return False
+    except (TimeoutError, _builtins.TimeoutError):
+        # The caller's SIGALRM watchdog (this module shadows the builtin name);
+        # let it abandon the task.
+        raise
     except Exception as e:
         print(f"✗ Error executing CadQuery script: {e}")
         return False
@@ -656,6 +673,8 @@ def compute_iou(gt_path: str, gen_path: str, normalize: bool = True) -> float:
         _iou = mesh_iou_cpu_boolean(gt_path, gen_path, normalize=normalize)
         log_event("iou", duration=time.time() - _t0)
         return _iou
+    except (TimeoutError, _builtins.TimeoutError):
+        raise
     except Exception as e:
         print(f"IoU computation failed: {e}")
         return 0.0
@@ -1659,6 +1678,15 @@ def export_stl_cadquery(sketch_actions_list: List[List[str]], height: float, fil
     return execute_cadquery_script(script_content, output_stl_path, script_path)
 
 
+def _revolve_frame(group):
+    """Explicit plane for a revolve group when the identity fix recorded one;
+    empty (stock behaviour: plane recovered from the action strings) otherwise."""
+    if group.get('revolve_origin') is None:
+        return {}
+    return {'origin': group['revolve_origin'], 'normal': group['revolve_normal'],
+            'xdir': group['revolve_xdir']}
+
+
 def calculate_extrusion_volume(group):
     """Calculate the volume of a single extrusion or revolve group"""
     try:
@@ -1676,7 +1704,8 @@ def calculate_extrusion_volume(group):
                 group['revolve_axis_start'],
                 group['revolve_axis_end'],
                 group['revolve_angle'],
-                temp_path
+                temp_path,
+                **_revolve_frame(group)
             )
         else:
             # Extrude operation
@@ -1709,6 +1738,30 @@ def calculate_extrusion_volume(group):
         return 0.0
 
 
+def _cache_solids_enabled() -> bool:
+    # Env so spawned pool workers see it (set by greedy_iou_based_pruning).
+    return os.environ.get("CADFIT_CACHE_SOLIDS", "") not in ("", "0")
+
+
+def _build_from_cached_solids(groups, stl_out):
+    """Write the compound STL for `groups` by concatenating the per-candidate
+    STLs built during evaluation, instead of rebuilding them in CadQuery.
+
+    A CadQuery `.add()` compound exports each solid's triangulation
+    independently, so the concatenation is triangle-for-triangle identical
+    (verified on the benchmark parts). Returns False if any STL is missing."""
+    paths = [g.get('stl_path') for g in groups]
+    if not paths or not all(p and os.path.exists(p) for p in paths):
+        return False
+    try:
+        meshes = [trimesh.load(p, force='mesh', process=False) for p in paths]
+        trimesh.util.concatenate(meshes).export(stl_out)
+        return os.path.exists(stl_out)
+    except Exception as e:
+        print(f"  Warning: cached-solid build failed ({e}); falling back to CadQuery")
+        return False
+
+
 def run_instruction_groups(groups, gt_mesh, output_folder, filename_suffix="tmp", alpha=0.01):
     """Helper function to build mesh from instruction groups and compute IoU.
     Handles both extrude and revolve operations."""
@@ -1733,7 +1786,15 @@ def run_instruction_groups(groups, gt_mesh, output_folder, filename_suffix="tmp"
             script_content = generate_cadquery_script_multi_height(sketch_actions_list, heights, f'{output_path}.stl')
             
             script_path = f'{output_path}.py'
-            success = execute_cadquery_script(script_content, f'{output_path}.stl', script_path)
+            success = False
+            if _cache_solids_enabled():
+                # Keep writing the script (downstream reads it); skip executing it.
+                with open(script_path, 'w') as f:
+                    f.write(script_content)
+                success = _build_from_cached_solids(extrude_groups, f'{output_path}.stl')
+                log_event("solid_cache", hit=success, n=len(extrude_groups))
+            if not success:
+                success = execute_cadquery_script(script_content, f'{output_path}.stl', script_path)
             
             if success:
                 mesh = trimesh.load(f'{output_path}.stl', force='mesh')
@@ -1750,11 +1811,19 @@ def run_instruction_groups(groups, gt_mesh, output_folder, filename_suffix="tmp"
                 group['revolve_axis_start'],
                 group['revolve_axis_end'],
                 group['revolve_angle'],
-                f'{output_path}.stl'
+                f'{output_path}.stl',
+                **_revolve_frame(group)
             )
             
             script_path = f'{output_path}.py'
-            success = execute_cadquery_script(script_content, f'{output_path}.stl', script_path)
+            success = False
+            if _cache_solids_enabled():
+                with open(script_path, 'w') as f:
+                    f.write(script_content)
+                success = _build_from_cached_solids([group], f'{output_path}.stl')
+                log_event("solid_cache", hit=success, n=1)
+            if not success:
+                success = execute_cadquery_script(script_content, f'{output_path}.stl', script_path)
             
             if success:
                 mesh = trimesh.load(f'{output_path}.stl', force='mesh')
@@ -1829,7 +1898,8 @@ def _test_removal_worker(args):
 
 
 def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.01, batch_removal=False, num_workers: int = 15,
-                             fast_prune: bool = False):
+                             fast_prune: bool = False, cache_volumes: bool = False,
+                             persistent_pool: bool = False, cache_solids: bool = False):
     """
     Greedy pruning based on IoU values:
     1. Start with the extrusion having the highest individual IoU
@@ -1846,6 +1916,10 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
             whole removal loop. Intended to leave the selection unchanged.
     """
     import os, pickle, json
+    cache_volumes = cache_volumes or fast_prune
+    persistent_pool = persistent_pool or fast_prune
+    if cache_solids:
+        os.environ["CADFIT_CACHE_SOLIDS"] = "1"
     
     # Check if results already computed
     files_exist = all([
@@ -1878,11 +1952,16 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
     extrusion_candidates = []
     for idx, sketch in enumerate(precomp):
         insts = sketch['insts']
+        # Stock precomp is positional (list index == sketch index); the identity
+        # fix carries the real index and a typed label instead.
+        sketch_no = sketch.get('sketch_idx', idx)
+        sketch_id = sketch.get('sketch_id', str(idx))
         
         # Add merged extrusion if available (takes precedence over individual pos/neg)
         if sketch.get('merged_h') is not None and sketch.get('merged_iou', 0.0) > 0:
             extrusion_candidates.append({
-                'sketch_idx': idx,
+                'sketch_idx': sketch_no,
+                'sketch_id': sketch_id,
                 'insts': sketch['merged_insts'],
                 'height': sketch['merged_h'],
                 'individual_iou': sketch['merged_iou'],
@@ -1892,7 +1971,8 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
             # Add positive extrusion if available
             if sketch.get('pos_h') is not None and sketch.get('pos_iou', 0.0) > 0:
                 extrusion_candidates.append({
-                    'sketch_idx': idx,
+                    'sketch_idx': sketch_no,
+                    'sketch_id': sketch_id,
                     'insts': insts,
                     'height': sketch['pos_h'],
                     'individual_iou': sketch['pos_iou'],
@@ -1903,7 +1983,8 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
             # Add negative extrusion if available
             if sketch.get('neg_h') is not None and sketch.get('neg_iou', 0.0) > 0:
                 extrusion_candidates.append({
-                    'sketch_idx': idx,
+                    'sketch_idx': sketch_no,
+                    'sketch_id': sketch_id,
                     'insts': insts,
                     'height': sketch['neg_h'],
                     'individual_iou': sketch['neg_iou'],
@@ -1913,7 +1994,8 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
         # Add revolve operation if available
         if sketch.get('revolve_angle') is not None and sketch.get('revolve_iou', 0.0) > 0:
             extrusion_candidates.append({
-                'sketch_idx': idx,
+                'sketch_idx': sketch_no,
+                'sketch_id': sketch_id,
                 'insts': insts,
                 'height': 0,
                 'individual_iou': sketch['revolve_iou'],
@@ -1922,8 +2004,14 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
                 'revolve_axis_start': sketch['revolve_axis_start'],
                 'revolve_axis_end': sketch['revolve_axis_end'],
                 'revolve_axis_angle': sketch.get('revolve_axis_angle'),
+                'revolve_origin': sketch.get('revolve_origin'),
+                'revolve_normal': sketch.get('revolve_normal'),
+                'revolve_xdir': sketch.get('revolve_xdir'),
                 'stl_path': sketch.get('revolve_stl')
             })
+
+    for i, c in enumerate(extrusion_candidates):
+        c['candidate_id'] = i
 
     if not extrusion_candidates:
         print("No valid extrusion candidates found!")
@@ -1940,8 +2028,8 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
     _t_phase = time.time()
     for i, candidate in enumerate(extrusion_candidates):
         try:
-            stl_path = candidate.pop('stl_path', None)
-            if fast_prune and stl_path and os.path.exists(stl_path):
+            stl_path = candidate.get('stl_path')
+            if cache_volumes and stl_path and os.path.exists(stl_path):
                 volume = abs(trimesh.load(stl_path, force='mesh').volume)
             else:
                 volume = calculate_extrusion_volume(candidate)
@@ -2062,7 +2150,7 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
         current_iou = best_iou
         removed_count = 0
         iteration = 0
-        shared_pool = mp.Pool(max(1, min(len(current_groups), num_workers))) if fast_prune else None
+        shared_pool = mp.Pool(max(1, min(len(current_groups), num_workers))) if persistent_pool else None
         
         while len(current_groups) > 1:
             iteration += 1
@@ -2175,7 +2263,7 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
     log_event("prune_phase", phase="backward", duration=time.time() - _t_phase, selected=len(final_groups))
     # The stock keep_mask / 'selected' flags are not reliable, so record the selection here.
     log_event("prune_result", output_folder=output_folder,
-              selected=[[g.get('sketch_idx'), g.get('type'), g.get('height'), g.get('individual_iou')]
+              selected=[[g.get('sketch_id', g.get('sketch_idx')), g.get('type'), g.get('height'), g.get('individual_iou')]
                         for g in final_groups])
 
     # Build final mesh
@@ -2190,12 +2278,11 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
     
     # Save results for future loading
     os.makedirs(output_folder, exist_ok=True)
-    instruction_groups = [{'insts': group['insts'], 'height': group['height']} for group in extrusion_candidates]
-    keep_mask = [i < len(final_groups) and any(
-        final_groups[j]['sketch_idx'] == extrusion_candidates[i]['sketch_idx'] and
-        final_groups[j]['type'] == extrusion_candidates[i]['type']
-        for j in range(len(final_groups))
-    ) for i in range(len(extrusion_candidates))]
+    # Stock kept only {insts, height} here (so revolves reloaded as extrusions) and
+    # gated keep_mask on `i < len(final_groups)` (so it was almost always False).
+    instruction_groups = [{k: v for k, v in group.items() if k != 'stl_path'} for group in extrusion_candidates]
+    selected_ids = {g['candidate_id'] for g in final_groups}
+    keep_mask = [c['candidate_id'] in selected_ids for c in extrusion_candidates]
     
     with open(f'{output_folder}/greedy_instruction_groups.pkl', 'wb') as f:
         pickle.dump(instruction_groups, f)
@@ -2207,7 +2294,9 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
     for i, candidate in enumerate(extrusion_candidates):
         extrusion_data.append({
             'candidate_idx': i,
+            'candidate_id': candidate['candidate_id'],
             'sketch_idx': candidate['sketch_idx'],
+            'sketch_id': candidate.get('sketch_id'),
             'height': candidate['height'],
             'individual_iou': candidate['individual_iou'],
             'type': candidate['type'],
@@ -2281,7 +2370,8 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
                 group['revolve_axis_start'],
                 group['revolve_axis_end'],
                 group['revolve_angle'],
-                f'{output_folder}/revolve_{idx}.stl'
+                f'{output_folder}/revolve_{idx}.stl',
+                **_revolve_frame(group)
             )
             
             # Extract the revolve body, rename result to solid_revolve_N

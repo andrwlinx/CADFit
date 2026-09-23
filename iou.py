@@ -109,8 +109,40 @@ def _manifold_boolean(a, b, op):
     return None
 
 
+# LRU (dict insertion order + move-to-end on hit). Stock used an 8-entry FIFO,
+# which evicted the ground truth every few candidate evaluations and re-ran its
+# alpha-wrap (seconds each) hundreds of times per pruning pass.
 _MANIFOLD_CACHE: dict = {}
-_CACHE_MAX = 8
+_CACHE_MAX = 64
+
+
+def _cache_get(key):
+    if key in _MANIFOLD_CACHE:
+        _MANIFOLD_CACHE[key] = _MANIFOLD_CACHE.pop(key)
+        return True, _MANIFOLD_CACHE[key]
+    return False, None
+
+
+def _cache_put(key, value):
+    if len(_MANIFOLD_CACHE) >= _CACHE_MAX:
+        _MANIFOLD_CACHE.pop(next(iter(_MANIFOLD_CACHE)))
+    _MANIFOLD_CACHE[key] = value
+
+# CADFit++ correctness fix (opt-in via env so pool workers inherit it): only
+# trust the direct manifold3d conversion when the mesh is a genuine volume.
+# Stock's volume-ratio gate below compares the same divergence integral to
+# itself and passes self-overlapping compounds (two extrusions sharing a face
+# merge into one "body" on load), which then yield IoU > 1 and steer greedy
+# search toward duplicate operations.
+def _validate_enabled() -> bool:
+    return os.environ.get("CADFIT_IOU_VALIDATE", "") not in ("", "0")
+
+
+def _is_clean_volume(mesh) -> bool:
+    try:
+        return bool(mesh.is_watertight and mesh.is_winding_consistent and mesh.volume > 0)
+    except Exception:
+        return False
 
 
 def _cached_manifold(path: str, normalize: bool):
@@ -127,12 +159,13 @@ def _cached_manifold(path: str, normalize: bool):
     except OSError:
         mtime = None
     key = (path, mtime, normalize)
-    if key in _MANIFOLD_CACHE:
-        return _MANIFOLD_CACHE[key]
+    hit, cached = _cache_get(key)
+    if hit:
+        return cached
     try:
         mesh = trimesh.load(path, force='mesh')
     except Exception:
-        _MANIFOLD_CACHE[key] = None
+        _cache_put(key, None)
         return None
     if normalize:
         mesh = normalize_mesh(mesh)
@@ -152,7 +185,7 @@ def _cached_manifold(path: str, normalize: bool):
     # detect cases where it silently went wrong (the alpha-wrap pathway
     # used to produce ~50% under-volumes on slabs with holes).
     m = None
-    if not multi_body:
+    if not multi_body and not (_validate_enabled() and not _is_clean_volume(mesh)):
         m_direct = _to_manifold(mesh)
         if m_direct is not None:
             try:
@@ -171,10 +204,40 @@ def _cached_manifold(path: str, normalize: bool):
         if m is None:
             m = _to_manifold(mesh)
 
-    if len(_MANIFOLD_CACHE) >= _CACHE_MAX:
-        _MANIFOLD_CACHE.pop(next(iter(_MANIFOLD_CACHE)))
-    _MANIFOLD_CACHE[key] = m
+    _cache_put(key, m)
     return m
+
+
+def _wrapped_manifold(path: str, normalize: bool):
+    """Alpha-wrapped manifold, bypassing the direct path (validation fallback)."""
+    key = (path, 'wrapped', normalize)
+    hit, cached = _cache_get(key)
+    if hit:
+        return cached
+    try:
+        mesh = trimesh.load(path, force='mesh')
+        if normalize:
+            mesh = normalize_mesh(mesh)
+        m = _to_manifold(_alpha_wrap(mesh))
+    except Exception:
+        m = None
+    _cache_put(key, m)
+    return m
+
+
+def _boolean_volumes(ma, mb):
+    inter = _manifold_boolean(ma, mb, _OP_INTERSECT)
+    uni = _manifold_boolean(ma, mb, _OP_ADD)
+    if inter is None or uni is None:
+        return None
+    return abs(inter.volume()), abs(uni.volume())
+
+
+def _volumes_consistent(ma, mb, v_inter, v_uni, tol=1e-4) -> bool:
+    """inter <= min(|A|,|B|) and union >= max(|A|,|B|), up to a relative tolerance."""
+    va, vb = abs(ma.volume()), abs(mb.volume())
+    scale = max(va, vb, 1e-12)
+    return v_inter <= min(va, vb) + tol * scale and v_uni >= max(va, vb) - tol * scale
 
 
 def mesh_iou_cpu_boolean(mesh_path_a: str,
@@ -197,15 +260,23 @@ def mesh_iou_cpu_boolean(mesh_path_a: str,
             print("[IOU] manifold construction failed")
         return 0.0
 
-    inter = _manifold_boolean(ma, mb, _OP_INTERSECT)
-    uni = _manifold_boolean(ma, mb, _OP_ADD)
-    if inter is None or uni is None:
+    vols = _boolean_volumes(ma, mb)
+    if vols is None:
         if verbose:
             print("[IOU] boolean failed")
         return 0.0
+    v_inter, v_uni = vols
 
-    v_inter = abs(inter.volume())
-    v_uni = abs(uni.volume())
+    if _validate_enabled() and not _volumes_consistent(ma, mb, v_inter, v_uni):
+        # The boolean engine was handed a non-volume. Re-run on alpha-wrapped
+        # inputs; if that is still inconsistent, refuse to score it.
+        ma2 = _wrapped_manifold(mesh_path_a, normalize)
+        mb2 = _wrapped_manifold(mesh_path_b, normalize=False)
+        vols = _boolean_volumes(ma2, mb2) if ma2 is not None and mb2 is not None else None
+        if vols is None or not _volumes_consistent(ma2, mb2, *vols):
+            print(f"[IOU] inconsistent boolean volumes for {os.path.basename(mesh_path_b)}; scoring 0")
+            return 0.0
+        v_inter, v_uni = vols
     if v_uni <= 0:
         return 0.0
     iou = v_inter / v_uni

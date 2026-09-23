@@ -1,0 +1,1480 @@
+{
+ "base": {
+  "parts": {
+   "boss_on_plate_0": {
+    "steps": {
+     "Extract planar contours": 12.613584041595459,
+     "Split planar loops": 0.20975494384765625,
+     "Extract axis-aligned sketches": 1.7390048503875732,
+     "Split axis loops": 1.2405650615692139,
+     "Translation analysis": 30.338133811950684,
+     "Revolve analysis": 7.522372007369995,
+     "Greedy CAD reconstruction": 434.61029410362244
+    },
+    "gap": 21.055049896240234,
+    "last_t": 1790058566.831112,
+    "duration": 494.46324610710144,
+    "final_iou": 0.9760515158635733,
+    "strict": {
+     "iou": 0.9891375152614342,
+     "consistent": true,
+     "vol_gt": 2.2726716722076725,
+     "vol_recon": 2.272118080223388,
+     "inter": 2.2599855508302804,
+     "union": 2.28480420160078
+    },
+    "tainted": false
+   },
+   "boss_on_plate_1": {
+    "steps": {
+     "Extract planar contours": 14.296912670135498,
+     "Split planar loops": 0.2938358783721924,
+     "Extract axis-aligned sketches": 1.6038312911987305,
+     "Split axis loops": 1.106489896774292,
+     "Translation analysis": 23.877323865890503,
+     "Revolve analysis": 9.099617004394531,
+     "Greedy CAD reconstruction": 465.78256464004517
+    },
+    "gap": 17.61354398727417,
+    "last_t": 1790059089.115027,
+    "duration": 522.2835772037506,
+    "final_iou": 0.8534337368018377,
+    "strict": {
+     "iou": 0.8531281584867667,
+     "consistent": true,
+     "vol_gt": 0.9619084813144132,
+     "vol_recon": 0.8277022555752052,
+     "inter": 0.8238865214899752,
+     "union": 0.9657242153996431
+    },
+    "tainted": false
+   },
+   "boss_on_plate_2": {
+    "steps": {
+     "Extract planar contours": 6.479168176651001,
+     "Split planar loops": 0.0836789608001709,
+     "Extract axis-aligned sketches": 0.4941110610961914,
+     "Split axis loops": 0.21221184730529785,
+     "Translation analysis": 117.26211977005005,
+     "Revolve analysis": 1.911442756652832,
+     "Greedy CAD reconstruction": 68.85095286369324
+    },
+    "gap": 117.51853322982788,
+    "last_t": 1790059285.559479,
+    "duration": 196.44417786598206,
+    "final_iou": 0.8880487819594087,
+    "strict": {
+     "iou": 0.8874039743470145,
+     "consistent": true,
+     "vol_gt": 0.7918153651804888,
+     "vol_recon": 0.7221005519776748,
+     "inter": 0.7118004518233333,
+     "union": 0.8021154653348302
+    },
+    "tainted": false
+   },
+   "box_with_pocket_0": {
+    "steps": {
+     "Extract planar contours": 13.184570074081421,
+     "Split planar loops": 0.23253941535949707,
+     "Extract axis-aligned sketches": 1.283644199371338,
+     "Split axis loops": 0.5795831680297852,
+     "Translation analysis": 10.106616973876953,
+     "Revolve analysis": 3.6972742080688477,
+     "Greedy CAD reconstruction": 201.92287421226501
+    },
+    "gap": 19.827337980270386,
+    "last_t": 1790059519.073001,
+    "duration": 233.51327514648438,
+    "final_iou": 0.9021073775242268,
+    "strict": {
+     "iou": 0.9024999182954381,
+     "consistent": true,
+     "vol_gt": 2.7722446090086192,
+     "vol_recon": 2.525396679950297,
+     "inter": 2.513072817752155,
+     "union": 2.7845684712067613
+    },
+    "tainted": false
+   },
+   "box_with_pocket_1": {
+    "steps": {
+     "Extract planar contours": 11.891041278839111,
+     "Split planar loops": 0.2376573085784912,
+     "Extract axis-aligned sketches": 1.3102750778198242,
+     "Split axis loops": 0.5952160358428955,
+     "Translation analysis": 14.99906611442566,
+     "Revolve analysis": 3.948507070541382,
+     "Greedy CAD reconstruction": 174.51939702033997
+    },
+    "gap": 19.126695156097412,
+    "last_t": 1790059729.247168,
+    "duration": 210.17389488220215,
+    "final_iou": 0.9700974303435397,
+    "strict": {
+     "iou": 0.9836720288006068,
+     "consistent": true,
+     "vol_gt": 0.9466119109778843,
+     "vol_recon": 0.9525718581453154,
+     "inter": 0.9417756182044672,
+     "union": 0.9574081509187325
+    },
+    "tainted": false
+   },
+   "box_with_pocket_2": {
+    "steps": {
+     "Extract planar contours": 11.77608609199524,
+     "Split planar loops": 0.23856306076049805,
+     "Extract axis-aligned sketches": 1.0757970809936523,
+     "Split axis loops": 0.544342041015625,
+     "Translation analysis": 174.62033605575562,
+     "Revolve analysis": 2.9887948036193848,
+     "Greedy CAD reconstruction": 125.39022302627563
+    },
+    "gap": 97.06647086143494,
+    "last_t": 1790060048.3828428,
+    "duration": 319.1354441642761,
+    "final_iou": 0.846054968161361,
+    "strict": {
+     "iou": 0.8514429497615752,
+     "consistent": true,
+     "vol_gt": 1.2766933370249052,
+     "vol_recon": 1.4957964705154612,
+     "inter": 1.2750146582804869,
+     "union": 1.4974751492598795
+    },
+    "tainted": false
+   },
+   "flange_0": {
+    "steps": {
+     "Extract planar contours": 13.181578874588013,
+     "Split planar loops": 0.35355424880981445,
+     "Extract axis-aligned sketches": 1.7880539894104004,
+     "Split axis loops": 1.1864597797393799,
+     "Translation analysis": 94.57902717590332,
+     "Revolve analysis": 11.64193606376648,
+     "Greedy CAD reconstruction": 214.31420183181763
+    },
+    "gap": 54.53535079956055,
+    "last_t": 1790060392.4104261,
+    "duration": 344.02733612060547,
+    "final_iou": 0.6505039276501869,
+    "strict": {
+     "iou": 0.6412132400578177,
+     "consistent": true,
+     "vol_gt": 0.5819850407778586,
+     "vol_recon": 0.37357622029244186,
+     "inter": 0.3733326769061626,
+     "union": 0.5822285841641378
+    },
+    "tainted": false
+   },
+   "flange_1": {
+    "steps": {
+     "Extract planar contours": 5.927972078323364,
+     "Split planar loops": 0.15218687057495117,
+     "Extract axis-aligned sketches": 0.8121809959411621,
+     "Split axis loops": 0.5669660568237305,
+     "Translation analysis": 51.0740270614624,
+     "Revolve analysis": 6.199754953384399,
+     "Greedy CAD reconstruction": 118.11425518989563
+    },
+    "gap": 51.60549592971802,
+    "last_t": 1790060576.455425,
+    "duration": 184.0447916984558,
+    "final_iou": 0.7886606852834719,
+    "strict": {
+     "iou": 0.7893309919655621,
+     "consistent": true,
+     "vol_gt": 0.5905232593304441,
+     "vol_recon": 0.4679977897748482,
+     "inter": 0.4669474085333389,
+     "union": 0.5915736405719534
+    },
+    "tainted": false
+   },
+   "flange_2": {
+    "steps": {
+     "Extract planar contours": 6.38493800163269,
+     "Split planar loops": 0.14819788932800293,
+     "Extract axis-aligned sketches": 0.6234250068664551,
+     "Split axis loops": 0.32155895233154297,
+     "Translation analysis": 131.08814406394958,
+     "Revolve analysis": 1.9173579216003418,
+     "Greedy CAD reconstruction": 83.47026300430298
+    },
+    "gap": 131.46451878547668,
+    "last_t": 1790060802.137463,
+    "duration": 225.6818208694458,
+    "final_iou": 0.8286543130341325,
+    "strict": {
+     "iou": 0.8237002353286306,
+     "consistent": true,
+     "vol_gt": 0.517818206669013,
+     "vol_recon": 0.4272476104084696,
+     "inter": 0.42685246228939056,
+     "union": 0.518213354788092
+    },
+    "tainted": false
+   },
+   "hex_prism_0": {
+    "steps": {
+     "Extract planar contours": 5.164758205413818,
+     "Split planar loops": 0.09239006042480469,
+     "Extract axis-aligned sketches": 0.5505421161651611,
+     "Split axis loops": 0.26627683639526367,
+     "Translation analysis": 2.1062357425689697,
+     "Revolve analysis": 2.467478036880493,
+     "Greedy CAD reconstruction": 5.3592689037323
+    },
+    "gap": 5.193241834640503,
+    "last_t": 1790060818.469506,
+    "duration": 16.331788063049316,
+    "final_iou": 0.9940188848164228,
+    "strict": {
+     "iou": 0.9939299986523162,
+     "consistent": true,
+     "vol_gt": 2.629873238335752,
+     "vol_recon": 2.6246713623594022,
+     "inter": 2.6192742530668887,
+     "union": 2.635270347628505
+    },
+    "tainted": false
+   },
+   "hex_prism_1": {
+    "steps": {
+     "Extract planar contours": 4.918111085891724,
+     "Split planar loops": 0.09183788299560547,
+     "Extract axis-aligned sketches": 0.6168079376220703,
+     "Split axis loops": 0.27181196212768555,
+     "Translation analysis": 2.2154581546783447,
+     "Revolve analysis": 2.6225368976593018,
+     "Greedy CAD reconstruction": 6.607919692993164
+    },
+    "gap": 5.1444830894470215,
+    "last_t": 1790060836.182768,
+    "duration": 17.712996006011963,
+    "final_iou": 0.9991663201994756,
+    "strict": {
+     "iou": 0.9988865056349245,
+     "consistent": true,
+     "vol_gt": 3.205848157449297,
+     "vol_recon": 3.203943083504538,
+     "inter": 3.2031103099032525,
+     "union": 3.206680931050572
+    },
+    "tainted": false
+   },
+   "hex_prism_2": {
+    "steps": {
+     "Extract planar contours": 5.169309139251709,
+     "Split planar loops": 0.09308218955993652,
+     "Extract axis-aligned sketches": 0.5563340187072754,
+     "Split axis loops": 0.2734508514404297,
+     "Translation analysis": 62.159712076187134,
+     "Revolve analysis": 0.9211561679840088,
+     "Greedy CAD reconstruction": 10.82213830947876
+    },
+    "gap": 62.46849012374878,
+    "last_t": 1790060916.642868,
+    "duration": 80.45983600616455,
+    "final_iou": 0.9978152830066347,
+    "strict": {
+     "iou": 0.9973944271219439,
+     "consistent": true,
+     "vol_gt": 2.0251084383439477,
+     "vol_recon": 2.0208469724577087,
+     "inter": 2.020338759496839,
+     "union": 2.0256166513048175
+    },
+    "tainted": false
+   },
+   "l_bracket_0": {
+    "steps": {
+     "Extract planar contours": 2.1029980182647705,
+     "Split planar loops": 0.08777904510498047,
+     "Extract axis-aligned sketches": 0.45362091064453125,
+     "Split axis loops": 0.1448509693145752,
+     "Translation analysis": 1.5719358921051025,
+     "Revolve analysis": 0.8668422698974609,
+     "Greedy CAD reconstruction": 21.13987112045288
+    },
+    "gap": 4.737663984298706,
+    "last_t": 1790060943.13796,
+    "duration": 26.494753122329712,
+    "final_iou": 0.9856651810371297,
+    "strict": {
+     "iou": 0.9856865140741953,
+     "consistent": true,
+     "vol_gt": 0.9540880354415254,
+     "vol_recon": 0.9465265922752983,
+     "inter": 0.943457184059125,
+     "union": 0.9571574436576987
+    },
+    "tainted": false
+   },
+   "l_bracket_1": {
+    "steps": {
+     "Extract planar contours": 2.038628101348877,
+     "Split planar loops": 0.05110788345336914,
+     "Extract axis-aligned sketches": 0.4458909034729004,
+     "Split axis loops": 0.1448659896850586,
+     "Translation analysis": 1.5148420333862305,
+     "Revolve analysis": 0.9119880199432373,
+     "Greedy CAD reconstruction": 4.871601819992065
+    },
+    "gap": 4.761969089508057,
+    "last_t": 1790060953.280082,
+    "duration": 10.141968250274658,
+    "final_iou": 0.9938979630542789,
+    "strict": {
+     "iou": 0.9937984726264953,
+     "consistent": true,
+     "vol_gt": 2.2136479066253325,
+     "vol_recon": 2.2027412773001487,
+     "inter": 2.201326205114173,
+     "union": 2.215062978811308
+    },
+    "tainted": false
+   },
+   "l_bracket_2": {
+    "steps": {
+     "Extract planar contours": 8.241294145584106,
+     "Split planar loops": 0.1429450511932373,
+     "Extract axis-aligned sketches": 1.3831069469451904,
+     "Split axis loops": 1.011268138885498,
+     "Translation analysis": 78.29572820663452,
+     "Revolve analysis": 2.9484505653381348,
+     "Greedy CAD reconstruction": 551.5872988700867
+    },
+    "gap": 54.637948751449585,
+    "last_t": 1790061600.461472,
+    "duration": 647.1812188625336,
+    "final_iou": 0.5970481958513069,
+    "strict": {
+     "iou": 0.6019726963919668,
+     "consistent": true,
+     "vol_gt": 0.9937259361894594,
+     "vol_recon": 0.8780986865893009,
+     "inter": 0.703374856426858,
+     "union": 1.168449766314425
+    },
+    "tainted": false
+   },
+   "plate_with_holes_0": {
+    "steps": {
+     "Extract planar contours": 5.847679138183594,
+     "Split planar loops": 0.13788509368896484,
+     "Extract axis-aligned sketches": 1.0872931480407715,
+     "Split axis loops": 1.2159831523895264,
+     "Translation analysis": 3.2174670696258545,
+     "Revolve analysis": 4.620186805725098,
+     "Greedy CAD reconstruction": 25.746427059173584
+    },
+    "gap": 5.943549871444702,
+    "last_t": 1790061643.43975,
+    "duration": 42.978076219558716,
+    "final_iou": 0.9637460805263054,
+    "strict": {
+     "iou": 0.9638985242604126,
+     "consistent": true,
+     "vol_gt": 0.37950933796995656,
+     "vol_recon": 0.39333954253686065,
+     "inter": 0.3793209711166469,
+     "union": 0.3935279093903533
+    },
+    "tainted": false
+   },
+   "plate_with_holes_1": {
+    "steps": {
+     "Extract planar contours": 5.777204990386963,
+     "Split planar loops": 0.08753204345703125,
+     "Extract axis-aligned sketches": 0.8419866561889648,
+     "Split axis loops": 0.6238977909088135,
+     "Translation analysis": 2.472172975540161,
+     "Revolve analysis": 3.3123397827148438,
+     "Greedy CAD reconstruction": 7.772900819778442
+    },
+    "gap": 5.783724069595337,
+    "last_t": 1790061664.946205,
+    "duration": 21.50625705718994,
+    "final_iou": 0.9994725960443392,
+    "strict": {
+     "iou": 0.9985057508370168,
+     "consistent": true,
+     "vol_gt": 0.6131576582557702,
+     "vol_recon": 0.6129606262471717,
+     "inter": 0.6126007682338906,
+     "union": 0.6135175162690513
+    },
+    "tainted": false
+   },
+   "plate_with_holes_2": {
+    "steps": {
+     "Extract planar contours": 6.129109859466553,
+     "Split planar loops": 0.14974689483642578,
+     "Extract axis-aligned sketches": 0.4916412830352783,
+     "Split axis loops": 0.21327900886535645,
+     "Translation analysis": 78.34030389785767,
+     "Revolve analysis": 1.2279658317565918,
+     "Greedy CAD reconstruction": 9.432093143463135
+    },
+    "gap": 78.55469417572021,
+    "last_t": 1790061761.468369,
+    "duration": 96.5219030380249,
+    "final_iou": 0.9933293402003556,
+    "strict": {
+     "iou": 0.9918997461226735,
+     "consistent": true,
+     "vol_gt": 0.5691278968996012,
+     "vol_recon": 0.5655313779571924,
+     "inter": 0.5650225363283915,
+     "union": 0.5696367385283232
+    },
+    "tainted": false
+   },
+   "pulley_0": {
+    "steps": {
+     "Extract planar contours": 5.307283878326416,
+     "Split planar loops": 0.09195899963378906,
+     "Extract axis-aligned sketches": 0.6822261810302734,
+     "Split axis loops": 0.4477658271789551,
+     "Translation analysis": 10.31595492362976,
+     "Revolve analysis": 4.268627882003784,
+     "Greedy CAD reconstruction": 22.82509684562683
+    },
+    "gap": 14.760050058364868,
+    "last_t": 1790061806.415429,
+    "duration": 44.946735858917236,
+    "final_iou": 0.9947668369307511,
+    "strict": {
+     "iou": 0.9945753630982078,
+     "consistent": true,
+     "vol_gt": 2.6498660730913506,
+     "vol_recon": 2.639742012977741,
+     "inter": 2.6376109823584284,
+     "union": 2.6519971037106633
+    },
+    "tainted": false
+   },
+   "pulley_1": {
+    "steps": {
+     "Extract planar contours": 5.532170057296753,
+     "Split planar loops": 0.09187507629394531,
+     "Extract axis-aligned sketches": 0.6832678318023682,
+     "Split axis loops": 0.44287896156311035,
+     "Translation analysis": 8.828143835067749,
+     "Revolve analysis": 4.282767057418823,
+     "Greedy CAD reconstruction": 25.648170948028564
+    },
+    "gap": 13.608792066574097,
+    "last_t": 1790061853.0302138,
+    "duration": 46.61445498466492,
+    "final_iou": 0.994514853238468,
+    "strict": {
+     "iou": 0.9938866237884038,
+     "consistent": true,
+     "vol_gt": 1.719274345889263,
+     "vol_recon": 1.7169025811228995,
+     "inter": 1.7128207010280625,
+     "union": 1.7233562259841
+    },
+    "tainted": false
+   },
+   "pulley_2": {
+    "steps": {
+     "Extract planar contours": 219.32273292541504,
+     "Split planar loops": 0.23069000244140625,
+     "Extract axis-aligned sketches": 7.38765025138855,
+     "Split axis loops": 47.522417068481445,
+     "Translation analysis": 145.05278992652893,
+     "Revolve analysis": 29.330254793167114,
+     "Greedy CAD reconstruction": 333.60420417785645
+    },
+    "gap": 214.25590014457703,
+    "last_t": 1790062645.245366,
+    "duration": 792.2147972583771,
+    "final_iou": 0.8484035345707455,
+    "strict": {
+     "iou": 0.862930034158492,
+     "consistent": true,
+     "vol_gt": 1.7456243421805833,
+     "vol_recon": 1.731589773732918,
+     "inter": 1.610684481329345,
+     "union": 1.8665296345839262
+    },
+    "tainted": false
+   },
+   "stepped_block_0": {
+    "steps": {
+     "Extract planar contours": 6.410423040390015,
+     "Split planar loops": 0.14575910568237305,
+     "Extract axis-aligned sketches": 0.5729360580444336,
+     "Split axis loops": 0.2580277919769287,
+     "Translation analysis": 11.765427112579346,
+     "Revolve analysis": 3.314034938812256,
+     "Greedy CAD reconstruction": 90.47956013679504
+    },
+    "gap": 12.160444021224976,
+    "last_t": 1790062758.628984,
+    "duration": 113.38323307037354,
+    "final_iou": 1.545437668532411,
+    "strict": {
+     "iou": 0.7736442666258698,
+     "consistent": true,
+     "vol_gt": 1.6818558843543328,
+     "vol_recon": 1.3013298403132751,
+     "inter": 1.3012330463310804,
+     "union": 1.6819526783365275
+    },
+    "tainted": false
+   },
+   "stepped_block_1": {
+    "steps": {
+     "Extract planar contours": 6.408733129501343,
+     "Split planar loops": 0.1519019603729248,
+     "Extract axis-aligned sketches": 0.4522440433502197,
+     "Split axis loops": 0.1507248878479004,
+     "Translation analysis": 11.626115083694458,
+     "Revolve analysis": 1.4049320220947266,
+     "Greedy CAD reconstruction": 39.00162982940674
+    },
+    "gap": 11.785459756851196,
+    "last_t": 1790062818.0124002,
+    "duration": 59.38318419456482,
+    "final_iou": 1.3813996166961546,
+    "strict": {
+     "iou": 0.6909979766898502,
+     "consistent": true,
+     "vol_gt": 1.1862881279916502,
+     "vol_recon": 0.8198276709692038,
+     "inter": 0.8197655923876617,
+     "union": 1.1863502065731923
+    },
+    "tainted": false
+   },
+   "stepped_block_2": {
+    "steps": {
+     "Extract planar contours": 6.2615580558776855,
+     "Split planar loops": 0.09191203117370605,
+     "Extract axis-aligned sketches": 0.4454631805419922,
+     "Split axis loops": 0.2116692066192627,
+     "Translation analysis": 57.35565185546875,
+     "Revolve analysis": 1.485706090927124,
+     "Greedy CAD reconstruction": 75.33129978179932
+    },
+    "gap": 57.629430055618286,
+    "last_t": 1790062960.02791,
+    "duration": 142.01532411575317,
+    "final_iou": 0.9824031349670381,
+    "strict": {
+     "iou": 0.9972392279328839,
+     "consistent": true,
+     "vol_gt": 1.6846225461381705,
+     "vol_recon": 1.6809788418483016,
+     "inter": 1.6804745684671878,
+     "union": 1.685126819520067
+    },
+    "tainted": false
+   },
+   "stepped_shaft_0": {
+    "steps": {
+     "Extract planar contours": 6.136752128601074,
+     "Split planar loops": 0.08887600898742676,
+     "Extract axis-aligned sketches": 0.5703186988830566,
+     "Split axis loops": 0.2721889019012451,
+     "Translation analysis": 30.346355199813843,
+     "Revolve analysis": 3.2743606567382812,
+     "Greedy CAD reconstruction": 102.61307120323181
+    },
+    "gap": 30.707988023757935,
+    "last_t": 1790063104.0066838,
+    "duration": 143.97854471206665,
+    "final_iou": 0.9874834396157487,
+    "strict": {
+     "iou": 0.9873539396389158,
+     "consistent": true,
+     "vol_gt": 0.6230619933497931,
+     "vol_recon": 0.6277127280799997,
+     "inter": 0.6214078550239792,
+     "union": 0.6293668664058135
+    },
+    "tainted": false
+   },
+   "stepped_shaft_1": {
+    "steps": {
+     "Extract planar contours": 6.087942123413086,
+     "Split planar loops": 0.09324789047241211,
+     "Extract axis-aligned sketches": 0.6328010559082031,
+     "Split axis loops": 0.27289605140686035,
+     "Translation analysis": 44.191027879714966,
+     "Revolve analysis": 3.541633129119873,
+     "Greedy CAD reconstruction": 113.8730947971344
+    },
+    "gap": 44.5596821308136,
+    "last_t": 1790063273.3548522,
+    "duration": 169.3478410243988,
+    "final_iou": 0.9873816143841195,
+    "strict": {
+     "iou": 0.9872450607265176,
+     "consistent": true,
+     "vol_gt": 0.5456954704069061,
+     "vol_recon": 0.5498512955060058,
+     "inter": 0.5442575527383724,
+     "union": 0.5512892131745395
+    },
+    "tainted": false
+   },
+   "stepped_shaft_2": {
+    "steps": {
+     "Extract planar contours": 6.339235067367554,
+     "Split planar loops": 0.08626699447631836,
+     "Extract axis-aligned sketches": 0.5046951770782471,
+     "Split axis loops": 0.21209406852722168,
+     "Translation analysis": 34.49512720108032,
+     "Revolve analysis": 2.346538782119751,
+     "Greedy CAD reconstruction": 67.87826204299927
+    },
+    "gap": 34.80254817008972,
+    "last_t": 1790063386.7095292,
+    "duration": 113.35434293746948,
+    "final_iou": 0.9837468299156493,
+    "strict": {
+     "iou": 0.9982591727497911,
+     "consistent": true,
+     "vol_gt": 1.46419558943852,
+     "vol_recon": 1.4629660028605624,
+     "inter": 1.4623057656792375,
+     "union": 1.4648558266198446
+    },
+    "tainted": false
+   },
+   "u_channel_0": {
+    "steps": {
+     "Extract planar contours": 6.506759166717529,
+     "Split planar loops": 0.14066815376281738,
+     "Extract axis-aligned sketches": 0.6257317066192627,
+     "Split axis loops": 0.44506072998046875,
+     "Translation analysis": 2.832472085952759,
+     "Revolve analysis": 3.1526241302490234,
+     "Greedy CAD reconstruction": 25.021462202072144
+    },
+    "gap": 17.7327880859375,
+    "last_t": 1790063425.8998132,
+    "duration": 39.189855098724365,
+    "final_iou": 0.9980784217917092,
+    "strict": {
+     "iou": 0.9962221851582802,
+     "consistent": true,
+     "vol_gt": 0.3181078843052315,
+     "vol_recon": 0.31753822521020914,
+     "inter": 0.3172215803015043,
+     "union": 0.3184245292139364
+    },
+    "tainted": false
+   },
+   "u_channel_1": {
+    "steps": {
+     "Extract planar contours": 6.247790813446045,
+     "Split planar loops": 0.09158110618591309,
+     "Extract axis-aligned sketches": 0.5021381378173828,
+     "Split axis loops": 0.14649605751037598,
+     "Translation analysis": 2.2098939418792725,
+     "Revolve analysis": 1.4987010955810547,
+     "Greedy CAD reconstruction": 7.642461776733398
+    },
+    "gap": 6.249517917633057,
+    "last_t": 1790063444.39644,
+    "duration": 18.49643087387085,
+    "final_iou": 0.9980878523094701,
+    "strict": {
+     "iou": 0.9973013777616039,
+     "consistent": true,
+     "vol_gt": 1.2007285220431332,
+     "vol_recon": 1.198540563799734,
+     "inter": 1.1980136756385562,
+     "union": 1.2012554102025224
+    },
+    "tainted": false
+   },
+   "u_channel_2": {
+    "steps": {
+     "Extract planar contours": 5.938092231750488,
+     "Split planar loops": 0.1465752124786377,
+     "Extract axis-aligned sketches": 0.4867062568664551,
+     "Split axis loops": 0.2120199203491211,
+     "Translation analysis": 54.541967153549194,
+     "Revolve analysis": 0.9287629127502441,
+     "Greedy CAD reconstruction": 12.832579135894775
+    },
+    "gap": 54.82810711860657,
+    "last_t": 1790063519.812665,
+    "duration": 75.41602206230164,
+    "final_iou": 0.9943843616136617,
+    "strict": {
+     "iou": 0.9919198352605095,
+     "consistent": true,
+     "vol_gt": 0.3078097571573487,
+     "vol_recon": 0.3061669466956804,
+     "inter": 0.305743062626825,
+     "union": 0.3082336412261856
+    },
+    "tainted": false
+   }
+  },
+  "steps": {
+   "Extract planar contours": 427.62441658973694,
+   "Split planar loops": 4.3355872631073,
+   "Extract axis-aligned sketches": 30.703726053237915,
+   "Split axis loops": 61.113317012786865,
+   "Translation analysis": 1293.399577140808,
+   "Revolve analysis": 127.65494465827942,
+   "Greedy CAD reconstruction": 3447.0654385089874
+  },
+  "phases": {
+   "evaluate": 349.10720586776733,
+   "volume_pass": 701.2335531711578,
+   "forward": 1334.9693930149078,
+   "backward": 586.6329188346863
+  }
+ },
+ "new": {
+  "parts": {
+   "boss_on_plate_0": {
+    "steps": {
+     "Extract planar contours": 14.433279037475586,
+     "Split planar loops": 0.2093958854675293,
+     "Extract axis-aligned sketches": 1.7792458534240723,
+     "Split axis loops": 1.2335829734802246,
+     "Translation analysis": 14.07417893409729,
+     "Revolve analysis": 7.8997204303741455,
+     "Greedy CAD reconstruction": 251.80310702323914
+    },
+    "gap": 17.477257251739502,
+    "last_t": 1790116422.303402,
+    "duration": 299.48612999916077,
+    "final_iou": 0.8230322209480726,
+    "strict": {
+     "iou": 0.8233038659802177,
+     "consistent": true,
+     "vol_gt": 2.2726716722076725,
+     "vol_recon": 1.8767239193050511,
+     "inter": 1.8736391095935747,
+     "union": 2.275756481919149
+    },
+    "tainted": false
+   },
+   "boss_on_plate_1": {
+    "steps": {
+     "Extract planar contours": 14.224502801895142,
+     "Split planar loops": 0.3184788227081299,
+     "Extract axis-aligned sketches": 1.6136415004730225,
+     "Split axis loops": 1.0277888774871826,
+     "Translation analysis": 12.025648832321167,
+     "Revolve analysis": 9.15901517868042,
+     "Greedy CAD reconstruction": 317.4915533065796
+    },
+    "gap": 15.996989250183105,
+    "last_t": 1790116784.182754,
+    "duration": 361.87913608551025,
+    "final_iou": 0.8534337368018377,
+    "strict": {
+     "iou": 0.8531281584867667,
+     "consistent": true,
+     "vol_gt": 0.9619084813144132,
+     "vol_recon": 0.8277022555752052,
+     "inter": 0.8238865214899752,
+     "union": 0.9657242153996431
+    },
+    "tainted": false
+   },
+   "boss_on_plate_2": {
+    "steps": {
+     "Extract planar contours": 58.58987307548523,
+     "Split planar loops": 0.20808100700378418,
+     "Extract axis-aligned sketches": 8.915378332138062,
+     "Split axis loops": 106.87031364440918,
+     "Translation analysis": 55.197383880615234,
+     "Revolve analysis": 95.07958173751831,
+     "Greedy CAD reconstruction": 72.51986527442932
+    },
+    "gap": 106.68112921714783,
+    "last_t": 1790117191.370199,
+    "duration": 407.1872308254242,
+    "final_iou": 0.9268999633628179,
+    "strict": {
+     "iou": 0.9669658087743407,
+     "consistent": true,
+     "vol_gt": 0.7918153651804888,
+     "vol_recon": 0.8179078341482088,
+     "inter": 0.7913443580985178,
+     "union": 0.8183788412349051
+    },
+    "tainted": false
+   },
+   "box_with_pocket_0": {
+    "steps": {
+     "Extract planar contours": 14.440461874008179,
+     "Split planar loops": 0.20659303665161133,
+     "Extract axis-aligned sketches": 1.3486599922180176,
+     "Split axis loops": 0.5810990333557129,
+     "Translation analysis": 8.523174047470093,
+     "Revolve analysis": 3.2517848014831543,
+     "Greedy CAD reconstruction": 90.20900821685791
+    },
+    "gap": 20.991961002349854,
+    "last_t": 1790117312.5051892,
+    "duration": 121.13444876670837,
+    "final_iou": 0.9021073775242268,
+    "strict": {
+     "iou": 0.9024999182954381,
+     "consistent": true,
+     "vol_gt": 2.7722446090086192,
+     "vol_recon": 2.525396679950297,
+     "inter": 2.513072817752155,
+     "union": 2.7845684712067613
+    },
+    "tainted": false
+   },
+   "box_with_pocket_1": {
+    "steps": {
+     "Extract planar contours": 13.251041889190674,
+     "Split planar loops": 0.21085405349731445,
+     "Extract axis-aligned sketches": 1.5563688278198242,
+     "Split axis loops": 0.7013418674468994,
+     "Translation analysis": 5.631734848022461,
+     "Revolve analysis": 3.203847885131836,
+     "Greedy CAD reconstruction": 56.49470829963684
+    },
+    "gap": 17.178535223007202,
+    "last_t": 1790117396.338228,
+    "duration": 83.83282399177551,
+    "final_iou": 0.970224143175683,
+    "strict": {
+     "iou": 0.98598169688718,
+     "consistent": true,
+     "vol_gt": 0.9466119109778843,
+     "vol_recon": 0.9530075962859264,
+     "inter": 0.9431054012973423,
+     "union": 0.9565141059664684
+    },
+    "tainted": false
+   },
+   "box_with_pocket_2": {
+    "steps": {
+     "Extract planar contours": 12.74292540550232,
+     "Split planar loops": 0.21117281913757324,
+     "Extract axis-aligned sketches": 1.2367477416992188,
+     "Split axis loops": 0.6463809013366699,
+     "Translation analysis": 38.039093017578125,
+     "Revolve analysis": 2.941673994064331,
+     "Greedy CAD reconstruction": 65.84995079040527
+    },
+    "gap": 22.843757152557373,
+    "last_t": 1790117520.298559,
+    "duration": 123.95987820625305,
+    "final_iou": 0.9977287298484397,
+    "strict": {
+     "iou": 0.9937982524340724,
+     "consistent": true,
+     "vol_gt": 1.2766933370249052,
+     "vol_recon": 1.2808330363266733,
+     "inter": 1.2747855693477133,
+     "union": 1.2827408040066777
+    },
+    "tainted": false
+   },
+   "flange_0": {
+    "steps": {
+     "Extract planar contours": 14.516870498657227,
+     "Split planar loops": 0.3194451332092285,
+     "Extract axis-aligned sketches": 1.8509232997894287,
+     "Split axis loops": 1.181758165359497,
+     "Translation analysis": 62.69433522224426,
+     "Revolve analysis": 11.931231498718262,
+     "Greedy CAD reconstruction": 114.72130513191223
+    },
+    "gap": 39.099462270736694,
+    "last_t": 1790117733.983645,
+    "duration": 213.6847541332245,
+    "final_iou": 0.6505039276501869,
+    "strict": {
+     "iou": 0.6412132400578177,
+     "consistent": true,
+     "vol_gt": 0.5819850407778586,
+     "vol_recon": 0.37357622029244186,
+     "inter": 0.3733326769061626,
+     "union": 0.5822285841641378
+    },
+    "tainted": false
+   },
+   "flange_1": {
+    "steps": {
+     "Extract planar contours": 12.82371711730957,
+     "Split planar loops": 0.32318687438964844,
+     "Extract axis-aligned sketches": 1.904900312423706,
+     "Split axis loops": 1.3072340488433838,
+     "Translation analysis": 729.3612358570099,
+     "Revolve analysis": 18.120373964309692,
+     "Greedy CAD reconstruction": 308.7750551700592
+    },
+    "gap": 680.845988035202,
+    "last_t": 1790118837.551496,
+    "duration": 1103.5676290988922,
+    "final_iou": 0.9597925507040986,
+    "strict": {
+     "iou": 0.9603234092904712,
+     "consistent": true,
+     "vol_gt": 0.5905232593304441,
+     "vol_recon": 0.6147929036391042,
+     "inter": 0.590460391081477,
+     "union": 0.6148557718880714
+    },
+    "tainted": true
+   },
+   "flange_2": {
+    "steps": {
+     "Extract planar contours": 17.431290864944458,
+     "Split planar loops": 0.14099931716918945,
+     "Extract axis-aligned sketches": 0.6033599376678467,
+     "Split axis loops": 0.33226490020751953,
+     "Translation analysis": 140.75978803634644,
+     "Revolve analysis": 3.006760358810425,
+     "Greedy CAD reconstruction": 100.41005182266235
+    },
+    "gap": 141.14662981033325,
+    "last_t": 1790119103.162116,
+    "duration": 265.61006593704224,
+    "final_iou": 0.9455432070288019,
+    "strict": {
+     "iou": 0.9925429598256345,
+     "consistent": true,
+     "vol_gt": 0.517818206669013,
+     "vol_recon": 0.5157712786097132,
+     "inter": 0.5148606517638018,
+     "union": 0.5187288335149244
+    },
+    "tainted": false
+   },
+   "hex_prism_0": {
+    "steps": {
+     "Extract planar contours": 5.465201139450073,
+     "Split planar loops": 0.07782411575317383,
+     "Extract axis-aligned sketches": 0.5577988624572754,
+     "Split axis loops": 0.24487519264221191,
+     "Translation analysis": 2.214266777038574,
+     "Revolve analysis": 2.470075845718384,
+     "Greedy CAD reconstruction": 5.329060792922974
+    },
+    "gap": 5.4685587882995605,
+    "last_t": 1790119119.9032168,
+    "duration": 16.74066424369812,
+    "final_iou": 0.9940188848164228,
+    "strict": {
+     "iou": 0.9939299986523162,
+     "consistent": true,
+     "vol_gt": 2.629873238335752,
+     "vol_recon": 2.6246713623594022,
+     "inter": 2.6192742530668887,
+     "union": 2.635270347628505
+    },
+    "tainted": false
+   },
+   "hex_prism_1": {
+    "steps": {
+     "Extract planar contours": 5.143014907836914,
+     "Split planar loops": 0.0790860652923584,
+     "Extract axis-aligned sketches": 0.5684139728546143,
+     "Split axis loops": 0.2901031970977783,
+     "Translation analysis": 2.20739483833313,
+     "Revolve analysis": 2.5733771324157715,
+     "Greedy CAD reconstruction": 6.528485059738159
+    },
+    "gap": 5.146327018737793,
+    "last_t": 1790119137.605972,
+    "duration": 17.702467918395996,
+    "final_iou": 0.9991663201994756,
+    "strict": {
+     "iou": 0.9988958213698249,
+     "consistent": true,
+     "vol_gt": 3.205848157449297,
+     "vol_recon": 3.2039419790983286,
+     "inter": 3.2031247025506406,
+     "union": 3.206665433996981
+    },
+    "tainted": false
+   },
+   "hex_prism_2": {
+    "steps": {
+     "Extract planar contours": 5.154583930969238,
+     "Split planar loops": 0.07784914970397949,
+     "Extract axis-aligned sketches": 0.5662326812744141,
+     "Split axis loops": 0.29930806159973145,
+     "Translation analysis": 19.960615873336792,
+     "Revolve analysis": 0.9537630081176758,
+     "Greedy CAD reconstruction": 10.715943098068237
+    },
+    "gap": 20.292680025100708,
+    "last_t": 1790119175.8260689,
+    "duration": 38.21963596343994,
+    "final_iou": 0.9978198783107629,
+    "strict": {
+     "iou": 0.9973923735721203,
+     "consistent": true,
+     "vol_gt": 2.0251084383439477,
+     "vol_recon": 2.020853171688079,
+     "inter": 2.020339772497791,
+     "union": 2.0256218375342354
+    },
+    "tainted": false
+   },
+   "l_bracket_0": {
+    "steps": {
+     "Extract planar contours": 2.0368847846984863,
+     "Split planar loops": 0.08034205436706543,
+     "Extract axis-aligned sketches": 0.4619710445404053,
+     "Split axis loops": 0.13559603691101074,
+     "Translation analysis": 1.610851764678955,
+     "Revolve analysis": 0.896467924118042,
+     "Greedy CAD reconstruction": 6.475779056549072
+    },
+    "gap": 4.774121999740601,
+    "last_t": 1790119187.654965,
+    "duration": 11.828563928604126,
+    "final_iou": 0.9856651810371297,
+    "strict": {
+     "iou": 0.9856865140741953,
+     "consistent": true,
+     "vol_gt": 0.9540880354415254,
+     "vol_recon": 0.9465265922752983,
+     "inter": 0.943457184059125,
+     "union": 0.9571574436576987
+    },
+    "tainted": false
+   },
+   "l_bracket_1": {
+    "steps": {
+     "Extract planar contours": 2.0502121448516846,
+     "Split planar loops": 0.0799410343170166,
+     "Extract axis-aligned sketches": 0.46598124504089355,
+     "Split axis loops": 0.13573503494262695,
+     "Translation analysis": 1.5640919208526611,
+     "Revolve analysis": 0.8915390968322754,
+     "Greedy CAD reconstruction": 5.356323957443237
+    },
+    "gap": 5.199659109115601,
+    "last_t": 1790119198.3645592,
+    "duration": 10.70937204360962,
+    "final_iou": 0.9938979630542789,
+    "strict": {
+     "iou": 0.9937984726264953,
+     "consistent": true,
+     "vol_gt": 2.2136479066253325,
+     "vol_recon": 2.2027412773001487,
+     "inter": 2.201326205114173,
+     "union": 2.215062978811308
+    },
+    "tainted": false
+   },
+   "l_bracket_2": {
+    "steps": {
+     "Extract planar contours": 8.516785860061646,
+     "Split planar loops": 0.21436095237731934,
+     "Extract axis-aligned sketches": 1.4151272773742676,
+     "Split axis loops": 1.0351066589355469,
+     "Translation analysis": 31.52041721343994,
+     "Revolve analysis": 2.9957480430603027,
+     "Greedy CAD reconstruction": 247.0286350250244
+    },
+    "gap": 57.3632709980011,
+    "last_t": 1790119495.74274,
+    "duration": 297.370148897171,
+    "final_iou": 0.5970481958513069,
+    "strict": {
+     "iou": 0.6019726963919668,
+     "consistent": true,
+     "vol_gt": 0.9937259361894594,
+     "vol_recon": 0.8780986865893009,
+     "inter": 0.703374856426858,
+     "union": 1.168449766314425
+    },
+    "tainted": false
+   },
+   "plate_with_holes_0": {
+    "steps": {
+     "Extract planar contours": 6.187313079833984,
+     "Split planar loops": 0.130723237991333,
+     "Extract axis-aligned sketches": 1.1251111030578613,
+     "Split axis loops": 1.0927050113677979,
+     "Translation analysis": 3.2618560791015625,
+     "Revolve analysis": 5.1587913036346436,
+     "Greedy CAD reconstruction": 12.042719841003418
+    },
+    "gap": 6.196995973587036,
+    "last_t": 1790119525.618645,
+    "duration": 29.875667095184326,
+    "final_iou": 0.963746100064321,
+    "strict": {
+     "iou": 0.9639001257757632,
+     "consistent": true,
+     "vol_gt": 0.37950933796995656,
+     "vol_recon": 0.39333309486610174,
+     "inter": 0.37931812745378907,
+     "union": 0.3935243053822691
+    },
+    "tainted": false
+   },
+   "plate_with_holes_1": {
+    "steps": {
+     "Extract planar contours": 5.833817005157471,
+     "Split planar loops": 0.13176298141479492,
+     "Extract axis-aligned sketches": 0.8903067111968994,
+     "Split axis loops": 0.6163489818572998,
+     "Translation analysis": 2.5798771381378174,
+     "Revolve analysis": 3.349682092666626,
+     "Greedy CAD reconstruction": 8.310525894165039
+    },
+    "gap": 5.840430021286011,
+    "last_t": 1790119547.974577,
+    "duration": 22.355576992034912,
+    "final_iou": 0.9994725960443392,
+    "strict": {
+     "iou": 0.9985250132605771,
+     "consistent": true,
+     "vol_gt": 0.6131576582557702,
+     "vol_recon": 0.6129702769755679,
+     "inter": 0.6126115033152679,
+     "union": 0.6135164319167632
+    },
+    "tainted": false
+   },
+   "plate_with_holes_2": {
+    "steps": {
+     "Extract planar contours": 6.481385946273804,
+     "Split planar loops": 0.13389086723327637,
+     "Extract axis-aligned sketches": 0.5172388553619385,
+     "Split axis loops": 0.1892681121826172,
+     "Translation analysis": 26.14233422279358,
+     "Revolve analysis": 1.1714019775390625,
+     "Greedy CAD reconstruction": 9.26242184638977
+    },
+    "gap": 26.364859104156494,
+    "last_t": 1790119592.448168,
+    "duration": 44.473345041275024,
+    "final_iou": 0.9933368888403005,
+    "strict": {
+     "iou": 0.9919488445752938,
+     "consistent": true,
+     "vol_gt": 0.5691278968996012,
+     "vol_recon": 0.5655500146442682,
+     "inter": 0.5650458576716246,
+     "union": 0.5696320538722447
+    },
+    "tainted": false
+   },
+   "pulley_0": {
+    "steps": {
+     "Extract planar contours": 5.328606367111206,
+     "Split planar loops": 0.07488608360290527,
+     "Extract axis-aligned sketches": 0.6849589347839355,
+     "Split axis loops": 0.4094250202178955,
+     "Translation analysis": 6.7240800857543945,
+     "Revolve analysis": 4.468816041946411,
+     "Greedy CAD reconstruction": 26.002557039260864
+    },
+    "gap": 15.585896015167236,
+    "last_t": 1790119637.211734,
+    "duration": 44.76266074180603,
+    "final_iou": 0.9947668369307511,
+    "strict": {
+     "iou": 0.9945753630982078,
+     "consistent": true,
+     "vol_gt": 2.6498660730913506,
+     "vol_recon": 2.639742012977741,
+     "inter": 2.6376109823584284,
+     "union": 2.6519971037106633
+    },
+    "tainted": false
+   },
+   "pulley_1": {
+    "steps": {
+     "Extract planar contours": 6.104164123535156,
+     "Split planar loops": 0.1303119659423828,
+     "Extract axis-aligned sketches": 0.7806448936462402,
+     "Split axis loops": 0.4579160213470459,
+     "Translation analysis": 6.587862014770508,
+     "Revolve analysis": 4.3897600173950195,
+     "Greedy CAD reconstruction": 26.11303424835205
+    },
+    "gap": 14.240734100341797,
+    "last_t": 1790119682.8870149,
+    "duration": 45.67490005493164,
+    "final_iou": 0.994514853238468,
+    "strict": {
+     "iou": 0.9938866237884038,
+     "consistent": true,
+     "vol_gt": 1.719274345889263,
+     "vol_recon": 1.7169025811228995,
+     "inter": 1.7128207010280625,
+     "union": 1.7233562259841
+    },
+    "tainted": false
+   },
+   "pulley_2": {
+    "steps": {
+     "Extract planar contours": 203.54495859146118,
+     "Split planar loops": 0.26875805854797363,
+     "Extract axis-aligned sketches": 7.329763174057007,
+     "Split axis loops": 42.398313760757446,
+     "Translation analysis": 47.12205696105957,
+     "Revolve analysis": 25.721187829971313,
+     "Greedy CAD reconstruction": 2522.0092861652374
+    },
+    "gap": 1031.9220311641693,
+    "last_t": 1790122541.325135,
+    "duration": 2858.4377541542053,
+    "final_iou": 0.8370049453405294,
+    "strict": {
+     "iou": 0.8531092088881297,
+     "consistent": true,
+     "vol_gt": 1.7456243421805833,
+     "vol_recon": 1.9246257625044358,
+     "inter": 1.6896598150888769,
+     "union": 1.9805902895961425
+    },
+    "tainted": true
+   },
+   "stepped_block_0": {
+    "steps": {
+     "Extract planar contours": 6.426766872406006,
+     "Split planar loops": 0.13161182403564453,
+     "Extract axis-aligned sketches": 0.6246047019958496,
+     "Split axis loops": 0.29906702041625977,
+     "Translation analysis": 9.506078004837036,
+     "Revolve analysis": 3.500154972076416,
+     "Greedy CAD reconstruction": 28.230034351348877
+    },
+    "gap": 12.530266761779785,
+    "last_t": 1790122590.9532511,
+    "duration": 49.6278178691864,
+    "final_iou": 0.986341067642469,
+    "strict": {
+     "iou": 0.9948273038241143,
+     "consistent": true,
+     "vol_gt": 1.6818558843543328,
+     "vol_recon": 1.6736470285541964,
+     "inter": 1.6734009552724076,
+     "union": 1.6821019576361218
+    },
+    "tainted": false
+   },
+   "stepped_block_1": {
+    "steps": {
+     "Extract planar contours": 6.219955921173096,
+     "Split planar loops": 0.12691879272460938,
+     "Extract axis-aligned sketches": 0.45797085762023926,
+     "Split axis loops": 0.18313312530517578,
+     "Translation analysis": 8.744390964508057,
+     "Revolve analysis": 1.4410412311553955,
+     "Greedy CAD reconstruction": 16.747922897338867
+    },
+    "gap": 8.984352111816406,
+    "last_t": 1790122625.569959,
+    "duration": 34.61638379096985,
+    "final_iou": 0.9857185641898747,
+    "strict": {
+     "iou": 0.9967341054773295,
+     "consistent": true,
+     "vol_gt": 1.1862881279916502,
+     "vol_recon": 1.1828780679656912,
+     "inter": 1.1826455723758755,
+     "union": 1.1865206235814658
+    },
+    "tainted": false
+   },
+   "stepped_block_2": {
+    "steps": {
+     "Extract planar contours": 6.231844186782837,
+     "Split planar loops": 0.13158679008483887,
+     "Extract axis-aligned sketches": 0.46540379524230957,
+     "Split axis loops": 0.18883299827575684,
+     "Translation analysis": 25.508785724639893,
+     "Revolve analysis": 1.4974429607391357,
+     "Greedy CAD reconstruction": 31.116349935531616
+    },
+    "gap": 25.806249141693115,
+    "last_t": 1790122691.571116,
+    "duration": 66.00085997581482,
+    "final_iou": 0.9830797659844863,
+    "strict": {
+     "iou": 0.996252424096928,
+     "consistent": true,
+     "vol_gt": 1.6846225461381705,
+     "vol_recon": 1.6792930240901636,
+     "inter": 1.6788002363044943,
+     "union": 1.685115333923804
+    },
+    "tainted": false
+   },
+   "stepped_shaft_0": {
+    "steps": {
+     "Extract planar contours": 10.146075010299683,
+     "Split planar loops": 0.1373751163482666,
+     "Extract axis-aligned sketches": 0.7408938407897949,
+     "Split axis loops": 0.294389009475708,
+     "Translation analysis": 16.064393281936646,
+     "Revolve analysis": 5.505279064178467,
+     "Greedy CAD reconstruction": 58.10591101646423
+    },
+    "gap": 22.945137977600098,
+    "last_t": 1790122783.22064,
+    "duration": 91.64863014221191,
+    "final_iou": 0.9874834396157487,
+    "strict": {
+     "iou": 0.9873539396389158,
+     "consistent": true,
+     "vol_gt": 0.6230619933497931,
+     "vol_recon": 0.6277127280799997,
+     "inter": 0.6214078550239792,
+     "union": 0.6293668664058135
+    },
+    "tainted": false
+   },
+   "stepped_shaft_1": {
+    "steps": {
+     "Extract planar contours": 10.535062074661255,
+     "Split planar loops": 0.13869333267211914,
+     "Extract axis-aligned sketches": 0.7342491149902344,
+     "Split axis loops": 0.29839634895324707,
+     "Translation analysis": 21.87198781967163,
+     "Revolve analysis": 5.95128607749939,
+     "Greedy CAD reconstruction": 81.03037595748901
+    },
+    "gap": 22.29291081428528,
+    "last_t": 1790122904.474111,
+    "duration": 121.25314998626709,
+    "final_iou": 0.9873816143841195,
+    "strict": {
+     "iou": 0.9872450607265176,
+     "consistent": true,
+     "vol_gt": 0.5456954704069061,
+     "vol_recon": 0.5498512955060058,
+     "inter": 0.5442575527383724,
+     "union": 0.5512892131745395
+    },
+    "tainted": false
+   },
+   "stepped_shaft_2": {
+    "steps": {
+     "Extract planar contours": 12.49194598197937,
+     "Split planar loops": 0.1363377571105957,
+     "Extract axis-aligned sketches": 0.6787738800048828,
+     "Split axis loops": 0.24118995666503906,
+     "Translation analysis": 21.147269010543823,
+     "Revolve analysis": 3.1350040435791016,
+     "Greedy CAD reconstruction": 39.021479845047
+    },
+    "gap": 21.419938802719116,
+    "last_t": 1790122982.7587452,
+    "duration": 78.28428792953491,
+    "final_iou": 0.9839859913265802,
+    "strict": {
+     "iou": 0.9979987603212964,
+     "consistent": true,
+     "vol_gt": 1.46419558943852,
+     "vol_recon": 1.4626103821560676,
+     "inter": 1.461937209051426,
+     "union": 1.4648687625431207
+    },
+    "tainted": false
+   },
+   "u_channel_0": {
+    "steps": {
+     "Extract planar contours": 11.646334171295166,
+     "Split planar loops": 0.18818020820617676,
+     "Extract axis-aligned sketches": 0.8877367973327637,
+     "Split axis loops": 0.4038829803466797,
+     "Translation analysis": 4.633152961730957,
+     "Revolve analysis": 5.191441059112549,
+     "Greedy CAD reconstruction": 39.548845052719116
+    },
+    "gap": 28.28506088256836,
+    "last_t": 1790123045.762679,
+    "duration": 63.00358700752258,
+    "final_iou": 0.9980587442170497,
+    "strict": {
+     "iou": 0.996185337179543,
+     "consistent": true,
+     "vol_gt": 0.3181078843052315,
+     "vol_recon": 0.3175141863670098,
+     "inter": 0.317203705987564,
+     "union": 0.3184183646846773
+    },
+    "tainted": false
+   },
+   "u_channel_1": {
+    "steps": {
+     "Extract planar contours": 11.18296194076538,
+     "Split planar loops": 0.19068193435668945,
+     "Extract axis-aligned sketches": 0.6298940181732178,
+     "Split axis loops": 0.1341257095336914,
+     "Translation analysis": 2.9761462211608887,
+     "Revolve analysis": 2.217923879623413,
+     "Greedy CAD reconstruction": 12.726301193237305
+    },
+    "gap": 11.184560775756836,
+    "last_t": 1790123076.062044,
+    "duration": 30.29916214942932,
+    "final_iou": 0.9980837568264259,
+    "strict": {
+     "iou": 0.9973245164392345,
+     "consistent": true,
+     "vol_gt": 1.2007285220431332,
+     "vol_recon": 1.1985124893381707,
+     "inter": 1.1980135735593354,
+     "union": 1.2012274378219685
+    },
+    "tainted": false
+   },
+   "u_channel_2": {
+    "steps": {
+     "Extract planar contours": 11.26609206199646,
+     "Split planar loops": 0.13390588760375977,
+     "Extract axis-aligned sketches": 0.5724191665649414,
+     "Split axis loops": 0.2362370491027832,
+     "Translation analysis": 33.468793869018555,
+     "Revolve analysis": 1.2703051567077637,
+     "Greedy CAD reconstruction": 21.78146195411682
+    },
+    "gap": 33.725733041763306,
+    "last_t": 1790123145.1203241,
+    "duration": 69.05791902542114,
+    "final_iou": 0.9944232130449356,
+    "strict": {
+     "iou": 0.991936874405456,
+     "consistent": true,
+     "vol_gt": 0.3078097571573487,
+     "vol_recon": 0.3061813980861376,
+     "inter": 0.3057528957219603,
+     "union": 0.308238259521526
+    },
+    "tainted": false
+   }
+  },
+  "steps": {
+   "Extract planar contours": 520.4479286670685,
+   "Split planar loops": 4.943235158920288,
+   "Extract axis-aligned sketches": 41.964720726013184,
+   "Split axis loops": 163.46571969985962,
+   "Translation analysis": 1361.72327542305,
+   "Revolve analysis": 239.34447860717773,
+   "Greedy CAD reconstruction": 4591.758059263229
+  },
+  "phases": {
+   "evaluate": 440.8848285675049,
+   "volume_pass": 0.43369317054748535,
+   "forward": 887.2111105918884,
+   "backward": 2650.3016147613525
+  }
+ }
+}

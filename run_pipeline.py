@@ -549,10 +549,10 @@ def refine_with_fillet_chamfer(src_script: str, src_stl: str, gt_stl: str,
     return disk_iou, len(ops), new_script, output_stl
 
 
-def run_analysis_steps(stl_path, output_folder, n_slices=5, delta=0.05, normalize=True,
+def run_analysis_steps(stl_path, output_folder, n_slices=5, delta=0.05, normalize=True, alpha=0.01,
                         filter_sketches=False, filter_threshold=None,
                         filter_model_path=None, filter_norm_path=None,
-                        greedy_args=None):
+                        greedy_args=None, analysis_args=None):
     """Run analysis steps to generate translation and revolve analysis.
 
     If `filter_sketches=True`, runs the DINOv2+MLP loop classifier between
@@ -718,6 +718,8 @@ def run_analysis_steps(stl_path, output_folder, n_slices=5, delta=0.05, normaliz
             "--output-folder", translation_analysis_folder, "--num-workers", str(inner_workers), "--no-plots"]
     if normalize:
         cmd5.append("--normalize")
+    if analysis_args:
+        cmd5.extend(analysis_args)
     if not run_command(cmd5, "Translation analysis", timeout=3600):
         return False
     
@@ -741,6 +743,7 @@ def run_analysis_steps(stl_path, output_folder, n_slices=5, delta=0.05, normaliz
             "--num-workers", str(inner_workers)]
     if normalize:
         cmd7.append("--normalize")
+    cmd7.extend(["--alpha", str(alpha)])
     if greedy_args:
         cmd7.extend(greedy_args)
     if not run_command(cmd7, "Greedy CAD reconstruction", timeout=3000):
@@ -815,12 +818,25 @@ def _decimate_input_if_needed(stl_path: str, output_folder: str,
         return stl_path
 
 
+def _refine_improves(gt_stl, current_stl, new_stl, what):
+    """CADFit++ refinement guard: stock applies every cut/union unconditionally;
+    accept it only if IoU against the ground truth does not drop."""
+    before = mesh_iou_cpu_boolean(gt_stl, current_stl, normalize=True)
+    after = mesh_iou_cpu_boolean(gt_stl, new_stl, normalize=True)
+    log_event("refine_guard", op=what, before=before, after=after, accepted=after >= before - 1e-6)
+    if after < before - 1e-6:
+        print(f"✗ Rejected {what}: IoU {before:.6f} -> {after:.6f}; keeping previous reconstruction")
+        return False
+    print(f"  [guard] {what}: IoU {before:.6f} -> {after:.6f}")
+    return True
+
+
 def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel",
                                    over_threshold=0.02, under_threshold=0.01, max_iterations=5,
                                    apply_fillet_chamfer=False, keep_history=False,
                                    filter_sketches=False, filter_threshold=None,
                                    filter_model_path=None, filter_norm_path=None,
-                                   greedy_args=None):
+                                   greedy_args=None, analysis_args=None, guard_refine=False):
     """Process a single STL file with iterative refinement using precomputed analysis"""
     stl_name = os.path.basename(stl_path)
     stl_id = os.path.splitext(stl_name)[0]
@@ -872,7 +888,7 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
                                 filter_threshold=filter_threshold,
                                 filter_model_path=filter_model_path,
                                 filter_norm_path=filter_norm_path,
-                                greedy_args=greedy_args):
+                                greedy_args=greedy_args, alpha=alpha, analysis_args=analysis_args):
         print(f"✗ Failed to complete analysis steps for {stl_name}")
         return
     
@@ -934,7 +950,7 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
             over_output = f"{output_folder}/refine_over_{iteration}"
             
             if not run_analysis_steps(over_recon_path, over_output, normalize=False,
-                                      greedy_args=greedy_args):
+                                      greedy_args=greedy_args, alpha=alpha, analysis_args=analysis_args):
                 print("✗ Failed to analyze over-reconstruction")
                 break
             
@@ -962,6 +978,8 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
             new_reconstruction = f"{output_folder}/reconstruction_cut_{iteration}.stl"
             
             if os.path.exists(new_reconstruction):
+                if guard_refine and not _refine_improves(stl_path, current_reconstruction, new_reconstruction, 'cut'):
+                    break
                 current_reconstruction = new_reconstruction
                 current_cadquery_script = cut_script_path
                 print(f"✓ Applied cut operation")
@@ -995,7 +1013,7 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
             under_output = f"{output_folder}/refine_under_{iteration}"
             
             if not run_analysis_steps(under_recon_path, under_output, normalize=False,
-                                      greedy_args=greedy_args):
+                                      greedy_args=greedy_args, alpha=alpha, analysis_args=analysis_args):
                 print("✗ Failed to analyze under-reconstruction")
                 # Continue anyway to try next iteration
                 continue
@@ -1024,6 +1042,8 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
             new_reconstruction = f"{output_folder}/reconstruction_union_{iteration}.stl"
             
             if os.path.exists(new_reconstruction):
+                if guard_refine and not _refine_improves(stl_path, current_reconstruction, new_reconstruction, 'union'):
+                    continue
                 current_reconstruction = new_reconstruction
                 current_cadquery_script = union_script_path
                 print(f"✓ Applied union operation")
@@ -1239,8 +1259,32 @@ def main():
     parser.add_argument('--candidate-drop-tau', type=float, default=None,
                         help='Drop whole groups whose best proxy IoU is below this value.')
     parser.add_argument('--fast-prune', action='store_true',
-                        help='Output-preserving speedups inside greedy pruning.')
+                        help='Output-preserving speedups inside greedy pruning (= --cache-volumes --persistent-pool).')
+    parser.add_argument('--cache-volumes', action=argparse.BooleanOptionalAction, default=True,
+                        help='Read candidate volumes from the STLs built during evaluation.')
+    parser.add_argument('--persistent-pool', action=argparse.BooleanOptionalAction, default=True,
+                        help='Reuse one worker pool across pruning removal iterations.')
+    parser.add_argument('--fix-sketch-identity', action=argparse.BooleanOptionalAction, default=True,
+                        help='Keep extrusion and revolve candidates apart in pruning.')
+    parser.add_argument('--cache-solids', action=argparse.BooleanOptionalAction, default=True,
+                        help='Build pruning subsets from the candidate STLs instead of re-running CadQuery '
+                             '(requires --fix-sketch-identity).')
+    parser.add_argument('--fix-iou-validity', action=argparse.BooleanOptionalAction, default=True,
+                        help='Alpha-wrap meshes that are not genuine volumes before boolean IoU.')
+    parser.add_argument('--fast-cd', action=argparse.BooleanOptionalAction, default=True,
+                        help='Lossless speedup of the translation-analysis chamfer sweep.')
+    parser.add_argument('--guard-refine', action=argparse.BooleanOptionalAction, default=True,
+                        help='Only keep a residual cut/union if IoU against the ground truth does not drop '
+                             '(stock applies them unconditionally).')
+    parser.add_argument('--seed', type=int, default=None,
+                        help='Seed for translation-analysis surface sampling (default: unseeded, as stock).')
     args = parser.parse_args()
+
+    # Flags forwarded to analyze_loop_translation.py (explicitly either way, so the
+    # subprocess defaults never matter).
+    analysis_args = ['--fast-cd' if args.fast_cd else '--no-fast-cd']
+    if args.seed is not None:
+        analysis_args += ['--seed', str(args.seed)]
 
     # Flags forwarded verbatim to greedy_search.py (main pass and refine passes).
     greedy_args = []
@@ -1253,7 +1297,12 @@ def main():
         if args.candidate_drop_tau is not None:
             greedy_args += ['--candidate-drop-tau', str(args.candidate_drop_tau)]
     if args.fast_prune:
-        greedy_args.append('--fast-prune')
+        args.cache_volumes = args.persistent_pool = True
+    for flag in ('cache_volumes', 'persistent_pool', 'cache_solids', 'fix_sketch_identity', 'fix_iou_validity'):
+        greedy_args.append(('--' if getattr(args, flag) else '--no-') + flag.replace('_', '-'))
+    if args.fix_iou_validity:
+        # The final IoU checks in this process must use the same metric.
+        os.environ["CADFIT_IOU_VALIDATE"] = "1"
 
     in_dir = args.input_folder.rstrip('/')
     if not os.path.isdir(in_dir):
@@ -1314,6 +1363,8 @@ def main():
                 filter_model_path=args.filter_model,
                 filter_norm_path=args.filter_norm,
                 greedy_args=greedy_args,
+                analysis_args=analysis_args,
+                guard_refine=args.guard_refine,
             )
             successful += 1
         except Exception as e:

@@ -55,7 +55,22 @@ def chamfer_distance(points_a, points_b):
     return np.mean(dists)
 
 
-def sample_surface_points(mesh, num_samples=100000):
+# CADFit++ (opt-in via env so pool workers inherit it): lossless speedup of the
+# chamfer sweep. `compact_nodes=False` avoids a cKDTree pathology on rotated
+# parts (100x slower per query when surface points are not axis-aligned), the
+# tree is built once per sketch instead of once per loop, and all translation
+# steps are queried in one call. CD arrays are bitwise identical to stock.
+def _fast_cd_enabled() -> bool:
+    return os.environ.get("CADFIT_FAST_CD", "") not in ("", "0")
+
+
+def build_surface_tree(surface_points):
+    if _fast_cd_enabled():
+        return cKDTree(surface_points, compact_nodes=False)
+    return cKDTree(surface_points)
+
+
+def sample_surface_points(mesh, num_samples=100000, seed=None):
     """
     Sample points uniformly on the surface of a mesh.
     
@@ -66,7 +81,7 @@ def sample_surface_points(mesh, num_samples=100000):
     Returns:
         Nx3 array of surface points
     """
-    points, _ = trimesh.sample.sample_surface(mesh, num_samples)
+    points, _ = trimesh.sample.sample_surface(mesh, num_samples, seed=seed)
     return points
 
 
@@ -94,7 +109,7 @@ def translate_loop_along_normal(loop_3d, normal, translation_factor):
     return translated
 
 
-def compute_cd_for_translations(loop_3d, normal, surface_points, translation_range=(0, 2), step=0.01):
+def compute_cd_for_translations(loop_3d, normal, surface_points, translation_range=(0, 2), step=0.01, tree=None):
     """Compute one-sided Chamfer Distance between a translated loop and the
     target surface for a range of translation factors along `normal`.
 
@@ -104,13 +119,23 @@ def compute_cd_for_translations(loop_3d, normal, surface_points, translation_ran
     """
     t_min, t_max = translation_range
     translation_factors = np.arange(t_min, t_max + step, step)
-    tree = cKDTree(surface_points)
+    if tree is None:
+        tree = build_surface_tree(surface_points)
     loop_3d = np.asarray(loop_3d)
     normal = np.asarray(normal, dtype=float)
     nrm = np.linalg.norm(normal)
     if nrm > 0:
         normal = normal / nrm
     cd_values = np.empty(translation_factors.shape[0])
+    if _fast_cd_enabled():
+        # One query for every step; per-step means over contiguous slices so
+        # the float summation order matches the stock loop exactly.
+        n = loop_3d.shape[0]
+        translated = (loop_3d[None, :, :] + translation_factors[:, None, None] * normal[None, None, :]).reshape(-1, 3)
+        dists, _ = tree.query(translated, k=1)
+        for i in range(translation_factors.shape[0]):
+            cd_values[i] = dists[i * n:(i + 1) * n].mean()
+        return translation_factors, cd_values
     for i, t in enumerate(translation_factors):
         translated = loop_3d + t * normal
         dists, _ = tree.query(translated, k=1)
@@ -590,12 +615,17 @@ def process_single_sketch(args):
     
     print(f"\nProcessing Sketch {sketch_idx} ({len(loops_3d)} loops)...")
     
-    # Reconstruct mesh from data
-    mesh = trimesh.Trimesh(vertices=mesh_data['vertices'], faces=mesh_data['faces'])
+    # Reconstruct mesh from data (only the 3D plot needs it)
+    mesh = None
+    if save_plots or not _fast_cd_enabled():
+        mesh = trimesh.Trimesh(vertices=mesh_data['vertices'], faces=mesh_data['faces'])
     
     # Plot 3D visualization once for all loops in this sketch
     if save_plots:
         plot_loop_on_mesh_3d(loops_3d, normal, mesh, surface_points, sketch_idx, output_folder, save_plots)
+
+    # One surface tree per sketch (stock rebuilds it per loop).
+    tree = build_surface_tree(surface_points) if _fast_cd_enabled() else None
     
     # Collect CD data for all loops in this sketch
     loops_cd_data = []
@@ -613,6 +643,7 @@ def process_single_sketch(args):
             loop_3d, normal, surface_points,
             translation_range=translation_range,
             step=step,
+            tree=tree,
         )
 
         # Store for combined plot
@@ -650,7 +681,7 @@ def process_single_sketch(args):
 
 def analyze_all_loops(loops_json, stl_path, output_folder="loop_translation_analysis", normalize=False,
                       num_surface_samples=100000, translation_range=(0, 2), step=0.01,
-                      num_workers=4, save_plots=True):
+                      num_workers=4, save_plots=True, seed=None, fast_cd=False):
     """Analyze every loop in `loops_json` by sweeping it along its normal and
     computing one-sided chamfer distance to the target mesh surface."""
     print(f"Loading STL file: {stl_path}")
@@ -660,8 +691,10 @@ def analyze_all_loops(loops_json, stl_path, output_folder="loop_translation_anal
         print("Normalizing mesh...")
         mesh = normalize_mesh(mesh)
 
+    if fast_cd:
+        os.environ["CADFIT_FAST_CD"] = "1"
     print(f"Sampling {num_surface_samples} points on surface...")
-    surface_points = sample_surface_points(mesh, num_surface_samples)
+    surface_points = sample_surface_points(mesh, num_surface_samples, seed=seed)
     print(f"  Sampled {len(surface_points)} surface points")
     
     print(f"Loading loops from: {loops_json}")
@@ -831,6 +864,9 @@ if __name__ == '__main__':
     parser.add_argument('--num-workers', type=int, default=25, help='Number of parallel workers')
     parser.add_argument('--normalize', action='store_true', help='Normalize mesh before analysis')
     parser.add_argument('--no-plots', action='store_true', help='Disable saving visualization plots')
+    parser.add_argument('--seed', type=int, default=None, help='Seed for surface sampling (default: unseeded, as stock)')
+    parser.add_argument('--fast-cd', action=argparse.BooleanOptionalAction, default=True,
+                        help='Lossless speedup of the chamfer sweep (compact_nodes=False, one tree per sketch, batched query)')
 
     args = parser.parse_args()
 
@@ -844,4 +880,6 @@ if __name__ == '__main__':
         num_workers=args.num_workers,
         normalize=args.normalize,
         save_plots=not args.no_plots,
+        seed=args.seed,
+        fast_cd=args.fast_cd,
     )

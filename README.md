@@ -112,6 +112,27 @@ process_single_stl("abc_hard/00013080.stl",
 
 ---
 
+## CADFit++ (this branch)
+
+This branch adds correctness fixes and lossless speedups on top of the released code; all
+are default-on and each can be disabled with `--no-<flag>` (e.g. `--no-guard-refine`).
+On a 30-part synthetic benchmark the end-to-end pipeline is 1.8× faster and +0.055 mean
+IoU versus stock. See `bench/REPORT2.md` (and `bench/REPORT.md` for the candidate-ranking
+experiment that motivated it).
+
+| flag | what it does |
+|---|---|
+| `--fix-iou-validity` | alpha-wrap meshes that are not genuine volumes before the boolean IoU (stock could return IoU > 1 and select duplicate operations) |
+| `--fix-sketch-identity` | keep extrusion and revolve candidates apart in pruning (their `sketch_idx` index different files) |
+| `--guard-refine` | keep a residual cut/union only if IoU against the target does not drop |
+| `--cache-volumes`, `--cache-solids`, `--persistent-pool` | reuse the candidate STLs built during evaluation instead of re-running CadQuery inside pruning (identical output) |
+| `--fast-cd` | byte-identical translation analysis with a kd-tree setting that is 4× faster on tilted parts |
+| `--seed N` | reproducible surface sampling |
+| `CADFIT_PROFILE=<file>` | per-phase timing events (JSON lines) |
+
+Benchmark tooling lives in `bench/` (`make_synthetic.py`, `run_arms.sh`, `compare.py`,
+`score.py`, `full_compare.py`, `test_fixes.py`, `test_proxy.py`).
+
 ## Citation
 
 If you find our work helpful, please consider citing:
