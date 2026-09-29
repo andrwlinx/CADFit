@@ -1,0 +1,11 @@
+[10:31:08] arm=rules flags: --persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400
+[11:07:44] stopping: less than 3 GB free
+[13:18:35] arm=rules flags: --persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400
+bench/run_full_arms.sh: line 42: 60997 Segmentation fault: 11  CADFIT_PROFILE="$OUT/profile.jsonl" caffeinate -dims $PY "$CODE/run_pipeline.py" "$IN" --output-folder "$OUT" --start-from "$part.stl" --limit 1 $COMMON $FLAGS >> "$OUT/log.txt" 2>&1
+[17:14:23] arm=rules done
+[17:14:23] arm=all flags: --persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --sweep-loft --emit-splines
+[23:16:21] arm=all done
+[23:26:45] arm=rules flags: --persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400
+[23:31:26] arm=rules done
+bench/run_full_arms.sh: line 54: unexpected EOF while looking for matching `"'
+bench/run_full_arms.sh: line 56: syntax error: unexpected end of file

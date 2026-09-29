@@ -678,6 +678,10 @@ def plot_primitives_and_points(primitives: List[Tuple], pts2: np.ndarray, entry_
     return filepath
 
 
+# CADFIT_EMIT_SPLINES=1 (run_pipeline.py --emit-splines) emits spline fragments.
+_EMIT_SPLINES = os.environ.get('CADFIT_EMIT_SPLINES') == '1'
+
+
 def primitives_to_instances(primitives: List[Tuple], original_pts: np.ndarray = None):
     """Convert primitive specification to nuCAD action dataclass instances (2D coords).
     Returns a list of instances in sketch-local 2D coordinates.
@@ -703,9 +707,42 @@ def primitives_to_instances(primitives: List[Tuple], original_pts: np.ndarray = 
         p1 = (float(cx + r * math.cos(a0)), float(cy + r * math.sin(a0)))
         inst.append("sketch.moveTo({}, {})".format(round(float(p1[0]), 5), round(float(p1[1]), 5)))
         prev_point = np.array(p1, dtype=float)
+    elif first_primitive[0] == 'spline' and _EMIT_SPLINES and first_primitive[1]:
+        s = first_primitive[1][0]
+        inst.append("sketch.moveTo({}, {})".format(round(float(s[0]), 5), round(float(s[1]), 5)))
+        prev_point = np.array(s, dtype=float)
+
+    # Consecutive spline fragments are emitted as one spline through all their
+    # points (stock drops them, so freeform stretches degrade to a chord).
+    spline_pts = []
+
+    def _flush_spline():
+        nonlocal prev_point
+        pts = []
+        last = prev_point
+        for q in spline_pts:
+            q = np.array(q, dtype=float)
+            if last is None or np.linalg.norm(q - last) > 1e-4:
+                pts.append(q)
+                last = q
+        spline_pts.clear()
+        if not pts:
+            return
+        if len(pts) == 1:
+            inst.append("sketch.lineTo({}, {})".format(round(float(pts[0][0]), 5), round(float(pts[0][1]), 5)))
+        else:
+            pts_str = ', '.join(f"({round(float(q[0]), 5)}, {round(float(q[1]), 5)})" for q in pts)
+            inst.append(f"sketch = sketch.spline([{pts_str}], includeCurrent=True)")
+        prev_point = pts[-1]
 
     for prim in primitives:
         t = prim[0]
+        if t == 'spline':
+            if _EMIT_SPLINES:
+                spline_pts.extend(prim[1])
+            continue
+        if spline_pts:
+            _flush_spline()
         if t == 'line':
             e = prim[2]
             e_point = np.array(e, dtype=float)
@@ -768,6 +805,8 @@ def primitives_to_instances(primitives: List[Tuple], original_pts: np.ndarray = 
             #     continue
             inst.append("sketch = sketch.threePointArc(({}, {}), ({}, {}))".format(round(float(p2[0]), 5), round(float(p2[1]), 5), round(float(p3[0]), 5), round(float(p3[1]), 5)))
             prev_point = p3_point
+    if spline_pts:
+        _flush_spline()
     return inst
 
 

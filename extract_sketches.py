@@ -17,6 +17,7 @@ Dependencies: trimesh, numpy
 import argparse
 import json
 import math
+import os
 from typing import List, Tuple
 
 import numpy as np
@@ -139,6 +140,45 @@ def is_rectangular_loop(loop_2d, parallel_tolerance=0.01):
 def quantile_slices(bounds_min, bounds_max, count=10):
     val_range = bounds_max - bounds_min
     return list(np.linspace(bounds_min, bounds_max-1e-6, count))
+
+
+def event_slices(mesh, direction, max_slices=12, min_gap=0.01, min_area_frac=1e-3, cos_tol=0.9998):
+    """Slice positions midway between consecutive planar 'events' along `direction`.
+
+    An event is a height at which planar faces with normal parallel to
+    `direction` sit (a step, shelf, pocket floor, cap). Between two events a
+    2.5D part has constant cross-section, so one slice per gap sees every
+    layer, however thin; evenly spaced slices miss layers narrower than the
+    spacing. Returns at most `max_slices` midpoints, preferring the widest gaps.
+    """
+    d = np.asarray(direction, float)
+    d = d / np.linalg.norm(d)
+    with np.errstate(all='ignore'):
+        n = mesh.face_normals
+        par = np.abs(n @ d) > cos_tol
+    if not par.any():
+        return []
+    h = mesh.triangles_center[par] @ d
+    a = mesh.area_faces[par]
+    order = np.argsort(h)
+    h, a = h[order], a[order]
+    total = float(mesh.area) or 1.0
+    levels, cur, cur_a = [], [h[0]], [a[0]]
+    for hi, ai in zip(h[1:], a[1:]):
+        if hi - cur[-1] <= 1e-3:
+            cur.append(hi)
+            cur_a.append(ai)
+        else:
+            levels.append((float(np.average(cur, weights=cur_a)), float(np.sum(cur_a))))
+            cur, cur_a = [hi], [ai]
+    levels.append((float(np.average(cur, weights=cur_a)), float(np.sum(cur_a))))
+    hs = [lv for lv, ar in levels if ar / total >= min_area_frac]
+    proj = mesh.vertices @ d
+    hs = sorted(set([float(proj.min()), float(proj.max())] + hs))
+    gaps = [(hs[i + 1] - hs[i], 0.5 * (hs[i] + hs[i + 1])) for i in range(len(hs) - 1)
+            if hs[i + 1] - hs[i] > min_gap]
+    gaps.sort(reverse=True)
+    return sorted(m for _, m in gaps[:max_slices])
 
 
 def detect_flat_planes(mesh: trimesh.Trimesh, angle_tol=1e-2, area_thresh=1e-6):
@@ -314,7 +354,9 @@ def slice_mesh_loops(mesh: trimesh.Trimesh, origin: Tuple[float, float, float], 
         # We'll attempt to link segments by endpoints to form closed loops
         segments = []
         for ent in planar.entities:
-            pts = np.asarray(ent.discrete())
+            # trimesh >= 4 needs the vertex array; stock crashed here and the slice was lost.
+            pts = np.asarray(ent.discrete(planar.vertices) if os.environ.get('CADFIT_FIX_SLICE_FALLBACK') == '1'
+                             else ent.discrete())
             if pts.shape[0] >= 2:
                 segments.append([tuple(map(float, p)) for p in pts])
         # link segments by endpoints
@@ -370,6 +412,10 @@ def main():
     p.add_argument('--axis-slices', type=int, default=5, help='Number of axis-aligned slices per axis')
     p.add_argument('--samples', type=int, default=3000, help='Approx samples per extracted loop')
     p.add_argument('--normalize', action='store_true', help='Normalize mesh into [-10,10] box before slicing')
+    p.add_argument('--event-slices', action='store_true',
+                   help='Also slice midway between consecutive planar-face heights along each direction')
+    p.add_argument('--directions', default=None,
+                   help='JSON from detect_directions.py; each direction is sliced like an axis')
     args = p.parse_args()
 
     mesh = trimesh.load(args.input, force='mesh')
@@ -384,17 +430,49 @@ def main():
     results = []
     results_with_rects = []  # Keep all loops including rectangles
 
-    bounds = mesh.bounds
-    for axis in range(3):
-        mins = bounds[0][axis]
-        maxs = bounds[1][axis]
-        slices = quantile_slices(mins, maxs, args.axis_slices)
+    # Slice directions: X/Y/Z, plus any detected by detect_directions.py.
+    slice_dirs = [np.eye(3)[a] for a in range(3)]
+    if args.directions and os.path.exists(args.directions):
+        with open(args.directions) as f:
+            slice_dirs += [np.array(d['direction'], float) for d in json.load(f)]
+    for axis_idx, direction in enumerate(slice_dirs):
+        direction = direction / np.linalg.norm(direction)
+        proj = mesh.vertices @ direction
+        slices = quantile_slices(proj.min(), proj.max(), args.axis_slices)
+        if args.event_slices:
+            extra = [e for e in event_slices(mesh, direction, max_slices=6)
+                     if all(abs(e - q) > 0.01 for q in slices)]
+            # Every loop is densified to --samples points; on lattice-like parts
+            # one slice can hold thousands of loops (a 2.3 GB sketch file was
+            # seen). Extra slices must stay cheap, so skip busy ones.
+            busy = set()
+            for e in extra:
+                try:
+                    sec = mesh.section(plane_origin=e * direction, plane_normal=direction)
+                    if sec is not None and len(sec.discrete) > 50:
+                        busy.add(e)
+                except Exception:
+                    busy.add(e)
+            slices = sorted(list(slices) + [e for e in extra if e not in busy])
         for s in slices:
-            origin = [0.0, 0.0, 0.0]
-            origin[axis] = float(s)
-            normal = [0.0, 0.0, 0.0]
-            normal[axis] = 1.0
+            if axis_idx < 3:
+                origin = [0.0, 0.0, 0.0]
+                origin[axis_idx] = float(s)
+                normal = [0.0, 0.0, 0.0]
+                normal[axis_idx] = 1.0
+            else:
+                origin = [float(x) for x in s * direction]
+                normal = [float(x) for x in direction]
             try:
+                # Resource guard: a slice across a perforated sheet can hold
+                # thousands of loops, each densified to --samples points
+                # (2.2 GB of JSON on one CADBench part). Skip such slices.
+                max_loops = int(os.environ.get('CADFIT_MAX_SLICE_LOOPS') or 0)
+                if max_loops:
+                    sec = mesh.section(plane_origin=origin, plane_normal=normal)
+                    if sec is not None and len(sec.discrete) > max_loops:
+                        print(f'  Skipping slice at {origin}: {len(sec.discrete)} loops > {max_loops}')
+                        continue
                 loops2d, loops3d = slice_mesh_loops(mesh, origin=origin, normal=normal, samples_per_loop=args.samples)
                 if loops2d:
                     # Separate rectangular and non-rectangular loops

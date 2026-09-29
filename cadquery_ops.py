@@ -571,6 +571,14 @@ def timeout_handler(signum, frame):
     raise TimeoutError("Operation timed out")
 
 
+def generate_generic_script(code: str, output_stl_path: str, n: int = 1) -> str:
+    """Script for a self-contained ('generic') op, e.g. a loft or sweep from
+    analyze_sweep_loft.py, whose code defines `solid_gen_{N}`."""
+    body = code.replace('{N}', str(n))
+    return (f"import cadquery as cq\nimport math\n\n{body}\n\nresult = solid_gen_{n}\n"
+            f"cq.exporters.export(result, '{output_stl_path}')\n")
+
+
 def execute_cadquery_script(script_content: str, output_stl_path: str, save_script_path: str = None) -> bool:
     """
     Execute a CadQuery script and export STL file.
@@ -605,6 +613,22 @@ def execute_cadquery_script(script_content: str, output_stl_path: str, save_scri
         # Execute the script in the parent's Python interpreter.
         import sys as _sys
         _t0 = time.time()
+        import cq_worker
+        if cq_worker.enabled():
+            # Same script, same STL; run in a long-lived interpreter that has
+            # already imported cadquery (see cq_worker.py).
+            ok, err = cq_worker.run_script(script_content, script_path, timeout=60)
+            log_event("cq_exec", duration=time.time() - _t0, ok=ok, worker=True)
+            if not save_script_path:
+                try:
+                    os.unlink(script_path)
+                except OSError:
+                    pass
+            if ok and os.path.exists(output_stl_path):
+                print(f"✓ Successfully generated STL: {output_stl_path}")
+                return True
+            print(f"✗ CadQuery script execution failed: {err if not ok else 'STL not found'}")
+            return False
         # Own session so a timeout can kill the whole process group (a child
         # holding the stdout pipe would otherwise block `communicate`).
         proc = subprocess.Popen([_sys.executable, script_path], stdout=subprocess.PIPE,
@@ -1697,7 +1721,9 @@ def calculate_extrusion_volume(group):
         
         script_path = temp_path.replace('.stl', '.py')
         
-        if group.get('type') == 'revolve':
+        if group.get('type') == 'generic':
+            script_content = generate_generic_script(group['code'], temp_path)
+        elif group.get('type') == 'revolve':
             # Revolve operation
             script_content = generate_cadquery_revolve_script(
                 group['insts'],
@@ -1762,15 +1788,190 @@ def _build_from_cached_solids(groups, stl_out):
         return False
 
 
+def _exact_union_enabled() -> bool:
+    return os.environ.get("CADFIT_EXACT_UNION", "") not in ("", "0")
+
+
+def _groups_manifold(groups):
+    """(union of add groups) - (union of cut groups), from cached candidate STLs."""
+    import iou as _iou
+    paths = [g.get('stl_path') for g in groups]
+    if not paths or not all(p and os.path.exists(p) for p in paths):
+        return None
+    parts = [_iou._cached_manifold(p, normalize=False) for p in paths]
+    if any(m is None for m in parts):
+        return None
+    adds = [m for m, g in zip(parts, groups) if g.get('op') != 'cut']
+    cuts = [m for m, g in zip(parts, groups) if g.get('op') == 'cut']
+    if not adds:
+        return None
+    try:
+        M = _iou.manifold3d.Manifold
+        union = M.batch_boolean(adds, _iou._OP_ADD) if len(adds) > 1 else adds[0]
+        if cuts:
+            tool = M.batch_boolean(cuts, _iou._OP_ADD) if len(cuts) > 1 else cuts[0]
+            union = union - tool
+    except Exception:
+        return None
+    return union
+
+
+def _group_solid_code(group, name, tag):
+    """Script lines that build one candidate group into variable `name`, with
+    its internal variables renamed by `tag` so it can sit next to others."""
+    import re
+    if group.get('type') == 'generic':
+        body = group['code'].replace('{N}', tag).split('\n')
+        return body + [f"{name} = solid_gen_{tag}"]
+    if group.get('type') == 'revolve':
+        script = generate_cadquery_revolve_script(
+            group['insts'], group['revolve_axis_start'], group['revolve_axis_end'],
+            group['revolve_angle'], '/dev/null', **_revolve_frame(group))
+    else:
+        script = generate_cadquery_script_multi_height([group['insts']], [group['height']], '/dev/null')
+    out = []
+    for line in script.split('\n'):
+        st = line.strip()
+        if not st or st.startswith('import ') or 'cq.exporters.export' in st or st.startswith('print('):
+            continue
+        line = re.sub(r'\b(plane|sketch|solid|loop)_(\w+)', rf'\1_{tag}_\2', line)
+        line = re.sub(r'\bresult\b', name, line)
+        out.append(line)
+    return out
+
+
+def _cut_phase_enabled() -> bool:
+    return os.environ.get("CADFIT_CUT_PHASE", "") not in ("", "0")
+
+
+def cut_phase(groups, pool, gt_mesh, output_folder, max_cuts=30, min_gain=1e-4,
+              max_inside=0.3):
+    """Greedily subtract candidate solids from the selected model while IoU improves.
+
+    Stock search only unions candidates, so a blind pocket or hole must be
+    carved by the residual refinement pass (a full re-analysis of recon - GT).
+    Here every evaluated candidate, including the ones dropped for near-zero
+    IoU (a hole's own extrusion is empty space), is a potential cut tool: it
+    qualifies if it removes material from the current model and lies mostly
+    outside the ground truth. Returns (groups + accepted cuts, iou)."""
+    import iou as _iou
+    U = _groups_manifold(groups)
+    gt_path = os.path.join(output_folder, '_greedy_gt_cached.stl')
+    if not os.path.exists(gt_path):
+        gt_mesh.copy().export(gt_path)
+    G = _iou._cached_manifold(gt_path, normalize=True)
+    if U is None or G is None:
+        return groups, None
+    vG = abs(G.volume())
+
+    def iou_of(m):
+        inter = abs((m ^ G).volume())
+        if inter > min(abs(m.volume()), vG) * (1 + 1e-4):
+            return -1.0  # inconsistent booleans: never accept
+        return inter / (abs(m.volume()) + vG - inter)
+
+    base = iou_of(U)
+    t0 = time.time()
+    tools = []
+    for c in pool:
+        m = _iou._cached_manifold(c['stl_path'], normalize=False) if c.get('stl_path') else None
+        if m is None:
+            continue
+        v = abs(m.volume())
+        if v <= 0 or abs((m ^ G).volume()) / v > max_inside:
+            continue
+        tools.append((c, m))
+    accepted = []
+    while len(accepted) < max_cuts and tools:
+        best = None
+        vU = abs(U.volume())
+        for i, (c, m) in enumerate(tools):
+            if abs((m ^ U).volume()) < 1e-4 * vU:
+                continue
+            cand = U - m
+            gain = iou_of(cand) - base
+            if gain > min_gain and (best is None or gain > best[0]):
+                best = (gain, i, cand)
+        if best is None:
+            break
+        gain, i, U = best
+        base += gain
+        c, _ = tools.pop(i)
+        accepted.append(dict(c, op='cut'))
+        print(f"  Cut phase: subtract {c.get('sketch_id')} ({c['type']}) gain={gain:.5f} -> IoU {base:.5f}")
+    log_event("prune_phase", phase="cut", duration=time.time() - t0, pool=len(pool),
+              tools=len(tools) + len(accepted), accepted=len(accepted))
+    return groups + accepted, base
+
+
+def _exact_union_iou(groups, gt_mesh, output_folder, filename_suffix):
+    """IoU of the union of `groups` from their cached per-candidate STLs, with
+    the union done exactly by manifold3d instead of concatenating the STLs and
+    alpha-wrapping the self-overlapping compound on every call.
+
+    Each candidate's manifold is built once and cached (iou._cached_manifold),
+    so a forward/backward step costs one n-ary boolean plus one IoU boolean
+    instead of an alpha-wrap of the whole growing model. Returns None if any
+    candidate STL is missing or unusable (caller falls back to stock)."""
+    import iou as _iou
+    union = _groups_manifold(groups)
+    if union is None:
+        return None
+    gt_path = os.path.join(output_folder, '_greedy_gt_cached.stl')
+    if not os.path.exists(gt_path):
+        gt_mesh.copy().export(gt_path)
+    gt = _iou._cached_manifold(gt_path, normalize=True)
+    if gt is None:
+        return None
+    vols = _iou._boolean_volumes(gt, union)
+    if vols is None or vols[1] <= 0 or not _iou._volumes_consistent(gt, union, *vols):
+        # A candidate mesh that is not a clean volume (e.g. a self-touching
+        # loft) makes the booleans inconsistent; fall back to the stock path.
+        return None
+    out = union.to_mesh()
+    trimesh.Trimesh(np.asarray(out.vert_properties)[:, :3], np.asarray(out.tri_verts),
+                    process=False).export(f'{output_folder}/greedy_{filename_suffix}.stl')
+    log_event("exact_union", n=len(groups))
+    return vols[0] / vols[1]
+
+
 def run_instruction_groups(groups, gt_mesh, output_folder, filename_suffix="tmp", alpha=0.01):
     """Helper function to build mesh from instruction groups and compute IoU.
     Handles both extrude and revolve operations."""
+    if _exact_union_enabled() and _cache_solids_enabled():
+        iou_val = _exact_union_iou(groups, gt_mesh, output_folder, filename_suffix)
+        if iou_val is not None:
+            executed = []
+            for group in groups:
+                executed.extend(group['insts'])
+                if group.get('type') == 'generic':
+                    executed.append(f"{group['kind']}()")
+                elif group.get('type') == 'revolve':
+                    executed.append(f"revolve(angle={group['revolve_angle']}, axis_start={group['revolve_axis_start']}, axis_end={group['revolve_axis_end']})")
+                else:
+                    executed.append(f"extrude(height={group['height']})")
+            return iou_val, executed
+    if any(g.get('op') == 'cut' for g in groups):
+        print("  Cut groups need the exact-union path; ignoring cuts in this evaluation")
+        groups = [g for g in groups if g.get('op') != 'cut']
     try:
         # Separate extrude and revolve operations
-        extrude_groups = [g for g in groups if g.get('type') != 'revolve']
+        extrude_groups = [g for g in groups if g.get('type') not in ('revolve', 'generic')]
         revolve_groups = [g for g in groups if g.get('type') == 'revolve']
+        generic_groups = [g for g in groups if g.get('type') == 'generic']
         
         all_meshes = []
+
+        for idx, group in enumerate(generic_groups):
+            output_path = f'{output_folder}/greedy_{filename_suffix}_generic_{idx}'
+            script_content = generate_generic_script(group['code'], f'{output_path}.stl')
+            success = _build_from_cached_solids([group], f'{output_path}.stl')
+            if not success:
+                success = execute_cadquery_script(script_content, f'{output_path}.stl', f'{output_path}.py')
+            if success:
+                mesh = trimesh.load(f'{output_path}.stl', force='mesh')
+                if mesh is not None:
+                    all_meshes.append(mesh)
         
         # Process extrude operations
         if extrude_groups:
@@ -1872,7 +2073,9 @@ def run_instruction_groups(groups, gt_mesh, output_folder, filename_suffix="tmp"
         executed = []
         for group in groups:
             executed.extend(group['insts'])
-            if group.get('type') == 'revolve':
+            if group.get('type') == 'generic':
+                executed.append(f"{group['kind']}()")
+            elif group.get('type') == 'revolve':
                 executed.append(f"revolve(angle={group['revolve_angle']}, axis_start={group['revolve_axis_start']}, axis_end={group['revolve_axis_end']})")
             else:
                 executed.append(f"extrude(height={group['height']})")
@@ -1899,7 +2102,8 @@ def _test_removal_worker(args):
 
 def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.01, batch_removal=False, num_workers: int = 15,
                              fast_prune: bool = False, cache_volumes: bool = False,
-                             persistent_pool: bool = False, cache_solids: bool = False):
+                             persistent_pool: bool = False, cache_solids: bool = False, cut_pool=None,
+                             order: str = 'ratio'):
     """
     Greedy pruning based on IoU values:
     1. Start with the extrusion having the highest individual IoU
@@ -1991,6 +2195,21 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
                     'type': 'neg'
                 })
         
+        if sketch.get('generic'):
+            g = sketch['generic']
+            extrusion_candidates.append({
+                'sketch_idx': sketch_no,
+                'sketch_id': sketch_id,
+                'insts': [],
+                'height': 0,
+                'individual_iou': g['iou'],
+                'type': 'generic',
+                'kind': g['kind'],
+                'code': g['code'],
+                'stl_path': g.get('stl'),
+            })
+            continue
+
         # Add revolve operation if available
         if sketch.get('revolve_angle') is not None and sketch.get('revolve_iou', 0.0) > 0:
             extrusion_candidates.append({
@@ -2053,7 +2272,15 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
         return 0.0, None, []
 
     # Sort candidates by IoU/volume ratio (descending - best ratio first)
-    extrusion_candidates.sort(key=lambda x: x['individual_iou'] / max(x['volume'], 1e-12), reverse=True)  # IoU/volume sort
+    # Forward-phase order. Stock: IoU/volume. Multi-start (greedy_search.py)
+    # also tries individual IoU and volume, since the greedy is myopic and a
+    # bigger candidate pool can lead it into a worse local optimum.
+    if order == 'iou':
+        extrusion_candidates.sort(key=lambda x: x['individual_iou'], reverse=True)
+    elif order == 'volume':
+        extrusion_candidates.sort(key=lambda x: x['volume'], reverse=True)
+    else:
+        extrusion_candidates.sort(key=lambda x: x['individual_iou'] / max(x['volume'], 1e-12), reverse=True)  # IoU/volume sort
     print(f"\nSorted {len(extrusion_candidates)} extrusion candidates by IoU")
     
     # Count and print number of each type
@@ -2261,6 +2488,10 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
     
     
     log_event("prune_phase", phase="backward", duration=time.time() - _t_phase, selected=len(final_groups))
+
+    if cut_pool and _cut_phase_enabled() and _exact_union_enabled() and _cache_solids_enabled():
+        print(f"\nCut phase over {len(cut_pool)} candidate tools...")
+        final_groups, cut_iou = cut_phase(final_groups, cut_pool, gt_mesh, output_folder)
     # The stock keep_mask / 'selected' flags are not reliable, so record the selection here.
     log_event("prune_result", output_folder=output_folder,
               selected=[[g.get('sketch_id', g.get('sketch_idx')), g.get('type'), g.get('height'), g.get('individual_iou')]
@@ -2321,11 +2552,20 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
     # Generate and save the final CadQuery script for best_greedy_parallel.stl
     try:
         # Separate extrude and revolve operations
-        extrude_groups = [g for g in final_groups if g.get('type') != 'revolve']
-        revolve_groups = [g for g in final_groups if g.get('type') == 'revolve']
+        cut_groups = [g for g in final_groups if g.get('op') == 'cut']
+        add_groups = [g for g in final_groups if g.get('op') != 'cut']
+        extrude_groups = [g for g in add_groups if g.get('type') not in ('revolve', 'generic')]
+        revolve_groups = [g for g in add_groups if g.get('type') == 'revolve']
+        generic_groups = [g for g in add_groups if g.get('type') == 'generic']
         
         final_script_lines = ["import cadquery as cq", "import math", ""]
         solid_names = []
+
+        for idx, group in enumerate(generic_groups):
+            final_script_lines.append(f"# {group['kind'].capitalize()} operation {idx+1}")
+            final_script_lines.extend(group['code'].replace('{N}', str(idx + 1)).split('\n'))
+            final_script_lines.append("")
+            solid_names.append(f"solid_gen_{idx+1}")
         
         # Generate extrude operations
         if extrude_groups:
@@ -2396,6 +2636,12 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
                 final_script_lines.append(f"result = result.add({solid_name})")
         elif len(solid_names) == 1:
             final_script_lines.append(f"result = {solid_names[0]}")
+
+        for idx, group in enumerate(cut_groups):
+            final_script_lines.append("")
+            final_script_lines.append(f"# Cut operation {idx+1}")
+            final_script_lines.extend(_group_solid_code(group, f"cut_{idx+1}", f"c{idx+1}"))
+            final_script_lines.append(f"result = result.cut(cut_{idx+1})")
         
         # Save the final script
         final_script_path = f'{output_folder}/best_greedy_parallel.py'

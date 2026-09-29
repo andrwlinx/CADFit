@@ -1,0 +1,3 @@
+# CADBench meshes: re-download with bench/fetch_cadbench.py (license unconfirmed)
+bench/cadbench/**/*.stl
+bench/cadbench/**/*.step

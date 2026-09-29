@@ -638,9 +638,16 @@ def process_single_sketch(args):
         
         print(f"  Loop {loop_idx}: {len(loop_3d)} points", end=" - ")
         
+        # Loops are densified to thousands of evenly spaced points; the mean
+        # distance is estimated just as well from an even stride of them.
+        max_pts = int(os.environ.get('CADFIT_TRANSLATION_MAXPTS') or 0)
+        cd_loop = loop_3d
+        if max_pts and len(loop_3d) > max_pts:
+            cd_loop = np.asarray(loop_3d)[::int(np.ceil(len(loop_3d) / max_pts))]
+
         # Compute CD for translation range
         translation_factors, cd_values = compute_cd_for_translations(
-            loop_3d, normal, surface_points,
+            cd_loop, normal, surface_points,
             translation_range=translation_range,
             step=step,
             tree=tree,
@@ -694,6 +701,8 @@ def analyze_all_loops(loops_json, stl_path, output_folder="loop_translation_anal
     if fast_cd:
         os.environ["CADFIT_FAST_CD"] = "1"
     print(f"Sampling {num_surface_samples} points on surface...")
+    if seed is None and os.environ.get('CADFIT_SEED'):
+        seed = int(os.environ['CADFIT_SEED'])
     surface_points = sample_surface_points(mesh, num_surface_samples, seed=seed)
     print(f"  Sampled {len(surface_points)} surface points")
     

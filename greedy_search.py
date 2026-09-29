@@ -30,6 +30,7 @@ from cadquery_ops import (
     generate_cadquery_script,
     compute_iou,
     generate_cadquery_revolve_script,
+    generate_generic_script,
 )
 
 
@@ -517,6 +518,18 @@ def precompute_operations_from_analysis(
             print(f"  Sketch {sketch_idx}: {len(revolves)} revolve(s)")
     
     print(f"Total revolves: {revolve_count}")
+
+    # Loft / sweep ("generic": self-contained CadQuery code) from analyze_sweep_loft.py.
+    generic_count = 0
+    generic_path = os.path.join(os.path.dirname(loops_split_path), 'sweep_loft_candidates.json')
+    if os.environ.get('CADFIT_SWEEP_LOFT') == '1' and os.path.exists(generic_path):
+        with open(generic_path) as f:
+            for gi, c in enumerate(json.load(f)):
+                all_operations.append({'type': 'generic', 'kind': c['kind'], 'sketch_idx': gi,
+                                       'code': c['code'], 'actions': [],
+                                       '_rank': None})
+                generic_count += 1
+        print(f"Total loft/sweep candidates: {generic_count}")
     print(f"Total operations: {len(all_operations)}")
 
     # Detach ranker-only metadata so the saved/evaluated operations are unchanged.
@@ -565,6 +578,11 @@ def _evaluate_operation_worker(args):
         
         if result is not None and result.get('iou', 0.0) >= 0.0005:
             return result
+        elif result is not None and os.environ.get('CADFIT_CUT_PHASE') == '1':
+            # Near-zero IoU usually means empty space (a hole's own extrusion):
+            # useless as an add, but a candidate cut tool.
+            result['low_iou'] = True
+            return result
         elif result is not None:
             print(f"  Skipping operation with IoU < 0.0005 (IoU = {result.get('iou', 0.0):.6f})")
             return None
@@ -601,7 +619,9 @@ def evaluate_single_operation(operation: Dict, gt_mesh_path: str, output_folder:
     op_type = operation['type']
     
     # Create unique filename
-    if op_type == 'extrude':
+    if op_type == 'generic':
+        filename = f"generic_{sketch_idx}_{operation['kind']}"
+    elif op_type == 'extrude':
         source = operation.get('source', 'unknown')
         filename = f"sketch_{sketch_idx}_{source}"
     else:  # revolve
@@ -612,7 +632,9 @@ def evaluate_single_operation(operation: Dict, gt_mesh_path: str, output_folder:
     script_path = os.path.join(output_folder, f"{filename}.py")
     
     # Generate CadQuery script
-    if op_type == 'extrude':
+    if op_type == 'generic':
+        script_content = generate_generic_script(operation['code'], stl_path)
+    elif op_type == 'extrude':
         script_content = generate_cadquery_script(
             sketch_actions_list=[operation['actions']],
             height=operation['height'],
@@ -639,6 +661,22 @@ def evaluate_single_operation(operation: Dict, gt_mesh_path: str, output_folder:
     if not success or not os.path.exists(stl_path):
         print(f"  Failed to generate {filename}")
         return None
+    if op_type == 'generic':
+        # Lofts/sweeps can pass OCC's isValid() yet tessellate to an open or
+        # self-touching mesh, which would poison every boolean it enters.
+        import trimesh as _tm
+        _m = _tm.load(stl_path, force='mesh')
+        if not (_m.is_watertight and _m.is_winding_consistent and _m.volume > 0):
+            print(f"  Rejecting {filename}: tessellation is not a clean volume")
+            return None
+        # A loft that twists through itself is watertight and consistently
+        # wound, but opposite-orientation regions cancel in the volume
+        # integral. Its alpha-wrapped hull then has far more volume.
+        from iou import _alpha_wrap
+        _w = abs(_alpha_wrap(_m).volume)
+        if _w > 1.12 * _m.volume:
+            print(f"  Rejecting {filename}: self-intersecting (wrapped/mesh volume {_w / _m.volume:.2f})")
+            return None
     
     # Compute IoU
     try:
@@ -658,6 +696,30 @@ def evaluate_single_operation(operation: Dict, gt_mesh_path: str, output_folder:
         return None
 
 
+def _cut_pool(results):
+    """Every evaluated candidate as a pruning-style group, for the cut phase."""
+    pool = []
+    for i, r in enumerate(results):
+        if r['type'] == 'generic':
+            # Loft/sweep solids are fitted to material, not to empty space;
+            # as cut tools they only carve plausible-looking damage.
+            continue
+        tag = {'extrude': 'E', 'revolve': 'R'}.get(r['type'], '?')
+        g = {'sketch_idx': r['sketch_idx'], 'sketch_id': f"cut:{tag}{r['sketch_idx']}",
+             'individual_iou': r['iou'], 'stl_path': r.get('stl_path'), 'candidate_id': 100000 + i,
+             'insts': r.get('actions') or [], 'height': r.get('height', 0)}
+        if r['type'] == 'extrude':
+            g['type'] = 'pos'
+        elif r['type'] == 'revolve':
+            g.update(type='revolve', revolve_angle=r['angle'], revolve_axis_start=r['axis_start'],
+                     revolve_axis_end=r['axis_end'], revolve_origin=r.get('origin'),
+                     revolve_normal=r.get('normal'), revolve_xdir=r.get('xdir'))
+        else:
+            g.update(type='generic', kind=r['kind'], code=r['code'])
+        pool.append(g)
+    return pool
+
+
 def collapse_evaluated_operations(evaluated_operations, fix_sketch_identity=False):
     """Collapse evaluated candidates into the per-sketch dicts that
     `greedy_iou_based_pruning` expects (best extrusion / best revolve per key).
@@ -673,6 +735,21 @@ def collapse_evaluated_operations(evaluated_operations, fix_sketch_identity=Fals
     # IMPORTANT: Store actions separately for each operation since each has different translated origins
     sketches_by_idx = {}
     for result in evaluated_operations:
+        if result['type'] == 'generic':
+            # Own entry per loft/sweep candidate; positional (stock) keys cannot hold them.
+            if not fix_sketch_identity or result['iou'] < 0.0005:
+                continue
+            key = ('G', result['sketch_idx'])
+            sketches_by_idx[key] = {
+                'insts': [], 'faces_idx': key, 'sketch_idx': result['sketch_idx'],
+                'sketch_id': f"G{result['sketch_idx']}", 'pos_h': None, 'pos_iou': 0.0,
+                'neg_h': None, 'neg_iou': 0.0, 'revolve_angle': None, 'revolve_iou': 0.0,
+                'pos_actions': None, 'neg_actions': None, 'revolve_actions': None,
+                'is_symmetric': False, 'use_revolve': False, 'zero_only': False,
+                'generic': {'kind': result['kind'], 'code': result['code'],
+                            'iou': result['iou'], 'stl': result.get('stl_path')},
+            }
+            continue
         is_rev = result['type'] == 'revolve'
         # With the identity fix, extrusions and revolves never share an entry.
         sketch_idx = ('R' if is_rev else 'E', result['sketch_idx']) if fix_sketch_identity else result['sketch_idx']
@@ -917,7 +994,8 @@ def run_greedy_search(
         results = pool.map(_evaluate_operation_worker, eval_args)
     
     # Filter out None results
-    evaluated_operations = [r for r in results if r is not None]
+    evaluated_operations = [r for r in results if r is not None and not r.get('low_iou')]
+    cut_pool = _cut_pool([r for r in results if r is not None]) if os.environ.get('CADFIT_CUT_PHASE') == '1' else None
     log_event("evaluate", duration=_time.time() - _t_eval, n=len(operations), n_ok=len(evaluated_operations))
 
     if ranking_rows is not None:
@@ -972,18 +1050,51 @@ def run_greedy_search(
     
     precomp_for_greedy = collapse_evaluated_operations(evaluated_operations, fix_sketch_identity)
 
-    # Run greedy pruning
-    final_iou, final_mesh, final_actions = greedy_iou_based_pruning(
-        precomp=precomp_for_greedy,
-        gt_mesh=gt_mesh,
-        output_folder=output_folder,
-        alpha=alpha,
-        num_workers=num_workers,
-        fast_prune=fast_prune,
-        cache_volumes=cache_volumes,
-        persistent_pool=persistent_pool,
-        cache_solids=cache_solids,
-    )
+    def _prune(precomp, order):
+        # greedy_iou_based_pruning resumes from these files if present.
+        for f in ('greedy_instruction_groups.pkl', 'greedy_keep_mask.json',
+                  'greedy_extrusion_data.json', 'greedy_final_actions.pkl'):
+            try:
+                os.remove(os.path.join(output_folder, f))
+            except OSError:
+                pass
+        return greedy_iou_based_pruning(
+            precomp=precomp,
+            gt_mesh=gt_mesh,
+            output_folder=output_folder,
+            alpha=alpha,
+            num_workers=num_workers,
+            fast_prune=fast_prune,
+            cache_volumes=cache_volumes,
+            persistent_pool=persistent_pool,
+            cache_solids=cache_solids,
+            cut_pool=cut_pool,
+            order=order,
+        )
+
+    if os.environ.get('CADFIT_MULTISTART') == '1' and os.environ.get('CADFIT_EXACT_UNION') == '1':
+        # Multi-start: the greedy is myopic, so a larger candidate pool can
+        # steer it into a worse local optimum. Try several forward orders and
+        # the pool without loft/sweep, keep the best by exact IoU, and run the
+        # winner last so the files on disk belong to it.
+        no_generic = [e for e in precomp_for_greedy if not e.get('generic')]
+        variants = [('ratio', precomp_for_greedy), ('iou', precomp_for_greedy), ('volume', precomp_for_greedy)]
+        if len(no_generic) < len(precomp_for_greedy):
+            variants.append(('ratio', no_generic))
+        results = []
+        for order, pc in variants:
+            res = _prune(pc, order)
+            label = f"{order}{'' if pc is precomp_for_greedy else '/no-generic'}"
+            print(f"  Multi-start variant {label}: IoU {res[0]:.6f}")
+            log_event("multistart", variant=label, iou=float(res[0]))
+            results.append(res)
+        best = int(max(range(len(results)), key=lambda i: results[i][0]))
+        if best == len(variants) - 1:
+            final_iou, final_mesh, final_actions = results[best]
+        else:
+            final_iou, final_mesh, final_actions = _prune(variants[best][1], variants[best][0])
+    else:
+        final_iou, final_mesh, final_actions = _prune(precomp_for_greedy, 'ratio')
     
     # `greedy_tmp.stl` was built via manifold3d's robust union on each
     # candidate's STL and is clean + watertight — use that as the canonical

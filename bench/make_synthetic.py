@@ -12,6 +12,7 @@ Usage:
 """
 import argparse
 import json
+import math
 import os
 import random
 
@@ -105,17 +106,64 @@ FAMILIES = [plate_with_holes, l_bracket, stepped_block, boss_on_plate, box_with_
             u_channel, hex_prism, stepped_shaft, flange, pulley]
 
 
+# ---- Phase 3 families: operations stock CADFit cannot express --------------
+
+def loft_square_circle(r):
+    a, rc, h = r.uniform(20, 40), r.uniform(6, 14), r.uniform(20, 50)
+    wp = cq.Workplane("XY").rect(a, a).workplane(offset=h).circle(rc).loft(ruled=False)
+    return wp, dict(op="loft", a=a, rc=rc, h=h, axis=[0, 0, 1]), 1
+
+
+def tapered_boss(r):
+    r0, r1, h = r.uniform(12, 20), r.uniform(4, 10), r.uniform(15, 40)
+    L, T = r.uniform(50, 80), r.uniform(4, 8)
+    base = cq.Workplane("XY").box(L, L, T, centered=(True, True, False))
+    cone = cq.Workplane("XY").workplane(offset=T).circle(r0).workplane(offset=h).circle(r1).loft()
+    return base.union(cone), dict(op="loft", r0=r0, r1=r1, h=h, L=L, T=T, axis=[0, 0, 1]), 2
+
+
+def bent_pipe(r):
+    R, rp, ang = r.uniform(25, 45), r.uniform(4, 9), r.uniform(60, 150)
+    th = math.radians(ang)
+    # Arc centred at (R, 0) in the XZ plane, starting at the origin tangent to +Z.
+    mid = (R - R * math.cos(th / 2), R * math.sin(th / 2))
+    end = (R - R * math.cos(th), R * math.sin(th))
+    path = cq.Workplane("XZ").threePointArc(mid, end)
+    wp = cq.Workplane("XY").circle(rp).sweep(path)
+    return wp, dict(op="sweep", R=R, rp=rp, angle=ang), 1
+
+
+def s_swept_bar(r):
+    w, t, L, amp = r.uniform(6, 12), r.uniform(3, 6), r.uniform(50, 90), r.uniform(8, 20)
+    pts = [(0, 0), (amp, L * 0.33), (-amp, L * 0.66), (0, L)]
+    path = cq.Workplane("XZ").spline(pts)
+    wp = cq.Workplane("XY").rect(w, t).sweep(path)
+    return wp, dict(op="sweep", w=w, t=t, L=L, amp=amp), 1
+
+
+def plate_with_loft_handle(r):
+    L, W, T = r.uniform(60, 90), r.uniform(30, 50), r.uniform(4, 8)
+    a, rc, h = r.uniform(10, 18), r.uniform(3, 6), r.uniform(15, 30)
+    base = cq.Workplane("XY").box(L, W, T, centered=(True, True, False))
+    handle = cq.Workplane("XY").workplane(offset=T).rect(a, a).workplane(offset=h).circle(rc).loft()
+    return base.union(handle), dict(op="loft", L=L, W=W, T=T, a=a, rc=rc, h=h, axis=[0, 0, 1]), 2
+
+
+FAMILIES_P3 = [loft_square_circle, tapered_boss, bent_pipe, s_swept_bar, plate_with_loft_handle]
+
+
 def main():
     ap = argparse.ArgumentParser(description="Generate synthetic CAD benchmark STLs")
     ap.add_argument("--out", default="bench/synthetic")
     ap.add_argument("--per-family", type=int, default=3)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--p3", action="store_true", help="phase-3 families (loft/sweep) instead of the originals")
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
     r = random.Random(args.seed)
     manifest = []
-    for fam in FAMILIES:
+    for fam in (FAMILIES_P3 if args.p3 else FAMILIES):
         for k in range(args.per_family):
             wp, params, n_ops = fam(r)
             # Last variant of each family is tilted so its planes are off-axis.

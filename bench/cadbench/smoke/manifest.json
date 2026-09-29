@@ -1,0 +1,52 @@
+[
+ {
+  "file": "bench1B-00020-of-00031.parquet",
+  "rg": 1,
+  "row": 10,
+  "file_id": "00965166_2b804e467aa374824278c473_step_002",
+  "label": "hard",
+  "split": "benchA",
+  "brep_faces": 182,
+  "sha1": "5d9e79ecae3fe85e13a236472247daa3c12fcae5"
+ },
+ {
+  "file": "bench1B-00011-of-00031.parquet",
+  "rg": 0,
+  "row": 4,
+  "file_id": "00053793_2dd7c36b8a4041bc941f2edc_step_030",
+  "label": "hard",
+  "split": "benchA",
+  "brep_faces": 448,
+  "sha1": "7b9487c7ea8824f19d8f842a479dfb066527d182"
+ },
+ {
+  "file": "bench1B-00014-of-00031.parquet",
+  "rg": 4,
+  "row": 10,
+  "file_id": "00399282_319e389453454fffe1b03b17_step_000",
+  "label": "hard",
+  "split": "benchA",
+  "brep_faces": 444,
+  "sha1": "7636a3237619de61ca338c4350e6a32735c2d9f3"
+ },
+ {
+  "file": "bench1B-00011-of-00031.parquet",
+  "rg": 3,
+  "row": 17,
+  "file_id": "00096093_fbe5edcc2a948f42aa4b8b78_step_000",
+  "label": "hard",
+  "split": "benchA",
+  "brep_faces": 259,
+  "sha1": "b11bc86f1c627069b0f48cac6473f6a8caeb847f"
+ },
+ {
+  "file": "bench1B-00014-of-00031.parquet",
+  "rg": 3,
+  "row": 10,
+  "file_id": "00380269_a1ce90b25fd7132a907c8af6_step_000",
+  "label": "hard",
+  "split": "benchA",
+  "brep_faces": 388,
+  "sha1": "d07f5634f308685e6b1d3f872ae210e76c175df7"
+ }
+]

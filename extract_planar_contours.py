@@ -36,13 +36,22 @@ from analyze_revolve_axis import chamfer_distance
 import random
 
 
+def _env_seed():
+    v = os.environ.get('CADFIT_SEED')
+    return int(v) if v not in (None, '') else None
+
+
 def sample_surface_points(mesh: trimesh.Trimesh, n_samples: int = 10000):
     """
     Sample points uniformly on the mesh surface.
     Returns: (points, face_indices, face_normals)
     """
-    # Sample points on surface
-    points, face_indices = mesh.sample(n_samples, return_index=True)
+    # Sample points on surface (seeded when CADFIT_SEED is set; stock is unseeded)
+    seed = _env_seed()
+    if seed is None:
+        points, face_indices = mesh.sample(n_samples, return_index=True)
+    else:
+        points, face_indices = trimesh.sample.sample_surface(mesh, n_samples, seed=seed)
     
     # Get corresponding face normals
     face_normals = mesh.face_normals[face_indices]
@@ -944,7 +953,9 @@ def extract_loops_from_planar(planar, transform, samples_per_loop):
         # fallback: collect continuous entities into loops
         segments = []
         for ent in planar.entities:
-            pts = np.asarray(ent.discrete())
+            # trimesh >= 4 needs the vertex array; stock crashed here and the slice was lost.
+            pts = np.asarray(ent.discrete(planar.vertices) if os.environ.get('CADFIT_FIX_SLICE_FALLBACK') == '1'
+                             else ent.discrete())
             if pts.shape[0] >= 2:
                 segments.append([tuple(map(float, p)) for p in pts])
         
@@ -1326,7 +1337,9 @@ def main():
         
         if len(results) > 100:
             # randomly sample 150 entries to save
-            results = random.sample(results, 100)
+            seed = _env_seed()
+            results = (random.sample(results, 100) if seed is None
+                       else random.Random(seed).sample(results, 100))
         # Save results
         with open(args.out, 'w') as f:
             json.dump(results, f, indent=2)

@@ -224,8 +224,62 @@ def watertight(mesh, stl_path):
     return mesh
     
 
+def _manifold_difference(mesh_a_path, mesh_b_path, output_path, normalize_a, normalize_b):
+    """A - B with manifold3d on the same manifolds the IoU uses. trimesh's
+    boolean refuses meshes it does not consider watertight, which includes the
+    exact-union exports after the STL round trip, so stock refinement silently
+    skipped them."""
+    import iou as _iou
+    ma = _iou._cached_manifold(mesh_a_path, normalize_a)
+    mb = _iou._cached_manifold(mesh_b_path, normalize_b)
+    if ma is None or mb is None:
+        return None
+    out = (ma - mb).to_mesh()
+    diff = trimesh.Trimesh(np.asarray(out.vert_properties)[:, :3], np.asarray(out.tri_verts), process=False)
+    if len(diff.faces) == 0:
+        return None
+    comps = [c for c in diff.split(only_watertight=False) if abs(c.volume) > 0.01]
+    if not comps:
+        return None
+    diff = comps[0] if len(comps) == 1 else trimesh.util.concatenate(comps)
+    diff.export(output_path)
+    return True
+
+
+def _combine_meshes(base_path, op_path, out_path, operation):
+    """Refinement result mesh without executing the combined CadQuery script:
+    an exact manifold3d cut/union of the two STLs (both already in the
+    normalized frame). OCC booleans on compounds holding lofts took > 300 s
+    and timed out. Only with --exact-union; returns False otherwise."""
+    if os.environ.get('CADFIT_EXACT_UNION') != '1':
+        return False
+    try:
+        import iou as _iou
+        a = _iou._cached_manifold(base_path, False)
+        b = _iou._cached_manifold(op_path, False)
+        if a is None or b is None:
+            return False
+        r = (a - b) if operation == 'cut' else (a + b)
+        out = r.to_mesh()
+        if len(out.tri_verts) == 0:
+            return False
+        trimesh.Trimesh(np.asarray(out.vert_properties)[:, :3], np.asarray(out.tri_verts),
+                        process=False).export(out_path)
+        print(f"  {operation} applied exactly with manifold3d")
+        return True
+    except Exception as e:
+        print(f"  manifold {operation} failed ({e}); executing the CadQuery script")
+        return False
+
+
 def compute_difference_mesh(mesh_a_path, mesh_b_path, output_path, normalize_a=False, normalize_b=False):
     """Compute difference A - B of two meshes and remove surface-like components"""
+    if os.environ.get('CADFIT_EXACT_UNION') == '1':
+        try:
+            if _manifold_difference(mesh_a_path, mesh_b_path, output_path, normalize_a, normalize_b):
+                return True
+        except Exception as e:
+            print(f"  manifold difference failed ({e}); trying trimesh")
     try:
         mesh_a = trimesh.load(mesh_a_path, force='mesh')
         mesh_b = trimesh.load(mesh_b_path, force='mesh')
@@ -549,6 +603,11 @@ def refine_with_fillet_chamfer(src_script: str, src_stl: str, gt_stl: str,
     return disk_iou, len(ops), new_script, output_stl
 
 
+# Phase-3 analysis options, set once in main() and read by every
+# run_analysis_steps call (main pass and refinement passes alike).
+ANALYSIS_OPTS = {}
+
+
 def run_analysis_steps(stl_path, output_folder, n_slices=5, delta=0.05, normalize=True, alpha=0.01,
                         filter_sketches=False, filter_threshold=None,
                         filter_model_path=None, filter_norm_path=None,
@@ -634,6 +693,14 @@ def run_analysis_steps(stl_path, output_folder, n_slices=5, delta=0.05, normaliz
         cmd3 = [sys.executable, _release_script("extract_sketches.py"), stl_path, "--out", axis_sketches_path, "--axis-slices", str(n_slices), "--normalize"]
     else:
         cmd3 = [sys.executable, _release_script("extract_sketches.py"), stl_path, "--out", axis_sketches_path, "--axis-slices", str(n_slices)]
+    if ANALYSIS_OPTS.get('event_slices'):
+        cmd3 += ["--event-slices"]
+    if ANALYSIS_OPTS.get('detect_directions'):
+        # Step 3a: Gauss-map extrusion directions beyond X/Y/Z and planar caps.
+        directions_path = f"{output_folder}/directions.json"
+        cmd3a = [sys.executable, _release_script("detect_directions.py"), stl_path, "--out", directions_path]
+        if run_command(cmd3a, "Detect extrusion directions", timeout=120):
+            cmd3 += ["--directions", directions_path]
     if not run_command(cmd3, "Extract axis-aligned sketches", timeout=300):
         return False
     
@@ -734,6 +801,15 @@ def run_analysis_steps(stl_path, output_folder, n_slices=5, delta=0.05, normaliz
     if not run_command(cmd6, "Revolve analysis", timeout=3600):
         return False
     
+    if ANALYSIS_OPTS.get('sweep_loft'):
+        # Step 6b: loft / sweep candidates by cross-section tracking.
+        print(f"\n🌀 Step 6b: Tracking sections for loft/sweep candidates...")
+        cmd6b = [sys.executable, _release_script("analyze_sweep_loft.py"), loops_split_path, stl_path,
+                 "--out", f"{output_folder}/sweep_loft_candidates.json"]
+        if normalize:
+            cmd6b.append("--normalize")
+        run_command(cmd6b, "Loft/sweep analysis", timeout=300)
+
     # Step 7: Run greedy CAD reconstruction with precomputed operations
     print(f"\n🏗️  Step 7/7: Running greedy CAD reconstruction with precomputed operations...")
     cmd7 = [sys.executable, _release_script("greedy_search.py"),
@@ -969,8 +1045,11 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
                 print("✗ Failed to combine scripts for cut")
                 break
             
-            # Execute combined script
-            if not execute_cadquery_script_file(cut_script_path, timeout=300):
+            # Execute combined script (with exact-union, the mesh is the exact
+            # manifold difference of the two STLs; the script stays the CAD program)
+            if not _combine_meshes(current_reconstruction, cutting_solid_path,
+                                   f"{output_folder}/reconstruction_cut_{iteration}.stl", 'cut') \
+                    and not execute_cadquery_script_file(cut_script_path, timeout=300):
                 print("✗ Failed to execute cut script")
                 break
             
@@ -1033,8 +1112,10 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
                 print("✗ Failed to combine scripts for union")
                 continue
             
-            # Execute combined script
-            if not execute_cadquery_script_file(union_script_path, timeout=300):
+            # Execute combined script (exact manifold union with --exact-union)
+            if not _combine_meshes(current_reconstruction, additional_solid_path,
+                                   f"{output_folder}/reconstruction_union_{iteration}.stl", 'union') \
+                    and not execute_cadquery_script_file(union_script_path, timeout=300):
                 print("✗ Failed to execute union script")
                 continue
             
@@ -1276,8 +1357,39 @@ def main():
     parser.add_argument('--guard-refine', action=argparse.BooleanOptionalAction, default=True,
                         help='Only keep a residual cut/union if IoU against the ground truth does not drop '
                              '(stock applies them unconditionally).')
+    parser.add_argument('--fix-slice-fallback', action=argparse.BooleanOptionalAction, default=True,
+                        help='Fix the section fallback in extract_sketches/extract_planar_contours '
+                             '(stock calls entity.discrete() without vertices and loses the slice).')
+    parser.add_argument('--max-slice-loops', type=int, default=200,
+                        help='Skip axis slices with more loops than this (resource guard; 0 = stock, unlimited).')
+    parser.add_argument('--persistent-cq', action=argparse.BooleanOptionalAction, default=False,
+                        help='Run generated CadQuery scripts in a long-lived interpreter per worker '
+                             '(cq_worker.py) instead of a fresh python per candidate. Same scripts, same STLs.')
+    parser.add_argument('--exact-union', action=argparse.BooleanOptionalAction, default=False,
+                        help='Score greedy compositions by an exact manifold3d union of the cached '
+                             'candidate solids instead of alpha-wrapping the concatenated compound.')
+    parser.add_argument('--emit-splines', action=argparse.BooleanOptionalAction, default=False,
+                        help='Emit fitted spline fragments in sketches (stock drops them).')
+    parser.add_argument('--translation-max-points', type=int, default=0,
+                        help='Subsample each loop to at most this many points for the translation '
+                             'chamfer sweep (0 = all points, as stock).')
+    parser.add_argument('--multistart', action=argparse.BooleanOptionalAction, default=False,
+                        help='Run the greedy add/prune from several candidate orders (and without '
+                             'loft/sweep) and keep the best by exact IoU. Needs --exact-union.')
+    parser.add_argument('--cut-phase', action=argparse.BooleanOptionalAction, default=False,
+                        help='After greedy add/prune, subtract candidate solids while IoU improves '
+                             '(needs --exact-union and --cache-solids).')
+    parser.add_argument('--sweep-loft', action=argparse.BooleanOptionalAction, default=False,
+                        help='Propose loft and sweep candidates by cross-section tracking '
+                             '(analyze_sweep_loft.py). Needs --fix-sketch-identity (default on).')
+    parser.add_argument('--event-slices', action=argparse.BooleanOptionalAction, default=False,
+                        help='Slice between consecutive planar-face heights (every 2.5D layer) in '
+                             'addition to the evenly spaced axis slices.')
+    parser.add_argument('--detect-directions', action=argparse.BooleanOptionalAction, default=False,
+                        help='Also slice along Gauss-map extrusion directions not covered by X/Y/Z or '
+                             'planar caps (detect_directions.py).')
     parser.add_argument('--seed', type=int, default=None,
-                        help='Seed for translation-analysis surface sampling (default: unseeded, as stock).')
+                        help='Seed for all analysis-stage sampling (default: unseeded, as stock).')
     args = parser.parse_args()
 
     # Flags forwarded to analyze_loop_translation.py (explicitly either way, so the
@@ -1285,6 +1397,22 @@ def main():
     analysis_args = ['--fast-cd' if args.fast_cd else '--no-fast-cd']
     if args.seed is not None:
         analysis_args += ['--seed', str(args.seed)]
+        # Every analysis subprocess inherits this (planar sampling, entry subsampling).
+        os.environ['CADFIT_SEED'] = str(args.seed)
+
+    ANALYSIS_OPTS['detect_directions'] = args.detect_directions
+    ANALYSIS_OPTS['event_slices'] = args.event_slices
+    ANALYSIS_OPTS['sweep_loft'] = args.sweep_loft
+    os.environ['CADFIT_SWEEP_LOFT'] = '1' if args.sweep_loft else '0'
+    os.environ['CADFIT_CUT_PHASE'] = '1' if args.cut_phase else '0'
+    os.environ['CADFIT_MULTISTART'] = '1' if args.multistart else '0'
+    os.environ['CADFIT_TRANSLATION_MAXPTS'] = str(args.translation_max_points)
+    # Inherited by every subprocess (greedy_search.py, refine passes, pool workers).
+    os.environ['CADFIT_CQ_WORKER'] = '1' if args.persistent_cq else '0'
+    os.environ['CADFIT_EMIT_SPLINES'] = '1' if args.emit_splines else '0'
+    os.environ['CADFIT_EXACT_UNION'] = '1' if args.exact_union else '0'
+    os.environ['CADFIT_FIX_SLICE_FALLBACK'] = '1' if args.fix_slice_fallback else '0'
+    os.environ['CADFIT_MAX_SLICE_LOOPS'] = str(args.max_slice_loops)
 
     # Flags forwarded verbatim to greedy_search.py (main pass and refine passes).
     greedy_args = []
