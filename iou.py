@@ -280,6 +280,13 @@ def _cached_manifold(path: str, normalize: bool):
         m = _bodies_union_manifold(mesh)
         if m is None:
             m = _merged_manifold(mesh)
+    elif (not multi_body and os.environ.get("CADFIT_EXACT_UNION", "") not in ("", "0")
+          and not _is_clean_volume(mesh)):
+        # A single-body exact-union export cracked by the float32 STL round
+        # trip. Alpha-wrap mangles these (a 0.921 model read as 0.775, and the
+        # refinement then cut it against that shape down to 0.799); re-stitching
+        # the near-duplicate vertices recovers the exact solid.
+        m = _merged_manifold(mesh)
     if m is None and not multi_body and not (_validate_enabled() and not _is_clean_volume(mesh)):
         m_direct = _to_manifold(mesh)
         if m_direct is not None:

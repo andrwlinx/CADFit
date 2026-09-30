@@ -1840,6 +1840,162 @@ def _group_solid_code(group, name, tag):
     return out
 
 
+def _beam_width() -> int:
+    try:
+        return int(os.environ.get("CADFIT_BEAM") or 0)
+    except ValueError:
+        return 0
+
+
+def beam_search(cands, tools, gt_mesh, output_folder, width=4, max_depth=40, min_gain=1e-4,
+                time_budget=240.0, add_min_inside=0.3, cut_max_inside=0.3, seed=None):
+    """Beam search over compositions (adds, cuts), scored by exact manifold IoU.
+
+    Greedy forward selection is path-dependent: one early candidate can lock
+    the search into a worse optimum (see REPORT3 §5). Here the top-`width`
+    partial models survive each depth. Moves are "add candidate", "cut
+    tool" and "remove an add"; an add only qualifies if the candidate lies mostly inside the GT,
+    a cut only if the tool lies mostly outside it. Each move's IoU is exact:
+    I' = |M' ^ G|, V' = |M'| from one boolean on the current model. An upper
+    bound (I + |c ^ G|) / |M v G| skips adds that cannot beat the parent.
+    With `seed` (groups, cuts marked op='cut', e.g. the greedy result) the
+    search starts from that model instead of the best single candidates.
+    Returns (groups, iou) with cut groups marked op='cut'.
+    """
+    import iou as _iou
+    t0 = time.time()
+    gt_path = os.path.join(output_folder, '_greedy_gt_cached.stl')
+    if not os.path.exists(gt_path):
+        gt_mesh.copy().export(gt_path)
+    G = _iou._cached_manifold(gt_path, normalize=True)
+    if G is None:
+        return None, None
+    vG = abs(G.volume())
+
+    def prep(groups, want_inside, force=False):
+        out = []
+        for g in groups:
+            m = _iou._cached_manifold(g['stl_path'], normalize=False) if g.get('stl_path') else None
+            if m is None:
+                continue
+            v = abs(m.volume())
+            if v <= 0:
+                continue
+            gi = abs((m ^ G).volume())
+            frac = gi / v
+            if force or (want_inside and frac >= add_min_inside) or (not want_inside and frac <= cut_max_inside):
+                out.append({'g': g, 'm': m, 'v': v, 'gi': gi})
+        return out
+
+    A = prep(cands, True)
+    T = prep(tools or [], False)
+    if not A:
+        return None, None
+
+    def score(I, V):
+        u = V + vG - I
+        return I / u if u > 0 else 0.0
+
+    union = _iou.manifold3d.Manifold.batch_boolean
+
+    def state(adds, cuts, Madd, C, M=None):
+        # A state's model is (union of adds) - (union of cuts): the geometry
+        # the emitted groups build, whatever order the moves came in.
+        if M is None:
+            M = Madd - C if C is not None else Madd
+        I, V = abs((M ^ G).volume()), abs(M.volume())
+        return {'adds': adds, 'cuts': cuts, 'Madd': Madd, 'C': C, 'M': M, 'I': I, 'V': V, 'iou': score(I, V)}
+
+    if seed:
+        # Seed members that the inside/outside filters dropped still belong
+        # to the seed model, so they are appended unfiltered.
+        def index(pool, groups):
+            ids = []
+            for g in groups:
+                k = next((k for k, x in enumerate(pool) if x['g'].get('stl_path') == g.get('stl_path')), None)
+                if k is None:
+                    extra = prep([g], True, force=True)
+                    if not extra:
+                        return None
+                    pool.append(extra[0])
+                    k = len(pool) - 1
+                ids.append(k)
+            return tuple(sorted(set(ids)))
+        sa = index(A, [g for g in seed if g.get('op') != 'cut'])
+        sc = index(T, [dict(g, op=None) for g in seed if g.get('op') == 'cut'])
+        if not sa or sc is None:
+            return None, None
+        Madd = union([A[i]['m'] for i in sa], _iou._OP_ADD) if len(sa) > 1 else A[sa[0]]['m']
+        C = (union([T[j]['m'] for j in sc], _iou._OP_ADD) if len(sc) > 1 else T[sc[0]]['m']) if sc else None
+        beam = [state(sa, sc, Madd, C)]
+        print(f"  Beam seed: IoU {beam[0]['iou']:.5f} ({len(sa)} adds, {len(sc)} cuts)")
+    else:
+        # Initial beam: best single adds.
+        beam = sorted(({'adds': (i,), 'cuts': (), 'Madd': a['m'], 'C': None, 'M': a['m'], 'I': a['gi'],
+                        'V': a['v'], 'iou': score(a['gi'], a['v'])} for i, a in enumerate(A)),
+                      key=lambda s: -s['iou'])[:width]
+    best = beam[0]
+    evals = 0
+    for depth in range(max_depth):
+        if time.time() - t0 > time_budget:
+            print(f"  Beam: time budget reached at depth {depth}")
+            break
+        children = {}
+
+        def offer(st, key, make):
+            nonlocal evals
+            if key in children:
+                return
+            evals += 1
+            ch = make()
+            if ch['iou'] > st['iou'] + min_gain:
+                children[key] = ch
+
+        for st in beam:
+            U = st['V'] + vG - st['I']
+            for i, a in enumerate(A):
+                if i in st['adds']:
+                    continue
+                if (st['I'] + a['gi']) / U <= st['iou'] + min_gain:
+                    continue  # cannot beat the parent even with zero overlap cost
+                offer(st, (tuple(sorted(st['adds'] + (i,))), st['cuts']),
+                      lambda: state(tuple(sorted(st['adds'] + (i,))), st['cuts'], st['Madd'] + a['m'], st['C']))
+            for j, t in enumerate(T):
+                if j in st['cuts']:
+                    continue
+                if abs((t['m'] ^ st['M']).volume()) < 1e-4 * st['V']:
+                    continue
+                offer(st, (st['adds'], tuple(sorted(st['cuts'] + (j,)))),
+                      lambda: state(st['adds'], tuple(sorted(st['cuts'] + (j,))), st['Madd'],
+                                    st['C'] + t['m'] if st['C'] is not None else t['m'], st['M'] - t['m']))
+            # Removal lets the search back out of an early add that later ones
+            # make redundant: a large, loose candidate often has the best
+            # single IoU, seeds every beam state, and only hurts once the
+            # parts it overhangs are covered by tighter candidates.
+            if len(st['adds']) > 1:
+                for i in st['adds']:
+                    rest = tuple(k for k in st['adds'] if k != i)
+                    offer(st, (rest, st['cuts']),
+                          lambda: state(rest, st['cuts'],
+                                        union([A[k]['m'] for k in rest], _iou._OP_ADD) if len(rest) > 1 else A[rest[0]]['m'],
+                                        st['C']))
+            if time.time() - t0 > time_budget:
+                break
+        if not children:
+            break
+        beam = sorted(children.values(), key=lambda s: -s['iou'])[:width]
+        if beam[0]['iou'] > best['iou']:
+            best = beam[0]
+        print(f"  Beam depth {depth + 1}: best IoU {best['iou']:.5f} ({len(best['adds'])} adds, "
+              f"{len(best['cuts'])} cuts), {len(children)} children, {evals} evals")
+
+    adds, cuts, cur = list(best['adds']), list(best['cuts']), best['iou']
+    log_event("prune_phase", phase="beam", duration=time.time() - t0, width=width, evals=evals,
+              adds=len(adds), cuts=len(cuts), iou=float(cur))
+    groups = [A[i]['g'] for i in adds] + [dict(T[j]['g'], op='cut') for j in cuts]
+    return groups, cur
+
+
 def _cut_phase_enabled() -> bool:
     return os.environ.get("CADFIT_CUT_PHASE", "") not in ("", "0")
 
@@ -2300,17 +2456,17 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
     selected_groups = []
     best_iou = 0.0
     early_stop = False
-    
+
     print("\nStarting greedy selection process (testing from largest IoU to smallest)...")
     _t_phase = time.time()
-    
+
     # Start with the largest IoU extrusion
     selected_groups.append(extrusion_candidates[0])
     current_iou, current_executed = run_instruction_groups(selected_groups, gt_mesh, output_folder, "greedy_step", alpha)
     best_iou = current_iou
     print(f"Step 1: Started with largest IoU extrusion (Volume={extrusion_candidates[0]['volume']:.6f}, IoU={extrusion_candidates[0]['individual_iou']:.6f})")
     print(f"        Combined IoU: {current_iou:.6f}")
-    
+
     # Check if we already have near-perfect reconstruction
     if current_iou > 0.99:
         print(f"✓ IoU > 0.99 achieved with single extrusion ({current_iou:.6f}), stopping greedy selection")
@@ -2321,7 +2477,7 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
         # Iteratively try adding remaining extrusions (in order of decreasing volume)
         for i, candidate in enumerate(extrusion_candidates[1:], 2):
             print(f"\nStep {i}: Testing addition of sketch {candidate['sketch_idx']} ({candidate['type']}) with volume {candidate['volume']:.6f} (IoU {candidate['individual_iou']:.6f})")
-            
+        
             # Test with this candidate added
             test_groups = selected_groups + [candidate]
             try:
@@ -2330,9 +2486,9 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
                 print(f"        ✗ Error testing this extrusion: {e}")
                 print(f"        Skipping sketch {candidate['sketch_idx']} ({candidate['type']})")
                 continue
-            
+        
             print(f"        Combined IoU with this extrusion: {test_iou:.6f}")
-            
+        
             if test_iou >= best_iou:
                 # Keep this extrusion
                 selected_groups.append(candidate)
@@ -2340,14 +2496,14 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
                 current_executed = test_executed
                 print(f"        ✓ Kept extrusion (improvement: {test_iou - current_iou:.6f})")
                 current_iou = test_iou
-                
+            
                 # Check if we've reached near-perfect reconstruction
                 if test_iou > 0.99:
                     print(f"        IoU > 0.99 achieved, stopping greedy selection")
                     break
             else:
                 print(f"        ✗ Rejected extrusion (no improvement)")
-        
+    
         final_groups = selected_groups
 
     log_event("prune_phase", phase="forward", duration=time.time() - _t_phase,
@@ -2363,33 +2519,33 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
             'final_iou': best_iou,
             'num_extrusions': len(final_groups)
         }, f)
-    
+
     # Post-processing: Iteratively remove extrusion that leads to biggest IoU increase
     # Skip post-processing if early stop (single extrusion with IoU > 0.99)
     if early_stop:
         print(f"\nSkipping post-processing: early stop with IoU > 0.99")
     elif len(final_groups) > 1:  # Only do post-processing if we have multiple extrusions
         print(f"\nStarting post-processing: iteratively removing extrusions that increase IoU...")
-    
-    
+
+
     if not early_stop and len(final_groups) > 1:  # Only do post-processing if we have multiple extrusions
         current_groups = final_groups.copy()
         current_iou = best_iou
         removed_count = 0
         iteration = 0
         shared_pool = mp.Pool(max(1, min(len(current_groups), num_workers))) if persistent_pool else None
-        
+    
         while len(current_groups) > 1:
             iteration += 1
             print(f"\n  Iteration {iteration}: Testing removal of each of {len(current_groups)} extrusions in parallel...")
-            
+        
             # Prepare worker arguments for parallel removal testing
             worker_args = []
             for idx in range(len(current_groups)):
                 groups_before = current_groups[:idx]
                 groups_after = current_groups[idx+1:]
                 worker_args.append((idx, groups_before, groups_after, gt_mesh, output_folder, iteration, alpha))
-            
+        
             # Test all removals in parallel (cap at num_workers).
             if shared_pool is not None:
                 results = shared_pool.map(_test_removal_worker, worker_args)
@@ -2401,33 +2557,33 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
             if batch_removal:
                 # Batch removal: collect all candidates with iou_gain > -0.005
                 candidates_to_remove = []
-                
+            
                 for idx, test_iou, error in results:
                     if error is not None:
                         print(f"    ✗ Error testing removal of extrusion {idx}: {error}")
                         continue
-                    
+                
                     if test_iou is None:
                         continue
                     iou_gain = (test_iou - current_iou)
                     group = current_groups[idx]
                     print(f"    Testing removal of extrusion {idx} (sketch {group['sketch_idx']}, type {group['type']}): IoU {current_iou:.6f} -> {test_iou:.6f} (gain: {iou_gain:.6f})")
-                    
+                
                     # Collect all candidates with positive or near-zero IoU gain
                     if iou_gain > -0.005:
                         candidates_to_remove.append((idx, test_iou, iou_gain))
-                
+            
                 # Remove all candidates in batch (from highest index to lowest to preserve indexing)
                 if candidates_to_remove:
                     candidates_to_remove.sort(key=lambda x: x[0], reverse=True)
                     print(f"\n  Batch removing {len(candidates_to_remove)} extrusions with IoU gain > -0.02")
-                    
+                
                     for idx, test_iou, iou_gain in candidates_to_remove:
                         removed_group = current_groups[idx]
                         print(f"    ✓ Removing extrusion {idx} (sketch {removed_group['sketch_idx']}, type {removed_group['type']}): IoU gain {iou_gain:.6f}")
                         current_groups = current_groups[:idx] + current_groups[idx+1:]
                         removed_count += 1
-                    
+                
                     # Recompute IoU for the new configuration
                     if current_groups:
                         current_iou, _ = run_instruction_groups(current_groups, gt_mesh, output_folder, f"removal_iter{iteration}_batch", alpha)
@@ -2443,24 +2599,24 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
                 best_removal_idx = None
                 best_removal_iou = current_iou
                 best_iou_gain = -0.005
-                
+            
                 for idx, test_iou, error in results:
                     if error is not None:
                         print(f"    ✗ Error testing removal of extrusion {idx}: {error}")
                         continue
-                    
+                
                     if test_iou is None:
                         continue
                     iou_gain = (test_iou - current_iou)
                     group = current_groups[idx]
                     print(f"    Testing removal of extrusion {idx} (sketch {group['sketch_idx']}, type {group['type']}): IoU {current_iou:.6f} -> {test_iou:.6f} (gain: {iou_gain:.6f})")
-                    
+                
                     # Track the removal that gives biggest IoU increase
                     if iou_gain >= best_iou_gain:
                         best_iou_gain = iou_gain
                         best_removal_idx = idx
                         best_removal_iou = test_iou
-                
+            
                 # If we found a removal that increases IoU, apply it
                 if best_removal_idx is not None and best_iou_gain > -0.005:
                     removed_group = current_groups[best_removal_idx]
@@ -2472,26 +2628,37 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
                     # No removal improves IoU, stop iterating
                     print(f"  ✗ No removal improves IoU, stopping post-processing")
                     break
-        
+    
         if shared_pool is not None:
             shared_pool.close()
             shared_pool.join()
         print(f"\n  Post-processing completed: removed {removed_count} out of {len(final_groups)} extrusions")
         print(f"  Final IoU after post-processing: {current_iou:.6f} (improvement: {current_iou - best_iou:.6f})")
-        
+    
         # Update final groups and IoU
         final_groups = current_groups
         best_iou = current_iou
     else:
         print("  Skipping post-processing: only one extrusion selected")
 
-    
-    
+
+
     log_event("prune_phase", phase="backward", duration=time.time() - _t_phase, selected=len(final_groups))
 
     if cut_pool and _cut_phase_enabled() and _exact_union_enabled() and _cache_solids_enabled():
         print(f"\nCut phase over {len(cut_pool)} candidate tools...")
         final_groups, cut_iou = cut_phase(final_groups, cut_pool, gt_mesh, output_folder)
+    if _beam_width() and _exact_union_enabled() and _cache_solids_enabled():
+        # Beam refines the greedy result rather than replacing it: it starts
+        # from greedy's selection and only accepts improving moves, so it can
+        # never end below greedy. Started from single candidates instead, it
+        # lost 0.91 -> 0.72 on a part where the best single is a loose
+        # oversized solid that seeds every state.
+        print(f"\nBeam search (width {_beam_width()}) from the greedy selection over {len(extrusion_candidates)} candidates...")
+        _beam_groups, _beam_iou = beam_search(extrusion_candidates, cut_pool if _cut_phase_enabled() else None,
+                                              gt_mesh, output_folder, width=_beam_width(), seed=final_groups)
+        if _beam_groups is not None:
+            final_groups = _beam_groups
     # The stock keep_mask / 'selected' flags are not reliable, so record the selection here.
     log_event("prune_result", output_folder=output_folder,
               selected=[[g.get('sketch_id', g.get('sketch_idx')), g.get('type'), g.get('height'), g.get('individual_iou')]

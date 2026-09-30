@@ -1373,6 +1373,9 @@ def main():
     parser.add_argument('--translation-max-points', type=int, default=0,
                         help='Subsample each loop to at most this many points for the translation '
                              'chamfer sweep (0 = all points, as stock).')
+    parser.add_argument('--beam', type=int, default=0,
+                        help='Beam search over add/cut compositions with this width, scored by exact IoU, '
+                             'instead of greedy forward/backward (needs --exact-union; 0 = greedy).')
     parser.add_argument('--multistart', action=argparse.BooleanOptionalAction, default=False,
                         help='Run the greedy add/prune from several candidate orders (and without '
                              'loft/sweep) and keep the best by exact IoU. Needs --exact-union.')
@@ -1406,6 +1409,7 @@ def main():
     os.environ['CADFIT_SWEEP_LOFT'] = '1' if args.sweep_loft else '0'
     os.environ['CADFIT_CUT_PHASE'] = '1' if args.cut_phase else '0'
     os.environ['CADFIT_MULTISTART'] = '1' if args.multistart else '0'
+    os.environ['CADFIT_BEAM'] = str(args.beam)
     os.environ['CADFIT_TRANSLATION_MAXPTS'] = str(args.translation_max_points)
     # Inherited by every subprocess (greedy_search.py, refine passes, pool workers).
     os.environ['CADFIT_CQ_WORKER'] = '1' if args.persistent_cq else '0'

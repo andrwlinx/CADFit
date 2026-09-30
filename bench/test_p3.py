@@ -68,6 +68,19 @@ groups, v = co.cut_phase(add, pool, trimesh.load(gt_path), TMP)
 cuts = [g['sketch_id'] for g in groups if g.get('op') == 'cut']
 check('cut phase subtracts the pocket and skips the decoy', cuts == ['cut:E1'] and v > 0.999, f'({cuts}, iou={v:.4f})')
 
+# --- beam search: add + cut composition ---------------------------------------
+bdir = os.path.join(TMP, 'beam')
+os.makedirs(bdir)
+decoy_add = {'type': 'pos', 'insts': [], 'height': 0.3, 'sketch_id': 'E9', 'candidate_id': 9,
+             'stl_path': export(cq.Workplane().box(0.4, 0.4, 0.3).translate((0.7, 0.2, 0)), 'dadd.stl')}
+bg, bv = co.beam_search(add + [decoy_add], pool, trimesh.load(gt_path), bdir, width=3)
+check('beam search finds box + pocket cut', bv is not None and bv > 0.999 and
+      sorted(g['sketch_id'] for g in bg) == ['E0', 'cut:E1'], f'({[g["sketch_id"] for g in bg] if bg else None}, {bv})')
+sg, sv = co.beam_search(add + [decoy_add], pool, trimesh.load(gt_path), bdir, width=3, seed=add + [decoy_add])
+# (the decoy sits inside the pocket, so the cut makes it redundant rather than harmful)
+check('seeded beam starts from the seed and adds the cut', sv is not None and sv > 0.999 and
+      {'E0', 'cut:E1'} <= {g['sketch_id'] for g in sg}, f'({[g["sketch_id"] for g in sg] if sg else None}, {sv})')
+
 # --- exact union IoU agrees with the strict judge ---------------------------
 os.environ['CADFIT_CACHE_SOLIDS'] = '1'
 # Candidates live in the pipeline's normalized frame, so the fixture's union is

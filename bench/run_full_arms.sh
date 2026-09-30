@@ -24,6 +24,7 @@ for arm in $ARMS; do
     rules)   FLAGS="--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400" ;;
     all)     FLAGS="--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --sweep-loft --emit-splines" ;;
     ms)      FLAGS="--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --sweep-loft --emit-splines --multistart" ;;
+    beam)    FLAGS="--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4" ;;
     *) echo "unknown arm $arm"; exit 1 ;;
   esac
   OUT=bench/runs/${TAG}_${arm}
