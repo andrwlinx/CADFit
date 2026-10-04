@@ -47,6 +47,92 @@ def _gwn(mesh, Q, max_elems=1_000_000):
     return out
 
 
+def _gwn_tri(T, q):
+    """Exact winding-number contribution of triangles T (k,3,3) at points q (m,3)."""
+    import numpy as np
+    a = T[None, :, 0, :] - q[:, None, :]
+    b = T[None, :, 1, :] - q[:, None, :]
+    c = T[None, :, 2, :] - q[:, None, :]
+    la, lb, lc = (np.linalg.norm(x, axis=2) for x in (a, b, c))
+    det = np.einsum('ijk,ijk->ij', a, np.cross(b, c))
+    den = (la * lb * lc + np.einsum('ijk,ijk->ij', a, b) * lc
+           + np.einsum('ijk,ijk->ij', b, c) * la + np.einsum('ijk,ijk->ij', c, a) * lb)
+    return (2 * np.arctan2(det, den)).sum(1) / (4 * np.pi)
+
+
+def _gwn_fast(mesh, Q, leaf=128, beta=2.5, chunk=4000):
+    """Generalized winding number with a one-level far-field approximation
+    (Barill et al. 2018): triangles are grouped into spatially coherent
+    clusters (Morton order of centroids); a cluster farther than beta times
+    its radius contributes its area-weighted dipole, nearer ones are summed
+    exactly. For meshes of 1e5-1e6 faces this is orders of magnitude faster
+    than _gwn, and still tolerant of triangle soups."""
+    import numpy as np
+    T = np.asarray(mesh.triangles, dtype=np.float64)
+    cen = T.mean(1)
+    lo, hi = cen.min(0), cen.max(0)
+    g = np.clip(((cen - lo) / np.maximum(hi - lo, 1e-12) * 1023).astype(np.int64), 0, 1023)
+
+    def spread(x):
+        x = (x | (x << 16)) & 0x030000FF
+        x = (x | (x << 8)) & 0x0300F00F
+        x = (x | (x << 4)) & 0x030C30C3
+        return (x | (x << 2)) & 0x09249249
+    T = T[np.argsort(spread(g[:, 0]) | (spread(g[:, 1]) << 1) | (spread(g[:, 2]) << 2), kind='stable')]
+    K = (len(T) + leaf - 1) // leaf
+    starts = np.arange(K) * leaf
+    an = 0.5 * np.cross(T[:, 1] - T[:, 0], T[:, 2] - T[:, 0])          # area * unit normal
+    area = np.linalg.norm(an, axis=1)
+    cen = T.mean(1)
+    D = np.add.reduceat(an, starts)                                       # cluster dipoles
+    w = np.add.reduceat(area, starts)
+    C = np.add.reduceat(cen * area[:, None], starts) / np.maximum(w, 1e-30)[:, None]
+    seg = np.repeat(np.arange(K), leaf)[:len(T)]
+    R = np.zeros(K)
+    np.maximum.at(R, seg, np.linalg.norm(T - C[seg][:, None, :], axis=2).max(1))
+    out = np.zeros(len(Q))
+    for s in range(0, len(Q), chunk):
+        q = Q[s:s + chunk]
+        d = C[None, :, :] - q[:, None, :]                                 # (m,K,3)
+        r = np.linalg.norm(d, axis=2)
+        near = r <= beta * R[None, :]
+        far = np.einsum('mkj,kj->mk', d, D) / np.maximum(r, 1e-30) ** 3
+        far[near] = 0.0
+        acc = far.sum(1) / (4 * np.pi)
+        for k in np.nonzero(near.any(0))[0]:
+            idx = np.nonzero(near[:, k])[0]
+            acc[idx] += _gwn_tri(T[starts[k]:starts[k] + leaf], q[idx])
+        out[s:s + chunk] = acc
+    return out
+
+
+def soup_iou(gt_path, recon_path, n=100000, seed=0, box=1.05):
+    """IoU for a ground truth that is an open triangle soup (raw ABC meshes:
+    most are not watertight, some split into 1e5 disconnected triangles), so
+    neither manifold booleans nor alpha-wrap describe its solid. Both shapes
+    are labelled by generalized winding number on the same seeded points,
+    uniform in the normalized frame's box [-box, box]^3. The GT labels are
+    cached next to the GT (.gtcache/), since GT meshes reach 8e5 faces.
+    The reconstruction is already in the normalized frame."""
+    import numpy as np
+    Q = np.random.default_rng(seed).uniform(-box, box, (n, 3))
+    cache = os.path.join(os.path.dirname(gt_path), '.gtcache',
+                         f"{os.path.splitext(os.path.basename(gt_path))[0]}_n{n}_s{seed}_b{box}.npy")
+    if os.path.exists(cache):
+        in_gt = np.load(cache)
+    else:
+        gt = iou.normalize_mesh(trimesh.load(gt_path, force='mesh'))
+        in_gt = _gwn_fast(gt, Q) > 0.5
+        os.makedirs(os.path.dirname(cache), exist_ok=True)
+        np.save(cache, in_gt)
+    rc = trimesh.load(recon_path, force='mesh')
+    outside = float(np.any(np.abs(rc.bounds) > box))
+    in_rc = _gwn_fast(rc, Q) > 0.5
+    u = (in_gt | in_rc).sum()
+    return {'iou': float((in_gt & in_rc).sum() / u) if u else 0.0, 'method': 'gwn-mc-soup',
+            'recon_exceeds_box': bool(outside)}
+
+
 def robust_iou(gt_path, recon_path, n=40000, seed=0):
     """Judge that does not depend on how clean the reconstruction's STL is.
 
@@ -99,6 +185,15 @@ def strict_iou(gt_path, recon_path):
 
 
 JUDGE = 'robust'   # --judge wrap restores the phase-2 alpha-wrap judge
+
+
+def judge(gt, recon):
+    if JUDGE == 'soup':
+        # Watertight GTs keep the exact judge; soups get winding-number labels.
+        return robust_iou(gt, recon) if trimesh.load(gt, force='mesh').is_watertight else soup_iou(gt, recon)
+    return robust_iou(gt, recon) if JUDGE == 'robust' else strict_iou(gt, recon)
+
+
 RUN_RECON = ('best_greedy_parallel_iterative.stl', 'best_greedy_parallel.stl')
 
 
@@ -134,7 +229,7 @@ def score_runs(run_dirs, stl_dir):
                     res[part] = {'iou': 0.0, 'cd': None, 'valid': False}
                 continue
             gt = os.path.join(stl_dir, part + '.stl')
-            r = robust_iou(gt, recon) if JUDGE == 'robust' else strict_iou(gt, recon)
+            r = judge(gt, recon)
             r['cd'] = chamfer(gt, recon)
             r['valid'] = True
             res[part] = r
@@ -159,9 +254,11 @@ def main():
     ap.add_argument('--stl-dir')
     ap.add_argument('--recon', default='best_greedy_parallel.stl')
     ap.add_argument('--out')
-    ap.add_argument('--judge', choices=['robust', 'wrap'], default='robust',
+    ap.add_argument('--judge', choices=['robust', 'wrap', 'soup'], default='robust',
                     help='robust: exact booleans, winding-number MC for unclean meshes (default); '
-                         'wrap: alpha-wrap both meshes (phase-2 judge)')
+                         'wrap: alpha-wrap both meshes (phase-2 judge); '
+                         'soup: like robust, but a non-watertight GT (raw ABC triangle soup) is labelled '
+                         'by winding number on 1e5 cached seeded points')
     args = ap.parse_args()
     global JUDGE
     JUDGE = args.judge
@@ -187,7 +284,7 @@ def main():
             json.dump(out, open(args.out, 'w'), indent=2)
     else:
         gt, recon = args.paths
-        print(json.dumps(robust_iou(gt, recon) if JUDGE == 'robust' else strict_iou(gt, recon), indent=2))
+        print(json.dumps(judge(gt, recon), indent=2))
 
 
 if __name__ == '__main__':

@@ -2250,7 +2250,16 @@ def _test_removal_worker(args):
     idx, groups_before, groups_after, gt_mesh, output_folder, iteration, alpha = args
     try:
         test_groups = groups_before + groups_after
-        test_iou, _ = run_instruction_groups(test_groups, gt_mesh, output_folder, f"removal_iter{iteration}_test{idx}", alpha)
+        suffix = f"removal_iter{iteration}_test{idx}"
+        test_iou, _ = run_instruction_groups(test_groups, gt_mesh, output_folder, suffix, alpha)
+        # Only the IoU is used. Each test leaves a full model STL (plus the
+        # fallback path's per-type STL and script); on a raw ABC part with a
+        # finely tessellated revolve, 20 removal rounds left 4414 files, 13 GB.
+        for f in glob.glob(os.path.join(glob.escape(output_folder), f"greedy_{suffix}[._]*")):
+            try:
+                os.remove(f)
+            except OSError:
+                pass
         return idx, test_iou, None
     except Exception as e:
         return idx, None, str(e)

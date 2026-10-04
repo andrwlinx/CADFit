@@ -1,3 +1,6 @@
 # CADBench meshes: re-download with bench/fetch_cadbench.py (license unconfirmed)
 bench/cadbench/**/*.stl
 bench/cadbench/**/*.step
+
+# Meshes shared by the lab via Google Drive (0000.zip)
+bench/drive/
