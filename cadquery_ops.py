@@ -1884,6 +1884,11 @@ def beam_search(cands, tools, gt_mesh, output_folder, width=4, max_depth=40, min
             if v <= 1e-6 * vG:
                 continue
             gi = abs((m ^ G).volume())
+            if gi > min(v, vG) * (1 + 1e-6) + 1e-12:
+                # Same broken-boolean signature as in state(): drop it here so
+                # it cannot poison every state it would join.
+                print(f"  Beam: dropping {g.get('sketch_id')} (|c^G| {gi:.5g} > min(|c| {v:.5g}, |G| {vG:.5g}))")
+                continue
             frac = gi / v
             if force or (want_inside and frac >= add_min_inside) or (not want_inside and frac <= cut_max_inside):
                 out.append({'g': g, 'm': m, 'v': v, 'gi': gi})
@@ -1936,7 +1941,9 @@ def beam_search(cands, tools, gt_mesh, output_folder, width=4, max_depth=40, min
         beam = [state(sa, sc, Madd, C)]
         print(f"  Beam seed: IoU {beam[0]['iou']:.5f} ({len(sa)} adds, {len(sc)} cuts)")
         if beam[0]['iou'] < 0:
-            return None, None  # broken seed boolean: keep the greedy result
+            s0 = beam[0]
+            print(f"  Beam: seed boolean is broken (|M^G| {s0['I']:.5g}, |M| {s0['V']:.5g}, |G| {vG:.5g}); keeping greedy")
+            return None, None
     else:
         # Initial beam: best single adds.
         beam = sorted(({'adds': (i,), 'cuts': (), 'Madd': a['m'], 'C': None, 'M': a['m'], 'I': a['gi'],

@@ -492,23 +492,30 @@ def are_loops_parallel_duplicates(loop1_3d, loop2_3d, shape_tolerance=0.05, peri
     """
     if len(loop1_3d) < 3 or len(loop2_3d) < 3:
         return False
-    
-    # Calculate perimeters
-    loop1_array = np.array(loop1_3d)
-    loop2_array = np.array(loop2_3d)
-    
-    perimeter1 = 0.0
-    for j in range(len(loop1_3d)):
-        p1 = loop1_array[j]
-        p2 = loop1_array[(j + 1) % len(loop1_3d)]
-        perimeter1 += np.linalg.norm(p2 - p1)
-    
-    perimeter2 = 0.0
-    for j in range(len(loop2_3d)):
-        p1 = loop2_array[j]
-        p2 = loop2_array[(j + 1) % len(loop2_3d)]
-        perimeter2 += np.linalg.norm(p2 - p1)
-    
+    return parallel_duplicate_from_features(loop_features(loop1_3d), loop_features(loop2_3d),
+                                            loop1_3d, loop2_3d, perimeter_tolerance)
+
+
+def loop_features(loop_3d):
+    """Per-loop quantities used by the parallel-duplicate test: (perimeter,
+    plane normal, centroid). Computing them once per loop rather than once
+    per pair is what keeps the O(n^2) cross-plane deduplication tractable
+    (raw ABC 00000313: 828 loops, >280 s when recomputed per pair)."""
+    loop_array = np.array(loop_3d)
+    perimeter = 0.0
+    for j in range(len(loop_3d)):
+        p1 = loop_array[j]
+        p2 = loop_array[(j + 1) % len(loop_3d)]
+        perimeter += np.linalg.norm(p2 - p1)
+    normal, centroid = fit_plane_to_loop(loop_3d)
+    return perimeter, normal, centroid
+
+
+def parallel_duplicate_from_features(f1, f2, loop1_3d, loop2_3d, perimeter_tolerance=0.15):
+    """are_loops_parallel_duplicates on precomputed loop_features."""
+    perimeter1, normal1, centroid1 = f1
+    perimeter2, normal2, centroid2 = f2
+
     # Check if perimeters are similar
     if max(perimeter1, perimeter2) > 1e-8:
         perimeter_ratio = abs(perimeter1 - perimeter2) / max(perimeter1, perimeter2)
@@ -516,10 +523,6 @@ def are_loops_parallel_duplicates(loop1_3d, loop2_3d, shape_tolerance=0.05, peri
             return False
     else:
         return False
-    
-    # Fit planes to both loops
-    normal1, centroid1 = fit_plane_to_loop(loop1_3d)
-    normal2, centroid2 = fit_plane_to_loop(loop2_3d)
     
     if normal1 is None or normal2 is None:
         return False
@@ -1287,7 +1290,14 @@ def main():
             print("\nRemoving parallel duplicate loops across all entries...")
             filtered_results = []
             removed_count = 0
-            
+            features = {}  # id(loop) -> (loop_features, mean point)
+
+            def feats(loop):
+                k = id(loop)
+                if k not in features:
+                    features[k] = (loop_features(loop), np.mean(np.array(loop), axis=0))
+                return features[k]
+
             for i, entry in enumerate(results):
                 if entry['entry_type'] != 'individual_loop':
                     # Keep all grouped entries as-is
@@ -1311,8 +1321,7 @@ def main():
                         continue
                     
                     # Check for same-location duplicates
-                    loop_centroid = np.mean(np.array(loop_3d), axis=0)
-                    existing_centroid = np.mean(np.array(existing_loop_3d), axis=0)
+                    (f_new, loop_centroid), (f_old, existing_centroid) = feats(loop_3d), feats(existing_loop_3d)
                     centroid_dist = np.linalg.norm(loop_centroid - existing_centroid)
                     
                     if centroid_dist < 0.01:
@@ -1322,7 +1331,7 @@ def main():
                         break
                     
                     # Check for parallel duplicates
-                    if are_loops_parallel_duplicates(loop_3d, existing_loop_3d):
+                    if parallel_duplicate_from_features(f_new, f_old, loop_3d, existing_loop_3d):
                         is_duplicate = True
                         removed_count += 1
                         print(f"  Removing parallel duplicate: entry {i} (parallel to existing entry, distance: {centroid_dist:.4f})")

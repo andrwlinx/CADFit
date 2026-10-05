@@ -141,10 +141,43 @@ def is_loop_contained_in_loop(inner_loop: List[List[float]], outer_loop: List[Li
         return False
 
 
+def _loop_polygon(loop, origin, normal, xdir):
+    """The polygon is_loop_contained_in_loop builds for `loop` (closed,
+    buffer(0) if invalid), or None where it would raise."""
+    try:
+        pts = project_loop_to_2d(loop, origin, normal, xdir)
+        if len(pts) < 3:
+            return None
+        if pts[0] != pts[-1]:
+            pts.append(pts[0])
+        poly = Polygon(pts)
+        return poly if poly.is_valid else poly.buffer(0)
+    except Exception:
+        return None
+
+
 def group_contained_loops(loops: List[List[List[float]]], origin: List[float], normal: List[float], xdir: List[float] = None) -> List[List[List[List[float]]]]:
     """Group loops where some are contained within others."""
     if len(loops) <= 1:
         return [[loop] for loop in loops]
+
+    # The pairwise test re-projected and rebuilt both polygons per pair; on
+    # raw ABC parts (loops of thousands of points, 484 MB of sketches for
+    # 00000456) that ran past the pipeline's timeout. Build each once.
+    polys = [_loop_polygon(loop, origin, normal, xdir) for loop in loops]
+
+    def contained(j, i):
+        inner, outer = polys[j], polys[i]
+        if inner is None or outer is None:
+            return is_loop_contained_in_loop(loops[j], loops[i], origin, normal, xdir)
+        try:
+            if not inner.is_empty and not outer.is_empty:
+                a, b = inner.bounds, outer.bounds
+                if a[0] < b[0] or a[1] < b[1] or a[2] > b[2] or a[3] > b[3]:
+                    return False  # covers() needs the inner box inside the outer
+            return outer.contains(inner) or outer.covers(inner)
+        except Exception:
+            return is_loop_contained_in_loop(loops[j], loops[i], origin, normal, xdir)
     
     # Calculate areas to help determine outer vs inner loops
     loop_areas = []
@@ -187,7 +220,7 @@ def group_contained_loops(loops: List[List[List[float]]], origin: List[float], n
                 continue
                 
             # Check if loop j is contained in loop i
-            if is_loop_contained_in_loop(loops[j], loops[i], origin, normal, xdir):
+            if contained(j, i):
                 current_group.append(loops[j])
                 current_group_indices.append(j)
                 used_indices.add(j)
