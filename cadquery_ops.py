@@ -1879,7 +1879,9 @@ def beam_search(cands, tools, gt_mesh, output_folder, width=4, max_depth=40, min
             if m is None:
                 continue
             v = abs(m.volume())
-            if v <= 0:
+            # A near-empty solid (e.g. a revolve of a degenerate profile)
+            # adds nothing but can break the booleans of every state it joins.
+            if v <= 1e-6 * vG:
                 continue
             gi = abs((m ^ G).volume())
             frac = gi / v
@@ -1904,7 +1906,11 @@ def beam_search(cands, tools, gt_mesh, output_folder, width=4, max_depth=40, min
         if M is None:
             M = Madd - C if C is not None else Madd
         I, V = abs((M ^ G).volume()), abs(M.volume())
-        return {'adds': adds, 'cuts': cuts, 'Madd': Madd, 'C': C, 'M': M, 'I': I, 'V': V, 'iou': score(I, V)}
+        # |M ^ G| above |M| or |G| means a boolean produced a broken manifold
+        # (abs() hides an inverted shell); on raw ABC parts such states scored
+        # IoU 9.73 (00001081) and 1.18 (00000456) and won. Never accept them.
+        iou = score(I, V) if I <= min(V, vG) * (1 + 1e-6) + 1e-12 else -1.0
+        return {'adds': adds, 'cuts': cuts, 'Madd': Madd, 'C': C, 'M': M, 'I': I, 'V': V, 'iou': iou}
 
     if seed:
         # Seed members that the inside/outside filters dropped still belong
@@ -1929,6 +1935,8 @@ def beam_search(cands, tools, gt_mesh, output_folder, width=4, max_depth=40, min
         C = (union([T[j]['m'] for j in sc], _iou._OP_ADD) if len(sc) > 1 else T[sc[0]]['m']) if sc else None
         beam = [state(sa, sc, Madd, C)]
         print(f"  Beam seed: IoU {beam[0]['iou']:.5f} ({len(sa)} adds, {len(sc)} cuts)")
+        if beam[0]['iou'] < 0:
+            return None, None  # broken seed boolean: keep the greedy result
     else:
         # Initial beam: best single adds.
         beam = sorted(({'adds': (i,), 'cuts': (), 'Madd': a['m'], 'C': None, 'M': a['m'], 'I': a['gi'],
@@ -1944,7 +1952,9 @@ def beam_search(cands, tools, gt_mesh, output_folder, width=4, max_depth=40, min
 
         def offer(st, key, make):
             nonlocal evals
-            if key in children:
+            # One state's moves can take minutes on dense parts (00001081 ran
+            # 845 s against a 240 s budget), so the deadline is checked per move.
+            if key in children or time.time() - t0 > time_budget:
                 return
             evals += 1
             ch = make()
@@ -2544,7 +2554,16 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
         iteration = 0
         shared_pool = mp.Pool(max(1, min(len(current_groups), num_workers))) if persistent_pool else None
     
+        # Each round rebuilds the model once per selected extrusion, so on a
+        # dense part with ~55 selected this pass alone overran the 3000 s
+        # greedy step (raw ABC 00000456). Stop between rounds once the budget
+        # is spent and keep the best selection so far; the slowest stock run
+        # seen (1269 s) is well inside the default.
+        backward_budget = float(os.environ.get("CADFIT_BACKWARD_BUDGET") or 1800)
         while len(current_groups) > 1:
+            if time.time() - _t_phase > backward_budget:
+                print(f"\n  Backward pass budget ({backward_budget:.0f}s) reached; keeping current selection")
+                break
             iteration += 1
             print(f"\n  Iteration {iteration}: Testing removal of each of {len(current_groups)} extrusions in parallel...")
         

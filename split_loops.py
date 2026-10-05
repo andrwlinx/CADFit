@@ -28,6 +28,7 @@ Usage:
 """
 from __future__ import annotations
 import json
+import os
 import argparse
 from collections import defaultdict
 from typing import Tuple, List
@@ -336,8 +337,12 @@ def split_loops(input_path: str, output_path: str, merge: bool = False, group_co
                 out_entries.append(entry_out)
 
     # write output
-    with open(output_path, 'w') as f:
+    # Write-then-rename: a caller that kills this script on timeout must never
+    # find a truncated JSON at output_path.
+    tmp_path = output_path + '.tmp'
+    with open(tmp_path, 'w') as f:
         json.dump(out_entries, f, indent=2)
+    os.replace(tmp_path, output_path)
 
     mode_str = "group-contained" if group_contained else ("merge" if merge else "split")
     print(f"Read {total_sketches} sketch entries from {input_path}")

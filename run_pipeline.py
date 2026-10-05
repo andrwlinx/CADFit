@@ -707,8 +707,14 @@ def run_analysis_steps(stl_path, output_folder, n_slices=5, delta=0.05, normaliz
     # Step 4: Split axis-aligned sketches loops
     print(f"\n🔄 Step 4/7: Splitting axis-aligned sketches loops...")
     cmd4 = [sys.executable, _release_script("split_loops.py"), axis_sketches_path, "--group-contained", "--out", axis_loops_split_path]
-    if not run_command(cmd4, "Split axis loops", timeout=120):
-        print("failed")
+    # 120 s was too tight for dense raw ABC parts (stock run of 00002086 took
+    # 119 s; the next run timed out). On failure, drop any stale or partial
+    # output so Step 4b falls back to the planar loops alone.
+    if not run_command(cmd4, "Split axis loops", timeout=300):
+        print("failed; continuing with planar loops only")
+        for path in (axis_loops_split_path, axis_loops_split_path + '.tmp'):
+            if os.path.exists(path):
+                os.remove(path)
     
     # Step 4b: Combine both split loop JSONs for extrusion
     print(f"\n🔗 Step 4b/7: Combining split loops from both sources...")

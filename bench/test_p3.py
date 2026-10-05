@@ -80,6 +80,14 @@ sg, sv = co.beam_search(add + [decoy_add], pool, trimesh.load(gt_path), bdir, wi
 # (the decoy sits inside the pocket, so the cut makes it redundant rather than harmful)
 check('seeded beam starts from the seed and adds the cut', sv is not None and sv > 0.999 and
       {'E0', 'cut:E1'} <= {g['sketch_id'] for g in sg}, f'({[g["sketch_id"] for g in sg] if sg else None}, {sv})')
+sliver = {'type': 'revolve', 'insts': [], 'height': 0, 'sketch_id': 'cut:R4', 'candidate_id': 100004,
+          'stl_path': export(cq.Workplane().box(1e-3, 1e-3, 1e-3).translate((0, 0, 0.2)), 'sliver.stl')}
+ng, nv = co.beam_search(add + [decoy_add], pool + [sliver], trimesh.load(gt_path), bdir, width=3)
+check('beam ignores a near-empty cut tool', nv is not None and 0.999 < nv <= 1.0 and
+      'cut:R4' not in [g['sketch_id'] for g in ng], f'({[g["sketch_id"] for g in ng] if ng else None}, {nv})')
+tg, tv = co.beam_search(add + [decoy_add], pool, trimesh.load(gt_path), bdir, width=3, seed=add, time_budget=0)
+check('beam with no time left returns the seed', tg is not None and [g['sketch_id'] for g in tg] == ['E0'],
+      f'({[g["sketch_id"] for g in tg] if tg else None}, {tv})')
 
 # --- exact union IoU agrees with the strict judge ---------------------------
 os.environ['CADFIT_CACHE_SOLIDS'] = '1'
