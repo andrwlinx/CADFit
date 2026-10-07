@@ -23,6 +23,7 @@ import trimesh
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import iou  # noqa: E402
+from gwn_repair import _gwn_fast, _gwn_tri  # noqa: E402,F401
 
 
 def _gwn(mesh, Q, max_elems=1_000_000):
@@ -44,65 +45,6 @@ def _gwn(mesh, Q, max_elems=1_000_000):
         den = (la * lb * lc + np.einsum('ijk,ijk->ij', a, b) * lc
                + np.einsum('ijk,ijk->ij', b, c) * la + np.einsum('ijk,ijk->ij', c, a) * lb)
         out[s:s + chunk] = (2 * np.arctan2(det, den)).sum(1) / (4 * np.pi)
-    return out
-
-
-def _gwn_tri(T, q):
-    """Exact winding-number contribution of triangles T (k,3,3) at points q (m,3)."""
-    import numpy as np
-    a = T[None, :, 0, :] - q[:, None, :]
-    b = T[None, :, 1, :] - q[:, None, :]
-    c = T[None, :, 2, :] - q[:, None, :]
-    la, lb, lc = (np.linalg.norm(x, axis=2) for x in (a, b, c))
-    det = np.einsum('ijk,ijk->ij', a, np.cross(b, c))
-    den = (la * lb * lc + np.einsum('ijk,ijk->ij', a, b) * lc
-           + np.einsum('ijk,ijk->ij', b, c) * la + np.einsum('ijk,ijk->ij', c, a) * lb)
-    return (2 * np.arctan2(det, den)).sum(1) / (4 * np.pi)
-
-
-def _gwn_fast(mesh, Q, leaf=128, beta=2.5, chunk=4000):
-    """Generalized winding number with a one-level far-field approximation
-    (Barill et al. 2018): triangles are grouped into spatially coherent
-    clusters (Morton order of centroids); a cluster farther than beta times
-    its radius contributes its area-weighted dipole, nearer ones are summed
-    exactly. For meshes of 1e5-1e6 faces this is orders of magnitude faster
-    than _gwn, and still tolerant of triangle soups."""
-    import numpy as np
-    T = np.asarray(mesh.triangles, dtype=np.float64)
-    cen = T.mean(1)
-    lo, hi = cen.min(0), cen.max(0)
-    g = np.clip(((cen - lo) / np.maximum(hi - lo, 1e-12) * 1023).astype(np.int64), 0, 1023)
-
-    def spread(x):
-        x = (x | (x << 16)) & 0x030000FF
-        x = (x | (x << 8)) & 0x0300F00F
-        x = (x | (x << 4)) & 0x030C30C3
-        return (x | (x << 2)) & 0x09249249
-    T = T[np.argsort(spread(g[:, 0]) | (spread(g[:, 1]) << 1) | (spread(g[:, 2]) << 2), kind='stable')]
-    K = (len(T) + leaf - 1) // leaf
-    starts = np.arange(K) * leaf
-    an = 0.5 * np.cross(T[:, 1] - T[:, 0], T[:, 2] - T[:, 0])          # area * unit normal
-    area = np.linalg.norm(an, axis=1)
-    cen = T.mean(1)
-    D = np.add.reduceat(an, starts)                                       # cluster dipoles
-    w = np.add.reduceat(area, starts)
-    C = np.add.reduceat(cen * area[:, None], starts) / np.maximum(w, 1e-30)[:, None]
-    seg = np.repeat(np.arange(K), leaf)[:len(T)]
-    R = np.zeros(K)
-    np.maximum.at(R, seg, np.linalg.norm(T - C[seg][:, None, :], axis=2).max(1))
-    out = np.zeros(len(Q))
-    for s in range(0, len(Q), chunk):
-        q = Q[s:s + chunk]
-        d = C[None, :, :] - q[:, None, :]                                 # (m,K,3)
-        r = np.linalg.norm(d, axis=2)
-        near = r <= beta * R[None, :]
-        far = np.einsum('mkj,kj->mk', d, D) / np.maximum(r, 1e-30) ** 3
-        far[near] = 0.0
-        acc = far.sum(1) / (4 * np.pi)
-        for k in np.nonzero(near.any(0))[0]:
-            idx = np.nonzero(near[:, k])[0]
-            acc[idx] += _gwn_tri(T[starts[k]:starts[k] + leaf], q[idx])
-        out[s:s + chunk] = acc
     return out
 
 

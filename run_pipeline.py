@@ -834,6 +834,27 @@ def run_analysis_steps(stl_path, output_folder, n_slices=5, delta=0.05, normaliz
     return True
 
 
+def _winding_repair_if_open(stl_path: str) -> str:
+    """For an open input mesh, return its winding-number solid (gwn_repair.py),
+    cached in a `.gwn/` subfolder next to the input so it is built once per
+    part and is not picked up as another input STL; otherwise `stl_path`.
+    Every downstream step (sketch extraction, greedy IoU, refinement) then
+    sees the solid the soup judge scores against; the final IoU report still
+    uses the original input."""
+    try:
+        mesh = trimesh.load(stl_path, force='mesh')
+        if mesh.is_watertight and mesh.body_count == 1:
+            return stl_path
+        from gwn_repair import repair_to_winding_solid
+        cache_dir = os.path.join(os.path.dirname(os.path.abspath(stl_path)), '.gwn')
+        os.makedirs(cache_dir, exist_ok=True)
+        out = repair_to_winding_solid(stl_path, os.path.join(cache_dir, os.path.basename(stl_path)))
+        return out or stl_path
+    except Exception as e:
+        print(f"⚠️  Winding-number repair failed ({e}); using the input mesh")
+        return stl_path
+
+
 def _decimate_input_if_needed(stl_path: str, output_folder: str,
                                target_faces: int = 30_000) -> str:
     """If the input STL has more than `target_faces`, write a decimated copy
@@ -918,7 +939,8 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
                                    apply_fillet_chamfer=False, keep_history=False,
                                    filter_sketches=False, filter_threshold=None,
                                    filter_model_path=None, filter_norm_path=None,
-                                   greedy_args=None, analysis_args=None, guard_refine=False):
+                                   greedy_args=None, analysis_args=None, guard_refine=False,
+                                   gwn_repair=False):
     """Process a single STL file with iterative refinement using precomputed analysis"""
     stl_name = os.path.basename(stl_path)
     stl_id = os.path.splitext(stl_name)[0]
@@ -940,6 +962,13 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
     # then loads this smaller mesh. The original stl_path is still used as
     # the canonical ground truth in the final IoU report.
     original_stl_path = stl_path
+    if gwn_repair:
+        stl_path = _winding_repair_if_open(stl_path)
+    # The final report and the single-candidate safety net below must score
+    # against the solid the search targeted: against a raw open soup the
+    # safety net swapped a lone candidate (0.17 by the soup judge) in for
+    # beam's 0.51 model on 00001945.
+    reference_gt_path = stl_path
     stl_path = _decimate_input_if_needed(stl_path, output_folder)
 
     # If the input STL is non-watertight or composed of multiple bodies, save
@@ -1192,9 +1221,9 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
     print(f"{'='*80}")
 
     iou_start = time.time()
-    # Final IoU is reported against the ORIGINAL (un-decimated) GT — the
-    # decimated copy was only used to accelerate sketch extraction.
-    final_iou = mesh_iou_cpu_boolean(original_stl_path, final_output, normalize=True, verbose=True)
+    # Final IoU is reported against the un-decimated GT (the winding-number
+    # solid under --gwn-repair) — the decimated copy only sped up sketch extraction.
+    final_iou = mesh_iou_cpu_boolean(reference_gt_path, final_output, normalize=True, verbose=True)
 
     # Safety net: a candidate from greedy's evaluated_operations may score
     # higher than the greedy combination when evaluated against the
@@ -1213,7 +1242,7 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
             if not stl_p or not os.path.exists(stl_p):
                 continue
             try:
-                iou = mesh_iou_cpu_boolean(original_stl_path, stl_p, normalize=True, verbose=False)
+                iou = mesh_iou_cpu_boolean(reference_gt_path, stl_p, normalize=True, verbose=False)
             except Exception:
                 continue
             if iou is not None and iou > best_candidate_iou + 1e-6:
@@ -1314,6 +1343,10 @@ def main():
     parser.add_argument('--limit', type=int, help='Process at most this many STLs')
     parser.add_argument('--fillet-chamfer', action='store_true',
                         help='Enable the per-iteration fillet/chamfer refinement step (off by default)')
+    parser.add_argument('--gwn-repair', action='store_true',
+                        help='Replace an open input mesh with its winding-number solid '
+                             '(gwn_repair.py) before analysis, so the search targets the '
+                             'solid the soup judge scores.')
     parser.add_argument('--keep-history', action='store_true',
                         help='Keep all intermediate files in the output folder. '
                              'By default, only the final STL, .py, and final_iou.json are kept.')
@@ -1502,6 +1535,7 @@ def main():
                 filter_norm_path=args.filter_norm,
                 greedy_args=greedy_args,
                 analysis_args=analysis_args,
+                gwn_repair=args.gwn_repair,
                 guard_refine=args.guard_refine,
             )
             successful += 1

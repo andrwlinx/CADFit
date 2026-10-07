@@ -149,5 +149,19 @@ prof = sec(0, 0.3) + path[0]
 ok = co.execute_cadquery_script(co.generate_generic_script(asl.sweep_code(prof, [0, 0, 1], path, True), out), out)
 check('sweep code builds a watertight solid', ok and trimesh.load(out).is_watertight)
 
+# --- winding-number repair of an open mesh -----------------------------------
+from gwn_repair import repair_to_winding_solid  # noqa: E402
+# Raw ABC meshes are triangle soups: every triangle on its own vertices.
+box = trimesh.creation.box((2.0, 1.0, 0.5))
+open_box = trimesh.Trimesh(box.triangles.reshape(-1, 3), np.arange(3 * len(box.faces)).reshape(-1, 3), process=False)
+open_box.export(os.path.join(TMP, 'open_box.stl'))
+rp = repair_to_winding_solid(os.path.join(TMP, 'open_box.stl'), os.path.join(TMP, 'open_box_gwn.stl'),
+                             cells_on_max_extent=48)
+rs = trimesh.load(rp) if rp else None
+check('winding repair turns a triangle-soup box into a closed solid of its volume and bounds',
+      rs is not None and rs.is_watertight and abs(rs.volume - 1.0) < 0.05
+      and np.allclose(rs.bounds, open_box.bounds, atol=1e-6),
+      f'(vol {rs.volume:.4f}, watertight {rs.is_watertight})' if rs is not None else '(no solid)')
+
 print(f"\n{sum(results)}/{len(results)} passed")
 sys.exit(0 if all(results) else 1)

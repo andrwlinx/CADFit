@@ -4,7 +4,7 @@
 # STLs in place. Analysis is seeded, so arms differ only by their flags.
 #
 # Usage: bench/run_full_arms.sh <stl_dir> <tag> [arm ...]
-#   arms: stock base speed cut rules all
+#   arms: stock base speed cut rules all ms beam basegwn beamgwn
 # Outputs: bench/runs/<tag>_<arm>/{<part>/..., profile.jsonl, log.txt}
 # Score:   .venv/bin/python bench/score.py --runs bench/runs/<tag>_* --stl-dir <stl_dir>
 set -u
@@ -25,6 +25,8 @@ for arm in $ARMS; do
     all)     FLAGS="--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --sweep-loft --emit-splines" ;;
     ms)      FLAGS="--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --sweep-loft --emit-splines --multistart" ;;
     beam)    FLAGS="--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4" ;;
+    basegwn) FLAGS="--gwn-repair" ;;
+    beamgwn) FLAGS="--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --gwn-repair" ;;
     *) echo "unknown arm $arm"; exit 1 ;;
   esac
   OUT=bench/runs/${TAG}_${arm}
