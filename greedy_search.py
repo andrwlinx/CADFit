@@ -31,6 +31,8 @@ from cadquery_ops import (
     compute_iou,
     generate_cadquery_revolve_script,
     generate_generic_script,
+    safe_pool_map,
+    guarded_pool,
 )
 
 
@@ -487,8 +489,9 @@ def precompute_operations_from_analysis(
     extrusion_args = [(sketch_idx, entry, translation_analysis_folder) 
                       for sketch_idx, entry in enumerate(loops_data)]
     
-    with mp.Pool(num_workers) as pool:
-        results = pool.map(_process_extrusion_worker, extrusion_args)
+    with guarded_pool(num_workers) as pool:
+        results, _ = safe_pool_map(pool, _process_extrusion_worker, extrusion_args, stall=900)
+    results = [r for r in results if r is not None]
     
     # Collect results
     for sketch_idx, extrusions in results:
@@ -507,8 +510,9 @@ def precompute_operations_from_analysis(
     revolve_args = [(sketch_idx, entry, revolve_analysis_folder) 
                     for sketch_idx, entry in enumerate(revolve_data)]
     
-    with mp.Pool(num_workers) as pool:
-        results = pool.map(_process_revolve_worker, revolve_args)
+    with guarded_pool(num_workers) as pool:
+        results, _ = safe_pool_map(pool, _process_revolve_worker, revolve_args, stall=900)
+    results = [r for r in results if r is not None]
     
     # Collect results
     for sketch_idx, revolves in results:
@@ -990,8 +994,11 @@ def run_greedy_search(
     # IoU is fully CPU now, so let it scale with the requested worker count.
     import time as _time
     _t_eval = _time.time()
-    with mp.Pool(max(1, num_workers)) as pool:
-        results = pool.map(_evaluate_operation_worker, eval_args)
+    from iou import warm_manifold
+    warm_manifold(ground_truth_path, normalize)
+    with guarded_pool(max(1, num_workers), initializer=warm_manifold,
+                 initargs=(ground_truth_path, normalize)) as pool:
+        results, _ = safe_pool_map(pool, _evaluate_operation_worker, eval_args, stall=900)
     
     # Filter out None results
     evaluated_operations = [r for r in results if r is not None and not r.get('low_iou')]
@@ -1179,6 +1186,13 @@ if __name__ == '__main__':
                              'them by int index and rebuilds the loser from the winner\'s sketch)')
     
     args = parser.parse_args()
+    # `kill -USR1 <pid>` appends every thread's stack to stack_dump.txt: the
+    # step has hung past its budgets on raw ABC parts, and ptrace (py-spy) is
+    # not always allowed. A file, because a timed-out step loses its stderr.
+    import faulthandler
+    os.makedirs(args.output_folder, exist_ok=True)
+    _dump_file = open(os.path.join(args.output_folder, 'stack_dump.txt'), 'a')
+    faulthandler.register(signal.SIGUSR1, file=_dump_file, all_threads=True)
     if args.cache_solids and not args.fix_sketch_identity:
         parser.error('--cache-solids requires --fix-sketch-identity (stock rebuilds losers from the winner\'s sketch, '
                      'so the evaluated STL would not match)')

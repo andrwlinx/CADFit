@@ -9,6 +9,7 @@ depends on benchmark runs.
 import os
 import sys
 import tempfile
+import time
 
 import numpy as np
 import trimesh
@@ -67,6 +68,10 @@ pool = [{'type': 'pos', 'insts': [], 'height': 0.4, 'sketch_id': 'cut:E1', 'cand
 groups, v = co.cut_phase(add, pool, trimesh.load(gt_path), TMP)
 cuts = [g['sketch_id'] for g in groups if g.get('op') == 'cut']
 check('cut phase subtracts the pocket and skips the decoy', cuts == ['cut:E1'] and v > 0.999, f'({cuts}, iou={v:.4f})')
+t0 = time.time()
+groups, v0 = co.cut_phase(add, pool, trimesh.load(gt_path), TMP, time_budget=0)
+check('cut phase stops at its time budget with the model unchanged',
+      groups == add and v0 is not None and time.time() - t0 < 5, f'({len(groups)} groups, iou={v0})')
 
 # --- beam search: add + cut composition ---------------------------------------
 bdir = os.path.join(TMP, 'beam')
@@ -162,6 +167,140 @@ check('winding repair turns a triangle-soup box into a closed solid of its volum
       rs is not None and rs.is_watertight and abs(rs.volume - 1.0) < 0.05
       and np.allclose(rs.bounds, open_box.bounds, atol=1e-6),
       f'(vol {rs.volume:.4f}, watertight {rs.is_watertight})' if rs is not None else '(no solid)')
+
+# A soup whose bounding box is set by an open sheet far from its solid: the
+# stretch onto the input's bounds used to distort the solid (00002336).
+sheet = trimesh.Trimesh([[-1, -0.5, 3.0], [1, -0.5, 3.0], [1, 0.5, 3.0]], [[0, 1, 2]], process=False)
+trimesh.util.concatenate([open_box, sheet]).export(os.path.join(TMP, 'box_sheet.stl'))
+rp = repair_to_winding_solid(os.path.join(TMP, 'box_sheet.stl'), os.path.join(TMP, 'box_sheet_gwn.stl'),
+                             cells_on_max_extent=48)
+check('winding repair declines (no stretch) when the solid does not fill the input bounds', rp is None
+      and os.path.exists(os.path.join(TMP, 'box_sheet_gwn.stl.declined')))
+
+# --- degenerate sketch loops -------------------------------------------------
+import fit_primitives  # noqa: E402
+# When every segment of a loop is shorter than the 1e-2 skip tolerance, only
+# its moveTo is left; close() then raised "No start point specified - cannot
+# close" and killed the whole candidate (raw ABC 00001607).
+_p2i = fit_primitives.primitives_to_instances
+calls = []
+fit_primitives.primitives_to_instances = lambda *a: (calls.append(1), _p2i(*a) if len(calls) == 1
+                                                     else ['sketch.moveTo(0.3, 0.3)'])[1]
+square = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
+acts = fit_primitives.build_action_instances_from_entry(
+    {'origin': [0, 0, 0], 'normal': [0, 0, 1], 'xdir': [1, 0, 0], 'loops_3d': [square, square]})
+fit_primitives.primitives_to_instances = _p2i
+check('a loop with no segments left is dropped, not emitted as moveTo + close',
+      len(calls) == 2 and 'sketch.moveTo(0.3, 0.3)' not in acts, f'({acts[-2:]})')
+
+# --- pool tasks that never return ---------------------------------------------
+import multiprocessing as mp  # noqa: E402
+import time  # noqa: E402
+from cadquery_ops import safe_pool_map  # noqa: E402
+
+
+def _task(x):
+    if x == 'die':
+        os._exit(1)        # a worker killed mid-task (segfault, OOM killer)
+    if x == 'hang':
+        time.sleep(3600)   # a deadlocked worker
+    return x * 2
+
+
+with mp.get_context('fork').Pool(2) as pool:
+    t0 = time.time()
+    res, lost = safe_pool_map(pool, _task, [1, 'die', 3], grace=3)
+    check('safe_pool_map returns the finished results when a worker dies', res == [2, None, 6] and lost == 1
+          and time.time() - t0 < 30, f'({res}, {time.time() - t0:.0f}s)')
+with mp.get_context('fork').Pool(2) as pool:
+    res, lost = safe_pool_map(pool, _task, [1, 'hang'], stall=3)
+    check('safe_pool_map gives up on a task that stalls', res == [2, None] and lost == 1)
+    res, lost = safe_pool_map(pool, _task, [1, 'hang'], deadline=time.time() + 3)
+    check('safe_pool_map stops at the deadline', res == [2, None] and lost == 1)
+
+# --- step timeouts kill the step's whole process tree --------------------------
+import subprocess  # noqa: E402
+from run_pipeline import _run_group  # noqa: E402
+pidfile = os.path.join(TMP, 'grandchild.pid')
+spawn = (f"import subprocess, sys, time; p = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(600)']);"
+         f"open({pidfile!r}, 'w').write(str(p.pid)); time.sleep(600)")
+try:
+    _run_group([sys.executable, '-c', spawn], timeout=5)
+    timed_out = False
+except subprocess.TimeoutExpired:
+    timed_out = True
+time.sleep(0.5)
+gpid = int(open(pidfile).read())
+try:
+    os.kill(gpid, 0)
+    alive = subprocess.run(['ps', '-o', 'stat=', '-p', str(gpid)], capture_output=True, text=True).stdout.strip()
+    alive = bool(alive) and not alive.startswith('Z')
+except ProcessLookupError:
+    alive = False
+check('a timed-out step leaves no grandchild running', timed_out and not alive)
+
+# --- a pool whose task-queue lock is held by a stuck process can still be stopped
+import threading  # noqa: E402
+from cadquery_ops import abandon_pool  # noqa: E402
+
+
+def _hold(lock):
+    lock.acquire()
+    time.sleep(600)
+
+
+def _stop_in_thread(fn, pool, wait=10):
+    t = threading.Thread(target=fn, args=(pool,), daemon=True)
+    t0 = time.time()
+    t.start()
+    t.join(wait)
+    return not t.is_alive(), time.time() - t0
+
+
+_ctx = mp.get_context('fork')
+_stuck = []
+for stop in (lambda p: p.terminate(), abandon_pool):
+    pool = _ctx.Pool(2)
+    pool.map(_task, [1, 2])
+    holder = _ctx.Process(target=_hold, args=(pool._inqueue._rlock,), daemon=True)
+    holder.start()
+    time.sleep(1)  # an idle worker gives the lock up to the holder only between tasks
+    _stuck.append((stop, pool, holder))
+ok_term, _ = _stop_in_thread(_stuck[0][0], _stuck[0][1], wait=8)
+ok_ab, t_ab = _stop_in_thread(_stuck[1][0], _stuck[1][1], wait=30)
+workers_dead = all(not w.is_alive() for w in _stuck[1][1]._pool)
+for _, _, holder in _stuck:
+    holder.kill()
+check('abandon_pool stops a pool whose queue lock is held by a stuck process (terminate() hangs)',
+      ok_ab and workers_dead, f'(terminate {"returned" if ok_term else "hung"}, abandon {t_ab:.1f}s)')
+
+# --- a watchdog firing inside the target's wrap must not poison the cache ------
+import iou  # noqa: E402
+soup = trimesh.creation.box(extents=(2, 1, 1))
+soup = trimesh.Trimesh(soup.vertices, soup.faces[:-2])  # open: needs the alpha-wrap
+soup_path = os.path.join(TMP, 'open_box.stl')
+soup.export(soup_path)
+
+
+class _AlarmClient:
+    def run(self, script, path=None, timeout=60.0):
+        raise TimeoutError('Operation evaluation timed out')
+
+
+_saved = iou._WRAP_CLIENT
+iou._WRAP_CLIENT = _AlarmClient()
+try:
+    iou._cached_manifold(soup_path, True)
+    raised = False
+except TimeoutError:
+    raised = True
+iou._WRAP_CLIENT = _saved
+cached = any(k[0] == soup_path for k in iou._MANIFOLD_CACHE)
+box_path = os.path.join(TMP, 'half_box.stl')
+trimesh.creation.box(extents=(1, 1, 1)).export(box_path)
+v = iou.mesh_iou_cpu_boolean(soup_path, box_path, normalize=True)
+check('a watchdog firing during the target wrap is re-raised, not cached as a failed target',
+      raised and not cached and v > 0, f'(raised={raised}, cached={cached}, iou={v:.3f})')
 
 print(f"\n{sum(results)}/{len(results)} passed")
 sys.exit(0 if all(results) else 1)

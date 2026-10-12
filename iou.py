@@ -84,7 +84,13 @@ def _alpha_wrap_forked(mesh, target_faces):
             f"np.savez({dst!r}, v=np.asarray(w.vertices), f=np.asarray(w.faces))\n")
         try:
             ok, _ = _WRAP_CLIENT.run(script, timeout=600)
-        except Exception:
+        except Exception as e:
+            # The caller's SIGALRM watchdog (builtin or cadquery_ops'
+            # TimeoutError): let it abandon the task. Read as a failed wrap, it
+            # cached a None ground truth and every later IoU in that worker
+            # was 0 (abc60c beam 00000493: 0/257 candidates).
+            if type(e).__name__ == 'TimeoutError':
+                raise
             ok = False
         if ok and os.path.exists(dst):
             d = np.load(dst)
@@ -308,6 +314,14 @@ def _cached_manifold(path: str, normalize: bool):
 
     _cache_put(key, m)
     return m
+
+
+def warm_manifold(path: str, normalize: bool):
+    """Build and cache `path`'s manifold now, outside any per-task watchdog.
+    Call before starting a pool (forked workers inherit the cache) and pass as
+    its initializer (spawned workers build their own). Under load the target's
+    alpha-wrap can outlast the 30 s per-candidate watchdog."""
+    _cached_manifold(path, normalize)
 
 
 def _wrapped_manifold(path: str, normalize: bool):

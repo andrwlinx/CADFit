@@ -16,6 +16,7 @@ import argparse
 import glob
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -66,7 +67,9 @@ def soup_iou(gt_path, recon_path, n=100000, seed=0, box=1.05):
         gt = iou.normalize_mesh(trimesh.load(gt_path, force='mesh'))
         in_gt = _gwn_fast(gt, Q) > 0.5
         os.makedirs(os.path.dirname(cache), exist_ok=True)
-        np.save(cache, in_gt)
+        tmp = f"{cache}.{os.getpid()}.npy"  # parallel scorers of one GT must not read a partial file
+        np.save(tmp, in_gt)
+        os.replace(tmp, cache)
     rc = trimesh.load(recon_path, force='mesh')
     outside = float(np.any(np.abs(rc.bounds) > box))
     in_rc = _gwn_fast(rc, Q) > 0.5
@@ -149,17 +152,43 @@ def chamfer(gt_path, recon_path, n=20000, seed=0):
     return float(0.5 * (cKDTree(b).query(a)[0].mean() + cKDTree(a).query(b)[0].mean()))
 
 
-def score_runs(run_dirs, stl_dir):
+def _score_one(job):
+    name, part, gt, recon, judge_name = job
+    global JUDGE
+    JUDGE = judge_name  # a spawned worker does not inherit main()'s setting
+    r = judge(gt, recon)
+    r['cd'] = chamfer(gt, recon)
+    r['valid'] = True
+    return name, part, r
+
+
+def _init_worker():
+    # One numpy thread per worker: the parallelism is across parts.
+    for v in ('OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS'):
+        os.environ[v] = '1'
+
+
+def score_runs(run_dirs, stl_dir, jobs=1):
     """Score full-pipeline output folders (run_pipeline.py --output-folder).
-    A part with no reconstruction counts as invalid with IoU 0."""
+    A part with no reconstruction counts as invalid with IoU 0. With jobs > 1,
+    parts are scored in that many processes (each part is serial numpy, so a
+    60-part, 2-arm run used ~16 of 88 threads and took about an hour)."""
     parts = sorted(os.path.splitext(os.path.basename(p))[0] for p in glob.glob(os.path.join(stl_dir, '*.stl')))
-    ps = subprocess.run(['ps', '-Ao', 'command'], capture_output=True, text=True).stdout
-    running = {p for p in parts if p + '.stl' in ps}
-    out = {}
+    # A part is still running if a live process of this run names it. Orphans
+    # (parent 1: pool workers left by a timed-out part) do not count; they
+    # used to keep finished parts from ever being scored.
+    procs = []
+    for line in subprocess.run(['ps', '-Ao', 'ppid=,command='], capture_output=True, text=True).stdout.splitlines():
+        ppid, _, cmd = line.strip().partition(' ')
+        if ppid != '1':
+            procs.append(cmd)
+    out, todo = {}, []
     for run in run_dirs:
         name = os.path.basename(run.rstrip('/'))
         if not any(os.path.isdir(os.path.join(run, p)) for p in parts):
             continue  # an input copy or code snapshot folder, not a run
+        mine = [c for c in procs if re.search(r'(^|[/\s])' + re.escape(name) + r'(_in)?(/|\s|$)', c)]
+        running = {p for p in parts if any(p + '.stl' in c or '/' + p + '/' in c for c in mine)}
         res = {}
         for part in parts:
             if part in running and not os.path.exists(os.path.join(run, part, 'final_iou.json')):
@@ -170,13 +199,24 @@ def score_runs(run_dirs, stl_dir):
                 if os.path.isdir(os.path.join(run, part)):
                     res[part] = {'iou': 0.0, 'cd': None, 'valid': False}
                 continue
-            gt = os.path.join(stl_dir, part + '.stl')
-            r = judge(gt, recon)
-            r['cd'] = chamfer(gt, recon)
-            r['valid'] = True
-            res[part] = r
-            print(f"{name:<22} {part[:40]:<40} iou={r['iou']:.4f} cd={r['cd']:.4f}")
+            res[part] = None  # filled in below
+            todo.append((name, part, os.path.join(stl_dir, part + '.stl'), recon, JUDGE))
         out[name] = res
+
+    def done(name, part, r):
+        out[name][part] = r
+        print(f"{name:<22} {part[:40]:<40} iou={r['iou']:.4f} cd={r['cd']:.4f}", flush=True)
+    if jobs > 1 and len(todo) > 1:
+        import multiprocessing as mp
+        from concurrent.futures import ProcessPoolExecutor, as_completed
+        # spawn: workers start clean instead of inheriting this process's state.
+        with ProcessPoolExecutor(min(jobs, len(todo)), mp_context=mp.get_context('spawn'),
+                                 initializer=_init_worker) as ex:
+            for f in as_completed([ex.submit(_score_one, j) for j in todo]):
+                done(*f.result())
+    else:
+        for j in todo:
+            done(*_score_one(j))
     common = set.intersection(*(set(v) for v in out.values())) if out else set()
     print(f'\n{len(common)} parts scored by every run')
     for name, res in out.items():
@@ -196,6 +236,8 @@ def main():
     ap.add_argument('--stl-dir')
     ap.add_argument('--recon', default='best_greedy_parallel.stl')
     ap.add_argument('--out')
+    ap.add_argument('--jobs', type=int, default=1,
+                    help='score --runs parts in this many processes (e.g. nproc/2 on the workstation)')
     ap.add_argument('--judge', choices=['robust', 'wrap', 'soup'], default='robust',
                     help='robust: exact booleans, winding-number MC for unclean meshes (default); '
                          'wrap: alpha-wrap both meshes (phase-2 judge); '
@@ -206,7 +248,7 @@ def main():
     JUDGE = args.judge
 
     if args.runs:
-        out = score_runs(args.runs, args.stl_dir)
+        out = score_runs(args.runs, args.stl_dir, jobs=args.jobs)
         if args.out:
             json.dump(out, open(args.out, 'w'), indent=2)
     elif args.arms:

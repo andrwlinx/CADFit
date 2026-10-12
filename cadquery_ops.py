@@ -23,6 +23,7 @@ import time
 import signal
 import subprocess
 import tempfile
+import contextlib
 import multiprocessing as mp
 from typing import List, Dict, Any, Optional, Tuple
 import tqdm
@@ -1614,8 +1615,11 @@ def precompute_sketch_heights_parallel(data, gt_mesh, hmin: float, hmax: float, 
             worker_args.append(args)
         
         # Process sketches in parallel using adaptive search
-        with mp.Pool(num_workers) as pool:
-            results = pool.map(process_single_sketch_adaptive, worker_args)
+        from iou import warm_manifold
+        warm_manifold(gt_stl_path, normalize)
+        with guarded_pool(num_workers, initializer=warm_manifold, initargs=(gt_stl_path, normalize)) as pool:
+            results, _ = safe_pool_map(pool, process_single_sketch_adaptive, worker_args, stall=900)
+        results = [r for r in results if r is not None]
         
         # Process results
         final_results = []
@@ -2018,7 +2022,7 @@ def _cut_phase_enabled() -> bool:
 
 
 def cut_phase(groups, pool, gt_mesh, output_folder, max_cuts=30, min_gain=1e-4,
-              max_inside=0.3):
+              max_inside=0.3, time_budget=None):
     """Greedily subtract candidate solids from the selected model while IoU improves.
 
     Stock search only unions candidates, so a blind pocket or hole must be
@@ -2036,6 +2040,13 @@ def cut_phase(groups, pool, gt_mesh, output_folder, max_cuts=30, min_gain=1e-4,
     if U is None or G is None:
         return groups, None
     vG = abs(G.volume())
+    # Each round is three booleans per tool against the growing model; on raw
+    # ABC 00000455 (116 revolve-heavy tools) four rounds took 45 min and the
+    # greedy step hit its 3000 s timeout, losing the whole search. Past the
+    # budget, keep the cuts accepted so far.
+    if time_budget is None:
+        time_budget = float(os.environ.get("CADFIT_CUT_BUDGET") or 300)
+    deadline = time.time() + time_budget
 
     def iou_of(m):
         inter = abs((m ^ G).volume())
@@ -2046,7 +2057,11 @@ def cut_phase(groups, pool, gt_mesh, output_folder, max_cuts=30, min_gain=1e-4,
     base = iou_of(U)
     t0 = time.time()
     tools = []
+    out_of_time = False
     for c in pool:
+        if time.time() > deadline:
+            out_of_time = True
+            break
         m = _iou._cached_manifold(c['stl_path'], normalize=False) if c.get('stl_path') else None
         if m is None:
             continue
@@ -2055,10 +2070,13 @@ def cut_phase(groups, pool, gt_mesh, output_folder, max_cuts=30, min_gain=1e-4,
             continue
         tools.append((c, m))
     accepted = []
-    while len(accepted) < max_cuts and tools:
+    while len(accepted) < max_cuts and tools and not out_of_time:
         best = None
         vU = abs(U.volume())
         for i, (c, m) in enumerate(tools):
+            if time.time() > deadline:
+                out_of_time = True  # a partial round's best still improves IoU
+                break
             if abs((m ^ U).volume()) < 1e-4 * vU:
                 continue
             cand = U - m
@@ -2072,8 +2090,10 @@ def cut_phase(groups, pool, gt_mesh, output_folder, max_cuts=30, min_gain=1e-4,
         c, _ = tools.pop(i)
         accepted.append(dict(c, op='cut'))
         print(f"  Cut phase: subtract {c.get('sketch_id')} ({c['type']}) gain={gain:.5f} -> IoU {base:.5f}")
+    if out_of_time:
+        print(f"  Cut phase: time budget ({time_budget:.0f}s) reached; keeping {len(accepted)} cuts")
     log_event("prune_phase", phase="cut", duration=time.time() - t0, pool=len(pool),
-              tools=len(tools) + len(accepted), accepted=len(accepted))
+              tools=len(tools) + len(accepted), accepted=len(accepted), out_of_time=out_of_time)
     return groups + accepted, base
 
 
@@ -2260,6 +2280,85 @@ def run_instruction_groups(groups, gt_mesh, output_folder, filename_suffix="tmp"
         import traceback
         traceback.print_exc()
         return 0.0, []
+
+
+def safe_pool_map(pool, fn, args, deadline=None, grace=600.0, stall=1800.0, poll=2.0):
+    """`pool.map(fn, args)` that cannot block forever.
+
+    A plain map() never returns if a task is lost: mp.Pool replaces a worker
+    killed mid-task (OCP segfault, OOM killer) without returning its task, and
+    a forked worker can deadlock on a lock held by a thread of the parent. On
+    raw ABC parts the greedy step then sat idle until run_pipeline's 3000 s
+    timeout, which discarded the finished search (00001387: 0.965) and left
+    the pool orphaned. Give up on the remaining tasks when `grace` s pass
+    without a task finishing after a worker died, when `stall` s pass without
+    a task finishing at all, or at the absolute time `deadline`.
+    Returns (results, lost): a lost or raising task's result is None. If
+    lost > 0 the pool may hold stuck workers; terminate() it, do not join().
+    """
+    pending = [pool.apply_async(fn, (a,)) for a in args]
+    pids = {p.pid for p in pool._pool}
+    died, last_done, last_t = False, -1, time.time()
+    while True:
+        done = sum(r.ready() for r in pending)
+        if done == len(pending):
+            break
+        now = time.time()
+        if done != last_done:
+            last_done, last_t = done, now
+        if not died and {p.pid for p in pool._pool} != pids:
+            died = True
+            print(f"  ⚠️  A pool worker died; {len(pending) - done} task(s) unfinished")
+        if (died and now - last_t > grace) or now - last_t > stall or (deadline and now > deadline):
+            print(f"  ⚠️  Giving up on {len(pending) - done} unfinished pool task(s)")
+            break
+        next(r for r in pending if not r.ready()).wait(poll)
+    results = []
+    for r in pending:
+        if not r.ready():
+            results.append(None)
+            continue
+        try:
+            results.append(r.get())
+        except Exception as e:
+            print(f"  ⚠️  Pool task raised {e!r}")
+            results.append(None)
+    return results, sum(x is None for x in results)
+
+
+def abandon_pool(pool):
+    """Stop `pool` without Pool.terminate(). terminate() takes the task queue's
+    lock and waits for stop sentinels that a stuck pool never delivers; the
+    greedy step then sat there until its 3000 s timeout and lost the search
+    (abc60r 00002383, 00000572: stack dumps inside terminate() after the
+    removal pass). Kill the workers instead; their results are already in."""
+    from multiprocessing.pool import TERMINATE
+    pool._state = TERMINATE
+    pool._worker_handler._state = TERMINATE  # do not replace the killed workers
+    pool._task_handler._state = TERMINATE
+    try:
+        pool._change_notifier.put(None)
+    except Exception:
+        pass
+    pool._worker_handler.join(timeout=5)
+    for p in list(pool._pool):
+        try:
+            p.kill()
+        except Exception:
+            pass
+    for p in list(pool._pool):
+        p.join(timeout=5)
+    pool._terminate.cancel()  # its finalizer would run terminate() at exit
+
+
+@contextlib.contextmanager
+def guarded_pool(processes, **kw):
+    """`with mp.Pool(...)` whose exit uses abandon_pool, not terminate()."""
+    pool = mp.Pool(processes, **kw)
+    try:
+        yield pool
+    finally:
+        abandon_pool(pool)
 
 
 def _test_removal_worker(args):
@@ -2582,11 +2681,17 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
                 worker_args.append((idx, groups_before, groups_after, gt_mesh, output_folder, iteration, alpha))
         
             # Test all removals in parallel (cap at num_workers).
+            # A round may not outlive the budget: a stuck task used to hang
+            # here until the greedy step's timeout threw the whole search away.
+            deadline = _t_phase + backward_budget
             if shared_pool is not None:
-                results = shared_pool.map(_test_removal_worker, worker_args)
+                results, lost = safe_pool_map(shared_pool, _test_removal_worker, worker_args, deadline=deadline)
             else:
-                with mp.Pool(max(1, min(len(worker_args), num_workers))) as pool:
-                    results = pool.map(_test_removal_worker, worker_args)
+                with guarded_pool(max(1, min(len(worker_args), num_workers))) as pool:
+                    results, lost = safe_pool_map(pool, _test_removal_worker, worker_args, deadline=deadline)
+            if lost:
+                print(f"  ✗ {lost} removal test(s) did not finish; keeping current selection")
+                break
             batch_removal=False
             # Find best removal or collect all candidates for batch removal
             if batch_removal:
@@ -2665,8 +2770,7 @@ def greedy_iou_based_pruning(precomp, gt_mesh, output_folder="search", alpha=0.0
                     break
     
         if shared_pool is not None:
-            shared_pool.close()
-            shared_pool.join()
+            abandon_pool(shared_pool)
         print(f"\n  Post-processing completed: removed {removed_count} out of {len(final_groups)} extrusions")
         print(f"  Final IoU after post-processing: {current_iou:.6f} (improvement: {current_iou - best_iou:.6f})")
     

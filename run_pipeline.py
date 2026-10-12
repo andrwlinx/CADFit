@@ -17,6 +17,7 @@ import glob
 import time
 import json
 import argparse
+import signal
 import subprocess
 import numpy as np
 import trimesh
@@ -135,7 +136,29 @@ def _release_env():
     env = os.environ.copy()
     existing = env.get("PYTHONPATH", "")
     env["PYTHONPATH"] = _RELEASE_DIR + (os.pathsep + existing if existing else "")
+    # A step killed at its timeout loses block-buffered output, and with it
+    # the log of where it stalled.
+    env["PYTHONUNBUFFERED"] = "1"
     return env
+
+
+def _run_group(cmd, timeout=None, **kw):
+    """subprocess.run in its own process group, killing the whole group when
+    the step ends. subprocess.run's timeout kills only the direct child, so a
+    timed-out greedy_search.py left its multiprocessing workers running with
+    no parent: 238 of them, holding ~137 GB, after 60 raw ABC parts."""
+    if kw.pop('capture_output', False):
+        kw['stdout'] = kw['stderr'] = subprocess.PIPE
+    proc = subprocess.Popen(cmd, start_new_session=True, **kw)
+    try:
+        out, err = proc.communicate(timeout=timeout)
+        return subprocess.CompletedProcess(cmd, proc.returncode, out, err)
+    finally:
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except (ProcessLookupError, PermissionError):
+            pass
+        proc.wait()
 
 
 def run_command(cmd, description="", timeout=None):
@@ -147,7 +170,7 @@ def run_command(cmd, description="", timeout=None):
 
     start_time = time.time()
     try:
-        result = subprocess.run(cmd, timeout=timeout, env=_release_env())
+        result = _run_group(cmd, timeout=timeout, env=_release_env())
         duration = time.time() - start_time
         
         log_event("step", step=description, duration=duration, ok=result.returncode == 0)
@@ -502,7 +525,7 @@ def combine_cadquery_scripts(base_script_path, operation_script_path, output_scr
 def execute_cadquery_script_file(script_path, timeout=300):
     """Execute a CadQuery script file"""
     try:
-        result = subprocess.run(
+        result = _run_group(
             [sys.executable, script_path],
             capture_output=True,
             text=True,
@@ -551,7 +574,7 @@ def refine_with_fillet_chamfer(src_script: str, src_stl: str, gt_stl: str,
         cmd.append("--no-normalize")
 
     try:
-        result = subprocess.run(cmd, timeout=timeout)
+        result = _run_group(cmd, timeout=timeout)
     except subprocess.TimeoutExpired:
         print(f"  [refine] worker exceeded {timeout}s timeout; reverting")
         return None
@@ -843,7 +866,10 @@ def _winding_repair_if_open(stl_path: str) -> str:
     uses the original input."""
     try:
         mesh = trimesh.load(stl_path, force='mesh')
-        if mesh.is_watertight and mesh.body_count == 1:
+        # Watertight multi-body meshes are left alone too: the grid solid is
+        # coarser than the exact union, and on the 9 such held-out abc60b
+        # parts repair lost (mean 0.797 -> 0.753, 0.93 -> 0.81 on 00000300).
+        if mesh.is_watertight:
             return stl_path
         from gwn_repair import repair_to_winding_solid
         cache_dir = os.path.join(os.path.dirname(os.path.abspath(stl_path)), '.gwn')

@@ -854,8 +854,11 @@ def build_action_instances_from_entry(entry, line_tol=1e-4, circ_tol=1e-4, plot_
                                      output_dir=plot_dir)
 
         instances = primitives_to_instances(primitives_closed, pts2)
-        if not instances:
-            # skip empty/degenerate loop
+        # Skip empty/degenerate loops. Every segment can be dropped as too
+        # short (< 1e-2 from the previous point), leaving a bare moveTo whose
+        # close() raises "No start point specified - cannot close" and fails
+        # the whole candidate (raw ABC 00001607).
+        if all(a.startswith("sketch.moveTo(") for a in instances):
             continue
         for a in instances:
             actions.append(a)

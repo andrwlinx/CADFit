@@ -138,12 +138,16 @@ def _solid_from_grid(w, lo, h, ref_bounds):
     M = manifold3d.Manifold.level_set(f, [*lo, *hi], h)
     # A soup's GWN leaves specks of solid around stray triangles (00001576:
     # 93 bodies of <0.2% beside one of 0.025); multi-body meshes are
-    # alpha-wrapped by iou._cached_manifold, so keep only real bodies.
+    # alpha-wrapped by iou._cached_manifold, so drop the specks. Subtract
+    # them rather than re-adding the kept bodies: decompose() also returns
+    # each internal cavity as a negative-volume shell, and adding that back
+    # fills the cavity (00000648: volume 0.79e8 -> 1.55e8).
     bodies = M.decompose()
-    total = sum(abs(b.volume()) for b in bodies)
-    keep = [b for b in bodies if abs(b.volume()) >= 1e-2 * total]
-    if len(keep) < len(bodies):
-        M = manifold3d.Manifold.batch_boolean(keep, manifold3d.OpType.Add) if len(keep) > 1 else keep[0]
+    total = sum(b.volume() for b in bodies if b.volume() > 0)
+    specks = [b for b in bodies if 0 < b.volume() < 1e-2 * total]
+    if specks:
+        M = M - (manifold3d.Manifold.batch_boolean(specks, manifold3d.OpType.Add)
+                 if len(specks) > 1 else specks[0])
     m = M.to_mesh()
     V = np.asarray(m.vert_properties)[:, :3].astype(float)
     F = np.asarray(m.tri_verts).astype(np.int64)
@@ -165,8 +169,16 @@ def _solid_from_grid(w, lo, h, ref_bounds):
         V[dup] += 1e-3 * h * d / np.maximum(np.linalg.norm(d, axis=1), 1e-30)[:, None]
     tm = trimesh.Trimesh(V, F, process=False)
     # Sub-cell stretch onto the source bounds keeps the normalization identical.
+    # Beyond that the solid is not the soup's bounding box (open sheets or
+    # stray triangles at the edges enclose no volume) and stretching distorts
+    # it: 00002336's solid was pulled 0.3 of its height down, IoU 0.23 vs the
+    # judge. Its bounds-based frame would differ from the judge's, so decline.
     b0, b1 = tm.bounds
     r0, r1 = ref_bounds
+    gap = max(np.abs(b0 - r0).max(), np.abs(b1 - r1).max())
+    if gap > 1.5 * h:
+        print(f"⚠️  Winding-number solid's bounds are {gap / h:.1f} cells inside the input's; not repairing")
+        return None
     s = np.where(b1 - b0 > 1e-12, (r1 - r0) / np.maximum(b1 - b0, 1e-12), 1.0)
     tm.vertices = (tm.vertices - b0) * s + r0
     return tm
@@ -182,6 +194,9 @@ def repair_to_winding_solid(stl_path, out_path, cells_on_max_extent=128, cells_a
     Carlo estimate over the bounding box), but never finer than extent/512."""
     if os.path.exists(out_path):
         return out_path
+    declined = out_path + '.declined'
+    if os.path.exists(declined):
+        return None
     t0 = time.time()
     mesh = trimesh.load(stl_path, force='mesh')
     lo, hi = mesh.bounds
@@ -192,6 +207,9 @@ def repair_to_winding_solid(stl_path, out_path, cells_on_max_extent=128, cells_a
     h = float(min(ext / cells_on_max_extent, max(t / cells_across_thickness, ext / 512)))
     w, glo, stats = _winding_grid(mesh, h)
     solid = _solid_from_grid(w, glo, h, mesh.bounds)
+    if solid is None:
+        open(declined, 'w').close()
+        return None
     if not solid.is_watertight or solid.volume <= 0:
         print(f"⚠️  Winding-number repair produced no valid solid for {stl_path}")
         return None
