@@ -22,6 +22,8 @@
 | A-018 | sandbox for agent code on ORCD GPU nodes, where bwrap cannot rebind / inside Apptainer | `agent/ns_sandbox.py` via `unshare -rnm`: all mounts remounted read-only, tmpfs on /tmp,/var/tmp,/dev/shm, workdir bound rw, fresh netns. Used only when a bwrap probe fails. Verified on a GPU node: workdir write OK; pool/home writes, deleting a pool file, and network all blocked. | interface | default |
 | A-019 | serving stack | vLLM 0.31.0 (uv-managed Python 3.12.15), `module load cuda/13.0.1`, `VLLM_USE_FLASHINFER_SAMPLER=0` (FlashInfer JIT sampler needs nvcc at warm-up); max-model-len 65536, gpu-memory-utilization 0.90 | interface | default |
 | A-020 | per-turn generation and context limits | max_tokens 16384 per model turn; `--keep-tool-results 6` (older tool results truncated to 300 chars in what is sent); identical for every model | semantic | default |
+| A-021 | tool names with chat-format residue (gpt-oss: `sectioncommentary`, `functions.x`) | `agent_loop.clean_tool_name`: map back only if stripping known channel residue yields an exact tool name; logged in the transcript as `tool_name_cleaned`. Applies to every model. | interface | default |
+| A-022 | GPU per model | One H200 (141 GB) for every model (`mit_normal_gpu` has 1 H100 node vs 13 H200 nodes); 8 concurrent episodes per server | interface | default |
 | A-017 | what the no-LLM skills control does | `agent/scripted_skills_policy.py`: mid-plane sketches along axes, flat-face normals and detected directions; fit_extrude all, fit_revolve axis sketches; section_extrude x/y/z; greedy add/cut by GT IoU gain ≥ 0.001; same 40-call / 30-min budget | semantic | default |
 
 ## Notes

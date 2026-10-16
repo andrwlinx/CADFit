@@ -192,6 +192,31 @@ def compact(messages, keep):
     return out
 
 
+_CHANNEL_JUNK = ('<|channel|>commentary', '<|channel|>analysis', '<|channel|>final', '<|constrain|>json',
+                 'commentary', 'analysis', 'json')
+
+
+def clean_tool_name(name, names):
+    """A tool name with chat-format residue mapped back to the tool it names, else unchanged.
+
+    gpt-oss under vLLM's `openai` parser sometimes returns the harmony channel
+    glued to the name ("sectioncommentary", "functions.evaluate"). Only an
+    exact tool name left after stripping that residue is accepted."""
+    if name in names or not isinstance(name, str):
+        return name
+    n = name.strip()
+    if n.startswith('functions.'):
+        n = n[len('functions.'):]
+    changed = True
+    while changed and n not in names:
+        changed = False
+        for junk in _CHANNEL_JUNK:
+            if n.endswith(junk) and len(n) > len(junk):
+                n, changed = n[:-len(junk)].rstrip(' .:<|>'), True
+                break
+    return n if n in names else name
+
+
 def call_tool(ws, name, args, allowed=None):
     if name == 'finish':
         return {'ok': True}
@@ -311,7 +336,10 @@ def main():
                 stop, done = 'time', True
                 break
             calls += 1
-            name = tc['function']['name']
+            raw_name = tc['function']['name']
+            name = clean_tool_name(raw_name, tool_names)
+            if name != raw_name:
+                log.write(json.dumps({'role': 'harness', 'tool_name_cleaned': [raw_name, name]}) + '\n')
             try:
                 args = json.loads(tc['function'].get('arguments') or '{}') or {}
             except json.JSONDecodeError as e:
