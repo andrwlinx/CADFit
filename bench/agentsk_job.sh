@@ -18,6 +18,7 @@ export HF_HOME=$P/cache/huggingface AGENT_API_KEY=local
 # sampling without FlashInfer's JIT sampler.
 module load cuda/13.0.1
 export VLLM_USE_FLASHINFER_SAMPLER=0
+export PATH=$P/envs/vllm/bin:$PATH  # ninja (and nvcc above) for kernels built at startup
 PORT=$((8000 + RANDOM % 1000))
 HF_ID=$(python3 bench/agentsk_models.py "$KEY" hf)
 mapfile -t SERVE < <(python3 bench/agentsk_models.py "$KEY" serve)
