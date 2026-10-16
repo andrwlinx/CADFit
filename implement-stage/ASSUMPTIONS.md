@@ -16,6 +16,7 @@
 | A-011 | where skill code runs | CADFit skills run in-process (trusted repo code); agent-written CadQuery stays sandboxed (bwrap/sandbox-exec) as before. | interface | default |
 | A-012 | determinism of skills | Surface sampling inside fit_extrude/fit_revolve seeded (seed 0); results cached per sketch so a repeated call is free and identical. | interface | default |
 | A-013 | extract_sketch loop filtering | Keep rectangular loops (the pipeline drops them as a batch-mode heuristic; an agent asking for a slice wants what is there). | interface | default |
+| A-014 | detect_directions skill: the pipeline stage omits flat-face normals (another stage covers them) | Skill returns detect_directions.py's off-axis directions **plus** describe_target's flat-face normals and plane offsets | interface | default |
 
 ## Notes
 
