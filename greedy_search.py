@@ -168,6 +168,23 @@ def create_extrusion_from_translation(entry: Dict, translation_data: Dict, sketc
     return extrusions
 
 
+# The on-axis closing edge of a split profile has only its two end points while
+# the rest of the loop is densely sampled; segment_greedy_fit then merges across
+# it and drops the profile's corner on the axis (a stepped shaft revolved to 40%
+# of its volume). Densifying the half-loop fixes it. Off by default so pipeline
+# runs stay comparable with earlier ones; agent/skills.py turns it on.
+DENSIFY_REVOLVE_SPLIT = False
+
+
+def _densify_closed_2d(pts: np.ndarray, step: float) -> np.ndarray:
+    """Closed polyline (last == first) with points inserted so no edge exceeds `step`."""
+    out = [pts[0]]
+    for p, q in zip(pts[:-1], pts[1:]):
+        k = int(np.ceil(np.linalg.norm(q - p) / step)) if step > 0 else 1
+        out.extend(p + (q - p) * (np.arange(1, max(k, 1) + 1)[:, None] / max(k, 1)))
+    return np.asarray(out)
+
+
 def _split_loop_along_axis_2d(pts2: np.ndarray, mp2: np.ndarray, ad2: np.ndarray):
     """Cut a closed 2D polyline by the axis line through mp2 with direction ad2.
     Keep the half whose signed perpendicular distance to the axis is positive.
@@ -193,6 +210,9 @@ def _split_loop_along_axis_2d(pts2: np.ndarray, mp2: np.ndarray, ad2: np.ndarray
     out = np.asarray(out, dtype=float)
     if not np.allclose(out[0], out[-1]):
         out = np.vstack([out, out[0:1]])
+    if DENSIFY_REVOLVE_SPLIT:
+        seg = np.linalg.norm(np.diff(np.vstack([pts2, pts2[:1]]), axis=0), axis=1)
+        out = _densify_closed_2d(out, float(np.median(seg[seg > 0])) if (seg > 0).any() else 0.0)
     return out
 
 

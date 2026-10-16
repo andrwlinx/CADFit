@@ -109,3 +109,41 @@ def test_extrude_is_cached(tmp_path):
 
 def test_extrude_unknown_sketch(tmp_path):
     assert 'error' in ws('plate_hole', tmp_path).fit_extrude('S9')
+
+
+def test_revolve_recovers_shaft(tmp_path):
+    w = ws('shaft', tmp_path)
+    sid = w.extract_sketch([0, 1, 0], 0.0)['sketches'][0]['id']
+    out = w.fit_revolve(sid)
+    assert out['candidates'], out
+    best = max(out['candidates'], key=lambda c: c['iou'])
+    assert best['iou'] > 0.97
+    assert abs(best['axis_direction'][2]) > 0.999  # the shaft's axis is Z
+
+
+def test_section_extrude_bracket(tmp_path):
+    w = ws('bracket', tmp_path)
+    out = w.section_extrude('y')
+    assert len(out['candidates']) == 1 and out['candidates'][0]['iou'] > 0.98
+    assert w.section_extrude('y')['candidates'] == out['candidates']  # cached
+    assert w.section_extrude('y', 5.0)['candidates'] == []           # plane misses the part
+
+
+def test_toolsets(tmp_path):
+    import json
+    import subprocess
+    root = os.path.dirname(HERE)
+    script = tmp_path / 'calls.json'
+    script.write_text(json.dumps([[{'name': 'section_extrude', 'arguments': {'axis': 'y'}}],
+                                  [{'name': 'add_code', 'arguments': {'code': "result = cq.Workplane('XY').box(1,1,1)"}}]]))
+    for toolset, ok in (('skills', True), ('code', False)):
+        out = tmp_path / toolset
+        r = subprocess.run([sys.executable, os.path.join(root, 'agent', 'agent_loop.py'), '--toolset', toolset,
+                            '--model', f'scripted:{script}', '--gt', os.path.join(MESHES, 'bracket.stl'),
+                            '--out', str(out)], capture_output=True, text=True, cwd=root)
+        assert r.returncode == 0, r.stderr[-800:]
+        tool_msgs = [json.loads(ln) for ln in open(out / 'transcript.jsonl') if '"role": "tool"' in ln]
+        first = json.loads(tool_msgs[0]['content'])
+        # The code toolset must not reach a CADFit skill even when the model names it.
+        assert ('error' not in first) == ok, first
+        assert json.load(open(out / 'result.json'))['toolset'] == toolset

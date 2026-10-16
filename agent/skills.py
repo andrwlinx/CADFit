@@ -33,12 +33,14 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cad_tools import ROOT, TOOL_SPECS, CadWorkspace, _r  # noqa: E402,F401  (ROOT: CADFit on sys.path)
 import analyze_loop_translation as _alt  # noqa: E402
+import analyze_revolve_axis as _ara  # noqa: E402
 import cadquery_ops as _cqo  # noqa: E402
 import detect_directions as _dd  # noqa: E402
 import extract_sketches as _es  # noqa: E402
 import fit_primitives as _fp  # noqa: E402
 import greedy_search as _gs  # noqa: E402
 import iou  # noqa: E402
+import section_extrude as _se  # noqa: E402
 import split_loops as _sl  # noqa: E402
 
 # Stage settings of the fresh-cohort pipeline arms (bench/run_parallel_arms.sh):
@@ -47,6 +49,9 @@ os.environ.setdefault('CADFIT_FAST_CD', '1')
 os.environ.setdefault('CADFIT_TRANSLATION_MAXPTS', '400')
 _T_RANGE, _T_STEP = (-2.0, 2.0), 0.01
 _N_SURFACE = 100000
+_gs.DENSIFY_REVOLVE_SPLIT = True  # see greedy_search.py: fixes revolve profiles split at the axis
+# Revolve analysis as run_pipeline.py calls it: 0 and 90 degree trial rotations, CD threshold 0.01.
+_ANGLES, _ANGLE_STEP, _REV_CD = (0.0, 90.0), 90.0, 0.01
 _SEED = 0
 
 _AXES = {'x': (1.0, 0.0, 0.0), 'y': (0.0, 1.0, 0.0), 'z': (0.0, 0.0, 1.0)}
@@ -224,13 +229,69 @@ class SkillWorkspace(CadWorkspace):
 
     @_quiet
     def fit_revolve(self, sketch):
-        # PLACEHOLDER: real revolve analysis lands at rung F3
-        return {'candidates': [], 'note': 'PLACEHOLDER'}
+        """analyze_revolve_axis.py on one sketch -> symmetry axes -> revolve candidates."""
+        try:
+            e = self._sketch(sketch)
+        except KeyError as err:
+            return {'error': str(err)}
+        key = ('revolve', sketch)
+        if key not in self._fits:
+            idx = int(sketch[1:])
+            folder = os.path.join(self.workdir, 'revolve')
+            os.makedirs(folder, exist_ok=True)
+            mesh_data = {'vertices': self.gt_mesh.vertices, 'faces': self.gt_mesh.faces}
+            entry = {k: v for k, v in e.items() if k != 'actions'}
+            _ara.process_single_sketch((idx, entry, self._surface_points(), mesh_data, folder,
+                                        _ANGLES, _ANGLE_STEP, False, _REV_CD))
+            configs = _gs.load_revolve_analysis(folder, idx)
+            ids = []
+            for op in (_gs.create_revolve_from_analysis(entry, configs, idx) if configs else []):
+                stem = f'sketch_{idx}_revolve_{op.get("axis_idx", len(ids))}'
+                script = _cqo.generate_cadquery_revolve_script(
+                    op['actions'], tuple(op['axis_start']), tuple(op['axis_end']), op['angle'],
+                    os.path.join(self.workdir, stem + '.stl'), origin=op['origin'], normal=op['normal'],
+                    xdir=op['xdir'])
+                # axis_start/axis_end are in the sketch plane's local frame; report world coords.
+                u, v, n = _fp.plane_basis(op['normal'], op['xdir'])
+                B = np.stack([u, v, n], axis=1)
+                p0 = np.asarray(op['origin'], float) + B @ np.asarray(op['axis_start'], float)
+                d = B @ (np.asarray(op['axis_end'], float) - np.asarray(op['axis_start'], float))
+                cid = self._register(script, stem, {'type': 'revolve', 'from_sketch': sketch,
+                                                    'axis_point': _r(p0), 'axis_direction': _r(d / np.linalg.norm(d)),
+                                                    'angle': op['angle']})
+                if cid:
+                    ids.append(cid)
+            self._fits[key] = ids
+        ids = self._fits[key]
+        return {'sketch': sketch, 'candidates': [self._public(c) for c in ids],
+                **({} if ids else {'note': 'no symmetry axis of this sketch revolves into the target'})}
 
     @_quiet
     def section_extrude(self, axis, offset=None):
-        # PLACEHOLDER: real section extrusion lands at rung F3
-        return {'candidates': [], 'note': 'PLACEHOLDER'}
+        """section_extrude.py: the cross-section at axis=offset extruded through the part."""
+        if axis not in ('x', 'y', 'z'):
+            return {'error': "axis must be 'x', 'y' or 'z'"}
+        k = 'xyz'.index(axis)
+        lo, hi = self.gt_mesh.bounds[0][k], self.gt_mesh.bounds[1][k]
+        value = 0.5 * (lo + hi) if offset is None else float(offset)
+        key = ('section', axis, round(value, 4))
+        if key not in self._fits:
+            polys = _se.section_polygons(self.gt_mesh, k, value)
+            ids = []
+            if polys:
+                n = 1000 + len(self._fits)
+                stem = f'generic_{n}_section_{axis}'
+                script = _cqo.generate_generic_script(_se.extrusion_code(polys, k, lo, hi),
+                                                      os.path.join(self.workdir, stem + '.stl'), n)
+                cid = self._register(script, stem, {'type': 'section_extrude', 'axis': axis,
+                                                    'section_at': round(value, 3), 'n_profiles': len(polys)})
+                if cid:
+                    ids.append(cid)
+            self._fits[key] = ids
+        ids = self._fits[key]
+        return {'candidates': [self._public(c) for c in ids],
+                **({} if ids else {'note': f'no cross-section at {axis}={value:.3f}; the target spans '
+                                           f'{lo:.3f} to {hi:.3f} along {axis}'})}
 
 
 _VEC = {'type': 'array', 'items': {'type': 'number'}, 'minItems': 3, 'maxItems': 3}
