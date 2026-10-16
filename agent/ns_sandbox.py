@@ -33,11 +33,16 @@ def main():
             mount('-o', 'remount,bind,ro', mp)
         except subprocess.CalledProcessError:
             pass  # already read-only and locked, or not remountable: it stays as it was
+    # The workdir may lie under a path about to get an empty tmpfs (e.g. /tmp/...):
+    # keep a handle on it, recreate the path afterwards, bind from the handle.
+    fd = os.open(work, os.O_RDONLY | os.O_DIRECTORY)
     tmp = [t for t in ('/tmp', '/var/tmp', '/dev/shm') if os.path.isdir(t)]
     for t in tmp:
         mount('-t', 'tmpfs', 'none', t)
-    mount('--bind', work, work)
+    os.makedirs(work, exist_ok=True)
+    mount('--bind', f'/proc/{os.getpid()}/fd/{fd}', work)
     mount('-o', 'remount,bind,rw', work)
+    os.close(fd)
     # Fail closed: every other mount must now be read-only.
     writable = []
     for line in open('/proc/self/mountinfo'):

@@ -120,7 +120,7 @@ class SkillWorkspace(CadWorkspace):
     def __init__(self, gt_stl, workdir):
         super().__init__(gt_stl, workdir)
         self.sketches = {}  # 'S<n>' -> sketch entry (split_loops schema) + fitted actions
-        self._slices = {}   # rounded (normal, offset) -> sketch ids, so a repeated call is free
+        self._slices = {}   # rounded (normal, offset) -> first reply, so a repeated call is free and identical
         self._fits = {}     # (skill, sketch/axis key) -> candidate ids
         self._surf = None
 
@@ -181,17 +181,17 @@ class SkillWorkspace(CadWorkspace):
         n = _unit(normal)
         offset = float(offset)
         key = (tuple(np.round(n, 4)), round(offset, 4))
-        if key in self._slices:
-            return {'sketches': [self._sketch_info(s) for s in self._slices[key]], 'note': 'same plane as before'}
+        if key in self._slices:  # the same reply as the first time (same cap and counts)
+            return dict(self._slices[key], note='same plane as before')
         origin = n * offset
         _, loops3d = _es.slice_mesh_loops(self.gt_mesh, tuple(origin), tuple(n), samples_per_loop=3000)
         loops3d = [lp for lp in loops3d if len(lp) >= 3]
         if not loops3d:
-            self._slices[key] = []
             proj = (self.gt_mesh.vertices * n).sum(1)  # not `@`: Accelerate BLAS raises spurious FP warnings
             lo, hi = proj.min(), proj.max()
-            return {'sketches': [], 'note': f'the plane misses the target; along this normal the target spans '
-                                            f'offsets {lo:.3f} to {hi:.3f}'}
+            self._slices[key] = {'sketches': [], 'note': f'the plane misses the target; along this normal the '
+                                                         f'target spans offsets {lo:.3f} to {hi:.3f}'}
+            return self._slices[key]
         xdir = _es.compute_xdir(tuple(n))
         o, nn = origin.tolist(), n.tolist()
         profiles, n_tiny = _nest(loops3d, o, nn, xdir)
@@ -204,7 +204,6 @@ class SkillWorkspace(CadWorkspace):
             sid = f'S{len(self.sketches)}'
             self.sketches[sid] = dict(entry, actions=actions)
             ids.append(sid)
-        self._slices[key] = ids
         out = {'plane': {'normal': _r(n), 'offset': round(offset, 4)},
                'sketches': [self._sketch_info(s) for s in ids[:_MAX_SHOWN]]}
         if len(ids) > _MAX_SHOWN:
@@ -212,6 +211,7 @@ class SkillWorkspace(CadWorkspace):
             out['more_sketch_ids'] = f'{ids[_MAX_SHOWN]}..{ids[-1]} (smaller profiles)'
         if n_tiny:
             out['n_sliver_loops_dropped'] = n_tiny
+        self._slices[key] = out
         return out
 
     def _sketch_info(self, sid):

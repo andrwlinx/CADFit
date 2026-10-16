@@ -4,10 +4,11 @@ No-LLM control for the skills toolset: a fixed policy that calls the same
 skills an agent gets, under the same budget, then assembles greedily.
 
   1. describe_target, detect_directions
-  2. extract_sketch at the middle of the target along each axis, each flat-face
-     normal and each detected direction; fit_extrude every sketch, and
-     fit_revolve the axis sketches
-  3. section_extrude along x, y, z
+  2. section_extrude along x, y, z
+  3. extract_sketch at the middle of the target along each axis, each flat-face
+     normal and each detected direction; fit_extrude the 3 largest profiles of
+     each plane, and fit_revolve those of the axis planes. Analysis stops 8
+     calls short of the budget so that assembly always gets calls
   4. greedy assembly: start from the best candidate, then repeatedly add (union
      or cut) the candidate that raises IoU most, until nothing gains 0.001
 
@@ -41,24 +42,49 @@ class Budget(Exception):
     pass
 
 
-def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3):
+def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3, reserve=8):
     t0 = time.time()
     ws = SkillWorkspace(gt, os.path.join(out, 'work'))
     calls = []
 
-    def call(name, **args):
-        if len(calls) >= max_calls or time.time() - t0 > 60 * max_minutes:
+    def call(name, assembly=False, **args):
+        # Analysis may not use the last `reserve` calls: they are kept for assembly.
+        if len(calls) >= max_calls - (0 if assembly else reserve) or time.time() - t0 > 60 * max_minutes:
             raise Budget()
         res = getattr(ws, name)(**args)
         calls.append({'name': name, 'args': args, 't': round(time.time() - t0, 1),
                       'error': res.get('error') if isinstance(res, dict) else None})
         return res
 
+    def assemble():
+        """Greedy assembly over the candidates the skills made."""
+        nonlocal trials
+        cands = sorted(ws.candidates, key=lambda c: -ws.candidates[c]['iou'])
+        if not cands:
+            return
+        call('add_candidate', assembly=True, id=cands[0])
+        while True:
+            base = ws._score(ws._model())
+            best = (min_gain, None, None)
+            for c in cands:
+                m = ws.candidates[c]['_m']
+                for mode in ('add', 'cut'):
+                    trials += 1
+                    cur = ws._model()
+                    sc = ws._score(cur + m if mode == 'add' else cur - m)
+                    if sc - base > best[0]:
+                        best = (sc - base, c, mode)
+            if best[1] is None:
+                return
+            call('add_candidate', assembly=True, id=best[1], mode=best[2])
+
     stop = 'done'
     trials = 0  # GT-scored trial unions/cuts in the greedy assembly (not tool calls; ledger A-017)
     try:
         info = call('describe_target')
         dirs = call('detect_directions')
+        for axis in 'xyz':  # cheap (1-2 s) and often the strongest single candidate
+            call('section_extrude', axis=axis)
         normals = [tuple(a) for a in dirs['axes']]
         for f in dirs['flat_face_normals'] + [{'normal': d['direction']} for d in dirs['other_directions']]:
             if all(abs(sum(p * q for p, q in zip(f['normal'], m))) < 0.999 for m in normals):
@@ -67,30 +93,14 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3):
         for k, nrm in enumerate(normals):
             proj = (verts * nrm).sum(1)
             mid = 0.5 * (proj.min() + proj.max())
-            for s in call('extract_sketch', normal=list(nrm), offset=float(mid))['sketches']:
+            for s in call('extract_sketch', normal=list(nrm), offset=float(mid))['sketches'][:per_plane]:
                 call('fit_extrude', sketch=s['id'])
                 if k < 3:
                     call('fit_revolve', sketch=s['id'])
-        for axis in 'xyz':
-            call('section_extrude', axis=axis)
-        # Greedy assembly over the candidates the skills made.
-        cands = sorted(ws.candidates, key=lambda c: -ws.candidates[c]['iou'])
-        if cands:
-            call('add_candidate', id=cands[0])
-            while True:
-                base = ws._score(ws._model())
-                best = (min_gain, None, None)
-                for c in cands:
-                    m = ws.candidates[c]['_m']
-                    for mode in ('add', 'cut'):
-                        trials += 1
-                        cur = ws._model()
-                        s = ws._score(cur + m if mode == 'add' else cur - m)
-                        if s - base > best[0]:
-                            best = (s - base, c, mode)
-                if best[1] is None:
-                    break
-                call('add_candidate', id=best[1], mode=best[2])
+    except Budget:
+        stop = 'budget'
+    try:
+        assemble()
     except Budget:
         stop = 'budget'
     stl = ws.export(out)

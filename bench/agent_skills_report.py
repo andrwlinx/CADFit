@@ -63,17 +63,18 @@ def main():
          'IoU(CAD) = judge on the solid rebuilt by running the final CadQuery program (A-008, headline). '
          'Failed or missing episodes score 0.', '',
          '## Results', '',
-         '| condition | IoU | IoU(CAD) | CAD invalid | episodes with a model | mean tool calls | stops |',
-         '|---|---|---|---|---|---|---|']
+         '| condition | IoU | IoU(CAD) | CAD invalid | episodes with a model | tool calls / episode | GT trial evals / episode | stops |',
+         '|---|---|---|---|---|---|---|---|']
     for c in agents + refs:
         rec = [C[c][p] for p in parts]
-        calls = [r['tool_calls'] for r in rec if r.get('tool_calls') is not None]
+        calls = [r['tool_calls'] for r in rec if r.get('tool_calls') is not None]  # episodes with a result
+        trials = [r['trial_evaluations'] for r in rec if r.get('trial_evaluations') is not None]
         stops = collections.Counter(r.get('stop') for r in rec if 'stop' in r)
         known = lambda k: all(k in r for r in rec)  # noqa: E731  (references may not record it)
         L.append(f'| {c} | {mean(col(c, "iou")):.4f} | {mean(col(c, "iou_cad")):.4f} | '
                  f'{sum(not r["cad_valid"] for r in rec) if known("cad_valid") else "n/a"} | '
                  f'{(str(sum(r["valid"] for r in rec)) + "/" + str(len(rec))) if known("valid") else "n/a"} | '
-                 f'{mean(calls):.1f} | {", ".join(f"{k} {v}" for k, v in stops.most_common()) or "—"} |')
+                 f'{mean(calls):.1f} (n={len(calls)}) | {f"{mean(trials):.0f}" if trials else "0"} | {", ".join(f"{k} {v}" for k, v in stops.most_common()) or "—"} |')
 
     L += ['', '## Skills vs code-only, paired over parts (IoU(CAD))', '',
           '| model | skills | code | skills − code [95% CI] | skills better / worse (±0.01) |', '|---|---|---|---|---|']
@@ -96,22 +97,33 @@ def main():
             L.append('| ' + ' | '.join(row) + ' |')
 
     L += ['', '## How the models used the skills (skills toolset)', '',
-          '| model | calls/episode | ' + ' | '.join(SKILLS) + ' | add_code | add_candidate | tool errors |',
-          '|---|---|' + '---|' * (len(SKILLS) + 3)]
+          'Per episode with a transcript (n shown), same denominator as the table above.', '',
+          '| model | n | calls/episode | ' + ' | '.join(SKILLS) + ' | add_code | add_candidate | tool errors |',
+          '|---|---|---|' + '---|' * (len(SKILLS) + 3)]
     for m in models:
-        tot, err = collections.Counter(), collections.Counter()
+        tot, err, n = collections.Counter(), collections.Counter(), 0
         for p in parts:
-            c_, e_ = tool_stats(os.path.join(a.runs, m, 'skills', p))
+            ep = os.path.join(a.runs, m, 'skills', p)
+            if not os.path.exists(os.path.join(ep, 'transcript.jsonl')):
+                continue
+            c_, e_ = tool_stats(ep)
             tot += c_
             err += e_
-        n = len(parts)
-        L.append(f'| {m} | {sum(tot.values()) / n:.1f} | ' +
+            n += 1
+        if not n:
+            L.append(f'| {m} | 0 | — |' + ' — |' * (len(SKILLS) + 3))
+            continue
+        L.append(f'| {m} | {n} | {sum(tot.values()) / n:.1f} | ' +
                  ' | '.join(f'{tot[s] / n:.1f}' for s in SKILLS) +
                  f' | {tot["add_code"] / n:.1f} | {tot["add_candidate"] / n:.1f} | '
                  f'{sum(err.values())}/{sum(tot.values())} |')
 
     L += ['', '## Caveats', '',
-          '- One episode per (model, toolset, part); no repeat variance (deferred).',
+          '- One episode per (model, toolset, part); no repeat variance (deferred). Confidence intervals: paired '
+          'percentile bootstrap over parts (10,000 resamples, seed 0) — part sampling only (A-028). '
+          '"Better/worse" counts need |Δ IoU(CAD)| > 0.01 (A-029).',
+          '- The no-LLM policy also scores every candidate union/cut against the GT without spending tool calls '
+          '("GT trial evals" column, A-026): a ceiling-style control with more oracle access than an agent.',
           '- Answer selection uses ground-truth IoU (A-007), as does every condition and the best-of control.',
           '- The agent fit_revolve carries a revolve-split bug fix the frozen pipeline arms do not (A-016).',
           '- Pipeline references are the frozen fresh-cohort runs (bench/runs/fresh_scores.json), not rerun.', '']

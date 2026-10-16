@@ -194,8 +194,10 @@ def cad_replay(recon, timeout=900):
     argv = [sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cad_replay.py'),
             os.path.abspath(prog), os.path.abspath(out_stl)]
     try:
-        p = subprocess.run(_sandboxed(os.path.dirname(os.path.abspath(prog)), argv),
-                           capture_output=True, text=True, timeout=timeout)
+        # cwd = the program's folder on every backend (sandbox-exec does not chdir):
+        # agent_model.py exports to a relative path.
+        p = subprocess.run(_sandboxed(os.path.dirname(os.path.abspath(prog)), argv), capture_output=True,
+                           text=True, timeout=timeout, cwd=os.path.dirname(os.path.abspath(prog)))
         rec = json.loads(p.stdout.strip().splitlines()[-1])
     except subprocess.TimeoutExpired:
         rec = {'built': False, 'valid': False, 'error': f'timeout {timeout}s'}

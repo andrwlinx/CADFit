@@ -85,7 +85,7 @@ def main():
             meta[(cond, p)] = {'tool_calls': r.get('tool_calls'), 'stop': r.get('stop', 'missing'),
                                'seconds': r.get('seconds'), 'agent_iou': r.get('best_iou'),
                                'tokens': sum((r.get('usage') or {}).values()) or None,
-                               'sources': r.get('sources')}
+                               'sources': r.get('sources'), 'trial_evaluations': r.get('trial_evaluations')}
             stl = os.path.join(ep, 'agent_model.stl')
             if os.path.exists(stl):
                 jobs.append((cond, p, os.path.join(a.stl_dir, p + '.stl'), stl))

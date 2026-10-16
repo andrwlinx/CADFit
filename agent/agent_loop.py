@@ -152,6 +152,58 @@ def text_tool_calls(content, names):
     return calls
 
 
+MAX_RESULT_CHARS = 8000
+
+
+def _is_points(v):
+    return bool(v) and all(isinstance(p, list) and p and all(isinstance(x, (int, float)) for x in p) for p in v)
+
+
+def fit_json(obj, limit):
+    """JSON of a tool result, at most `limit` characters and still valid JSON:
+    the longest list is thinned (point lists keep every other point, other
+    lists keep their first half plus an '... N more omitted' marker), then
+    long strings are cut, until it fits."""
+    txt = json.dumps(obj)
+    if len(txt) <= limit:
+        return txt
+    obj = json.loads(txt)
+    for _ in range(400):
+        found = []
+
+        def walk(o):
+            items = o.items() if isinstance(o, dict) else enumerate(o) if isinstance(o, list) else ()
+            for k, v in items:
+                if isinstance(v, list) and len(v) > 2:
+                    found.append((len(json.dumps(v)), id(o), o, k))
+                if isinstance(v, (dict, list)):
+                    walk(v)
+        walk(obj)
+        if not found:
+            break
+        _, _, cont, k = max(found, key=lambda f: f[0])
+        v = cont[k]
+        if _is_points(v):
+            cont[k] = v[::2]
+        else:
+            keep = max(1, len(v) // 2)
+            n = len(v) - keep
+            cont[k] = v[:keep] + [f'... {n} more omitted (result too long)']
+        txt = json.dumps(obj)
+        if len(txt) <= limit:
+            return txt
+
+    def cut(o):
+        if isinstance(o, dict):
+            return {k: cut(v) for k, v in o.items()}
+        if isinstance(o, list):
+            return [cut(v) for v in o]
+        return o[:limit // 2] + ' ...[cut]' if isinstance(o, str) and len(o) > limit // 2 else o
+    txt = json.dumps(cut(obj))
+    return txt if len(txt) <= limit else json.dumps({'error': 'tool result too large to show',
+                                                     'preview': txt[:limit // 2]})
+
+
 def _short(text, n=300):
     return text if len(text) <= n else text[:n] + ' ...[truncated]'
 
@@ -349,9 +401,7 @@ def main():
                 args, res = None, {'error': f'arguments are not valid JSON: {e}'}
             if args is not None:
                 res = call_tool(ws, name, args, tool_names)
-            txt = json.dumps(res)
-            if len(txt) > 6000:
-                txt = txt[:6000] + ' ...[truncated]'
+            txt = fit_json(res, MAX_RESULT_CHARS)
             tm = {'role': 'tool', 'tool_call_id': tc.get('id', ''), 'content': txt}
             messages.append(tm)
             log.write(json.dumps({**tm, 'name': name, 'args': args}) + '\n')
