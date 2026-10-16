@@ -40,7 +40,8 @@ def main():
     for t in tmp:
         mount('-t', 'tmpfs', 'none', t)
     os.makedirs(work, exist_ok=True)
-    mount('--bind', f'/proc/{os.getpid()}/fd/{fd}', work)
+    # -c: mount(8) must not canonicalize the source (that resolves to the new, empty path).
+    mount('-c', '--bind', f'/proc/{os.getpid()}/fd/{fd}', work)
     mount('-o', 'remount,bind,rw', work)
     os.close(fd)
     # Fail closed: every other mount must now be read-only.

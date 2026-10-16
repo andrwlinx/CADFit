@@ -41,6 +41,8 @@
 | A-033 | working directory of CAD replay during scoring | The program's own folder on every sandbox backend (`cwd=` set explicitly; sandbox-exec does not chdir), so relative exports in agent_model.py behave the same on macOS and Linux | interface | sweep |
 | A-034 | ns_sandbox with a workdir under /tmp, /var/tmp or /dev/shm | A handle to the workdir is opened before the empty tmpfs mounts; the path is recreated and bound from that handle | interface | sweep |
 
+| A-035 | CAD replay that dies with no output (seen once on ORCD, not reproducible: same program built on rerun) | Retried once; if it still prints nothing it scores as not built, with rc and stderr kept in `<name>_cad.json`. A replay that prints anything is never retried. | interface | default |
+
 ## Notes
 
 - **A-001** — The request says *generation*. The earlier agent study (refine mode, precomputed pool) already

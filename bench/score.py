@@ -193,16 +193,26 @@ def cad_replay(recon, timeout=900):
     from cad_tools import _sandboxed
     argv = [sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cad_replay.py'),
             os.path.abspath(prog), os.path.abspath(out_stl)]
-    try:
-        # cwd = the program's folder on every backend (sandbox-exec does not chdir):
-        # agent_model.py exports to a relative path.
-        p = subprocess.run(_sandboxed(os.path.dirname(os.path.abspath(prog)), argv), capture_output=True,
-                           text=True, timeout=timeout, cwd=os.path.dirname(os.path.abspath(prog)))
-        rec = json.loads(p.stdout.strip().splitlines()[-1])
-    except subprocess.TimeoutExpired:
-        rec = {'built': False, 'valid': False, 'error': f'timeout {timeout}s'}
-    except Exception as e:  # noqa: BLE001 - a crashed replay (OCC segfault) means it does not build
-        rec = {'built': False, 'valid': False, 'error': f'replay crashed: {type(e).__name__}'}
+    rec = None
+    for attempt in range(2):  # a replay that dies without any output is retried once
+        try:
+            # cwd = the program's folder on every backend (sandbox-exec does not chdir):
+            # agent_model.py exports to a relative path.
+            p = subprocess.run(_sandboxed(os.path.dirname(os.path.abspath(prog)), argv), capture_output=True,
+                               text=True, timeout=timeout, cwd=os.path.dirname(os.path.abspath(prog)))
+        except subprocess.TimeoutExpired:
+            rec = {'built': False, 'valid': False, 'error': f'timeout {timeout}s'}
+            break
+        lines = p.stdout.strip().splitlines()
+        try:
+            rec = json.loads(lines[-1])
+            break
+        except (IndexError, json.JSONDecodeError):
+            # no record: the replay process crashed (e.g. an OCC segfault) — it does not build
+            rec = {'built': False, 'valid': False,
+                   'error': f'replay crashed (rc {p.returncode}, attempt {attempt + 1}): {p.stderr.strip()[-300:]}'}
+            if lines:
+                break  # it printed something else: a real failure, not a silent death
     json.dump(rec, open(rec_path, 'w'))
     return rec, out_stl
 

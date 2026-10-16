@@ -146,6 +146,9 @@ def test_toolsets(tmp_path):
         first = json.loads(tool_msgs[0]['content'])
         # The code toolset must not reach a CADFit skill even when the model names it.
         assert ('error' not in first) == ok, first
+        # Agent code runs in the sandbox and builds (workdir under the pytest tmp dir).
+        added = json.loads(tool_msgs[1]['content'])
+        assert 'error' not in added and added['iou_after'] > 0, added
         assert json.load(open(out / 'result.json'))['toolset'] == toolset
 
 
