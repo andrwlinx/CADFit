@@ -61,10 +61,17 @@ def main():
     # Interleave toolsets so a job cut off by the time limit leaves both half done, not one.
     todo = [(t, p) for p in parts for t in a.toolsets]
     print(f'{a.model_key}: {len(todo)} episodes, {a.jobs} at a time', flush=True)
+    status = {}
     with ThreadPoolExecutor(a.jobs) as ex:
         for f in as_completed([ex.submit(episode, a, m, t, p) for t, p in todo]):
             part, toolset, msg = f.result()
+            status[f'{toolset}/{part}'] = msg
             print(f'[{time.strftime("%H:%M:%S")}] {toolset:6s} {part[:8]} {msg}', flush=True)
+    base = os.path.join(ROOT, 'bench', 'runs', a.tag, a.model_key)
+    done = {k: os.path.exists(os.path.join(base, k, 'result.json')) for k in status}
+    json.dump({'model': m['hf'], 'episodes': len(todo), 'with_result': sum(done.values()), 'status': status},
+              open(os.path.join(base, 'summary.json'), 'w'), indent=1)
+    print(f'{sum(done.values())}/{len(todo)} episodes have a result', flush=True)
 
 
 if __name__ == '__main__':

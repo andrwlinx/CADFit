@@ -32,6 +32,10 @@ done
 echo "[$(date +%T)] server ready"
 
 module load apptainer/1.5.2
+# A cold `import cadquery` from pool storage takes ~90 s (warm: ~1 s); skills and
+# add_code start fresh interpreters with 60-90 s limits. Warm the page cache once.
+apptainer exec -B /orcd $P/envs/cadfit-sandbox $P/envs/cadfit-venv/bin/python -c \
+  "import cadquery, manifold3d, trimesh, scipy, shapely" && echo "[$(date +%T)] imports warm"
 apptainer exec -B /orcd $P/envs/cadfit-sandbox $P/envs/cadfit-venv/bin/python bench/agentsk_run.py \
   --model-key "$KEY" --base-url http://127.0.0.1:$PORT/v1 "$@"
 echo "[$(date +%T)] done"
