@@ -187,9 +187,15 @@ def cad_replay(recon, timeout=900):
         return json.load(open(rec_path)), out_stl
     if not os.path.exists(prog):
         return {'built': False, 'valid': False, 'error': 'no program'}, out_stl
+    # The program may hold agent-written code (agent_model.py): run it in the same
+    # sandbox as the agent's episode (no network, writes only next to the program).
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'agent'))
+    from cad_tools import _sandboxed
+    argv = [sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cad_replay.py'),
+            os.path.abspath(prog), os.path.abspath(out_stl)]
     try:
-        p = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cad_replay.py'),
-                            prog, out_stl], capture_output=True, text=True, timeout=timeout)
+        p = subprocess.run(_sandboxed(os.path.dirname(os.path.abspath(prog)), argv),
+                           capture_output=True, text=True, timeout=timeout)
         rec = json.loads(p.stdout.strip().splitlines()[-1])
     except subprocess.TimeoutExpired:
         rec = {'built': False, 'valid': False, 'error': f'timeout {timeout}s'}

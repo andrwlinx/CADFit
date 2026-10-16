@@ -55,6 +55,7 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3):
         return res
 
     stop = 'done'
+    trials = 0  # GT-scored trial unions/cuts in the greedy assembly (not tool calls; ledger A-017)
     try:
         info = call('describe_target')
         dirs = call('detect_directions')
@@ -82,6 +83,7 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3):
                 for c in cands:
                     m = ws.candidates[c]['_m']
                     for mode in ('add', 'cut'):
+                        trials += 1
                         cur = ws._model()
                         s = ws._score(cur + m if mode == 'add' else cur - m)
                         if s - base > best[0]:
@@ -95,7 +97,7 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3):
     result = {'model': 'scripted-skills-policy', 'toolset': 'skills', 'gt': gt, 'init': None, 'init_iou': 0.0,
               'best_iou': ws.best[0], 'n_steps': len(ws.best[1]),
               'sources': [s['source'] for s in ws.best[1]], 'modes': [s['mode'] for s in ws.best[1]],
-              'tool_calls': len(calls), 'stop': stop, 'seconds': round(time.time() - t0, 1),
+              'tool_calls': len(calls), 'trial_evaluations': trials, 'stop': stop, 'seconds': round(time.time() - t0, 1),
               'n_candidates': len(ws.candidates), 'n_sketches': len(ws.sketches), 'calls': calls, 'stl': stl,
               'target_n_faces': info['n_faces'] if calls else None}
     json.dump(result, open(os.path.join(out, 'result.json'), 'w'), indent=1)

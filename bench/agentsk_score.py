@@ -18,6 +18,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, 'bench'))
 sys.path.insert(0, os.path.join(ROOT, 'agent'))
+from agentsk_models import MODELS  # noqa: E402
 from scripted_skills_policy import study_parts  # noqa: E402
 
 RUNS = os.path.join(ROOT, 'bench', 'runs')
@@ -66,11 +67,16 @@ def main():
     a = ap.parse_args()
     parts = study_parts(a.stl_dir)
     conds, meta, jobs = {}, {}, []
-    for d in sorted(glob.glob(os.path.join(RUNS, a.tag, '*', '*'))):
-        if os.path.isdir(d):
-            conds[os.path.relpath(d, os.path.join(RUNS, a.tag))] = d
-    if os.path.isdir(os.path.join(RUNS, 'agentsk_policy')):
-        conds['no-llm-policy/skills'] = os.path.join(RUNS, 'agentsk_policy')
+    # The declared panel (ledger A-004 x A-003), whether or not a run produced anything:
+    # a model whose server never came up scores 0 on every part instead of vanishing.
+    for key in sorted(MODELS):
+        for toolset in ('skills', 'code'):
+            conds[f'{key}/{toolset}'] = os.path.join(RUNS, a.tag, key, toolset)
+    conds['no-llm-policy/skills'] = os.path.join(RUNS, 'agentsk_policy')
+    extra = [d for d in glob.glob(os.path.join(RUNS, a.tag, '*', '*'))
+             if os.path.isdir(d) and os.path.relpath(d, os.path.join(RUNS, a.tag)) not in conds]
+    if extra:
+        print(f'note: not in the declared panel, not scored: {extra}')
     for cond, d in conds.items():
         for p in parts:
             ep = os.path.join(d, p)
@@ -96,10 +102,10 @@ def main():
     print(f'\n{"condition":<36} {"n":>3} {"IoU":>7} {"IoU(CAD)":>9} {"CAD bad":>8} {"calls":>6}')
     for c, r in res.items():
         v = [r[p] for p in parts]
-        bad = sum(not x.get('cad_valid', True) for x in v)
+        bad = sum(not x['cad_valid'] for x in v if 'cad_valid' in x) if any('cad_valid' in x for x in v) else 'n/a'
         calls = [x['tool_calls'] for x in v if x.get('tool_calls') is not None]
         print(f'{c:<36} {len(v):>3} {sum(x["iou"] for x in v) / len(v):7.4f} '
-              f'{sum(x.get("iou_cad", 0) for x in v) / len(v):9.4f} {bad:>8} '
+              f'{sum(x.get("iou_cad", 0) for x in v) / len(v):9.4f} {str(bad):>8} '
               f'{(sum(calls) / len(calls)) if calls else float("nan"):6.1f}')
 
 

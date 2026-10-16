@@ -147,3 +147,25 @@ def test_toolsets(tmp_path):
         # The code toolset must not reach a CADFit skill even when the model names it.
         assert ('error' not in first) == ok, first
         assert json.load(open(out / 'result.json'))['toolset'] == toolset
+
+
+def test_island_inside_hole(tmp_path):
+    # A ring with a separate disc sitting inside its hole: the disc is material, not a second hole.
+    import cadquery as cq
+    ring = cq.Workplane('XY').circle(1.0).circle(0.7).extrude(0.2)
+    disc = cq.Workplane('XY').circle(0.4).extrude(0.2)
+    path = str(tmp_path / 'ring_disc.stl')
+    cq.exporters.export(ring.union(disc), path, tolerance=0.002, angularTolerance=0.05)
+    w = SkillWorkspace(path, str(tmp_path / 'work'))
+    out = w.extract_sketch([0, 0, 1], 0.0)['sketches']
+    assert len(out) == 2
+    assert out[0]['n_loops'] == 2 and out[1]['n_loops'] == 1  # ring (outer + hole), then the disc
+    net = sum(s['outer_area'] - sum(s['hole_areas']) for s in out)
+    assert net == pytest.approx(section_area(w, [0, 0, 1], 0.0), rel=0.01)
+
+
+def test_offset_is_distance_along_unit_normal(tmp_path):
+    w = ws('plate_hole', tmp_path)
+    a = w.extract_sketch([0, 0, 2], 0.1)['sketches']
+    b = w.extract_sketch([0, 0, 1], 0.1)['sketches']
+    assert [s['id'] for s in a] == [s['id'] for s in b]  # same plane z = 0.1, served from the cache

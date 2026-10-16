@@ -335,6 +335,9 @@ def main():
             if time.time() >= deadline:  # tool calls returned at the deadline are not run
                 stop, done = 'time', True
                 break
+            if calls >= a.max_calls:  # several calls in one turn may not run past the budget
+                stop, done = 'budget', True
+                break
             calls += 1
             raw_name = tc['function']['name']
             name = clean_tool_name(raw_name, tool_names)
@@ -358,9 +361,9 @@ def main():
                   + (f'  ERR {str(res.get("error"))[:100]}' if isinstance(res, dict) and 'error' in res else ''),
                   flush=True)
             if name == 'finish':
-                done = True
+                stop, done = 'finish', True
+                break
         if done:
-            stop = 'finish' if stop != 'time' else stop
             break
 
     stl = ws.export(a.out)

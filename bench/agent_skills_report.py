@@ -69,9 +69,10 @@ def main():
         rec = [C[c][p] for p in parts]
         calls = [r['tool_calls'] for r in rec if r.get('tool_calls') is not None]
         stops = collections.Counter(r.get('stop') for r in rec if 'stop' in r)
+        known = lambda k: all(k in r for r in rec)  # noqa: E731  (references may not record it)
         L.append(f'| {c} | {mean(col(c, "iou")):.4f} | {mean(col(c, "iou_cad")):.4f} | '
-                 f'{sum(not r.get("cad_valid", True) for r in rec)} | '
-                 f'{sum(r.get("valid", True) for r in rec)}/{len(rec)} | '
+                 f'{sum(not r["cad_valid"] for r in rec) if known("cad_valid") else "n/a"} | '
+                 f'{(str(sum(r["valid"] for r in rec)) + "/" + str(len(rec))) if known("valid") else "n/a"} | '
                  f'{mean(calls):.1f} | {", ".join(f"{k} {v}" for k, v in stops.most_common()) or "—"} |')
 
     L += ['', '## Skills vs code-only, paired over parts (IoU(CAD))', '',

@@ -1,0 +1,128 @@
+{
+  "round": 1,
+  "reviewer": "gpt-6-astra (codex, model_reasoning_effort=xhigh, read-only)",
+  "threadId": "01a1469b-d8cb-7690-8e68-c7c0c5df5bd4",
+  "diff": "git diff 5f90fac..86d34b7",
+  "reply": {
+    "undeclared": [
+      {
+        "site": "agent/skills.py:58,170-178",
+        "decision": "Discard every slice loop below 0.001 normalized area, including holes and separate material components.",
+        "why_it_matters": "A-013 declares the rectangle-filter choice but omits this cutoff. Study part 00140273 has 67 components at x=0, all with areas between approximately 0.000216 and 0.000240; all disappear from the extracted sketches. An empty extraction therefore need not mean an empty section.",
+        "class": "semantic"
+      },
+      {
+        "site": "agent/skills.py:170,189-196; split_loops.py:208-233",
+        "decision": "Treat every contour enclosed by the largest contour as a hole, without distinguishing material islands nested inside holes.",
+        "why_it_matters": "This occurs in study part 00095369 at z=0. Its two material profiles have total area approximately 3.21767, but grouping produces outer_area approximately 4 and hole_areas approximately [3.36639, 2.58405]. The second alleged hole is material; subtracting the reported holes gives a negative area.",
+        "class": "semantic"
+      },
+      {
+        "site": "agent/skills.py:61-68,152-160,302-305",
+        "decision": "Normalize the supplied plane normal while leaving offset unchanged.",
+        "why_it_matters": "The advertised equation is dot(p, normal)=offset, but the implementation interprets offset as distance along a unit normal. For normal=[0,0,2], offset=0.2, it slices z=0.2 instead of z=0.1. No unit-normal requirement is declared.",
+        "class": "semantic"
+      },
+      {
+        "site": "agent/scripted_skills_policy.py:75-91",
+        "decision": "Give the no-LLM control uncharged exact-IoU evaluations of every candidate union and cut; count only accepted additions as tool calls.",
+        "why_it_matters": "A-017 declares greedy assembly and a shared call budget, but not this additional access to ground-truth evaluations. The 00046097 smoke episode records 17 calls while its 11 candidates undergo 66 additional trial add/cut scores across three assembly sweeps. The recorded call count excludes that search.",
+        "class": "semantic"
+      },
+      {
+        "site": "agent/agent_loop.py:159-191,291-296",
+        "decision": "Truncate older assistant text and string-valued tool arguments as well as tool results, and reduce retained results from six to three to one after context-length errors.",
+        "why_it_matters": "A-020 correctly records the initial six-result setting but omits these additional memory reductions. Earlier CAD code can be shortened, and episodes can retain different amounts of history depending on context errors.",
+        "class": "semantic"
+      },
+      {
+        "site": "bench/agentsk_score.py:69-87; bench/agent_skills_report.py:79-80",
+        "decision": "Discover evaluated conditions from existing directories instead of enumerating the declared model-by-toolset panel.",
+        "why_it_matters": "Missing parts receive zeros only within discovered conditions. A model server that exits before creating episode directories disappears entirely, and a missing toolset removes its model from the paired comparison. This changes which models the reported study represents.",
+        "class": "semantic"
+      },
+      {
+        "site": "bench/agentsk_score.py:93-94; bench/agent_skills_report.py:72-74",
+        "decision": "Interpret absent validity metadata as successful validation.",
+        "why_it_matters": "The best-of pipeline reference is constructed with only iou and iou_cad. The report consequently displays zero invalid CADs and all parts having models through default-True lookups, although those validity facts were not supplied.",
+        "class": "semantic"
+      },
+      {
+        "site": "bench/agent_skills_report.py:22-27,81-94",
+        "decision": "Use a paired percentile bootstrap over parts, with 10,000 resamples and seed 0, for 95% confidence intervals.",
+        "why_it_matters": "Neither the request nor ledger specifies an uncertainty model. These intervals describe resampling variation across the observed parts; they do not measure variation across repeated stochastic agent episodes.",
+        "class": "semantic"
+      },
+      {
+        "site": "bench/agent_skills_report.py:77-85",
+        "decision": "Count skills as better or worse only when the absolute paired IoU(CAD) difference exceeds 0.01.",
+        "why_it_matters": "This introduces an undeclared practical-equivalence margin. Smaller improvements and regressions count as neither better nor worse.",
+        "class": "semantic"
+      },
+      {
+        "site": "bench/agentsk_score.py:31; bench/score.py:180-192; bench/cad_replay.py:26",
+        "decision": "Replay exported agent-written Python with an ordinary subprocess and unrestricted exec.",
+        "why_it_matters": "The exported program retains agent-written code. Scoring therefore executes that code outside the episode sandbox, with the scoring process's filesystem and network access. Being selected as the best geometry does not establish that the program is trusted.",
+        "class": "interface"
+      },
+      {
+        "site": "agent/cad_tools.py:58-59; agent/ns_sandbox.py:29-40",
+        "decision": "Execute agent code as namespace root without dropping its namespace capabilities after configuring mounts.",
+        "why_it_matters": "Static inference: the child retains the capabilities needed to undo read-only remounts established in that same namespace. The write-confinement claim therefore depends on agent code leaving those mounts alone. This follows from the documented [user-namespace capability rules](https://man7.org/linux/man-pages/man7/user_namespaces.7.html) and [mount-locking rules](https://man7.org/linux/man-pages/man7/mount_namespaces.7.html).",
+        "class": "interface"
+      },
+      {
+        "site": "agent/ns_sandbox.py:29-33",
+        "decision": "Continue executing agent code after any read-only remount failure, without checking the resulting mount permissions.",
+        "why_it_matters": "A failed isolation operation is silently accepted as safe. The code does not establish that the affected mount was already read-only before proceeding.",
+        "class": "interface"
+      }
+    ],
+    "stale_rows": [
+      {
+        "row": "A-003",
+        "site": "agent/agent_loop.py:73-75; bench/agentsk_score.py:90-94",
+        "stated_choice": "Skills and code conditions are identical apart from skills/candidates; references are beamsec and the best-of section control.",
+        "actual_choice": "The conditions also receive different strategy instructions: extract and fit sketches versus read sections for exact profiles. The scorer additionally includes fresh_beamkh.",
+        "class": "semantic"
+      },
+      {
+        "row": "A-006",
+        "site": "agent/agent_loop.py:284,334-364",
+        "stated_choice": "40 tool calls and 30 minutes per episode.",
+        "actual_choice": "The call limit is checked between model turns, not between calls within a turn. A read-only execution check reproduced 41 calls with max-calls=40. The deadline is checked before tools start; an in-flight tool can finish and contribute results after it expires.",
+        "class": "semantic"
+      },
+      {
+        "row": "A-008",
+        "site": "bench/agentsk_score.py:69-87",
+        "stated_choice": "Failed or missing episodes score zero across the declared study.",
+        "actual_choice": "Zero filling applies only to conditions whose directories exist. Entirely missing model/toolset conditions are omitted.",
+        "class": "semantic"
+      },
+      {
+        "row": "A-010",
+        "site": "agent/run_agent_bench.py:31-62; bench/agentsk_run.py:47-57",
+        "stated_choice": "run_agent_bench.py --toolset --jobs provides concurrent episodes.",
+        "actual_choice": "Concurrency is implemented in bench/agentsk_run.py using --toolsets and --jobs. The old runner remains sequential, always supplies --cands, and forwards unrecognized arguments to agent_loop.py.",
+        "class": "interface"
+      },
+      {
+        "row": "A-011",
+        "site": "bench/agentsk_score.py:31; bench/score.py:191-192; bench/cad_replay.py:26",
+        "stated_choice": "Agent-written CadQuery stays sandboxed.",
+        "actual_choice": "Episode execution is wrapped, but CAD replay during scoring executes the exported agent code without that sandbox.",
+        "class": "interface"
+      },
+      {
+        "row": "A-018",
+        "site": "agent/ns_sandbox.py:14,27-40",
+        "stated_choice": "All mounts are remounted read-only and writes outside the workspace are blocked.",
+        "actual_choice": "The implementation excludes /proc, /sys and /dev, ignores remount failures, and preserves the child's namespace capabilities. Its implementation does not provide the stated general write-confinement guarantee.",
+        "class": "interface"
+      }
+    ],
+    "semantic_undeclared": 9,
+    "verdict": "gaps"
+  }
+}

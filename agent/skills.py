@@ -55,7 +55,8 @@ _ANGLES, _ANGLE_STEP, _REV_CD = (0.0, 90.0), 90.0, 0.01
 _SEED = 0
 
 _AXES = {'x': (1.0, 0.0, 0.0), 'y': (0.0, 1.0, 0.0), 'z': (0.0, 0.0, 1.0)}
-_MIN_LOOP_AREA = 1e-3  # split_loops.py drops smaller loops
+_MIN_LOOP_AREA = 1e-6  # numerical slivers only (split_loops.py's 1e-3 drops real small features)
+_MAX_SHOWN = 20         # sketches listed per extract_sketch reply (largest first)
 
 
 def _unit(v):
@@ -75,6 +76,32 @@ def _primitive_counts(actions):
                           ('splines', 'spline')):
             n[key] += a.count(word)
     return n
+
+
+def _nest(loops3d, origin, normal, xdir):
+    """Loops of one slice -> profiles [(loops, areas)] by even-odd nesting:
+    a loop inside an even number of others is an outer boundary, one inside an
+    odd number is a hole of its innermost container. So material islands inside
+    holes become profiles of their own (split_loops.group_contained_loops would
+    list them as holes of the outermost loop). Largest profile first."""
+    polys = [_sl._loop_polygon(lp, origin, normal, xdir) for lp in loops3d]
+    areas = [abs(p.area) if p is not None and not p.is_empty else 0.0 for p in polys]
+    keep = [i for i, a in enumerate(areas) if a >= _MIN_LOOP_AREA]
+    n_tiny = len(loops3d) - len(keep)
+    pts = {i: polys[i].representative_point() for i in keep}
+    contains = {i: [j for j in keep if j != i and areas[j] > areas[i] and polys[j].contains(pts[i])] for i in keep}
+    profiles = {}
+    for i in sorted(keep, key=lambda i: -areas[i]):
+        depth = len(contains[i])
+        if depth % 2 == 0:
+            profiles[i] = [i]
+        else:  # hole of the innermost (smallest) container at depth - 1
+            parents = [j for j in contains[i] if len(contains[j]) == depth - 1]
+            if parents:
+                p = min(parents, key=lambda j: areas[j])
+                profiles.setdefault(p, [p]).append(i)
+    out = [([loops3d[k] for k in ks], [areas[k] for k in ks]) for ks in profiles.values()]
+    return sorted(out, key=lambda g: -g[1][0]), n_tiny
 
 
 def _quiet(fn):
@@ -167,15 +194,10 @@ class SkillWorkspace(CadWorkspace):
                                             f'offsets {lo:.3f} to {hi:.3f}'}
         xdir = _es.compute_xdir(tuple(n))
         o, nn = origin.tolist(), n.tolist()
-        groups = _sl.group_contained_loops(loops3d, o, nn, xdir) if len(loops3d) > 1 else [loops3d]
+        profiles, n_tiny = _nest(loops3d, o, nn, xdir)
         ids = []
-        for group in groups:
-            areas = [_sl.compute_loop_area(lp, o, nn, xdir) for lp in group]
-            kept = [(lp, a) for lp, a in zip(group, areas) if a >= _MIN_LOOP_AREA]
-            if not kept:
-                continue
-            entry = {'origin': o, 'normal': nn, 'xdir': list(xdir),
-                     'loops_3d': [lp for lp, _ in kept], 'loop_areas': [a for _, a in kept]}
+        for group, areas in profiles:
+            entry = {'origin': o, 'normal': nn, 'xdir': list(xdir), 'loops_3d': group, 'loop_areas': areas}
             actions = _fp.build_action_instances_from_entry(entry)
             if not actions:
                 continue
@@ -183,8 +205,14 @@ class SkillWorkspace(CadWorkspace):
             self.sketches[sid] = dict(entry, actions=actions)
             ids.append(sid)
         self._slices[key] = ids
-        return {'plane': {'normal': _r(n), 'offset': round(offset, 4)},
-                'sketches': [self._sketch_info(s) for s in ids]}
+        out = {'plane': {'normal': _r(n), 'offset': round(offset, 4)},
+               'sketches': [self._sketch_info(s) for s in ids[:_MAX_SHOWN]]}
+        if len(ids) > _MAX_SHOWN:
+            out['n_more_sketches'] = len(ids) - _MAX_SHOWN
+            out['more_sketch_ids'] = f'{ids[_MAX_SHOWN]}..{ids[-1]} (smaller profiles)'
+        if n_tiny:
+            out['n_sliver_loops_dropped'] = n_tiny
+        return out
 
     def _sketch_info(self, sid):
         e = self.sketches[sid]
@@ -299,8 +327,9 @@ _VEC = {'type': 'array', 'items': {'type': 'number'}, 'minItems': 3, 'maxItems':
 SKILL_SPECS = [
     ('detect_directions', 'CADFit stage: the directions along which the target looks extruded (from the areas of its '
      'face normals), beyond the X/Y/Z axes. Use them as sketch-plane normals.', {}),
-    ('extract_sketch', 'CADFit stage: slice the target with the plane {p : dot(p, normal) = offset}, group the cut '
-     'loops into profiles (outer boundary + holes) and fit lines and arcs to them. Returns one sketch id per profile '
+    ('extract_sketch', 'CADFit stage: slice the target with the plane perpendicular to `normal` at signed distance `offset` '
+     'from the origin along it (normal is scaled to unit length), group the cut loops into profiles (outer '
+     'boundary + holes; islands inside holes are profiles of their own) and fit lines and arcs to them. Returns one sketch id per profile '
      '(S0, S1, ...) with its area, size and fitted primitives. Feed the ids to fit_extrude / fit_revolve.',
      {'normal': _VEC, 'offset': {'type': 'number'}}),
     ('fit_extrude', 'CADFit stage: sweep a sketch along its normal, find the ranges where it matches the target '
