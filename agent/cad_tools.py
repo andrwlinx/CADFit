@@ -14,7 +14,8 @@ scaled so its largest extent spans [-1, 1].
 
 Agent-written code is untrusted. It runs in a fresh interpreter with
 networking denied and file writes confined to the workspace directory: under
-`sandbox-exec` on macOS, under `bwrap` (bubblewrap) on Linux.
+`sandbox-exec` on macOS, under `bwrap` (bubblewrap) on Linux, or under plain
+user/mount/network namespaces (ns_sandbox.py) where bwrap cannot run.
 """
 import glob
 import json
@@ -48,9 +49,28 @@ def _sandboxed(workdir, argv):
         profile = ('(version 1)(allow default)(deny network*)(deny file-write*)'
                    f'(allow file-write* (subpath "{w}") (subpath "/private/var/folders") (literal "/dev/null"))')
         return ['sandbox-exec', '-p', profile, *argv]
-    # Read-only view of the host, private /tmp, writable workspace, own net namespace.
-    return ['bwrap', '--ro-bind', '/', '/', '--dev', '/dev', '--proc', '/proc', '--tmpfs', '/tmp',
-            '--bind', w, w, '--unshare-net', '--die-with-parent', '--chdir', w, *argv]
+    if _bwrap_works():
+        # Read-only view of the host, private /tmp, writable workspace, own net namespace.
+        return ['bwrap', '--ro-bind', '/', '/', '--dev', '/dev', '--proc', '/proc', '--tmpfs', '/tmp',
+                '--bind', w, w, '--unshare-net', '--die-with-parent', '--chdir', w, *argv]
+    # Same guarantees from plain namespaces where bwrap cannot rebind the root
+    # (ORCD GPU nodes inside Apptainer): see ns_sandbox.py.
+    return ['unshare', '-rnm', PY, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ns_sandbox.py'),
+            w, '--', *argv]
+
+
+_BWRAP = None
+
+
+def _bwrap_works():
+    global _BWRAP
+    if _BWRAP is None:
+        try:
+            _BWRAP = subprocess.run(['bwrap', '--ro-bind', '/', '/', '--dev', '/dev', '--proc', '/proc',
+                                     '--unshare-net', 'true'], capture_output=True, timeout=30).returncode == 0
+        except (OSError, subprocess.TimeoutExpired):
+            _BWRAP = False
+    return _BWRAP
 
 
 def _strip_export(script):

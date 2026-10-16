@@ -14,6 +14,10 @@ KEY=$1; shift
 P=/orcd/pool/007/a_lin
 cd $P/cadfit
 export HF_HOME=$P/cache/huggingface AGENT_API_KEY=local
+# vLLM JIT-compiles some kernels: nvcc from the CUDA module matching torch (cu130);
+# sampling without FlashInfer's JIT sampler.
+module load cuda/13.0.1
+export VLLM_USE_FLASHINFER_SAMPLER=0
 PORT=$((8000 + RANDOM % 1000))
 HF_ID=$(python3 bench/agentsk_models.py "$KEY" hf)
 mapfile -t SERVE < <(python3 bench/agentsk_models.py "$KEY" serve)
