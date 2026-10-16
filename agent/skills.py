@@ -23,6 +23,8 @@ through list_candidates / show_candidate / add_candidate as in the pool toolset.
 Toolset `code` is the same workspace without these skills (and without
 candidates): the agent can only read the target and write CadQuery itself.
 """
+import contextlib
+import functools
 import os
 import sys
 
@@ -30,10 +32,22 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cad_tools import ROOT, TOOL_SPECS, CadWorkspace, _r  # noqa: E402,F401  (ROOT: CADFit on sys.path)
+import analyze_loop_translation as _alt  # noqa: E402
+import cadquery_ops as _cqo  # noqa: E402
 import detect_directions as _dd  # noqa: E402
 import extract_sketches as _es  # noqa: E402
 import fit_primitives as _fp  # noqa: E402
+import greedy_search as _gs  # noqa: E402
+import iou  # noqa: E402
 import split_loops as _sl  # noqa: E402
+
+# Stage settings of the fresh-cohort pipeline arms (bench/run_parallel_arms.sh):
+# fast one-sided CD with at most 400 points a loop, translations in [-2, 2] by 0.01.
+os.environ.setdefault('CADFIT_FAST_CD', '1')
+os.environ.setdefault('CADFIT_TRANSLATION_MAXPTS', '400')
+_T_RANGE, _T_STEP = (-2.0, 2.0), 0.01
+_N_SURFACE = 100000
+_SEED = 0
 
 _AXES = {'x': (1.0, 0.0, 0.0), 'y': (0.0, 1.0, 0.0), 'z': (0.0, 0.0, 1.0)}
 _MIN_LOOP_AREA = 1e-3  # split_loops.py drops smaller loops
@@ -58,6 +72,16 @@ def _primitive_counts(actions):
     return n
 
 
+def _quiet(fn):
+    """The pipeline stages print progress; send it to <workdir>/skills.log."""
+    @functools.wraps(fn)
+    def run(self, *a, **k):
+        with open(os.path.join(self.workdir, 'skills.log'), 'a') as log, contextlib.redirect_stdout(log):
+            print(f'== {fn.__name__} {a} {k}')
+            return fn(self, *a, **k)
+    return run
+
+
 class SkillWorkspace(CadWorkspace):
     """CadWorkspace whose candidates come from skills the agent calls."""
 
@@ -65,7 +89,42 @@ class SkillWorkspace(CadWorkspace):
         super().__init__(gt_stl, workdir)
         self.sketches = {}  # 'S<n>' -> sketch entry (split_loops schema) + fitted actions
         self._slices = {}   # rounded (normal, offset) -> sketch ids, so a repeated call is free
+        self._fits = {}     # (skill, sketch/axis key) -> candidate ids
+        self._surf = None
 
+    def _surface_points(self):
+        if self._surf is None:
+            self._surf = _alt.sample_surface_points(self.gt_mesh, _N_SURFACE, seed=_SEED)
+        return self._surf
+
+    def _register(self, script, stem, info):
+        """Run a generated CadQuery script; add its solid as a scored candidate."""
+        stl = os.path.join(self.workdir, f'{stem}.stl')
+        py = os.path.join(self.workdir, f'{stem}.py')
+        if not _cqo.execute_cadquery_script(script, stl, py) or not os.path.exists(stl):
+            return None
+        m = iou._cached_manifold(stl, False)
+        if m is None or m.volume() <= 1e-9:
+            return None
+        vi, vc = (m ^ self.gt).volume(), m.volume()
+        lo, hi = np.array(m.bounding_box()[:3]), np.array(m.bounding_box()[3:])
+        cid = f'C{len(self.candidates)}'
+        self.candidates[cid] = dict(info, iou=round(vi / (vc + self.gt_vol - vi), 4),
+                                    precision=round(vi / vc, 4), coverage=round(vi / self.gt_vol, 4),
+                                    vol_frac_of_target=round(vc / self.gt_vol, 4),
+                                    bbox_min=_r(lo), bbox_max=_r(hi), _stl=stl, _py=py, _m=m)
+        return cid
+
+    def _public(self, cid):
+        return dict(id=cid, **{k: v for k, v in self.candidates[cid].items() if not k.startswith('_')})
+
+    def _sketch(self, sketch):
+        e = self.sketches.get(sketch)
+        if e is None:
+            raise KeyError(f'unknown sketch {sketch!r}; extract_sketch returns ids like S0')
+        return e
+
+    @_quiet
     def detect_directions(self):
         """Sketch-plane normals: the extrusion directions detect_directions.py finds
         (walls parallel to them) and the normals of large flat faces.
@@ -84,6 +143,7 @@ class SkillWorkspace(CadWorkspace):
                         'extrusion along them would make). flat_face_normals: normals of the flat faces, with '
                         'the offsets of their planes. Any of these is a good extract_sketch normal.'}
 
+    @_quiet
     def extract_sketch(self, normal, offset):
         """Slice the target, group loops into profiles with holes, fit lines/arcs."""
         n = _unit(normal)
@@ -130,14 +190,44 @@ class SkillWorkspace(CadWorkspace):
                 'bbox_min': _r(pts.min(0)), 'bbox_max': _r(pts.max(0)),
                 'primitives': _primitive_counts(e['actions'])}
 
+    @_quiet
     def fit_extrude(self, sketch):
-        # PLACEHOLDER: real translation analysis lands at rung F2
-        return {'candidates': [], 'note': 'PLACEHOLDER'}
+        """analyze_loop_translation.py on one sketch -> extents -> extrusion candidates."""
+        try:
+            e = self._sketch(sketch)
+        except KeyError as err:
+            return {'error': str(err)}
+        key = ('extrude', sketch)
+        if key not in self._fits:
+            idx = int(sketch[1:])
+            folder = os.path.join(self.workdir, 'translation')
+            os.makedirs(folder, exist_ok=True)
+            mesh_data = {'vertices': self.gt_mesh.vertices, 'faces': self.gt_mesh.faces}
+            entry = {k: v for k, v in e.items() if k != 'actions'}
+            _alt.process_single_sketch((idx, entry, self._surface_points(), mesh_data, folder,
+                                        _T_RANGE, _T_STEP, False))
+            data = _gs.load_translation_analysis(folder, idx)
+            ids = []
+            for op in (_gs.create_extrusion_from_translation(entry, data, idx) if data else []):
+                stem = f'sketch_{idx}_{op["source"]}'
+                script = _cqo.generate_cadquery_script([op['actions']], op['height'],
+                                                       os.path.join(self.workdir, stem + '.stl'))
+                cid = self._register(script, stem, {'type': 'extrude', 'from_sketch': sketch,
+                                                    'normal': _r(op['normal']), 'height': round(op['height'], 3),
+                                                    'start_offset': round(float(np.dot(op['origin'], op['normal'])), 3)})
+                if cid:
+                    ids.append(cid)
+            self._fits[key] = ids
+        ids = self._fits[key]
+        return {'sketch': sketch, 'candidates': [self._public(c) for c in ids],
+                **({} if ids else {'note': 'no extent of this sketch matches the target surface'})}
 
+    @_quiet
     def fit_revolve(self, sketch):
         # PLACEHOLDER: real revolve analysis lands at rung F3
         return {'candidates': [], 'note': 'PLACEHOLDER'}
 
+    @_quiet
     def section_extrude(self, axis, offset=None):
         # PLACEHOLDER: real section extrusion lands at rung F3
         return {'candidates': [], 'note': 'PLACEHOLDER'}

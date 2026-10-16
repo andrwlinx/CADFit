@@ -4,7 +4,7 @@
 |------|---------|-------------------------------|------|--------|
 | F0 | spine: `--toolset skills` + `scripted:` model backend → result.json, stub skills | `.venv/bin/python agent/agent_loop.py --toolset skills --model scripted:tests/agent_scripts/spine.json --gt tests/meshes/plate_hole.stl --out /tmp/agentsk_spine && test -f /tmp/agentsk_spine/result.json` | MUST | ✅ |
 | F1 | real detect_directions + extract_sketch | `.venv/bin/python -m pytest -q tests/test_agent_skills.py -k "directions or extract"` | MUST | ✅ |
-| F2 | real fit_extrude (extents → evaluated candidates) | `.venv/bin/python -m pytest -q tests/test_agent_skills.py -k extrude` | MUST | ⬜ |
+| F2 | real fit_extrude (extents → evaluated candidates) | `.venv/bin/python -m pytest -q tests/test_agent_skills.py -k extrude` | MUST | ✅ |
 | F3 | real fit_revolve + section_extrude; `code` toolset | `.venv/bin/python -m pytest -q tests/test_agent_skills.py` | MUST | ⬜ |
 | F4 | skills on real fresh parts via a scripted no-LLM policy | `.venv/bin/python agent/scripted_skills_policy.py --smoke && test -f /tmp/agentsk_policy/summary.json` | MUST | ⬜ |
 | F5 | ORCD harness: vLLM env, per-model serve config, Slurm episode runner; smoke with one model | `ssh orcd test -f /orcd/pool/007/a_lin/cadfit/bench/runs/agentsk_smoke/summary.json` | MUST | ⬜ |
@@ -15,6 +15,7 @@
 <!-- one line per rung attempt: command, exit code, artifact, fix attempts used -->
 - F0: spine check exit 0; /tmp/agentsk_spine/result.json (best IoU 0.9182, box without hole); 0 fixes. pool prompt/tools verified byte-identical to 5f90fac.
 - F1: 6 passed, exit 0; 1 fix (rotated-bracket test assumed detect_directions.py returns cap normals — it excludes them by design; skill now adds flat-face normals, A-014). F0 re-run exit 0.
+- F2: 4 passed (plate_hole and bracket recovered at IoU>0.98 from one sketch; exported agent_model.py rebuilds the same volume), exit 0; 0 fixes. F0, F1 re-run exit 0.
 
 ## Deferred
 - Loft/sweep (`analyze_sweep_loft.py`) as a skill — exists only behind CADFIT_SWEEP_LOFT; low hit rate on CADBench.

@@ -17,6 +17,7 @@
 | A-012 | determinism of skills | Surface sampling inside fit_extrude/fit_revolve seeded (seed 0); results cached per sketch so a repeated call is free and identical. | interface | default |
 | A-013 | extract_sketch loop filtering | Keep rectangular loops (the pipeline drops them as a batch-mode heuristic; an agent asking for a slice wants what is there). | interface | default |
 | A-014 | detect_directions skill: the pipeline stage omits flat-face normals (another stage covers them) | Skill returns detect_directions.py's off-axis directions **plus** describe_target's flat-face normals and plane offsets | interface | default |
+| A-015 | stage settings inside skills | Same as the fresh-cohort pipeline arms: CADFIT_FAST_CD=1, CADFIT_TRANSLATION_MAXPTS=400, translation range [-2, 2] step 0.01, 100k surface samples (seed 0); extents → candidates by greedy_search.create_extrusion_from_translation (≤5 largest intervals) | interface | default |
 
 ## Notes
 

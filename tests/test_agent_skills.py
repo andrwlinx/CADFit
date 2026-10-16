@@ -75,3 +75,37 @@ def test_extract_misses(tmp_path):
 def test_extract_bad_normal(tmp_path):
     with pytest.raises(ValueError):
         ws('plate_hole', tmp_path).extract_sketch([0, 0, 0], 0.0)
+
+
+def best_extrusion(w, normal, offset):
+    sk = w.extract_sketch(normal, offset)['sketches']
+    assert sk, 'no sketch'
+    out = w.fit_extrude(sk[0]['id'])
+    assert out['candidates'], out
+    return max(out['candidates'], key=lambda c: c['iou'])
+
+
+@pytest.mark.parametrize('name,normal,offset', [('plate_hole', [0, 0, 1], 0.0), ('bracket', [0, 1, 0], 0.0)])
+def test_extrude_recovers_part(tmp_path, name, normal, offset):
+    w = ws(name, tmp_path)
+    best = best_extrusion(w, normal, offset)
+    assert best['iou'] > 0.98 and best['precision'] > 0.98
+    # Into the model, then the exported CadQuery program rebuilds it.
+    assert w.add_candidate(best['id'])['iou_after'] > 0.98
+    w.export(str(tmp_path / 'out'))
+    import subprocess
+    r = subprocess.run([sys.executable, 'agent_model.py'], cwd=tmp_path / 'out', capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr[-800:]
+    rebuilt = trimesh.load(str(tmp_path / 'out' / 'agent_model_cq.stl'))
+    assert rebuilt.volume == pytest.approx(w.best[1][0]['m'].volume(), rel=0.01)
+
+
+def test_extrude_is_cached(tmp_path):
+    w = ws('plate_hole', tmp_path)
+    sid = w.extract_sketch([0, 0, 1], 0.0)['sketches'][0]['id']
+    first = w.fit_extrude(sid)['candidates']
+    assert w.fit_extrude(sid)['candidates'] == first and len(w.candidates) == len(first)
+
+
+def test_extrude_unknown_sketch(tmp_path):
+    assert 'error' in ws('plate_hole', tmp_path).fit_extrude('S9')
