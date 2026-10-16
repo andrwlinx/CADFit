@@ -19,6 +19,9 @@ export HF_HOME=$P/cache/huggingface AGENT_API_KEY=local
 module load cuda/13.0.1
 export VLLM_USE_FLASHINFER_SAMPLER=0
 export PATH=$P/envs/vllm/bin:$PATH  # ninja (and nvcc above) for kernels built at startup
+# Kernels FlashInfer JIT-builds (e.g. FP8 block-scale GEMM) are compiled with the
+# module's GCC 12 and need its libstdc++ (GLIBCXX_3.4.29), not RHEL 8's.
+export LD_LIBRARY_PATH=$(dirname $(dirname $(command -v gcc)))/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 PORT=$((8000 + RANDOM % 1000))
 HF_ID=$(python3 bench/agentsk_models.py "$KEY" hf)
 mapfile -t SERVE < <(python3 bench/agentsk_models.py "$KEY" serve)
