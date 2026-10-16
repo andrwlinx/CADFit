@@ -36,6 +36,10 @@ SETS = [
     ('dev', 'benchA', 'hard', 30),
     ('dev', 'benchE', 'hard', 30),
     ('smoke', 'benchA', 'hard', 5),
+    # Fresh cohort (2026-10-14): never inspected; taken after every earlier set,
+    # and select() also excludes any file_id already on disk in another set.
+    ('fresh', 'benchA', 'hard', 30),
+    ('fresh', 'benchE', 'hard', 30),
 ]
 
 
@@ -68,12 +72,23 @@ def build_index(splits, workers=8):
     return index
 
 
+def _on_disk(exclude_set):
+    """file_ids already downloaded into any other set folder."""
+    ids = set()
+    for d in os.listdir(ROOT):
+        if d != exclude_set and os.path.isdir(os.path.join(ROOT, d)):
+            ids.update(f.split('_')[0] for f in os.listdir(os.path.join(ROOT, d)) if f.endswith('.stl'))
+    return ids
+
+
 def select(index, seed):
     taken, out = set(), {}
+    seen = _on_disk('fresh')
     for name, split, tier, n in SETS:
         pool = sorted((r for r in index[split] if r['label'] == tier), key=lambda r: r['file_id'])
         random.Random(f'{seed}:{split}:{tier}').shuffle(pool)
-        picked = [r for r in pool if (split, r['file_id']) not in taken][:n]
+        picked = [r for r in pool if (split, r['file_id']) not in taken
+                  and not (name == 'fresh' and r['file_id'].split('_')[0] in seen)][:n]
         taken.update((split, r['file_id']) for r in picked)
         out.setdefault(name, []).extend(dict(r, split=split) for r in picked)
     return out

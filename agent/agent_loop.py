@@ -53,15 +53,20 @@ any point is kept, so experimenting is safe. Work efficiently: you have a limite
 finish when you cannot improve further."""
 
 
-def chat(base_url, key, model, messages, tools, temperature, max_tokens, retries=5):
+def chat(base_url, key, model, messages, tools, temperature, max_tokens, retries=5, extra=None, deadline=None):
     body = json.dumps({'model': model, 'messages': messages, 'tools': tools, 'tool_choice': 'auto',
-                       'temperature': temperature, 'max_tokens': max_tokens}).encode()
+                       'temperature': temperature, 'max_tokens': max_tokens, **(extra or {})}).encode()
     headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {key}',
                'X-Title': 'CADFit agent'}
     for attempt in range(retries):
+        # A request may not run past the session deadline (runs used to overrun
+        # 20 min by up to 5 min: the deadline was only checked between requests).
+        left = 900 if deadline is None else min(900, deadline - time.time())
+        if left <= 1:
+            raise TimeoutError('session deadline reached')
         req = urllib.request.Request(base_url.rstrip('/') + '/chat/completions', body, headers)
         try:
-            with urllib.request.urlopen(req, timeout=300) as r:
+            with urllib.request.urlopen(req, timeout=left) as r:  # a thinking model's turn can run minutes
                 out = json.loads(r.read())
             if 'choices' in out and out['choices']:
                 return out
@@ -73,7 +78,10 @@ def chat(base_url, key, model, messages, tools, temperature, max_tokens, retries
         except Exception as e:  # network / timeout / bad JSON
             err = repr(e)
         print(f'  [api] attempt {attempt + 1} failed: {str(err)[:300]}', flush=True)
-        time.sleep(min(60, 5 * 2 ** attempt))
+        wait = min(60, 5 * 2 ** attempt)
+        if deadline is not None and time.time() + wait >= deadline:
+            raise TimeoutError('session deadline reached')
+        time.sleep(wait)
     raise RuntimeError(f'API failed after {retries} attempts: {err}')
 
 
@@ -165,6 +173,9 @@ def main():
     ap.add_argument('--max-tokens', type=int, default=4096)
     ap.add_argument('--keep-tool-results', type=int, default=0,
                     help='send only the last N tool results in full (0 = all); for small-context local models')
+    ap.add_argument('--extra-body', type=json.loads, default=None,
+                    help='JSON merged into each request, e.g. sampling settings or '
+                         '{"chat_template_kwargs": {"enable_thinking": false}} for Qwen3.x')
     a = ap.parse_args()
     key = os.environ.get('AGENT_API_KEY') or os.environ.get('OPENROUTER_API_KEY')
     if not key:
@@ -189,10 +200,14 @@ def main():
     usage = {'prompt_tokens': 0, 'completion_tokens': 0}
     cost = 0.0
     stop = 'budget'
-    while calls < a.max_calls and time.time() - t0 < 60 * a.max_minutes:
+    deadline = t0 + 60 * a.max_minutes
+    while calls < a.max_calls and time.time() < deadline:
         try:
             resp = chat(a.base_url, key, a.model, compact(messages, keep), tools,
-                        a.temperature, a.max_tokens)
+                        a.temperature, a.max_tokens, extra=a.extra_body, deadline=deadline)
+        except TimeoutError:
+            stop = 'time'
+            break
         except RuntimeError as e:
             # Context full: send fewer tool results in full and retry.
             if 'maximum context length' in str(e) and keep != 1:
@@ -206,6 +221,10 @@ def main():
             usage[k] += u.get(k, 0) or 0
         cost += float(u.get('cost', 0) or 0)
         msg = resp['choices'][0]['message']
+        truncated = resp['choices'][0].get('finish_reason') == 'length'
+        reasoning = msg.get('reasoning_content') or msg.get('reasoning')
+        if reasoning:  # transcript only: past reasoning is not sent back
+            log.write(json.dumps({'role': 'reasoning', 'content': reasoning}) + '\n')
         msg = {k: v for k, v in msg.items() if k in ('role', 'content', 'tool_calls') and v is not None}
         msg.setdefault('content', '')
         if not msg.get('tool_calls') and msg['content']:
@@ -221,7 +240,10 @@ def main():
                 break
             nudges += 1
             # Open models often paste code into their reply instead of running it.
-            text = ('Your code was not run: code in a reply does nothing. Call add_code with it.'
+            # Thinking models can also spend the whole reply on reasoning.
+            text = ('Your reply hit the token limit before you called a tool. '
+                    'Think briefly, then call a tool now.' if truncated else
+                    'Your code was not run: code in a reply does nothing. Call add_code with it.'
                     if '```' in msg['content'] else
                     'Continue by calling a tool, or call finish if you are done.')
             nudge = {'role': 'user', 'content': text}
@@ -230,6 +252,9 @@ def main():
             continue
         done = False
         for tc in tcs:
+            if time.time() >= deadline:  # tool calls returned at the deadline are not run
+                stop, done = 'time', True
+                break
             calls += 1
             name = tc['function']['name']
             try:
@@ -252,7 +277,7 @@ def main():
             if name == 'finish':
                 done = True
         if done:
-            stop = 'finish'
+            stop = 'finish' if stop != 'time' else stop
             break
 
     stl = ws.export(a.out)

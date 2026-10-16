@@ -31,6 +31,8 @@ flags_for() {
     all)     echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --sweep-loft --emit-splines" ;;
     ms)      echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --sweep-loft --emit-splines --multistart" ;;
     beam)    echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4" ;;
+    beamkh)  echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --keep-history" ;;
+    beamsec) echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --section-extrude" ;;
     basegwn) echo "--gwn-repair" ;;
     beamgwn) echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --gwn-repair" ;;
     *) return 1 ;;
@@ -58,7 +60,16 @@ run_part() {  # <arm> <part>
   CADFIT_PROFILE="$OUT/profile.jsonl" $PY "bench/runs/${TAG}_${arm}_code/run_pipeline.py" \
     "bench/runs/${TAG}_${arm}_in" --output-folder "$OUT" --start-from "$part.stl" --limit 1 \
     $COMMON $(flags_for "$arm") > "$OUT/logs/$part.txt" 2>&1
-  echo "[$(date +%T)] done  $arm/$part exit $?"
+  local rc=$?
+  # --keep-history arms: keep only what the agent's workspace reads (candidate
+  # STL/scripts, their metadata, the final model); history is ~1 GB a part.
+  if [ "$arm" = beamkh ] && [ -d "$OUT/$part" ]; then
+    find "$OUT/$part" -mindepth 1 -maxdepth 1 ! -name 'sketch_*.stl' ! -name 'sketch_*.py' \
+      ! -name 'generic_*.stl' ! -name 'generic_*.py' ! -name 'evaluated_operations.json' \
+      ! -name 'best_greedy_parallel*' ! -name 'final_iou.json' ! -name 'greedy_final_iou.json' \
+      -exec rm -rf {} +
+  fi
+  echo "[$(date +%T)] done  $arm/$part exit $rc"
 }
 export -f run_part disk_ok flags_for
 export TAG PY COMMON MIN_FREE_GB MAX_RUNS_GB

@@ -534,6 +534,16 @@ def precompute_operations_from_analysis(
                                        '_rank': None})
                 generic_count += 1
         print(f"Total loft/sweep candidates: {generic_count}")
+    # Whole-part section extrusions (section_extrude.py), also 'generic' ops;
+    # sketch_idx offset keeps their ('G', idx) keys apart from loft/sweep ones.
+    section_path = os.path.join(os.path.dirname(loops_split_path), 'section_extrude_candidates.json')
+    if os.environ.get('CADFIT_SECTION_EXTRUDE') == '1' and os.path.exists(section_path):
+        with open(section_path) as f:
+            for gi, c in enumerate(json.load(f)):
+                all_operations.append({'type': 'generic', 'kind': c['kind'], 'sketch_idx': 1000 + gi,
+                                       'code': c['code'], 'actions': [], '_rank': None})
+                generic_count += 1
+        print(f"Section-extrusion candidates loaded from {section_path}")
     print(f"Total operations: {len(all_operations)}")
 
     # Detach ranker-only metadata so the saved/evaluated operations are unchanged.
@@ -676,8 +686,11 @@ def evaluate_single_operation(operation: Dict, gt_mesh_path: str, output_folder:
         # A loft that twists through itself is watertight and consistently
         # wound, but opposite-orientation regions cancel in the volume
         # integral. Its alpha-wrapped hull then has far more volume.
+        # Section extrusions are linear extrusions of planar faces and cannot
+        # twist; the hull test wrongly rejected them (pockets and holes make the
+        # alpha-wrap 1.5-1.8x their volume).
         from iou import _alpha_wrap
-        _w = abs(_alpha_wrap(_m).volume)
+        _w = 0.0 if operation['kind'].startswith('section_') else abs(_alpha_wrap(_m).volume)
         if _w > 1.12 * _m.volume:
             print(f"  Rejecting {filename}: self-intersecting (wrapped/mesh volume {_w / _m.volume:.2f})")
             return None

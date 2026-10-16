@@ -839,6 +839,15 @@ def run_analysis_steps(stl_path, output_folder, n_slices=5, delta=0.05, normaliz
             cmd6b.append("--normalize")
         run_command(cmd6b, "Loft/sweep analysis", timeout=300)
 
+    if ANALYSIS_OPTS.get('section_extrude'):
+        # Step 6c: whole-part section extrusions (one per axis).
+        print(f"\n▭ Step 6c: Section-extrusion candidates...")
+        cmd6c = [sys.executable, _release_script("section_extrude.py"), stl_path,
+                 "--out", f"{output_folder}/section_extrude_candidates.json"]
+        if normalize:
+            cmd6c.append("--normalize")
+        run_command(cmd6c, "Section extrusion", timeout=300)
+
     # Step 7: Run greedy CAD reconstruction with precomputed operations
     print(f"\n🏗️  Step 7/7: Running greedy CAD reconstruction with precomputed operations...")
     cmd7 = [sys.executable, _release_script("greedy_search.py"),
@@ -1447,6 +1456,10 @@ def main():
     parser.add_argument('--cut-phase', action=argparse.BooleanOptionalAction, default=False,
                         help='After greedy add/prune, subtract candidate solids while IoU improves '
                              '(needs --exact-union and --cache-solids).')
+    parser.add_argument('--section-extrude', action=argparse.BooleanOptionalAction, default=False,
+                        help='CADFit++: add three whole-part section extrusions (mid-bbox section per axis, '
+                             'extruded through the full extent; section_extrude.py) to the candidate pool. '
+                             'Needs --fix-sketch-identity (default on).')
     parser.add_argument('--sweep-loft', action=argparse.BooleanOptionalAction, default=False,
                         help='Propose loft and sweep candidates by cross-section tracking '
                              '(analyze_sweep_loft.py). Needs --fix-sketch-identity (default on).')
@@ -1471,6 +1484,8 @@ def main():
     ANALYSIS_OPTS['detect_directions'] = args.detect_directions
     ANALYSIS_OPTS['event_slices'] = args.event_slices
     ANALYSIS_OPTS['sweep_loft'] = args.sweep_loft
+    ANALYSIS_OPTS['section_extrude'] = args.section_extrude
+    os.environ['CADFIT_SECTION_EXTRUDE'] = '1' if args.section_extrude else '0'
     os.environ['CADFIT_SWEEP_LOFT'] = '1' if args.sweep_loft else '0'
     os.environ['CADFIT_CUT_PHASE'] = '1' if args.cut_phase else '0'
     os.environ['CADFIT_MULTISTART'] = '1' if args.multistart else '0'

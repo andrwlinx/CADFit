@@ -49,33 +49,58 @@ def _gwn(mesh, Q, max_elems=1_000_000):
     return out
 
 
-def soup_iou(gt_path, recon_path, n=100000, seed=0, box=1.05):
+def soup_iou(gt_path, recon_path, n=100000, seed=0, min_union=10000, max_chunks=10):
     """IoU for a ground truth that is an open triangle soup (raw ABC meshes:
     most are not watertight, some split into 1e5 disconnected triangles), so
     neither manifold booleans nor alpha-wrap describe its solid. Both shapes
-    are labelled by generalized winding number on the same seeded points,
-    uniform in the normalized frame's box [-box, box]^3. The GT labels are
-    cached next to the GT (.gtcache/), since GT meshes reach 8e5 faces.
-    The reconstruction is already in the normalized frame."""
+    are labelled by generalized winding number on seeded uniform points.
+
+    Points are drawn in the GT's bounding box (padded 1%), not a fixed cube:
+    thin parts filled ~0.1% of the old [-1.05,1.05]^3 cube (abc40 00001081:
+    94 union samples, SE ~0.05). Reconstruction material outside that box
+    cannot overlap the GT, so it is counted with points at the same density
+    drawn from the part of the reconstruction's box outside the GT box (the
+    old cube clipped it: abc60 00000156). Chunks of `n` points are added until
+    the union holds `min_union` samples (SE <= ~0.005) or `max_chunks` is
+    reached. GT labels are cached per chunk next to the GT (.gtcache/)."""
     import numpy as np
-    Q = np.random.default_rng(seed).uniform(-box, box, (n, 3))
-    cache = os.path.join(os.path.dirname(gt_path), '.gtcache',
-                         f"{os.path.splitext(os.path.basename(gt_path))[0]}_n{n}_s{seed}_b{box}.npy")
-    if os.path.exists(cache):
-        in_gt = np.load(cache)
-    else:
-        gt = iou.normalize_mesh(trimesh.load(gt_path, force='mesh'))
-        in_gt = _gwn_fast(gt, Q) > 0.5
-        os.makedirs(os.path.dirname(cache), exist_ok=True)
-        tmp = f"{cache}.{os.getpid()}.npy"  # parallel scorers of one GT must not read a partial file
-        np.save(tmp, in_gt)
-        os.replace(tmp, cache)
+    gt = iou.normalize_mesh(trimesh.load(gt_path, force='mesh'))
+    pad = 0.01 * float(np.ptp(gt.bounds, axis=0).max())
+    glo, ghi = gt.bounds[0] - pad, gt.bounds[1] + pad
     rc = trimesh.load(recon_path, force='mesh')
-    outside = float(np.any(np.abs(rc.bounds) > box))
-    in_rc = _gwn_fast(rc, Q) > 0.5
-    u = (in_gt | in_rc).sum()
-    return {'iou': float((in_gt & in_rc).sum() / u) if u else 0.0, 'method': 'gwn-mc-soup',
-            'recon_exceeds_box': bool(outside)}
+    rlo, rhi = rc.bounds[0] - pad, rc.bounds[1] + pad
+    gvol = float(np.prod(ghi - glo))
+    rvol = float(np.prod(np.maximum(rhi - rlo, 0)))
+    tag = os.path.splitext(os.path.basename(gt_path))[0]
+    inter = union = total = 0
+    for k in range(max_chunks):
+        rng = np.random.default_rng([seed, k])
+        Q = rng.uniform(glo, ghi, (n, 3))
+        cache = os.path.join(os.path.dirname(gt_path), '.gtcache', f'{tag}_bbox_n{n}_s{seed}_c{k}.npy')
+        if os.path.exists(cache):
+            in_gt = np.load(cache)
+        else:
+            in_gt = _gwn_fast(gt, Q) > 0.5
+            os.makedirs(os.path.dirname(cache), exist_ok=True)
+            tmp = f"{cache}.{os.getpid()}.npy"  # parallel scorers of one GT must not read a partial file
+            np.save(tmp, in_gt)
+            os.replace(tmp, cache)
+        in_rc = _gwn_fast(rc, Q) > 0.5
+        inter += int((in_gt & in_rc).sum())
+        union += int((in_gt | in_rc).sum())
+        # Same density over the reconstruction's box; keep points outside the GT box.
+        m = rng.poisson(n * rvol / gvol) if rvol > 0 else 0
+        if m:
+            R = rng.uniform(rlo, rhi, (m, 3))
+            R = R[np.any((R < glo) | (R > ghi), axis=1)]
+            if len(R):
+                union += int((_gwn_fast(rc, R) > 0.5).sum())
+        total += n
+        if union >= min_union:
+            break
+    j = inter / union if union else 0.0
+    return {'iou': float(j), 'method': 'gwn-mc-soup', 'union_samples': union, 'points': total,
+            'se': float(np.sqrt(j * (1 - j) / union)) if union else None}
 
 
 def robust_iou(gt_path, recon_path, n=40000, seed=0):
@@ -152,13 +177,43 @@ def chamfer(gt_path, recon_path, n=20000, seed=0):
     return float(0.5 * (cKDTree(b).query(a)[0].mean() + cKDTree(a).query(b)[0].mean()))
 
 
+def cad_replay(recon, timeout=900):
+    """Run the CadQuery program saved next to `recon` (same name, .py) in a fresh
+    process (bench/cad_replay.py) and return its record; the rebuilt STL is
+    written next to it as <name>_cad.stl. Cached in <name>_cad.json."""
+    base = os.path.splitext(recon)[0]
+    prog, out_stl, rec_path = base + '.py', base + '_cad.stl', base + '_cad.json'
+    if os.path.exists(rec_path) and os.path.getmtime(rec_path) >= os.path.getmtime(prog):
+        return json.load(open(rec_path)), out_stl
+    if not os.path.exists(prog):
+        return {'built': False, 'valid': False, 'error': 'no program'}, out_stl
+    try:
+        p = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cad_replay.py'),
+                            prog, out_stl], capture_output=True, text=True, timeout=timeout)
+        rec = json.loads(p.stdout.strip().splitlines()[-1])
+    except subprocess.TimeoutExpired:
+        rec = {'built': False, 'valid': False, 'error': f'timeout {timeout}s'}
+    except Exception as e:  # noqa: BLE001 - a crashed replay (OCC segfault) means it does not build
+        rec = {'built': False, 'valid': False, 'error': f'replay crashed: {type(e).__name__}'}
+    json.dump(rec, open(rec_path, 'w'))
+    return rec, out_stl
+
+
 def _score_one(job):
-    name, part, gt, recon, judge_name = job
+    name, part, gt, recon, judge_name, cad = job
     global JUDGE
     JUDGE = judge_name  # a spawned worker does not inherit main()'s setting
     r = judge(gt, recon)
     r['cd'] = chamfer(gt, recon)
     r['valid'] = True
+    if cad:
+        # Mesh fidelity (iou) and executable-CAD fidelity (iou_cad) are reported
+        # separately: iou_cad judges the geometry the program rebuilds, 0 if it
+        # does not build; cad_valid is OCC validity of that shape and its solids.
+        rec, stl = cad_replay(recon)
+        r['cad_built'], r['cad_valid'] = rec['built'], rec['valid']
+        r['cad_error'] = rec.get('error')
+        r['iou_cad'] = judge(gt, stl)['iou'] if rec['built'] and os.path.exists(stl) else 0.0
     return name, part, r
 
 
@@ -168,7 +223,7 @@ def _init_worker():
         os.environ[v] = '1'
 
 
-def score_runs(run_dirs, stl_dir, jobs=1):
+def score_runs(run_dirs, stl_dir, jobs=1, cad=False):
     """Score full-pipeline output folders (run_pipeline.py --output-folder).
     A part with no reconstruction counts as invalid with IoU 0. With jobs > 1,
     parts are scored in that many processes (each part is serial numpy, so a
@@ -200,20 +255,36 @@ def score_runs(run_dirs, stl_dir, jobs=1):
                     res[part] = {'iou': 0.0, 'cd': None, 'valid': False}
                 continue
             res[part] = None  # filled in below
-            todo.append((name, part, os.path.join(stl_dir, part + '.stl'), recon, JUDGE))
+            todo.append((name, part, os.path.join(stl_dir, part + '.stl'), recon, JUDGE, cad))
         out[name] = res
 
     def done(name, part, r):
         out[name][part] = r
-        print(f"{name:<22} {part[:40]:<40} iou={r['iou']:.4f} cd={r['cd']:.4f}", flush=True)
+        print(f"{name:<22} {part[:40]:<40} iou={r['iou']:.4f} cd={r['cd']:.4f}"
+              + (f" iou_cad={r['iou_cad']:.4f} cad_valid={r['cad_valid']}" if 'iou_cad' in r else ''), flush=True)
     if jobs > 1 and len(todo) > 1:
         import multiprocessing as mp
         from concurrent.futures import ProcessPoolExecutor, as_completed
-        # spawn: workers start clean instead of inheriting this process's state.
-        with ProcessPoolExecutor(min(jobs, len(todo)), mp_context=mp.get_context('spawn'),
-                                 initializer=_init_worker) as ex:
-            for f in as_completed([ex.submit(_score_one, j) for j in todo]):
-                done(*f.result())
+        from concurrent.futures.process import BrokenProcessPool
+        # A judge can take ~22 GB (gwn-mc on a large part); a few at once can
+        # exhaust RAM and the OOM killer breaks the whole pool. Rerun what is
+        # left with half the workers, down to one, instead of losing the run.
+        while todo:
+            left = {}
+            try:
+                # spawn: workers start clean instead of inheriting this process's state.
+                with ProcessPoolExecutor(min(jobs, len(todo)), mp_context=mp.get_context('spawn'),
+                                         initializer=_init_worker) as ex:
+                    left = {ex.submit(_score_one, j): j for j in todo}
+                    for f in as_completed(left):
+                        done(*f.result())
+                        del left[f]
+                todo = []
+            except BrokenProcessPool:
+                if jobs == 1:
+                    raise
+                todo, jobs = list(left.values()), max(1, jobs // 2)
+                print(f'worker died (likely OOM); rescoring {len(todo)} parts with {jobs} jobs', flush=True)
     else:
         for j in todo:
             done(*_score_one(j))
@@ -224,7 +295,12 @@ def score_runs(run_dirs, stl_dir, jobs=1):
         cds = [res[p]['cd'] for p in common if res[p]['cd'] is not None]
         inval = sum(not res[p]['valid'] for p in common)
         if ious:
-            print(f'{name:<22} mean IoU {sum(ious) / len(ious):.4f}  mean CD {sum(cds) / max(len(cds), 1):.4f}  invalid {inval}')
+            line = f'{name:<22} mean IoU {sum(ious) / len(ious):.4f}  mean CD {sum(cds) / max(len(cds), 1):.4f}  invalid {inval}'
+            if cad:
+                ic = [res[p].get('iou_cad', 0.0) for p in common]
+                bad = sum(not res[p].get('cad_valid', False) for p in common)
+                line += f'  mean IoU(CAD) {sum(ic) / len(ic):.4f}  CAD invalid/unbuilt {bad}'
+            print(line)
     return out
 
 
@@ -243,12 +319,14 @@ def main():
                          'wrap: alpha-wrap both meshes (phase-2 judge); '
                          'soup: like robust, but a non-watertight GT (raw ABC triangle soup) is labelled '
                          'by winding number on 1e5 cached seeded points')
+    ap.add_argument('--cad', action='store_true',
+                    help='also replay each part\'s CadQuery program, check OCC validity and judge the rebuilt shape')
     args = ap.parse_args()
     global JUDGE
     JUDGE = args.judge
 
     if args.runs:
-        out = score_runs(args.runs, args.stl_dir, jobs=args.jobs)
+        out = score_runs(args.runs, args.stl_dir, jobs=args.jobs, cad=args.cad)
         if args.out:
             json.dump(out, open(args.out, 'w'), indent=2)
     elif args.arms:

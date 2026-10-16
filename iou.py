@@ -226,16 +226,28 @@ def _bodies_union_manifold(mesh):
     """Exact manifold of a multi-body mesh: each closed body is converted on its
     own and the bodies are unioned by manifold3d, which resolves overlaps
     correctly. (Stock converted the whole compound at once, where overlapping
-    shells break the volume math, and fell back to alpha-wrap.) Returns None if
-    any body is open or fails to convert."""
+    shells break the volume math, and fell back to alpha-wrap.) Inward-facing
+    bodies (negative signed volume) are internal cavities: they are flipped and
+    subtracted, not unioned (unioning them filled every cavity: 00344388 judge
+    0.976 vs 0.986). Returns None if any body is open or fails to convert."""
     try:
         bodies = mesh.split(only_watertight=False)
         if not bodies or not all(b.is_watertight and b.is_winding_consistent for b in bodies):
             return None
-        parts = [_to_manifold(b) for b in bodies]
-        if any(p is None for p in parts):
+        solids, cavities = [], []
+        for b in bodies:
+            if b.volume < 0:
+                b = b.copy()
+                b.invert()
+                cavities.append(_to_manifold(b))
+            else:
+                solids.append(_to_manifold(b))
+        if not solids or any(p is None for p in solids + cavities):
             return None
-        return manifold3d.Manifold.batch_boolean(parts, _OP_ADD) if len(parts) > 1 else parts[0]
+        m = manifold3d.Manifold.batch_boolean(solids, _OP_ADD) if len(solids) > 1 else solids[0]
+        if cavities:
+            m = manifold3d.Manifold.batch_boolean([m] + cavities, manifold3d.OpType.Subtract)
+        return m
     except Exception:
         return None
 
