@@ -43,6 +43,8 @@
 
 | A-035 | CAD replay that dies with no output (seen once on ORCD, not reproducible: same program built on rerun) | Retried once; if it still prints nothing it scores as not built, with rc and stderr kept in `<name>_cad.json`. A replay that prints anything is never retried. | interface | default |
 
+| A-036 | CPU threads per process (wall-clock budgets make compute contention part of the result) | No-LLM policy: 5 parts on 16 cores with OMP/OpenBLAS/MKL threads = 3 (first attempt without a cap ran at load ~98 on 16 cores and was discarded, never scored). Model jobs: 8 episodes on the node's 24-48 cores without a cap; observed load ~10 on 48 cores, so no contention correction. | interface | default |
+
 ## Notes
 
 - **A-001** — The request says *generation*. The earlier agent study (refine mode, precomputed pool) already
