@@ -1,0 +1,8 @@
+[
+ [{"name": "describe_target", "arguments": {}}],
+ [{"name": "detect_directions", "arguments": {}}],
+ [{"name": "extract_sketch", "arguments": {"normal": [0, 0, 1], "offset": 0.0}}],
+ [{"name": "add_code", "arguments": {"code": "result = cq.Workplane('XY').box(2.0, 1.2, 0.3)"}}],
+ [{"name": "evaluate", "arguments": {}}],
+ [{"name": "finish", "arguments": {}}]
+]

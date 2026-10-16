@@ -27,17 +27,35 @@ import urllib.error
 import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from cad_tools import CadWorkspace, openai_tools  # noqa: E402
+from cad_tools import CadWorkspace  # noqa: E402
+from skills import SkillWorkspace, openai_tools  # noqa: E402
 
-SYSTEM = """You are a CAD engineer. Your job: build a solid CAD model that matches a target 3D part as closely \
+_INTRO = """You are a CAD engineer. Your job: build a solid CAD model that matches a target 3D part as closely \
 as possible, measured by volumetric IoU (intersection over union) against the target.
 
 You cannot see the target. You learn about it only through tools:
 - describe_target: size, volume, and the flat faces (directions and plane positions).
 - section: exact cross-section polygons of the target (and of your model) in any axis-aligned plane.
+"""
+_TOOLS = {
+    'pool': """\
 - list_candidates / show_candidate: solids that the CADFit pipeline already fitted to the target by slicing it \
 into sketches and extruding/revolving them. precision near 1 means the candidate lies inside the target.
 - add_candidate / add_code: append a solid to the model as a union ('add') or a difference ('cut').
+""",
+    'skills': """\
+- CADFit skills, the stages of a CAD reconstruction pipeline, which you run yourself: detect_directions (likely \
+extrusion directions), extract_sketch (slice the target at a plane into sketch profiles fitted with lines and arcs), \
+fit_extrude / fit_revolve (turn a sketch into extrusion / revolve solids that match the target), section_extrude \
+(extrude a whole cross-section through the part). Each solid they make becomes a scored candidate: \
+list_candidates / show_candidate show them; precision near 1 means the candidate lies inside the target.
+- add_candidate / add_code: append a solid to the model as a union ('add') or a difference ('cut').
+""",
+    'code': """\
+- add_code: append a solid built by your CadQuery code to the model as a union ('add') or a difference ('cut').
+""",
+}
+_OUTRO = """\
 - evaluate: current IoU and where material is missing or extra.
 - remove_step, list_steps, finish.
 
@@ -47,10 +65,39 @@ spans [-1, 1]). Your CadQuery code (cq and math are imported) must assign the fi
     result = cq.Workplane('XY', origin=(0, 0, -0.2)).circle(0.3).extrude(0.4)
     result = cq.Workplane('XZ').polyline([(0,0),(0.5,0),(0.5,0.2),(0,0.2)]).close().revolve(360, (0,0,0), (0,1,0))
 
-Good strategy: describe the target, look at candidates and sections, build the main body first, then add features \
+Good strategy: describe the target, {look}, build the main body first, then add features \
 and cut holes/pockets, checking evaluate after changes and removing steps that lower IoU. The best model seen at \
 any point is kept, so experimenting is safe. Work efficiently: you have a limited number of tool calls. Call \
 finish when you cannot improve further."""
+_LOOK = {'pool': 'look at candidates and sections',
+         'skills': 'extract sketches on its main planes and fit them into candidates',
+         'code': 'read sections to get exact profile shapes'}
+
+
+def system_prompt(toolset):
+    return _INTRO + _TOOLS[toolset] + _OUTRO.replace('{look}', _LOOK[toolset])
+
+
+SYSTEM = system_prompt('pool')
+
+
+class Scripted:
+    """Model backend that replays tool calls from a JSON file (`--model scripted:<file>`):
+    a list of turns, each a list of {"name", "arguments"}; finish when exhausted.
+    For tests and deterministic no-LLM controls."""
+
+    def __init__(self, path):
+        self.turns = json.load(open(path))
+        self.i = 0
+
+    def __call__(self, *_, **__):
+        turn = self.turns[self.i] if self.i < len(self.turns) else [{'name': 'finish', 'arguments': {}}]
+        self.i += 1
+        calls = [{'id': f'scripted_{self.i}_{k}', 'type': 'function',
+                  'function': {'name': c['name'], 'arguments': json.dumps(c.get('arguments', {}))}}
+                 for k, c in enumerate(turn)]
+        return {'choices': [{'message': {'role': 'assistant', 'content': '', 'tool_calls': calls},
+                             'finish_reason': 'tool_calls'}], 'usage': {}}
 
 
 def chat(base_url, key, model, messages, tools, temperature, max_tokens, retries=5, extra=None, deadline=None):
@@ -145,11 +192,11 @@ def compact(messages, keep):
     return out
 
 
-def call_tool(ws, name, args):
+def call_tool(ws, name, args, allowed=None):
     if name == 'finish':
         return {'ok': True}
     fn = getattr(ws, name, None)
-    if fn is None or name.startswith('_'):
+    if fn is None or name.startswith('_') or (allowed is not None and name not in allowed):
         return {'error': f'unknown tool {name}'}
     try:
         return fn(**args)
@@ -164,8 +211,11 @@ def main():
     ap.add_argument('--gt', required=True)
     ap.add_argument('--cands', help='part folder of a --keep-history pipeline run')
     ap.add_argument('--init', help='CadQuery script to start from (refine mode)')
-    ap.add_argument('--model', required=True)
+    ap.add_argument('--model', required=True, help='model name at --base-url, or scripted:<calls.json>')
     ap.add_argument('--out', required=True)
+    ap.add_argument('--toolset', choices=['pool', 'skills', 'code'], default='pool',
+                    help='pool: precomputed CADFit candidates (--cands); skills: the agent runs CADFit stages '
+                         'itself (agent/skills.py); code: CadQuery only')
     ap.add_argument('--base-url', default=os.environ.get('AGENT_BASE_URL', 'https://openrouter.ai/api/v1'))
     ap.add_argument('--max-calls', type=int, default=40, help='tool-call budget')
     ap.add_argument('--max-minutes', type=float, default=20)
@@ -177,20 +227,25 @@ def main():
                     help='JSON merged into each request, e.g. sampling settings or '
                          '{"chat_template_kwargs": {"enable_thinking": false}} for Qwen3.x')
     a = ap.parse_args()
+    scripted = Scripted(a.model.split(':', 1)[1]) if a.model.startswith('scripted:') else None
     key = os.environ.get('AGENT_API_KEY') or os.environ.get('OPENROUTER_API_KEY')
-    if not key:
+    if not key and not scripted:
         sys.exit('set OPENROUTER_API_KEY (or AGENT_API_KEY for another endpoint)')
+    if a.toolset != 'pool' and (a.cands or a.init):
+        sys.exit('--cands/--init belong to --toolset pool; skills and code start from an empty model')
 
     os.makedirs(a.out, exist_ok=True)
     t0 = time.time()
-    ws = CadWorkspace(a.gt, os.path.join(a.out, 'work'), a.cands, a.init)
+    work = os.path.join(a.out, 'work')
+    ws = (CadWorkspace(a.gt, work, a.cands, a.init) if a.toolset == 'pool' else
+          SkillWorkspace(a.gt, work) if a.toolset == 'skills' else CadWorkspace(a.gt, work))
     init_iou = ws.best[0]
-    tools = openai_tools()
+    tools = openai_tools(a.toolset)
     tool_names = {t['function']['name'] for t in tools}
     user = (f'Build a CAD model of the target. Budget: {a.max_calls} tool calls.'
             + (f' The model already holds a reconstruction from the CADFit pipeline (IoU {init_iou:.4f}) as '
                'step 0; improve on it.' if a.init else ''))
-    messages = [{'role': 'system', 'content': SYSTEM}, {'role': 'user', 'content': user}]
+    messages = [{'role': 'system', 'content': system_prompt(a.toolset)}, {'role': 'user', 'content': user}]
     log = open(os.path.join(a.out, 'transcript.jsonl'), 'w')
     for m in messages:
         log.write(json.dumps(m) + '\n')
@@ -203,8 +258,8 @@ def main():
     deadline = t0 + 60 * a.max_minutes
     while calls < a.max_calls and time.time() < deadline:
         try:
-            resp = chat(a.base_url, key, a.model, compact(messages, keep), tools,
-                        a.temperature, a.max_tokens, extra=a.extra_body, deadline=deadline)
+            resp = (scripted or chat)(a.base_url, key, a.model, compact(messages, keep), tools,
+                                      a.temperature, a.max_tokens, extra=a.extra_body, deadline=deadline)
         except TimeoutError:
             stop = 'time'
             break
@@ -262,7 +317,7 @@ def main():
             except json.JSONDecodeError as e:
                 args, res = None, {'error': f'arguments are not valid JSON: {e}'}
             if args is not None:
-                res = call_tool(ws, name, args)
+                res = call_tool(ws, name, args, tool_names)
             txt = json.dumps(res)
             if len(txt) > 6000:
                 txt = txt[:6000] + ' ...[truncated]'
@@ -281,7 +336,7 @@ def main():
             break
 
     stl = ws.export(a.out)
-    result = {'model': a.model, 'gt': a.gt, 'init': a.init, 'init_iou': init_iou,
+    result = {'model': a.model, 'toolset': a.toolset, 'gt': a.gt, 'init': a.init, 'init_iou': init_iou,
               'best_iou': ws.best[0], 'n_steps': len(ws.best[1]),
               'sources': [s['source'] for s in ws.best[1]], 'modes': [s['mode'] for s in ws.best[1]],
               'tool_calls': calls, 'stop': stop, 'seconds': round(time.time() - t0, 1),
