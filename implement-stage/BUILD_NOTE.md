@@ -6,7 +6,7 @@
 | F1 | real detect_directions + extract_sketch | `.venv/bin/python -m pytest -q tests/test_agent_skills.py -k "directions or extract"` | MUST | ✅ |
 | F2 | real fit_extrude (extents → evaluated candidates) | `.venv/bin/python -m pytest -q tests/test_agent_skills.py -k extrude` | MUST | ✅ |
 | F3 | real fit_revolve + section_extrude; `code` toolset | `.venv/bin/python -m pytest -q tests/test_agent_skills.py` | MUST | ✅ |
-| F4 | skills on real fresh parts via a scripted no-LLM policy | `.venv/bin/python agent/scripted_skills_policy.py --smoke && test -f /tmp/agentsk_policy/summary.json` | MUST | ⬜ |
+| F4 | skills on real fresh parts via a scripted no-LLM policy | `.venv/bin/python agent/scripted_skills_policy.py --smoke && test -f /tmp/agentsk_policy/summary.json` | MUST | ✅ |
 | F5 | ORCD harness: vLLM env, per-model serve config, Slurm episode runner; smoke with one model | `ssh orcd test -f /orcd/pool/007/a_lin/cadfit/bench/runs/agentsk_smoke/summary.json` | MUST | ⬜ |
 | F6 | study: models × {skills, code} × 20 parts, scored | `ssh orcd 'cd /orcd/pool/007/a_lin/cadfit && test -f bench/runs/agentsk_scores.json'` | MUST | ⬜ |
 | F7 | report: tables, tool-use stats, figure | `.venv/bin/python bench/agent_skills_report.py && test -f bench/AGENT_SKILLS_RESULTS.md` | SHOULD | ⬜ |
@@ -17,6 +17,7 @@
 - F1: 6 passed, exit 0; 1 fix (rotated-bracket test assumed detect_directions.py returns cap normals — it excludes them by design; skill now adds flat-face normals, A-014). F0 re-run exit 0.
 - F2: 4 passed (plate_hole and bracket recovered at IoU>0.98 from one sketch; exported agent_model.py rebuilds the same volume), exit 0; 0 fixes. F0, F1 re-run exit 0.
 - F3: 13 passed, exit 0; 1 fix: shaft revolve IoU 0.408 → 0.994 after densifying the split profile (pipeline bug, A-016); revolve axis now reported in world coords. No PLACEHOLDER left in agent/skills.py. F0 exit 0.
+- F4: smoke exit 0 on the first 3 study parts (00046097 0.781, 00095369 0.899, 00140273 0.894 agent-visible IoU; 34-247 s, 16-19 calls, within 40 calls / 30 min); slowest calls fit_revolve ~50 s, off-axis extract_sketch ~22 s. 0 fixes. F0-F3 green.
 
 ## Deferred
 - Loft/sweep (`analyze_sweep_loft.py`) as a skill — exists only behind CADFIT_SWEEP_LOFT; low hit rate on CADBench.

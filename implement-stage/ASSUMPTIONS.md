@@ -19,6 +19,7 @@
 | A-014 | detect_directions skill: the pipeline stage omits flat-face normals (another stage covers them) | Skill returns detect_directions.py's off-axis directions **plus** describe_target's flat-face normals and plane offsets | interface | default |
 | A-015 | stage settings inside skills | Same as the fresh-cohort pipeline arms: CADFIT_FAST_CD=1, CADFIT_TRANSLATION_MAXPTS=400, translation range [-2, 2] step 0.01, 100k surface samples (seed 0); extents → candidates by greedy_search.create_extrusion_from_translation (≤5 largest intervals) | interface | default |
 | A-016 | revolve profile split is buggy in the pipeline (on-axis edge has 2 points; line fit drops the axis corner: stepped shaft revolved to 40% volume) | Fixed behind `greedy_search.DENSIFY_REVOLVE_SPLIT` (default False, so pipeline arms stay reproducible); `agent/skills.py` sets it True. The agent's fit_revolve is therefore *better* than the revolve stage inside the frozen pipeline arms. | semantic | default |
+| A-017 | what the no-LLM skills control does | `agent/scripted_skills_policy.py`: mid-plane sketches along axes, flat-face normals and detected directions; fit_extrude all, fit_revolve axis sketches; section_extrude x/y/z; greedy add/cut by GT IoU gain ≥ 0.001; same 40-call / 30-min budget | semantic | default |
 
 ## Notes
 
