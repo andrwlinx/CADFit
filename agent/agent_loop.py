@@ -55,6 +55,12 @@ list_candidates / show_candidate show them; precision near 1 means the candidate
     'code': """\
 - add_code: append a solid built by your CadQuery code to the model as a union ('add') or a difference ('cut').
 """,
+    'codesec': """\
+- section_extrude: a CADFit stage that extrudes the target's whole cross-section at a plane through the full \
+extent of the part. Each solid it makes becomes a scored candidate: list_candidates / show_candidate show them; \
+precision near 1 means the candidate lies inside the target.
+- add_candidate / add_code: append a solid to the model as a union ('add') or a difference ('cut').
+""",
 }
 _OUTRO = """\
 - evaluate: current IoU and where material is missing or extra.
@@ -72,7 +78,8 @@ any point is kept, so experimenting is safe. Work efficiently: you have a limite
 finish when you cannot improve further."""
 _LOOK = {'pool': 'look at candidates and sections',
          'skills': 'extract sketches on its main planes and fit them into candidates',
-         'code': 'read sections to get exact profile shapes'}
+         'code': 'read sections to get exact profile shapes',
+         'codesec': 'read sections to get exact profile shapes and extrude whole cross-sections'}
 
 
 def system_prompt(toolset):
@@ -292,7 +299,7 @@ def main():
     ap.add_argument('--init', help='CadQuery script to start from (refine mode)')
     ap.add_argument('--model', required=True, help='model name at --base-url, or scripted:<calls.json>')
     ap.add_argument('--out', required=True)
-    ap.add_argument('--toolset', choices=['pool', 'skills', 'code'], default='pool',
+    ap.add_argument('--toolset', choices=['pool', 'skills', 'code', 'codesec'], default='pool',
                     help='pool: precomputed CADFit candidates (--cands); skills: the agent runs CADFit stages '
                          'itself (agent/skills.py); code: CadQuery only')
     ap.add_argument('--base-url', default=os.environ.get('AGENT_BASE_URL', 'https://openrouter.ai/api/v1'))
@@ -317,7 +324,7 @@ def main():
     t0 = time.time()
     work = os.path.join(a.out, 'work')
     ws = (CadWorkspace(a.gt, work, a.cands, a.init) if a.toolset == 'pool' else
-          SkillWorkspace(a.gt, work) if a.toolset == 'skills' else CadWorkspace(a.gt, work))
+          SkillWorkspace(a.gt, work) if a.toolset in ('skills', 'codesec') else CadWorkspace(a.gt, work))
     init_iou = ws.best[0]
     tools = openai_tools(a.toolset)
     tool_names = {t['function']['name'] for t in tools}

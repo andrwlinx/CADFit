@@ -349,7 +349,7 @@ _CANDIDATE_TOOLS = ('list_candidates', 'show_candidate', 'add_candidate')
 
 
 def toolset_specs(toolset):
-    """Tool specs for a toolset: pool (precomputed candidates), skills, code."""
+    """Tool specs for a toolset: pool (precomputed candidates), skills, code, codesec."""
     if toolset == 'pool':
         return list(TOOL_SPECS)
     base = [s for s in TOOL_SPECS if s[0] not in _CANDIDATE_TOOLS]
@@ -357,6 +357,9 @@ def toolset_specs(toolset):
         return base
     if toolset == 'skills':
         return base[:1] + SKILL_SPECS + [s for s in TOOL_SPECS if s[0] in _CANDIDATE_TOOLS] + base[1:]
+    if toolset == 'codesec':  # ablation: code + the whole-part section shortcut only
+        return (base[:1] + [s for s in SKILL_SPECS if s[0] == 'section_extrude']
+                + [s for s in TOOL_SPECS if s[0] in _CANDIDATE_TOOLS] + base[1:])
     raise ValueError(f'unknown toolset {toolset}')
 
 

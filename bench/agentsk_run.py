@@ -45,7 +45,7 @@ def episode(a, m, toolset, part):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--model-key', required=True, choices=sorted(MODELS))
-    ap.add_argument('--toolsets', nargs='+', default=['skills', 'code'], choices=['skills', 'code'])
+    ap.add_argument('--toolsets', nargs='+', default=['skills', 'code'], choices=['skills', 'code', 'codesec'])
     ap.add_argument('--parts', nargs='*', help='default: the 20-part study sample (ledger A-005)')
     ap.add_argument('--stl-dir', default=os.path.join(ROOT, 'bench', 'cadbench', 'fresh'))
     ap.add_argument('--tag', default='agentsk')

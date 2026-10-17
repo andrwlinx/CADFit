@@ -70,3 +70,11 @@
   `fresh_scores.json` ran with the bug, so "agent with skills vs pipeline" is not a same-stage comparison for
   revolves; the report must say so. Fixing the pipeline itself (flag default True) and rerunning its arms is the
   clean resolution — out of scope for this run, listed under Next.
+
+### Paper-stage additions (2026-10-17, after Codex outline review)
+
+| ID | Under-determined by the request | Chosen | Class | Source |
+|----|--------------------------------|--------|-------|--------|
+| A-040 | how to give the scripted policy the same target-score budget as an agent | `--charge-trials`: every GT-scored assembly trial costs one call of the same 40 (an agent pays at least one, since add_candidate reports the new IoU; removing a bad step costs it another, so this is still generous to the script); first-improving trial kept, candidates in IoU order, adds then cuts; 20 calls reserved for assembly. The unrestricted policy stays as a separate reference. | semantic | default |
+| A-041 | which single skill to ablate | `codesec` toolset = code tools + `section_extrude` (+ candidate list/show/add) only, Gemma-4-31B, same 20 parts, budget and prompt template as `code`/`skills` | semantic | default |
+| A-042 | episode-to-episode variance | 2 extra Gemma-4-31B skills repeats (tags agentsk_rep1, agentsk_rep2), unseeded sampling at the model-card temperature; the original episode is repeat 0 | semantic | default |

@@ -15,5 +15,5 @@ export OMP_NUM_THREADS=3 OPENBLAS_NUM_THREADS=3 MKL_NUM_THREADS=3 NUMEXPR_NUM_TH
 RUN="apptainer exec -B /orcd $P/envs/cadfit-sandbox $P/envs/cadfit-venv/bin/python"
 $RUN -c "import cadquery, manifold3d, trimesh, scipy, shapely" && echo "imports warm"
 $RUN -c "import sys; sys.path.insert(0, 'agent'); from scripted_skills_policy import study_parts; print('\n'.join(study_parts()))" \
-  | xargs -P 5 -I{} $RUN agent/scripted_skills_policy.py --parts {} --out bench/runs/agentsk_policy
-$RUN agent/scripted_skills_policy.py --out bench/runs/agentsk_policy   # summary over all 20 (cached)
+  | xargs -P 5 -I{} $RUN agent/scripted_skills_policy.py --parts {} --out ${OUT:-bench/runs/agentsk_policy} "$@"
+$RUN agent/scripted_skills_policy.py --out ${OUT:-bench/runs/agentsk_policy} "$@"   # summary over all 20 (cached)

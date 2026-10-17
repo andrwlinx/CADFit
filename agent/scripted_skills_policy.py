@@ -42,7 +42,7 @@ class Budget(Exception):
     pass
 
 
-def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3, reserve=8):
+def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3, reserve=8, charge_trials=False):
     t0 = time.time()
     ws = SkillWorkspace(gt, os.path.join(out, 'work'))
     calls = []
@@ -51,7 +51,7 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3
         # Analysis may not use the last `reserve` calls: they are kept for assembly.
         if len(calls) >= max_calls - (0 if assembly else reserve) or time.time() - t0 > 60 * max_minutes:
             raise Budget()
-        res = getattr(ws, name)(**args)
+        res = {} if name == 'trial' else getattr(ws, name)(**args)
         calls.append({'name': name, 'args': args, 't': round(time.time() - t0, 1),
                       'error': res.get('error') if isinstance(res, dict) else None})
         return res
@@ -63,6 +63,8 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3
         if not cands:
             return
         call('add_candidate', assembly=True, id=cands[0])
+        if charge_trials:
+            return assemble_charged(cands)
         while True:
             base = ws._score(ws._model())
             best = (min_gain, None, None)
@@ -77,6 +79,30 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3
             if best[1] is None:
                 return
             call('add_candidate', assembly=True, id=best[1], mode=best[2])
+
+    def assemble_charged(cands):
+        """Budget-matched assembly (ledger A-040): every GT-scored trial costs one tool call
+        (an agent pays at least one: add_candidate reports the new IoU), and the first
+        improving trial is kept, in order of candidate IoU, adds then cuts, until no trial
+        in a full pass improves or the budget is spent."""
+        nonlocal trials
+        used = {cands[0]}
+        improved = True
+        while improved:
+            improved = False
+            for mode in ('add', 'cut'):
+                for c in cands:
+                    if c in used:
+                        continue
+                    call('trial', assembly=True)  # charged like a tool call
+                    trials += 1
+                    m = ws.candidates[c]['_m']
+                    base = ws._score(ws._model())
+                    cur = ws._model()
+                    if ws._score(cur + m if mode == 'add' else cur - m) - base > min_gain:
+                        call('add_candidate', assembly=True, id=c, mode=mode)
+                        used.add(c)
+                        improved = True
 
     stop = 'done'
     trials = 0  # GT-scored trial unions/cuts in the greedy assembly (not tool calls; ledger A-017)
@@ -121,6 +147,9 @@ def main():
     ap.add_argument('--out', default='bench/runs/agentsk_policy')
     ap.add_argument('--max-calls', type=int, default=40)
     ap.add_argument('--max-minutes', type=float, default=30)
+    ap.add_argument('--charge-trials', action='store_true',
+                    help='budget-matched control: GT-scored assembly trials count as tool calls (A-040)')
+    ap.add_argument('--reserve', type=int, default=8, help='calls kept for assembly')
     ap.add_argument('--smoke', action='store_true', help='first 3 study parts into /tmp/agentsk_policy')
     a = ap.parse_args()
     parts = a.parts or study_parts(a.stl_dir)
@@ -132,7 +161,8 @@ def main():
         if os.path.exists(os.path.join(out, 'result.json')):
             r = json.load(open(os.path.join(out, 'result.json')))
         else:
-            r = run_part(os.path.join(a.stl_dir, p + '.stl'), out, a.max_calls, a.max_minutes)
+            r = run_part(os.path.join(a.stl_dir, p + '.stl'), out, a.max_calls, a.max_minutes,
+                         reserve=a.reserve, charge_trials=a.charge_trials)
         summary[p] = {k: r[k] for k in ('best_iou', 'tool_calls', 'stop', 'seconds', 'n_candidates')}
         print(f'{p[:8]} IoU {r["best_iou"]:.4f}  calls {r["tool_calls"]}  cands {r["n_candidates"]}  '
               f'{r["seconds"]}s  stop={r["stop"]}', flush=True)
