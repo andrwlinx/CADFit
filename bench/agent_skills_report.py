@@ -63,16 +63,17 @@ def main():
          'IoU(CAD) = judge on the solid rebuilt by running the final CadQuery program (A-008, headline). '
          'Failed or missing episodes score 0.', '',
          '## Results', '',
-         '| condition | IoU | IoU(CAD) | CAD invalid | episodes with a model | tool calls / episode | GT trial evals / episode | stops |',
+         '| condition | IoU | IoU(CAD) | CAD invalid (of models) | episodes with a model | tool calls / episode | GT trial evals / episode | stops |',
          '|---|---|---|---|---|---|---|---|']
     for c in agents + refs:
         rec = [C[c][p] for p in parts]
         calls = [r['tool_calls'] for r in rec if r.get('tool_calls') is not None]  # episodes with a result
         trials = [r['trial_evaluations'] for r in rec if r.get('trial_evaluations') is not None]
-        stops = collections.Counter(r.get('stop') for r in rec if 'stop' in r)
+        stops = collections.Counter((r['stop'][:9] if str(r['stop']).startswith('api error') else r['stop'])
+                                    for r in rec if 'stop' in r)
         known = lambda k: all(k in r for r in rec)  # noqa: E731  (references may not record it)
         L.append(f'| {c} | {mean(col(c, "iou")):.4f} | {mean(col(c, "iou_cad")):.4f} | '
-                 f'{sum(not r["cad_valid"] for r in rec) if known("cad_valid") else "n/a"} | '
+                 f'{sum(not r["cad_valid"] for r in rec if r.get("valid", True)) if known("cad_valid") else "n/a"} | '
                  f'{(str(sum(r["valid"] for r in rec)) + "/" + str(len(rec))) if known("valid") else "n/a"} | '
                  f'{mean(calls):.1f} (n={len(calls)}) | {f"{mean(trials):.0f}" if trials else "0"} | {", ".join(f"{k} {v}" for k, v in stops.most_common()) or "—"} |')
 

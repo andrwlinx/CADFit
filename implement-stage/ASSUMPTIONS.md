@@ -45,6 +45,8 @@
 
 | A-036 | CPU threads per process (wall-clock budgets make compute contention part of the result) | No-LLM policy: 5 parts on 16 cores with OMP/OpenBLAS/MKL threads = 3 (first attempt without a cap ran at load ~98 on 16 cores and was discarded, never scored). Model jobs: 8 episodes on the node's 24-48 cores without a cap; observed load ~10 on 48 cores, so no contention correction. | interface | default |
 
+| A-037 | episodes that ended in a serving failure | gpt-oss leaked harmony control tokens (`<|end|><|start|>`) into its text; sent back as history they made vLLM return HTTP 500 on every retry (9 gpt-oss-20b episodes: 3 code, 6 skills, stop = `api error`). Harness fix: those tokens are stripped from assistant text before it re-enters the history (raw text kept in the transcript). Only episodes whose stop reason was `api error` are rerun with the fix — selected by the failure, never by score; the originals are kept as `<part>.apierr1` and not scored. No other model had an `api error` stop. | semantic | default |
+
 ## Notes
 
 - **A-001** — The request says *generation*. The earlier agent study (refine mode, precomputed pool) already
