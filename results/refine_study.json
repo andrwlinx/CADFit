@@ -1,0 +1,40 @@
+{
+ "pipeline": {
+  "agentfr1.log": {
+   "n": 19,
+   "iou": 0.7508,
+   "wl": "0/0"
+  },
+  "agentfr2.log": {
+   "n": 19,
+   "iou": 0.7508,
+   "wl": "0/0"
+  }
+ },
+ "RedHatAI__Qwen3.8-27B-INT4/refine": {
+  "agentfr1.log": {
+   "n": 19,
+   "iou": 0.7973,
+   "wl": "2/3"
+  },
+  "agentfr2.log": {
+   "n": 19,
+   "iou": 0.8067,
+   "wl": "4/3"
+  }
+ },
+ "noop/refine": {
+  "agentfr1.log": {
+   "n": 19,
+   "iou": 0.7492,
+   "wl": "0/3"
+  }
+ },
+ "search/refine": {
+  "agentfr1.log": {
+   "n": 19,
+   "iou": 0.7556,
+   "wl": "8/2"
+  }
+ }
+}

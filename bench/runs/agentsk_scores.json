@@ -1,0 +1,5680 @@
+{
+ "parts": [
+  "00046097_c3c229ed6e3a45b2b648027c_step_000",
+  "00095369_fd1df382218e6e0f90aa941b_step_000",
+  "00140273_08a59d45a975b822d5536007_step_000",
+  "00153120_0f4e90ea5d8add32e39298eb_step_000",
+  "00154184_5735b30ee4b055a05f141e16_step_001",
+  "00232213_8960d9c6b1f3965294d14e5d_step_000",
+  "00249450_a68e99eb4d98c0460771fdce_step_000",
+  "00354176_32dffe026b23004e82670fb7_step_002",
+  "00492401_0645a3b965579de6bfa80267_step_000",
+  "00528181_ca079362860c563fb8b05377_step_000",
+  "00589302_08220b2f3dc9641b23f012b8_step_001",
+  "00630878_06994d5b0030f8d7d981349b_step_000",
+  "00700032_492e0ac476d95f6170717f46_step_000",
+  "00771600_d04fd68f81426574544a9b96_step_000",
+  "00834538_fe2e27a617dfbf8ef543260d_step_003",
+  "00862084_6c1777bbaabee941fe4215fc_step_000",
+  "00883892_580f65badecb1e9fa11c79a3_step_000",
+  "00941601_071d956501ffc009e947b4d3_step_000",
+  "00953658_06f20e34a1e8e27016ff3bb1_step_000",
+  "00966049_820834e0f6797f5657423325_step_004"
+ ],
+ "conditions": {
+  "devstral2-24b/skills": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.7649253510852728,
+    "method": "exact",
+    "cd": 0.031074351577554615,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.764925350898484,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 146.5,
+    "agent_iou": 0.7649253434531663,
+    "tokens": 292890,
+    "sources": [
+     "C1",
+     "C2",
+     "C3",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C11"
+    ],
+    "trial_evaluations": null
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.8380440340068748,
+    "method": "exact",
+    "cd": 0.01450932621245053,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8380440348246072,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 190.6,
+    "agent_iou": 0.8380440338167493,
+    "tokens": 286686,
+    "sources": [
+     "C1",
+     "C2",
+     "C3"
+    ],
+    "trial_evaluations": null
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.894392068659356,
+    "method": "exact",
+    "cd": 0.002867603850123619,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.894392068659356,
+    "tool_calls": 31,
+    "stop": "finish",
+    "seconds": 682.9,
+    "agent_iou": 0.8943920686593563,
+    "tokens": 278915,
+    "sources": [
+     "C4"
+    ],
+    "trial_evaluations": null
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.9710535821257547,
+    "method": "exact",
+    "cd": 0.007035366363610246,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9710535826661496,
+    "tool_calls": 31,
+    "stop": "finish",
+    "seconds": 225.9,
+    "agent_iou": 0.9710535812134325,
+    "tokens": 104083,
+    "sources": [
+     "C2",
+     "C7",
+     "C9",
+     "C10"
+    ],
+    "trial_evaluations": null
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.21838325691515267,
+    "method": "exact",
+    "cd": 0.04622428846873346,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.2183827615960327,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 278.6,
+    "agent_iou": 0.21838325840471332,
+    "tokens": 256429,
+    "sources": [
+     "C12",
+     "C13",
+     "C18"
+    ],
+    "trial_evaluations": null
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.4584612102327775,
+    "method": "exact",
+    "cd": 0.04487194852009724,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.45846121073042734,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 258.1,
+    "agent_iou": 0.4584612018628457,
+    "tokens": 263907,
+    "sources": [
+     "C0",
+     "C1",
+     "C2",
+     "C5",
+     "C7",
+     "C9"
+    ],
+    "trial_evaluations": null
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.8813277644783766,
+    "method": "exact",
+    "cd": 0.009332304886332417,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8813391113961758,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 238.9,
+    "agent_iou": 0.8813277644783768,
+    "tokens": 437925,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.9291199400843948,
+    "method": "exact",
+    "cd": 0.008223919714036569,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9291199400843948,
+    "tool_calls": 14,
+    "stop": "finish",
+    "seconds": 570.9,
+    "agent_iou": 0.9291199400844772,
+    "tokens": 94328,
+    "sources": [
+     "C3"
+    ],
+    "trial_evaluations": null
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.8832212565387066,
+    "method": "exact",
+    "cd": 0.03912342180858887,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8832509687907073,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 105.5,
+    "agent_iou": 0.8832212565387066,
+    "tokens": 271199,
+    "sources": [
+     "C2",
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.706920825529948,
+    "method": "exact",
+    "cd": 0.033874110589899586,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7063959531563995,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 199.2,
+    "agent_iou": 0.7069208255476743,
+    "tokens": 372569,
+    "sources": [
+     "C1",
+     "C0",
+     "C3",
+     "C2"
+    ],
+    "trial_evaluations": null
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.6690242643262777,
+    "method": "gwn-mc",
+    "cd": 0.05105640779911096,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6689555475243947,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 251.7,
+    "agent_iou": 0.6667033617768335,
+    "tokens": 105140,
+    "sources": [
+     "C0",
+     "C1",
+     "C4",
+     "C5",
+     "C12",
+     "C13",
+     "C16",
+     "C17",
+     "C23",
+     "C24"
+    ],
+    "trial_evaluations": null
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.6762297353707589,
+    "method": "exact",
+    "cd": 0.022695437524438165,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.67630772367823,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 369.6,
+    "agent_iou": 0.6762297319164786,
+    "tokens": 279023,
+    "sources": [
+     "C3",
+     "C4",
+     "C5"
+    ],
+    "trial_evaluations": null
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.9622744607433278,
+    "method": "exact",
+    "cd": 0.007742799789524945,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9622744607433278,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 779.7,
+    "agent_iou": 0.9622744607433279,
+    "tokens": 647507,
+    "sources": [
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.9185222585511461,
+    "method": "exact",
+    "cd": 0.007106313700695155,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9187277735853853,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 584.9,
+    "agent_iou": 0.9185222585512877,
+    "tokens": 266974,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.9657483592835822,
+    "method": "exact",
+    "cd": 0.007073271211100344,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9658462423446172,
+    "tool_calls": 29,
+    "stop": "finish",
+    "seconds": 297.3,
+    "agent_iou": 0.9657483646835645,
+    "tokens": 278840,
+    "sources": [
+     "C0",
+     "C6"
+    ],
+    "trial_evaluations": null
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.7980980232744073,
+    "method": "exact",
+    "cd": 0.005681168227895167,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7981179629651662,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 586.3,
+    "agent_iou": 0.7980980025190572,
+    "tokens": 240804,
+    "sources": [
+     "C0",
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12",
+     "C13",
+     "C14"
+    ],
+    "trial_evaluations": null
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.56871313087175,
+    "method": "gwn-mc",
+    "cd": 0.06772150665506824,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.57186686171783,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 350.0,
+    "agent_iou": 0.5718668696843956,
+    "tokens": 145954,
+    "sources": [
+     "C0",
+     "C1",
+     "C2",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12",
+     "C13",
+     "C14"
+    ],
+    "trial_evaluations": null
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.7307216323960796,
+    "method": "exact",
+    "cd": 0.026174648223009654,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7307678550827478,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 189.9,
+    "agent_iou": 0.7307216320389802,
+    "tokens": 199315,
+    "sources": [
+     "C1",
+     "C3",
+     "C4",
+     "C6",
+     "C7"
+    ],
+    "trial_evaluations": null
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.8899588077252065,
+    "method": "exact",
+    "cd": 0.008462641271536574,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8925375050766599,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 549.2,
+    "agent_iou": 0.8899587793116256,
+    "tokens": 249409,
+    "sources": [
+     "C0",
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12"
+    ],
+    "trial_evaluations": null
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.7901653242899533,
+    "method": "gwn-mc",
+    "cd": 0.0073903660865600185,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": false,
+    "cad_error": null,
+    "iou_cad": 0.7901653242899533,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 102.5,
+    "agent_iou": 0.8156556198638453,
+    "tokens": 224318,
+    "sources": [
+     "C0",
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C6"
+    ],
+    "trial_evaluations": null
+   }
+  },
+  "devstral2-24b/code": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.27448044089718393,
+    "method": "exact",
+    "cd": 0.3739498923538547,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.27448044089718393,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 266.1,
+    "agent_iou": 0.274480440897184,
+    "tokens": 329181,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.08639029571396598,
+    "method": "exact",
+    "cd": 0.1336232181039883,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.08639029571396598,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 144.0,
+    "agent_iou": 0.086390295713966,
+    "tokens": 224158,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.30773325086121034,
+    "method": "exact",
+    "cd": 0.25106813677013234,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.30773325086121034,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 132.4,
+    "agent_iou": 0.3077332508612104,
+    "tokens": 232445,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.2267844456925736,
+    "method": "exact",
+    "cd": 0.0261813984128206,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.2267844456925736,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 1804.2,
+    "agent_iou": 0.22678444569366185,
+    "tokens": 1117245,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.2092688963891634,
+    "method": "exact",
+    "cd": 0.13029326985653442,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.21051897710477147,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 98.8,
+    "agent_iou": 0.2092688963962555,
+    "tokens": 260541,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.12594591474882472,
+    "method": "exact",
+    "cd": 0.12388317096217985,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.12594591474882472,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 121.1,
+    "agent_iou": 0.12594591474882472,
+    "tokens": 210043,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.32687027992922335,
+    "method": "exact",
+    "cd": 0.019397888655930846,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.32687027992922335,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 235.8,
+    "agent_iou": 0.32687027992922335,
+    "tokens": 430429,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.22056345343957437,
+    "method": "exact",
+    "cd": 0.024065671509217592,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.22056345343957437,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 847.7,
+    "agent_iou": 0.22056345343941805,
+    "tokens": 343616,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.34307424784750634,
+    "method": "exact",
+    "cd": 0.17854922665518458,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.3430742488270947,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 170.5,
+    "agent_iou": 0.3430742480010478,
+    "tokens": 252787,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.25214834876507153,
+    "method": "exact",
+    "cd": 0.17842096856648654,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.25214834876507153,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 439.3,
+    "agent_iou": 0.25214834876580616,
+    "tokens": 442207,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.6522909045983666,
+    "method": "exact",
+    "cd": 0.034821998637343206,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6522909058391553,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 203.1,
+    "agent_iou": 0.6585087729060425,
+    "tokens": 298183,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.18553546765597728,
+    "method": "exact",
+    "cd": 0.10688008918700509,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": false,
+    "cad_error": null,
+    "iou_cad": 0.18107714701601166,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 190.0,
+    "agent_iou": 0.18553546765604173,
+    "tokens": 289013,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.32586529436391104,
+    "method": "exact",
+    "cd": 0.04187625312041267,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.32586529436391104,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 457.0,
+    "agent_iou": 0.325865294363911,
+    "tokens": 446978,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.7129822598509513,
+    "method": "exact",
+    "cd": 0.009785667122064415,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7129822598509513,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 159.5,
+    "agent_iou": 0.7129822598509514,
+    "tokens": 209973,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.18331567423275724,
+    "method": "exact",
+    "cd": 0.048356888338785216,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.18331567423275724,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 567.9,
+    "agent_iou": 0.18331567422507586,
+    "tokens": 440303,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.1605643943831853,
+    "method": "exact",
+    "cd": 0.09702669692637937,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.1605643943831853,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 326.3,
+    "agent_iou": 0.16056439438318532,
+    "tokens": 365764,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.5901547624613614,
+    "method": "exact",
+    "cd": 0.11121312655280485,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.5901547624613614,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 181.7,
+    "agent_iou": 0.5901547624613614,
+    "tokens": 255459,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.48888439191652017,
+    "method": "exact",
+    "cd": 0.05165908976802121,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.48888439192572947,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 171.6,
+    "agent_iou": 0.48888439192006616,
+    "tokens": 236212,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.4147567479830425,
+    "method": "exact",
+    "cd": 0.03963330754592955,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.4147567479830425,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 483.5,
+    "agent_iou": 0.4147567479830425,
+    "tokens": 501718,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.01122993229764522,
+    "method": "exact",
+    "cd": 0.04438512112615288,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.01122993229764522,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 178.6,
+    "agent_iou": 0.007995332210092857,
+    "tokens": 257900,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   }
+  },
+  "gemma4-31b/skills": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.8317329265052783,
+    "method": "exact",
+    "cd": 0.02670170969637333,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8317329287539577,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 941.9,
+    "agent_iou": 0.8317329267140314,
+    "tokens": 292415,
+    "sources": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5"
+    ],
+    "trial_evaluations": null
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.9508434207718531,
+    "method": "exact",
+    "cd": 0.012007695778145928,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9508434207718531,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 1593.8,
+    "agent_iou": 0.9508434207718534,
+    "tokens": 387126,
+    "sources": [
+     "C1",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.894392068659356,
+    "method": "exact",
+    "cd": 0.002867603850123619,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.894392068659356,
+    "tool_calls": 30,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.8943920686593563,
+    "tokens": 214452,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.9957188726868037,
+    "method": "exact",
+    "cd": 0.006751262843771138,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9957188726868037,
+    "tool_calls": 10,
+    "stop": "finish",
+    "seconds": 201.9,
+    "agent_iou": 0.9957188725833818,
+    "tokens": 77400,
+    "sources": [
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.9669606922163887,
+    "method": "exact",
+    "cd": 0.0197360139568043,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9673655518332477,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 815.2,
+    "agent_iou": 0.9669606756298126,
+    "tokens": 314976,
+    "sources": [
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.27871980192441237,
+    "method": "exact",
+    "cd": 0.10257130478152096,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.27871980192441237,
+    "tool_calls": 28,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.2787198019244124,
+    "tokens": 235484,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.979242814557158,
+    "method": "exact",
+    "cd": 0.008961772195139849,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9792558501848045,
+    "tool_calls": 11,
+    "stop": "finish",
+    "seconds": 390.6,
+    "agent_iou": 0.9792428145571579,
+    "tokens": 55317,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.9289829365811167,
+    "method": "exact",
+    "cd": 0.008271702481206351,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.928817451205511,
+    "tool_calls": 34,
+    "stop": "finish",
+    "seconds": 1655.2,
+    "agent_iou": 0.9289829474416902,
+    "tokens": 295758,
+    "sources": [
+     "C0",
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.9321693572822162,
+    "method": "exact",
+    "cd": 0.021078099355458995,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9321466564845936,
+    "tool_calls": 33,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.932169357281956,
+    "tokens": 266017,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.8894079454090067,
+    "method": "exact",
+    "cd": 0.019127092532000588,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8894499464638997,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 1599.2,
+    "agent_iou": 0.8894079454097173,
+    "tokens": 519225,
+    "sources": [
+     "C0",
+     "C2"
+    ],
+    "trial_evaluations": null
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.9484063376635004,
+    "method": "exact",
+    "cd": 0.011056443222802841,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9484063376635004,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 1139.8,
+    "agent_iou": 0.9743715101663049,
+    "tokens": 489533,
+    "sources": [
+     "C3"
+    ],
+    "trial_evaluations": null
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.9512953937889174,
+    "method": "exact",
+    "cd": 0.016019822827833242,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9512953937889174,
+    "tool_calls": 30,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.9512953937889117,
+    "tokens": 267197,
+    "sources": [
+     "C0",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.9616436604118277,
+    "method": "exact",
+    "cd": 0.007614574163450895,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9616928133054535,
+    "tool_calls": 20,
+    "stop": "finish",
+    "seconds": 580.8,
+    "agent_iou": 0.9616436568867446,
+    "tokens": 220587,
+    "sources": [
+     "C0",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.9988197663956785,
+    "method": "exact",
+    "cd": 0.0067488552506148785,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9988197663956785,
+    "tool_calls": 13,
+    "stop": "finish",
+    "seconds": 469.9,
+    "agent_iou": 0.9988197663957854,
+    "tokens": 83279,
+    "sources": [
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.9689906099434789,
+    "method": "exact",
+    "cd": 0.007062360532016842,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.969064332809886,
+    "tool_calls": 12,
+    "stop": "finish",
+    "seconds": 403.4,
+    "agent_iou": 0.9689906094027142,
+    "tokens": 103980,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.9990251143436724,
+    "method": "exact",
+    "cd": 0.004944080692477513,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9990251143436724,
+    "tool_calls": 14,
+    "stop": "finish",
+    "seconds": 655.3,
+    "agent_iou": 0.9990251143436728,
+    "tokens": 128766,
+    "sources": [
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.7729234441406793,
+    "method": "exact",
+    "cd": 0.04137446728231821,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7729234441406793,
+    "tool_calls": 21,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.7729234441406793,
+    "tokens": 158832,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.8979732532098096,
+    "method": "exact",
+    "cd": 0.027843721549614196,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.898000521846819,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 944.9,
+    "agent_iou": 0.8979732499896621,
+    "tokens": 327039,
+    "sources": [
+     "C0",
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.9287402126029207,
+    "method": "exact",
+    "cd": 0.008290136213671178,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9287402126029207,
+    "tool_calls": 27,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.9287402126029207,
+    "tokens": 269563,
+    "sources": [
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.7645114945362863,
+    "method": "exact",
+    "cd": 0.0063935456669278155,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7644865651994125,
+    "tool_calls": 36,
+    "stop": "finish",
+    "seconds": 1101.1,
+    "agent_iou": 0.7536077021310725,
+    "tokens": 281035,
+    "sources": [
+     "C1",
+     "C2",
+     "C3"
+    ],
+    "trial_evaluations": null
+   }
+  },
+  "gemma4-31b/code": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.3889192237204334,
+    "method": "exact",
+    "cd": 0.12132775296842874,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.3889192237204334,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 1762.1,
+    "agent_iou": 0.3889192237204334,
+    "tokens": 250733,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.9554618034608108,
+    "method": "exact",
+    "cd": 0.010735261039766112,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9554659990829133,
+    "tool_calls": 32,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.9554618034608106,
+    "tokens": 268332,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.25143772922668445,
+    "method": "exact",
+    "cd": 0.2609239173225565,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.25143772780326973,
+    "tool_calls": 25,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.2514377293678745,
+    "tokens": 141145,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.9758840213590142,
+    "method": "exact",
+    "cd": 0.006728666627960612,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9758840213174614,
+    "tool_calls": 6,
+    "stop": "finish",
+    "seconds": 271.3,
+    "agent_iou": 0.9758840212953748,
+    "tokens": 48408,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.22963343412547607,
+    "method": "exact",
+    "cd": 0.07022152613005828,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.22963343381150902,
+    "tool_calls": 18,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.22963343421082696,
+    "tokens": 211528,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.12143146625712929,
+    "method": "exact",
+    "cd": 0.05118864911025095,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.12143146625712929,
+    "tool_calls": 21,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.12143146625712929,
+    "tokens": 164345,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.9795685948740135,
+    "method": "exact",
+    "cd": 0.009005626681299221,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9795814622058573,
+    "tool_calls": 21,
+    "stop": "finish",
+    "seconds": 1414.0,
+    "agent_iou": 0.979568594874018,
+    "tokens": 234672,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.020954892749380363,
+    "method": "exact",
+    "cd": 0.02786994494579838,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.020954892749380363,
+    "tool_calls": 14,
+    "stop": "budget",
+    "seconds": 2049.5,
+    "agent_iou": 0.020954892749380366,
+    "tokens": 117804,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.6471919491931462,
+    "method": "exact",
+    "cd": 0.06319313504234773,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6471919491931462,
+    "tool_calls": 24,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.6471919491933916,
+    "tokens": 124159,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.22073713635139128,
+    "method": "exact",
+    "cd": 0.20196119715006872,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.22073713635139128,
+    "tool_calls": 23,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.22073713635131018,
+    "tokens": 149085,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.7467136608119773,
+    "method": "exact",
+    "cd": 0.02801818382273244,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7467136608119773,
+    "tool_calls": 23,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.7505575910377055,
+    "tokens": 213525,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.2518083602422667,
+    "method": "exact",
+    "cd": 0.04333788190634951,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": false,
+    "cad_error": null,
+    "iou_cad": 0.251801689860835,
+    "tool_calls": 15,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.2518083601980172,
+    "tokens": 149684,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.9614323822516977,
+    "method": "exact",
+    "cd": 0.007702683193128768,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9614316239981038,
+    "tool_calls": 16,
+    "stop": "finish",
+    "seconds": 1310.0,
+    "agent_iou": 0.9614323822548616,
+    "tokens": 245543,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.9446873715647114,
+    "method": "exact",
+    "cd": 0.00713254752937328,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.944426318651441,
+    "tool_calls": 33,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.9446873715582258,
+    "tokens": 281449,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.8155286175918808,
+    "method": "exact",
+    "cd": 0.011217390952243236,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8155286175918808,
+    "tool_calls": 27,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.8155286140136615,
+    "tokens": 271550,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.9333322267037102,
+    "method": "exact",
+    "cd": 0.005287700224978355,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9334059323443887,
+    "tool_calls": 28,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.9333322267037103,
+    "tokens": 288308,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.6681748217165198,
+    "method": "exact",
+    "cd": 0.050575974014394856,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6681748217165198,
+    "tool_calls": 15,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.6681748217165198,
+    "tokens": 129001,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.2885333774289146,
+    "method": "exact",
+    "cd": 0.13074332235131186,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.28853440775424105,
+    "tool_calls": 25,
+    "stop": "finish",
+    "seconds": 1214.5,
+    "agent_iou": 0.2885333774288733,
+    "tokens": 203561,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.6258087948687611,
+    "method": "exact",
+    "cd": 0.02982854122857169,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6279228086051651,
+    "tool_calls": 24,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.6258087948687611,
+    "tokens": 216417,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.8296181368813154,
+    "method": "exact",
+    "cd": 0.005183660293957761,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8296011022598841,
+    "tool_calls": 29,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.9602793910917735,
+    "tokens": 195101,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   }
+  },
+  "gptoss-120b/skills": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.7699163766737543,
+    "method": "exact",
+    "cd": 0.03471165623217659,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7699163767021111,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 457.0,
+    "agent_iou": 0.769916376965705,
+    "tokens": 272460,
+    "sources": [
+     "C0",
+     "C3"
+    ],
+    "trial_evaluations": null
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.9528734114402873,
+    "method": "exact",
+    "cd": 0.012118068849344146,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9528734114402873,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 808.0,
+    "agent_iou": 0.952873411440287,
+    "tokens": 301603,
+    "sources": [
+     "C0",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.894392068659356,
+    "method": "exact",
+    "cd": 0.002867603850123619,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.894392068659356,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 793.8,
+    "agent_iou": 0.8943920686593563,
+    "tokens": 257181,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.9957188726868037,
+    "method": "exact",
+    "cd": 0.006751262843771138,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9957188726868037,
+    "tool_calls": 11,
+    "stop": "no tool call",
+    "seconds": 152.0,
+    "agent_iou": 0.9957188725833818,
+    "tokens": 99555,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.21755706293013813,
+    "method": "gwn-mc",
+    "cd": 0.04823902745728241,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.21755706293013813,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 324.1,
+    "agent_iou": 0.21672263497031363,
+    "tokens": 241754,
+    "sources": [
+     "C7",
+     "C3",
+     "C8",
+     "C6",
+     "C3",
+     "C4",
+     "C0",
+     "C15"
+    ],
+    "trial_evaluations": null
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.2763539081732485,
+    "method": "exact",
+    "cd": 0.07619066866385946,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.2763539081732485,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 561.9,
+    "agent_iou": 0.2763539074673881,
+    "tokens": 302452,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.9948420693581964,
+    "method": "exact",
+    "cd": 0.008975053902581995,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9948420693581964,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 340.8,
+    "agent_iou": 0.9948420693581965,
+    "tokens": 254516,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.929658546982828,
+    "method": "exact",
+    "cd": 0.008306116957807252,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.929964787863624,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 1526.2,
+    "agent_iou": 0.9296585487875141,
+    "tokens": 333604,
+    "sources": [
+     "code",
+     "C0",
+     "C0",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.8471186154456101,
+    "method": "exact",
+    "cd": 0.03744014984879975,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8471186154456101,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 463.2,
+    "agent_iou": 0.8471186154474079,
+    "tokens": 328671,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.8894079454090069,
+    "method": "exact",
+    "cd": 0.01906406972031056,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8894499464638997,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 371.4,
+    "agent_iou": 0.8894079454126154,
+    "tokens": 276504,
+    "sources": [
+     "C0",
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.9484063376635004,
+    "method": "exact",
+    "cd": 0.011056443222802841,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9484063376635004,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 698.1,
+    "agent_iou": 0.9743715101663049,
+    "tokens": 485683,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.7472765372849579,
+    "method": "exact",
+    "cd": 0.020809831728587032,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7473650924406182,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 471.1,
+    "agent_iou": 0.7472765375519556,
+    "tokens": 267992,
+    "sources": [
+     "C1",
+     "C3",
+     "C5"
+    ],
+    "trial_evaluations": null
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.9622744607433278,
+    "method": "exact",
+    "cd": 0.007742799789524945,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9622744607433278,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 505.4,
+    "agent_iou": 0.9622744607433279,
+    "tokens": 290635,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.6212883703796359,
+    "method": "exact",
+    "cd": 0.01318961244966153,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6212883703796359,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 499.7,
+    "agent_iou": 0.6212883703796359,
+    "tokens": 250784,
+    "sources": [
+     "code",
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.9677329508283683,
+    "method": "exact",
+    "cd": 0.007078645918117082,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9677329508283683,
+    "tool_calls": 33,
+    "stop": "no tool call",
+    "seconds": 437.6,
+    "agent_iou": 0.9677329561597015,
+    "tokens": 322916,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.9048012691858611,
+    "method": "exact",
+    "cd": 0.005043836026157003,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9048355277115308,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 988.2,
+    "agent_iou": 0.9048012386293827,
+    "tokens": 263921,
+    "sources": [
+     "C0",
+     "C2",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.7893537165459358,
+    "method": "exact",
+    "cd": 0.04717145490195454,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.789353716549927,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 509.6,
+    "agent_iou": 0.7893537166456229,
+    "tokens": 239258,
+    "sources": [
+     "C1",
+     "C2",
+     "code",
+     "C6"
+    ],
+    "trial_evaluations": null
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.8756112757830733,
+    "method": "exact",
+    "cd": 0.029813875932164526,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": false,
+    "cad_error": null,
+    "iou_cad": 0.8732502691893554,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 358.4,
+    "agent_iou": 0.8755698541594188,
+    "tokens": 292497,
+    "sources": [
+     "C3",
+     "C6",
+     "C0",
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.9287402126029207,
+    "method": "exact",
+    "cd": 0.008290136213671178,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9287402126029207,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 969.0,
+    "agent_iou": 0.9287402126029207,
+    "tokens": 385708,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.735242188701345,
+    "method": "exact",
+    "cd": 0.006660052847466742,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7352057357690751,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 334.3,
+    "agent_iou": 0.7370216420179673,
+    "tokens": 229086,
+    "sources": [
+     "C1",
+     "code"
+    ],
+    "trial_evaluations": null
+   }
+  },
+  "gptoss-120b/code": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.7017628607470928,
+    "method": "exact",
+    "cd": 0.048337625874239065,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7017628607470928,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 604.2,
+    "agent_iou": 0.701762860747093,
+    "tokens": 283768,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.8663172339248149,
+    "method": "exact",
+    "cd": 0.012794015671760152,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8663172339248149,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 613.9,
+    "agent_iou": 0.8663172339248147,
+    "tokens": 293423,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.4457526554128687,
+    "method": "exact",
+    "cd": 0.25132754734720303,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.4457526554128687,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 567.7,
+    "agent_iou": 0.4457526554128687,
+    "tokens": 199666,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.9758840213174614,
+    "method": "exact",
+    "cd": 0.006814682296486953,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9758840213174614,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 869.4,
+    "agent_iou": 0.9758840212953748,
+    "tokens": 606888,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.26752581225964817,
+    "method": "exact",
+    "cd": 0.10569361714845471,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.26752581225964833,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 561.6,
+    "agent_iou": 0.26752581228026073,
+    "tokens": 244714,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.22843931941349985,
+    "method": "exact",
+    "cd": 0.068056605132265,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.22843931941349985,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 712.1,
+    "agent_iou": 0.2284393198740802,
+    "tokens": 278596,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.9419685057032852,
+    "method": "exact",
+    "cd": 0.009613219694883202,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9419685057032852,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 429.5,
+    "agent_iou": 0.9419685057032853,
+    "tokens": 352573,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.31307637486254253,
+    "method": "exact",
+    "cd": 0.02695422846388959,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.31307637486254253,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 1230.7,
+    "agent_iou": 0.3130763748625425,
+    "tokens": 475612,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.6002691392373354,
+    "method": "exact",
+    "cd": 0.07701921488445103,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6017634361394651,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 586.1,
+    "agent_iou": 0.6002691392370496,
+    "tokens": 386816,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.19554028134538887,
+    "method": "exact",
+    "cd": 0.23931440548140906,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.19629024839267695,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 805.3,
+    "agent_iou": 0.19554028134330179,
+    "tokens": 555396,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.9501697749017642,
+    "method": "exact",
+    "cd": 0.011073814073415556,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9501697749017642,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 950.5,
+    "agent_iou": 0.9707121964602282,
+    "tokens": 705489,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.1566353848517568,
+    "method": "exact",
+    "cd": 0.03553701249903039,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.2551699970635399,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 571.6,
+    "agent_iou": 0.15663538490796292,
+    "tokens": 297075,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.9597862434524812,
+    "method": "exact",
+    "cd": 0.007692492433096011,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9597862434524812,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 611.1,
+    "agent_iou": 0.9597862434524809,
+    "tokens": 449784,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.6175080133186824,
+    "method": "exact",
+    "cd": 0.013049891132388516,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6175080133186824,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 520.2,
+    "agent_iou": 0.6175080133186823,
+    "tokens": 241928,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.8155286175918808,
+    "method": "exact",
+    "cd": 0.011208376984578473,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8155286175918808,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 975.0,
+    "agent_iou": 0.8155286140127783,
+    "tokens": 709892,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.4891971386650842,
+    "method": "exact",
+    "cd": 0.009216745912342679,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.4891971386650842,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 784.1,
+    "agent_iou": 0.48919713866508424,
+    "tokens": 539969,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.6758263391696179,
+    "method": "exact",
+    "cd": 0.046018832411479714,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6758263391696179,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 1616.4,
+    "agent_iou": 0.6758263391696179,
+    "tokens": 338589,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.02980583200187576,
+    "method": "exact",
+    "cd": 0.5030051134004385,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.02980583200187576,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 527.1,
+    "agent_iou": 0.02980583182353141,
+    "tokens": 427614,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.6230515632674053,
+    "method": "exact",
+    "cd": 0.029656920002773698,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6229684893834855,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 511.6,
+    "agent_iou": 0.6230515632674053,
+    "tokens": 362547,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.1755121600575057,
+    "method": "gwn-mc",
+    "cd": 0.0781931420847112,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.1755121600575057,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 388.7,
+    "agent_iou": 0.16874530810950292,
+    "tokens": 238885,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   }
+  },
+  "gptoss-20b/skills": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.7386130869957436,
+    "method": "exact",
+    "cd": 0.04122388017695927,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7386130869957436,
+    "tool_calls": 17,
+    "stop": "finish",
+    "seconds": 103.2,
+    "agent_iou": 0.7386130869957437,
+    "tokens": 98289,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.8715790159199656,
+    "method": "exact",
+    "cd": 0.013446892219895923,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8715790159199656,
+    "tool_calls": 35,
+    "stop": "no tool call",
+    "seconds": 375.9,
+    "agent_iou": 0.8715790159199659,
+    "tokens": 270483,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.6465904584246575,
+    "method": "exact",
+    "cd": 0.005038933708259094,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6465904596995974,
+    "tool_calls": 26,
+    "stop": "no tool call",
+    "seconds": 511.5,
+    "agent_iou": 0.6465904584836925,
+    "tokens": 215347,
+    "sources": [
+     "code",
+     "C2"
+    ],
+    "trial_evaluations": null
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.9957188726868037,
+    "method": "exact",
+    "cd": 0.006751262843771138,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9957188726868037,
+    "tool_calls": 10,
+    "stop": "finish",
+    "seconds": 76.6,
+    "agent_iou": 0.9957188725833818,
+    "tokens": 97829,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.19473739490731218,
+    "method": "exact",
+    "cd": 0.04760287168181959,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.19473739490731218,
+    "tool_calls": 36,
+    "stop": "finish",
+    "seconds": 239.1,
+    "agent_iou": 0.19473739385712718,
+    "tokens": 236814,
+    "sources": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C6",
+     "C5",
+     "C7",
+     "C8",
+     "C9"
+    ],
+    "trial_evaluations": null
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 11,
+    "stop": "api error: API failed after 5 attempts: HTTP 500: b'{\"error\":{\"message\":\"Encountered text corresponding to disallowed special token \\'<|end|>\\'.\\\\nIf you want this text to be encoded as a special token, pass it to `allowed_special`, e.g. `allowed_special={\\'<|end|>\\', ...}`.\\\\nIf you want this text to be encoded as normal text, disable the check for this token by passing `disallowed_special=(enc.special_tokens_set - {\\'<|end|>\\'})`.\\\\nTo disable this check for all special tokens, pass `disallowed_special=()`.\",\"type\":\"InternalServerError\",\"param\":null,\"co'",
+    "seconds": 316.0,
+    "agent_iou": 0.0,
+    "tokens": 47065,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.9948420693581964,
+    "method": "exact",
+    "cd": 0.008975053902581995,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9948420693581964,
+    "tool_calls": 19,
+    "stop": "finish",
+    "seconds": 188.6,
+    "agent_iou": 0.9948420693581965,
+    "tokens": 208373,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.9291199400843948,
+    "method": "exact",
+    "cd": 0.008223919714036569,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9291199400843948,
+    "tool_calls": 35,
+    "stop": "finish",
+    "seconds": 904.8,
+    "agent_iou": 0.9291199400844772,
+    "tokens": 321500,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.8476969411908709,
+    "method": "exact",
+    "cd": 0.03734901662852508,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8478211158816855,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 550.5,
+    "agent_iou": 0.8476969413822972,
+    "tokens": 343671,
+    "sources": [
+     "C0",
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.7662789117897723,
+    "method": "exact",
+    "cd": 0.031788316483567655,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7645701589471885,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 305.8,
+    "agent_iou": 0.7662789097874297,
+    "tokens": 432808,
+    "sources": [
+     "C0",
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.9484063376635004,
+    "method": "exact",
+    "cd": 0.011056443222802841,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9484063376635004,
+    "tool_calls": 18,
+    "stop": "finish",
+    "seconds": 154.7,
+    "agent_iou": 0.9743715101663049,
+    "tokens": 97521,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.6145801819860189,
+    "method": "exact",
+    "cd": 0.03847243618065343,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6145801819860189,
+    "tool_calls": 26,
+    "stop": "no tool call",
+    "seconds": 306.0,
+    "agent_iou": 0.6145801819860164,
+    "tokens": 163511,
+    "sources": [
+     "C0",
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.9622744607433278,
+    "method": "exact",
+    "cd": 0.007742799789524945,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9622744607433278,
+    "tool_calls": 29,
+    "stop": "finish",
+    "seconds": 297.1,
+    "agent_iou": 0.9622744607433279,
+    "tokens": 234280,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.9988197663956785,
+    "method": "exact",
+    "cd": 0.0067488552506148785,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9988197663956785,
+    "tool_calls": 10,
+    "stop": "finish",
+    "seconds": 78.1,
+    "agent_iou": 0.9988197663957854,
+    "tokens": 50631,
+    "sources": [
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.9677329508283683,
+    "method": "exact",
+    "cd": 0.007078645918117082,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9677329508283683,
+    "tool_calls": 11,
+    "stop": "no tool call",
+    "seconds": 53.4,
+    "agent_iou": 0.9677329561597015,
+    "tokens": 84480,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.9928881734077022,
+    "method": "exact",
+    "cd": 0.004958475685385554,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9929143896596255,
+    "tool_calls": 24,
+    "stop": "finish",
+    "seconds": 583.9,
+    "agent_iou": 0.9928881659768225,
+    "tokens": 168976,
+    "sources": [
+     "C1",
+     "C2"
+    ],
+    "trial_evaluations": null
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.7884439009477224,
+    "method": "gwn-mc",
+    "cd": 0.037328307978675784,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7933040300658915,
+    "tool_calls": 25,
+    "stop": "finish",
+    "seconds": 607.5,
+    "agent_iou": 0.7933040300658916,
+    "tokens": 140375,
+    "sources": [
+     "C0",
+     "C1",
+     "C2",
+     "C3"
+    ],
+    "trial_evaluations": null
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 11,
+    "stop": "api error: API failed after 5 attempts: HTTP 500: b'{\"error\":{\"message\":\"unexpected tokens remaining in message header: Some(\\\\\"to=functions=... We have issue: misuse of function call? I wrote \\\\\\\\\\\\\"functions=...\\\\\\\\\\\\\" incorrectly. Need correct.<|end|><|start|>assistant\\\\\")\",\"type\":\"InternalServerError\",\"param\":null,\"code\":500}}'",
+    "seconds": 270.3,
+    "agent_iou": 0.0,
+    "tokens": 45380,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.622327958924516,
+    "method": "exact",
+    "cd": 0.029135694877529535,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.622327958234014,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 574.8,
+    "agent_iou": 0.6223279588932273,
+    "tokens": 416008,
+    "sources": [
+     "code",
+     "code",
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.7632371691994622,
+    "method": "exact",
+    "cd": 0.005781370791432332,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7632371653243806,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 136.5,
+    "agent_iou": 0.9031222154745784,
+    "tokens": 247623,
+    "sources": [
+     "C0",
+     "C1",
+     "C2",
+     "C3",
+     "C4"
+    ],
+    "trial_evaluations": null
+   }
+  },
+  "gptoss-20b/code": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.8444985789687373,
+    "method": "gwn-mc",
+    "cd": 0.02719043327769395,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8444985789687373,
+    "tool_calls": 28,
+    "stop": "finish",
+    "seconds": 398.3,
+    "agent_iou": 0.8482263875595044,
+    "tokens": 344864,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.8725440139460414,
+    "method": "exact",
+    "cd": 0.01231973273794093,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8725440139460414,
+    "tool_calls": 23,
+    "stop": "finish",
+    "seconds": 197.5,
+    "agent_iou": 0.8725440139460414,
+    "tokens": 155713,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.24463582157466274,
+    "method": "exact",
+    "cd": 0.25638508844716873,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.24463582157466274,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 391.2,
+    "agent_iou": 0.24463582157466277,
+    "tokens": 209829,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.5790881452036911,
+    "method": "exact",
+    "cd": 0.02071461856308124,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.5790881452036911,
+    "tool_calls": 21,
+    "stop": "no tool call",
+    "seconds": 225.4,
+    "agent_iou": 0.5790881451885058,
+    "tokens": 218931,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.15106917763670918,
+    "method": "exact",
+    "cd": 0.052343734358455386,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.15106917747681697,
+    "tool_calls": 33,
+    "stop": "no tool call",
+    "seconds": 144.4,
+    "agent_iou": 0.1510691771136089,
+    "tokens": 263053,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.2428510285715355,
+    "method": "exact",
+    "cd": 0.09895199630213261,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.2428510285715355,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 254.7,
+    "agent_iou": 0.24285102667533848,
+    "tokens": 302181,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.6513705149768996,
+    "method": "exact",
+    "cd": 0.014781035960816213,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6513691124923929,
+    "tool_calls": 10,
+    "stop": "api error: API failed after 5 attempts: HTTP 500: b'{\"error\":{\"message\":\"unexpected tokens remaining in message header: Some(\\\\\"at step 1: we added a cylinder of radius 1 extruded along z from -0.018 to 0.018? Wait we used origin (0,0,-0.018) extrude 0.036, giving height 0.036. We used cut of circle 0.09 extrude 0.036, so cylinder 1 with centre hole. We need target shapes: The sections show a large shape roughly like a disk with irregular outer boundary but entire radius=1? The outer boundary at z=0 cross-section shows big shape that seems nearly '",
+    "seconds": 212.2,
+    "agent_iou": 0.6513705156125205,
+    "tokens": 34531,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.28113369299457297,
+    "method": "exact",
+    "cd": 0.0290324302838127,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.2811336929959758,
+    "tool_calls": 33,
+    "stop": "finish",
+    "seconds": 849.1,
+    "agent_iou": 0.2811336930266669,
+    "tokens": 372295,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.2927790337730219,
+    "method": "exact",
+    "cd": 0.22742013429540486,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.2917838366548478,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 577.2,
+    "agent_iou": 0.2927790334462567,
+    "tokens": 364980,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.16430615672701354,
+    "method": "exact",
+    "cd": 0.1762344584690272,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.16430615672701354,
+    "tool_calls": 29,
+    "stop": "finish",
+    "seconds": 331.8,
+    "agent_iou": 0.1643061567306326,
+    "tokens": 392930,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.9501697749017642,
+    "method": "exact",
+    "cd": 0.011073814073415556,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9501697749017642,
+    "tool_calls": 38,
+    "stop": "finish",
+    "seconds": 472.1,
+    "agent_iou": 0.9707121964602282,
+    "tokens": 520875,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.2653977081211964,
+    "method": "exact",
+    "cd": 0.07040596382737663,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.2653977081211964,
+    "tool_calls": 23,
+    "stop": "no tool call",
+    "seconds": 134.5,
+    "agent_iou": 0.26539770812119634,
+    "tokens": 79007,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.6138860511331887,
+    "method": "exact",
+    "cd": 0.021434724575924408,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6138860511331887,
+    "tool_calls": 27,
+    "stop": "no tool call",
+    "seconds": 386.3,
+    "agent_iou": 0.6138860511331887,
+    "tokens": 331542,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 6,
+    "stop": "finish",
+    "seconds": 48.6,
+    "agent_iou": 0.0,
+    "tokens": 18555,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.8155286175918808,
+    "method": "exact",
+    "cd": 0.011198203166088366,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8155286175918808,
+    "tool_calls": 20,
+    "stop": "no tool call",
+    "seconds": 272.0,
+    "agent_iou": 0.8155286139629522,
+    "tokens": 171998,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.12392756620534852,
+    "method": "exact",
+    "cd": 0.11863206899238077,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.12392756620534852,
+    "tool_calls": 32,
+    "stop": "no tool call",
+    "seconds": 449.5,
+    "agent_iou": 0.12392756620534852,
+    "tokens": 436711,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.5901547624613614,
+    "method": "exact",
+    "cd": 0.11121312655280485,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.5901547624613614,
+    "tool_calls": 10,
+    "stop": "finish",
+    "seconds": 117.9,
+    "agent_iou": 0.5901547624613614,
+    "tokens": 51669,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.3381871393750787,
+    "method": "exact",
+    "cd": 0.07134070998754558,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.3381871393750787,
+    "tool_calls": 30,
+    "stop": "finish",
+    "seconds": 223.5,
+    "agent_iou": 0.3381871393750787,
+    "tokens": 202991,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.4149835773178427,
+    "method": "exact",
+    "cd": 0.03951293448766828,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.4151022985927496,
+    "tool_calls": 21,
+    "stop": "finish",
+    "seconds": 179.7,
+    "agent_iou": 0.41498357734019437,
+    "tokens": 190573,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 6,
+    "stop": "finish",
+    "seconds": 35.2,
+    "agent_iou": 0.0,
+    "tokens": 18358,
+    "sources": [],
+    "trial_evaluations": null
+   }
+  },
+  "qwen36-35b-a3b/skills": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.7386130869957436,
+    "method": "exact",
+    "cd": 0.04122388017695927,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7386130869957436,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 116.6,
+    "agent_iou": 0.7386130869957437,
+    "tokens": 360059,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.8715790159199656,
+    "method": "exact",
+    "cd": 0.013446892219895923,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8715790159199656,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 298.0,
+    "agent_iou": 0.8715790159199659,
+    "tokens": 320371,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.884196374368234,
+    "method": "exact",
+    "cd": 0.00286757234948792,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.884196374368234,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 121.7,
+    "agent_iou": 0.884196374368234,
+    "tokens": 299485,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.9957188726868037,
+    "method": "exact",
+    "cd": 0.006751262843771138,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9957188726868037,
+    "tool_calls": 35,
+    "stop": "finish",
+    "seconds": 179.2,
+    "agent_iou": 0.9957188725833818,
+    "tokens": 296693,
+    "sources": [
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.9351406673903228,
+    "method": "exact",
+    "cd": 0.022929477920658914,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9355201571608378,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 130.7,
+    "agent_iou": 0.9351406673538584,
+    "tokens": 264997,
+    "sources": [
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10"
+    ],
+    "trial_evaluations": null
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.3041779745561231,
+    "method": "exact",
+    "cd": 0.047454399673588644,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.3041779745561231,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 261.3,
+    "agent_iou": 0.30417797429514254,
+    "tokens": 377194,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.9948420693581964,
+    "method": "exact",
+    "cd": 0.008975053902581995,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9948420693581964,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 239.8,
+    "agent_iou": 0.9948420693581965,
+    "tokens": 459921,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.9289829365811167,
+    "method": "exact",
+    "cd": 0.008271702481206351,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.928817451205511,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 1533.6,
+    "agent_iou": 0.9289829474416902,
+    "tokens": 796493,
+    "sources": [
+     "C0",
+     "C2"
+    ],
+    "trial_evaluations": null
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.9339465165447726,
+    "method": "exact",
+    "cd": 0.019287416300676305,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9339752196193232,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 87.1,
+    "agent_iou": 0.9339465168585552,
+    "tokens": 272851,
+    "sources": [
+     "C1",
+     "C3"
+    ],
+    "trial_evaluations": null
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.7650536726411957,
+    "method": "exact",
+    "cd": 0.03197287938876146,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7650536726411957,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 333.6,
+    "agent_iou": 0.7650536726954298,
+    "tokens": 521500,
+    "sources": [
+     "C3"
+    ],
+    "trial_evaluations": null
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.9500509481644446,
+    "method": "exact",
+    "cd": 0.011115932250730464,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9744833978518074,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 688.3,
+    "agent_iou": 0.9731774790218799,
+    "tokens": 779003,
+    "sources": [
+     "C0",
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.6576364049563527,
+    "method": "exact",
+    "cd": 0.024130817419218385,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6577127310218295,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 196.0,
+    "agent_iou": 0.6576364049563527,
+    "tokens": 241111,
+    "sources": [
+     "C2"
+    ],
+    "trial_evaluations": null
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.9622744607433278,
+    "method": "exact",
+    "cd": 0.007742799789524945,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9622744607433278,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 391.6,
+    "agent_iou": 0.9622744607433279,
+    "tokens": 571702,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.9988197663956785,
+    "method": "exact",
+    "cd": 0.0067488552506148785,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9988197663956785,
+    "tool_calls": 31,
+    "stop": "finish",
+    "seconds": 204.8,
+    "agent_iou": 0.9988197663957854,
+    "tokens": 320653,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.9677329508283683,
+    "method": "exact",
+    "cd": 0.007078645918117082,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9677329508283683,
+    "tool_calls": 29,
+    "stop": "finish",
+    "seconds": 133.1,
+    "agent_iou": 0.9677329561597015,
+    "tokens": 312347,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.9990251143436724,
+    "method": "exact",
+    "cd": 0.004944080692477513,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9990251143436724,
+    "tool_calls": 9,
+    "stop": "finish",
+    "seconds": 124.7,
+    "agent_iou": 0.9990251143436728,
+    "tokens": 55574,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.6694090141723691,
+    "method": "exact",
+    "cd": 0.05081208311870064,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6694090141723691,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 1098.5,
+    "agent_iou": 0.669409014172369,
+    "tokens": 224604,
+    "sources": [
+     "C6"
+    ],
+    "trial_evaluations": null
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.740219252510979,
+    "method": "exact",
+    "cd": 0.025910636905615826,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.740219244674031,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 161.4,
+    "agent_iou": 0.7402192525030105,
+    "tokens": 186115,
+    "sources": [
+     "C7",
+     "C6",
+     "C5"
+    ],
+    "trial_evaluations": null
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.9287402126029207,
+    "method": "exact",
+    "cd": 0.008290136213671178,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9287402126029207,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 281.0,
+    "agent_iou": 0.9287402126029207,
+    "tokens": 315160,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.8231207326404947,
+    "method": "exact",
+    "cd": 0.005846497090285644,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8230831846007427,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 117.3,
+    "agent_iou": 0.832927030768975,
+    "tokens": 183382,
+    "sources": [
+     "C1",
+     "C0"
+    ],
+    "trial_evaluations": null
+   }
+  },
+  "qwen36-35b-a3b/code": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 126.7,
+    "agent_iou": 0.0,
+    "tokens": 149361,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.9447757262801042,
+    "method": "exact",
+    "cd": 0.01048905550111701,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9447757262801042,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 370.5,
+    "agent_iou": 0.9447757262801042,
+    "tokens": 302561,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.43861660456673357,
+    "method": "gwn-mc",
+    "cd": 0.08188872187395715,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.43861660456673357,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 230.5,
+    "agent_iou": 0.44313085472071395,
+    "tokens": 263701,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.41048621799218316,
+    "method": "exact",
+    "cd": 0.03218651296800451,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.41048621799218316,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 567.7,
+    "agent_iou": 0.4104862179845859,
+    "tokens": 752418,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.16783651737804667,
+    "method": "exact",
+    "cd": 0.06557840916617605,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.16783651737804667,
+    "tool_calls": 29,
+    "stop": "no tool call",
+    "seconds": 594.6,
+    "agent_iou": 0.1678365178171673,
+    "tokens": 352918,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.39898887765419616,
+    "method": "gwn-mc",
+    "cd": 0.03878175286705593,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.39898887765419616,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 385.4,
+    "agent_iou": 0.4016890771995764,
+    "tokens": 286932,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.9795685948740135,
+    "method": "exact",
+    "cd": 0.00896324485485722,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9795814622058573,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 352.6,
+    "agent_iou": 0.9795685948740135,
+    "tokens": 348598,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.22056389071778387,
+    "method": "exact",
+    "cd": 0.024044028578773538,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.22056389071778387,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 629.3,
+    "agent_iou": 0.2205638907177839,
+    "tokens": 415252,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.23148673406531212,
+    "method": "exact",
+    "cd": 0.2137339994703492,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.23148673406531212,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 460.2,
+    "agent_iou": 0.23148673406579626,
+    "tokens": 335609,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.4723649798164041,
+    "method": "exact",
+    "cd": 0.0807775820027242,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.4723649798164041,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 196.5,
+    "agent_iou": 0.47236497981386305,
+    "tokens": 340292,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.9501697749017642,
+    "method": "exact",
+    "cd": 0.011073814073415556,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9501697749017642,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 540.2,
+    "agent_iou": 0.9707121964602282,
+    "tokens": 538274,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 68.7,
+    "agent_iou": 0.0,
+    "tokens": 122536,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.6078977275752824,
+    "method": "exact",
+    "cd": 0.021329614149830742,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6078977275752824,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 602.8,
+    "agent_iou": 0.6078977275778248,
+    "tokens": 728941,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.6175080133186824,
+    "method": "exact",
+    "cd": 0.012883984871145417,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6175080133186824,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 271.6,
+    "agent_iou": 0.6175080133186823,
+    "tokens": 224739,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.3185177618649072,
+    "method": "exact",
+    "cd": 0.03338162689334627,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.318517762350006,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 305.5,
+    "agent_iou": 0.3185177618186323,
+    "tokens": 396090,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.15715457947887632,
+    "method": "exact",
+    "cd": 0.023207242407038767,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.15715457947887632,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 322.7,
+    "agent_iou": 0.15715457947887632,
+    "tokens": 352798,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.5901547624613614,
+    "method": "exact",
+    "cd": 0.11121312655280485,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.5901547624613614,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 129.6,
+    "agent_iou": 0.5901547624613614,
+    "tokens": 284163,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.331635080701415,
+    "method": "exact",
+    "cd": 0.07204112683813263,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.331635080701415,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 132.4,
+    "agent_iou": 0.331635080701415,
+    "tokens": 151271,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.6221351219745638,
+    "method": "exact",
+    "cd": 0.029999647657325913,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6221351219745638,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 227.1,
+    "agent_iou": 0.6221351219745638,
+    "tokens": 217608,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.8357256333909433,
+    "method": "exact",
+    "cd": 0.005071270579667031,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8357256338805714,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 230.2,
+    "agent_iou": 0.9644382693587131,
+    "tokens": 263488,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   }
+  },
+  "qwen38-27b/skills": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.785221274868047,
+    "method": "gwn-mc",
+    "cd": 0.03524799563952584,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.785221274868047,
+    "tool_calls": 23,
+    "stop": "no tool call",
+    "seconds": 1215.7,
+    "agent_iou": 0.7802378958954058,
+    "tokens": 218986,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.9853248280359829,
+    "method": "exact",
+    "cd": 0.011110613694540056,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9855002590518921,
+    "tool_calls": 31,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.985324828035983,
+    "tokens": 426784,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 5,
+    "stop": "no tool call",
+    "seconds": 684.5,
+    "agent_iou": 0.0,
+    "tokens": 67144,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.9957188726868037,
+    "method": "exact",
+    "cd": 0.006751262843771138,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9957188726868037,
+    "tool_calls": 12,
+    "stop": "finish",
+    "seconds": 218.2,
+    "agent_iou": 0.9957188725833818,
+    "tokens": 76496,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.970744456748575,
+    "method": "exact",
+    "cd": 0.019739044267133007,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9711516650605557,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 1119.9,
+    "agent_iou": 0.9707444583741369,
+    "tokens": 204951,
+    "sources": [
+     "C3",
+     "C5",
+     "C6",
+     "C4",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 14,
+    "stop": "no tool call",
+    "seconds": 1145.9,
+    "agent_iou": 0.0,
+    "tokens": 134206,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.9795685948740135,
+    "method": "exact",
+    "cd": 0.008954066455882943,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9795814622058413,
+    "tool_calls": 32,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.9795685948740135,
+    "tokens": 419241,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.9289829365811167,
+    "method": "exact",
+    "cd": 0.008271702481206351,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.928817451205511,
+    "tool_calls": 13,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.9289829474416902,
+    "tokens": 120148,
+    "sources": [
+     "C0",
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.9096522578010406,
+    "method": "exact",
+    "cd": 0.029029649400562553,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9096511864167566,
+    "tool_calls": 24,
+    "stop": "no tool call",
+    "seconds": 1460.2,
+    "agent_iou": 0.909652257786783,
+    "tokens": 300265,
+    "sources": [
+     "C0",
+     "C1"
+    ],
+    "trial_evaluations": null
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.732298006656095,
+    "method": "exact",
+    "cd": 0.03340036908292658,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7324012384997091,
+    "tool_calls": 18,
+    "stop": "no tool call",
+    "seconds": 1675.2,
+    "agent_iou": 0.7322980066567352,
+    "tokens": 245672,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.8241860995603784,
+    "method": "exact",
+    "cd": 0.017402235057323186,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8241711937363203,
+    "tool_calls": 29,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.8511494016320286,
+    "tokens": 571256,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.842635502720129,
+    "method": "gwn-mc",
+    "cd": 0.01768462370533602,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8354930192104061,
+    "tool_calls": 37,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.835407490329216,
+    "tokens": 300736,
+    "sources": [
+     "C1",
+     "C2",
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.9633143985489444,
+    "method": "exact",
+    "cd": 0.007667293805950314,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9633143985489444,
+    "tool_calls": 35,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.9633143985489445,
+    "tokens": 434543,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.985091271111523,
+    "method": "exact",
+    "cd": 0.0067106146553556935,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9851538433528496,
+    "tool_calls": 20,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.9850912711115228,
+    "tokens": 299283,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.9677329508283683,
+    "method": "exact",
+    "cd": 0.007078645918117082,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9677329508283683,
+    "tool_calls": 17,
+    "stop": "no tool call",
+    "seconds": 1486.2,
+    "agent_iou": 0.9677329561597015,
+    "tokens": 271215,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.974440061938628,
+    "method": "exact",
+    "cd": 0.004962135848470894,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9745141440677259,
+    "tool_calls": 22,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.974440061938628,
+    "tokens": 272633,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 12,
+    "stop": "no tool call",
+    "seconds": 1087.0,
+    "agent_iou": 0.0,
+    "tokens": 158257,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.9156696330354079,
+    "method": "exact",
+    "cd": 0.01746196085073183,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9158277438275862,
+    "tool_calls": 36,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.91566962289689,
+    "tokens": 317352,
+    "sources": [
+     "C6",
+     "C1",
+     "C4",
+     "C5"
+    ],
+    "trial_evaluations": null
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.8442093724345016,
+    "method": "exact",
+    "cd": 0.01664767005615467,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8442093724345016,
+    "tool_calls": 17,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.8442093724345016,
+    "tokens": 233062,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 8,
+    "stop": "no tool call",
+    "seconds": 839.5,
+    "agent_iou": 0.0,
+    "tokens": 88873,
+    "sources": [],
+    "trial_evaluations": null
+   }
+  },
+  "qwen38-27b/code": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 9,
+    "stop": "no tool call",
+    "seconds": 794.4,
+    "agent_iou": 0.0,
+    "tokens": 93188,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.9447757262801042,
+    "method": "exact",
+    "cd": 0.011983089021980316,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9447757262801042,
+    "tool_calls": 23,
+    "stop": "no tool call",
+    "seconds": 1274.9,
+    "agent_iou": 0.9447757262801042,
+    "tokens": 234694,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 9,
+    "stop": "no tool call",
+    "seconds": 1230.2,
+    "agent_iou": 0.0,
+    "tokens": 153021,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.7488143910441062,
+    "method": "exact",
+    "cd": 0.010791938942829635,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7488143910441062,
+    "tool_calls": 29,
+    "stop": "no tool call",
+    "seconds": 1665.0,
+    "agent_iou": 0.7488143910124725,
+    "tokens": 366143,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 7,
+    "stop": "no tool call",
+    "seconds": 893.5,
+    "agent_iou": 0.0,
+    "tokens": 101379,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 13,
+    "stop": "no tool call",
+    "seconds": 1035.2,
+    "agent_iou": 0.0,
+    "tokens": 115124,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.978447020735185,
+    "method": "exact",
+    "cd": 0.009034978543080205,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9784598732383115,
+    "tool_calls": 26,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.9784470207351851,
+    "tokens": 272145,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.5659702330627087,
+    "method": "exact",
+    "cd": 0.014379845445910517,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.5659702330627087,
+    "tool_calls": 11,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.5659702330627088,
+    "tokens": 166500,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 14,
+    "stop": "no tool call",
+    "seconds": 1074.2,
+    "agent_iou": 0.0,
+    "tokens": 140418,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 7,
+    "stop": "no tool call",
+    "seconds": 1053.2,
+    "agent_iou": 0.0,
+    "tokens": 121534,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 3,
+    "stop": "no tool call",
+    "seconds": 716.0,
+    "agent_iou": 0.0,
+    "tokens": 67826,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 14,
+    "stop": "no tool call",
+    "seconds": 1003.1,
+    "agent_iou": 0.0,
+    "tokens": 113567,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.9768422574098986,
+    "method": "exact",
+    "cd": 0.007297235045292524,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9748496768359999,
+    "tool_calls": 37,
+    "stop": "time",
+    "seconds": 1800.0,
+    "agent_iou": 0.9768422574098989,
+    "tokens": 619063,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 3,
+    "stop": "no tool call",
+    "seconds": 737.8,
+    "agent_iou": 0.0,
+    "tokens": 71730,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.812627813446794,
+    "method": "exact",
+    "cd": 0.011223842047307291,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.812627813446794,
+    "tool_calls": 6,
+    "stop": "no tool call",
+    "seconds": 933.1,
+    "agent_iou": 0.8126278098434684,
+    "tokens": 120183,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.9260131184255018,
+    "method": "exact",
+    "cd": 0.005303459451553361,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9260131184255018,
+    "tool_calls": 34,
+    "stop": "finish",
+    "seconds": 1316.7,
+    "agent_iou": 0.926013118425502,
+    "tokens": 342538,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.16921667861508483,
+    "method": "exact",
+    "cd": 0.07589130911962258,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.16921667861508483,
+    "tool_calls": 7,
+    "stop": "no tool call",
+    "seconds": 783.7,
+    "agent_iou": 0.1692166786150848,
+    "tokens": 110638,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 9,
+    "stop": "no tool call",
+    "seconds": 997.6,
+    "agent_iou": 0.0,
+    "tokens": 103872,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 8,
+    "stop": "no tool call",
+    "seconds": 938.9,
+    "agent_iou": 0.0,
+    "tokens": 111313,
+    "sources": [],
+    "trial_evaluations": null
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.01770368795445411,
+    "method": "exact",
+    "cd": 0.1039565704595832,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.01770368795445411,
+    "tool_calls": 14,
+    "stop": "no tool call",
+    "seconds": 859.9,
+    "agent_iou": 0.0040653041679038025,
+    "tokens": 107504,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null
+   }
+  },
+  "no-llm-policy/skills": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.7812075318401139,
+    "method": "exact",
+    "cd": 0.033450731535451715,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.776322276216635,
+    "tool_calls": 17,
+    "stop": "done",
+    "seconds": 92.7,
+    "agent_iou": 0.7812075313722966,
+    "tokens": null,
+    "sources": [
+     "C2",
+     "C4",
+     "C9"
+    ],
+    "trial_evaluations": 66
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.899084316216786,
+    "method": "exact",
+    "cd": 0.0131045352926795,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.899084316216786,
+    "tool_calls": 18,
+    "stop": "done",
+    "seconds": 168.9,
+    "agent_iou": 0.8990843162167861,
+    "tokens": null,
+    "sources": [
+     "C1",
+     "C2"
+    ],
+    "trial_evaluations": 60
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.894392068659356,
+    "method": "exact",
+    "cd": 0.002867603850123619,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.894392068659356,
+    "tool_calls": 25,
+    "stop": "done",
+    "seconds": 1518.1,
+    "agent_iou": 0.8943920686593563,
+    "tokens": null,
+    "sources": [
+     "C1"
+    ],
+    "trial_evaluations": 90
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.9957188726868037,
+    "method": "exact",
+    "cd": 0.006751262843771138,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9957188726868037,
+    "tool_calls": 23,
+    "stop": "done",
+    "seconds": 760.5,
+    "agent_iou": 0.9957188725833818,
+    "tokens": null,
+    "sources": [
+     "C2"
+    ],
+    "trial_evaluations": 72
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.809597527254926,
+    "method": "exact",
+    "cd": 0.02963744652357722,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8095975254860961,
+    "tool_calls": 20,
+    "stop": "done",
+    "seconds": 137.7,
+    "agent_iou": 0.8095975258275399,
+    "tokens": null,
+    "sources": [
+     "C2",
+     "C3"
+    ],
+    "trial_evaluations": 28
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.40262221533117304,
+    "method": "exact",
+    "cd": 0.038657260715558805,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.40262221533118575,
+    "tool_calls": 20,
+    "stop": "done",
+    "seconds": 637.1,
+    "agent_iou": 0.4026222126719072,
+    "tokens": null,
+    "sources": [
+     "C1",
+     "C11"
+    ],
+    "trial_evaluations": 88
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.9948420693581964,
+    "method": "exact",
+    "cd": 0.008975053902581995,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9948420693581964,
+    "tool_calls": 19,
+    "stop": "done",
+    "seconds": 314.0,
+    "agent_iou": 0.9948420693581965,
+    "tokens": null,
+    "sources": [
+     "C2"
+    ],
+    "trial_evaluations": 48
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 2,
+    "stop": "budget",
+    "seconds": 2081.3,
+    "agent_iou": 0.0,
+    "tokens": null,
+    "sources": [],
+    "trial_evaluations": 0
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.8705059574444817,
+    "method": "exact",
+    "cd": 0.02893509714808655,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8705274964043614,
+    "tool_calls": 23,
+    "stop": "done",
+    "seconds": 98.4,
+    "agent_iou": 0.8705059565302955,
+    "tokens": null,
+    "sources": [
+     "C1",
+     "C6",
+     "C3",
+     "C4",
+     "C7"
+    ],
+    "trial_evaluations": 80
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.7840787417393513,
+    "method": "exact",
+    "cd": 0.025504758187898047,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7841141984955902,
+    "tool_calls": 27,
+    "stop": "done",
+    "seconds": 456.2,
+    "agent_iou": 0.7840787414792726,
+    "tokens": null,
+    "sources": [
+     "C1",
+     "C12",
+     "C4",
+     "C3",
+     "C11"
+    ],
+    "trial_evaluations": 180
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.9484063376635004,
+    "method": "exact",
+    "cd": 0.011056443222802841,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9484063376635004,
+    "tool_calls": 31,
+    "stop": "done",
+    "seconds": 468.5,
+    "agent_iou": 0.9743715101663049,
+    "tokens": null,
+    "sources": [
+     "C2"
+    ],
+    "trial_evaluations": 50
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.746299901737136,
+    "method": "exact",
+    "cd": 0.022774384635626324,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.746299901737136,
+    "tool_calls": 19,
+    "stop": "done",
+    "seconds": 492.4,
+    "agent_iou": 0.7462999017371323,
+    "tokens": null,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": 32
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.9622744607433278,
+    "method": "exact",
+    "cd": 0.007742799789524945,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9622744607433278,
+    "tool_calls": 33,
+    "stop": "budget",
+    "seconds": 592.4,
+    "agent_iou": 0.9622744607433279,
+    "tokens": null,
+    "sources": [
+     "C2"
+    ],
+    "trial_evaluations": 70
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.9988197663956785,
+    "method": "exact",
+    "cd": 0.0067488552506148785,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9988197663956785,
+    "tool_calls": 19,
+    "stop": "done",
+    "seconds": 1107.9,
+    "agent_iou": 0.9988197663957854,
+    "tokens": null,
+    "sources": [
+     "C1"
+    ],
+    "trial_evaluations": 56
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.9677329508283683,
+    "method": "exact",
+    "cd": 0.007078645918117082,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9677329508283683,
+    "tool_calls": 32,
+    "stop": "done",
+    "seconds": 317.7,
+    "agent_iou": 0.9677329561597015,
+    "tokens": null,
+    "sources": [
+     "C2"
+    ],
+    "trial_evaluations": 32
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.9990251143436724,
+    "method": "exact",
+    "cd": 0.004944080692477513,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9990251143436724,
+    "tool_calls": 23,
+    "stop": "done",
+    "seconds": 1784.5,
+    "agent_iou": 0.9990251143436728,
+    "tokens": null,
+    "sources": [
+     "C1"
+    ],
+    "trial_evaluations": 118
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.7884783368273934,
+    "method": "gwn-mc",
+    "cd": 0.037335284596067705,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7933692733666128,
+    "tool_calls": 28,
+    "stop": "done",
+    "seconds": 1188.1,
+    "agent_iou": 0.7933692733666128,
+    "tokens": null,
+    "sources": [
+     "C2",
+     "C1"
+    ],
+    "trial_evaluations": 48
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.740219252510979,
+    "method": "exact",
+    "cd": 0.025685122466028686,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.740219244674031,
+    "tool_calls": 27,
+    "stop": "done",
+    "seconds": 332.8,
+    "agent_iou": 0.7402192525030105,
+    "tokens": null,
+    "sources": [
+     "C0",
+     "C2",
+     "C1"
+    ],
+    "trial_evaluations": 54
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.9287402126029207,
+    "method": "exact",
+    "cd": 0.008290136213671178,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9287402126029207,
+    "tool_calls": 21,
+    "stop": "done",
+    "seconds": 1423.1,
+    "agent_iou": 0.9287402126029207,
+    "tokens": null,
+    "sources": [
+     "C2"
+    ],
+    "trial_evaluations": 42
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.6787645539592939,
+    "method": "exact",
+    "cd": 0.00792369333770844,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6787645539592938,
+    "tool_calls": 21,
+    "stop": "done",
+    "seconds": 341.1,
+    "agent_iou": 0.8140705947211961,
+    "tokens": null,
+    "sources": [
+     "C1",
+     "C0",
+     "C2"
+    ],
+    "trial_evaluations": 168
+   }
+  },
+  "pipeline/beamkh": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.9423843177408694,
+    "method": "exact",
+    "cd": 0.014865110257075296,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9429233991621784
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.8926009105641476,
+    "method": "exact",
+    "cd": 0.013225684075466527,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8926009103317891
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.8842442131216034,
+    "method": "exact",
+    "cd": 0.0028530396938582355,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8842442131216034
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.8565909301422304,
+    "method": "exact",
+    "cd": 0.007307704519265902,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8566964256891123
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.9836856605114802,
+    "method": "exact",
+    "cd": 0.01962489384539582,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9837715027588445
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.8609360756471788,
+    "method": "exact",
+    "cd": 0.01404776426316498,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": false,
+    "cad_error": null,
+    "iou_cad": 0.8725121032813341
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.960216113106843,
+    "method": "exact",
+    "cd": 0.00902107372297563,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9602107220499834
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.9033954391865532,
+    "method": "exact",
+    "cd": 0.00830748444369013,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9036919322002166
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.987410011619225,
+    "method": "exact",
+    "cd": 0.011203543070761043,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9875078150305715
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.8817316017316017,
+    "method": "gwn-mc",
+    "cd": 0.020019784901716416,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.881643457911295
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.9686832740213523,
+    "method": "gwn-mc",
+    "cd": 0.012229527719533336,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": false,
+    "cad_error": null,
+    "iou_cad": 0.9374822069122587
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.9437199501640801,
+    "method": "exact",
+    "cd": 0.015023371113976825,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9438503233737875
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.8859227669148064,
+    "method": "exact",
+    "cd": 0.00968486403595107,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8858911668952625
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.9196534286155583,
+    "method": "exact",
+    "cd": 0.007428221768461566,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9198752484662435
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.9540970404670828,
+    "method": "gwn-mc",
+    "cd": 0.007061026322382783,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9491003854915493
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.6386379355790264,
+    "method": "exact",
+    "cd": 0.03379900436224834,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.6481744902797535
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.9134813836374144,
+    "method": "gwn-mc",
+    "cd": 0.03623681613181326,
+    "valid": true,
+    "cad_built": false,
+    "cad_valid": false,
+    "cad_error": "ValueError: Null TopoDS_Shape object",
+    "iou_cad": 0.0
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.9471521331600572,
+    "method": "exact",
+    "cd": 0.017058029998850734,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9471828766756999
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.9783938211904049,
+    "method": "exact",
+    "cd": 0.007694350892703575,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9782551047467515
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.9449244060475162,
+    "method": "gwn-mc",
+    "cd": 0.00516374267935457,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8182119679983884
+   }
+  },
+  "pipeline/beamsec": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.9423843177408694,
+    "method": "exact",
+    "cd": 0.014865110257075296,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9429233991621784
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.9477972161301899,
+    "method": "exact",
+    "cd": 0.011964106796185061,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9477972161301899
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.894392068659356,
+    "method": "exact",
+    "cd": 0.002851198009634708,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.894392068659356
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.9957188726868037,
+    "method": "exact",
+    "cd": 0.006742024066848247,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9957188726868037
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.9836856605114802,
+    "method": "exact",
+    "cd": 0.01962489384539582,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9836650800519255
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.8692845615922539,
+    "method": "gwn-mc",
+    "cd": 0.014019526402822828,
+    "valid": true,
+    "cad_built": false,
+    "cad_valid": false,
+    "cad_error": "timeout 900s",
+    "iou_cad": 0.0
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.9948420693581964,
+    "method": "exact",
+    "cd": 0.009005100586610415,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9948420693581964
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.9033954391865532,
+    "method": "exact",
+    "cd": 0.00830748444369013,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9036919322002166
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.9871630773363429,
+    "method": "exact",
+    "cd": 0.01124679623547976,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9872484945180515
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.9595104367507754,
+    "method": "gwn-mc",
+    "cd": 0.01390794870982033,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9576032938225199
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.9486567572407277,
+    "method": "exact",
+    "cd": 0.011078328493256413,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9486567572407277
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.9437199501640801,
+    "method": "exact",
+    "cd": 0.015023371113976825,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9438503233737875
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.9545751776986838,
+    "method": "exact",
+    "cd": 0.007847219774255232,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9545751776986838
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.9988197663956785,
+    "method": "exact",
+    "cd": 0.006579395727240082,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9988197663956785
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.968194005829801,
+    "method": "exact",
+    "cd": 0.00702267780488834,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.968239934417406
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.9990251143436724,
+    "method": "exact",
+    "cd": 0.0049287191348409,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9990251143436724
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.8999711494868731,
+    "method": "gwn-mc",
+    "cd": 0.03669788047636047,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8999711494868731
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.9489421869030212,
+    "method": "exact",
+    "cd": 0.017090808100191528,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9489730402405411
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.9822035069298178,
+    "method": "exact",
+    "cd": 0.00763264743838594,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9819341126461212
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.9500904159132008,
+    "method": "gwn-mc",
+    "cd": 0.005102488836424712,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8210443927007492
+   }
+  },
+  "pipeline/best_of_beam_section": {
+   "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+    "iou": 0.9423843177408694,
+    "iou_cad": 0.9429233991621784
+   },
+   "00095369_fd1df382218e6e0f90aa941b_step_000": {
+    "iou": 0.8926009105641476,
+    "iou_cad": 0.8926009103317891
+   },
+   "00140273_08a59d45a975b822d5536007_step_000": {
+    "iou": 0.894392068659356,
+    "iou_cad": 0.894392068659356
+   },
+   "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+    "iou": 0.9957188726868037,
+    "iou_cad": 0.9957188726868037
+   },
+   "00154184_5735b30ee4b055a05f141e16_step_001": {
+    "iou": 0.9836856605114802,
+    "iou_cad": 0.9837715027588445
+   },
+   "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+    "iou": 0.8609360756471788,
+    "iou_cad": 0.8725121032813341
+   },
+   "00249450_a68e99eb4d98c0460771fdce_step_000": {
+    "iou": 0.9948420693581964,
+    "iou_cad": 0.9948420693581964
+   },
+   "00354176_32dffe026b23004e82670fb7_step_002": {
+    "iou": 0.9291199400843948,
+    "iou_cad": 0.9291199400843948
+   },
+   "00492401_0645a3b965579de6bfa80267_step_000": {
+    "iou": 0.987410011619225,
+    "iou_cad": 0.9875078150305715
+   },
+   "00528181_ca079362860c563fb8b05377_step_000": {
+    "iou": 0.8817316017316017,
+    "iou_cad": 0.881643457911295
+   },
+   "00589302_08220b2f3dc9641b23f012b8_step_001": {
+    "iou": 0.9686832740213523,
+    "iou_cad": 0.9374822069122587
+   },
+   "00630878_06994d5b0030f8d7d981349b_step_000": {
+    "iou": 0.9437199501640801,
+    "iou_cad": 0.9438503233737875
+   },
+   "00700032_492e0ac476d95f6170717f46_step_000": {
+    "iou": 0.9622744607433278,
+    "iou_cad": 0.9622744607433278
+   },
+   "00771600_d04fd68f81426574544a9b96_step_000": {
+    "iou": 0.9988197663956785,
+    "iou_cad": 0.9988197663956785
+   },
+   "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+    "iou": 0.9677329508283683,
+    "iou_cad": 0.9677329508283683
+   },
+   "00862084_6c1777bbaabee941fe4215fc_step_000": {
+    "iou": 0.9990251143436724,
+    "iou_cad": 0.9990251143436724
+   },
+   "00883892_580f65badecb1e9fa11c79a3_step_000": {
+    "iou": 0.9134813836374144,
+    "iou_cad": 0.0
+   },
+   "00941601_071d956501ffc009e947b4d3_step_000": {
+    "iou": 0.9471521331600572,
+    "iou_cad": 0.9471828766756999
+   },
+   "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+    "iou": 0.9783938211904049,
+    "iou_cad": 0.9782551047467515
+   },
+   "00966049_820834e0f6797f5657423325_step_004": {
+    "iou": 0.9449244060475162,
+    "iou_cad": 0.8182119679983884
+   }
+  }
+ }
+}

@@ -1,0 +1,109 @@
+== RedHatAI/Qwen3.8-27B-INT4 refine 00256926_1c0f3eab2a7c951e43efc577_step_003
+done: best IoU 0.8994 (init 0.8994), 17 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 34413, 'completion_tokens': 45250}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00266468_fe3404af55d9e27b491d3a02_step_000
+done: best IoU 0.7463 (init 0.7463), 6 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 30580, 'completion_tokens': 33271}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00317970_978820cff49bf7ec00da570f_step_005
+done: best IoU 0.7375 (init 0.7375), 13 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 51233, 'completion_tokens': 44610}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00365747_58451ba8376a4d109925d2a8_step_001
+done: best IoU 0.8876 (init 0.8876), 12 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 30659, 'completion_tokens': 42560}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00528181_ca079362860c563fb8b05377_step_000
+done: best IoU 0.8628 (init 0.8628), 14 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 53975, 'completion_tokens': 33900}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00562677_0f955758ce24893c8aa0cb99_step_002
+done: best IoU 0.8894 (init 0.8894), 12 calls, stop=time, 1200.0s, tokens {'prompt_tokens': 94859, 'completion_tokens': 37152}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00700032_492e0ac476d95f6170717f46_step_000
+done: best IoU 0.8859 (init 0.8859), 6 calls, stop=time, 1200.0s, tokens {'prompt_tokens': 29651, 'completion_tokens': 37527}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00709520_bb7e5d82d6f0783bdd2b6e94_step_009
+done: best IoU 0.9183 (init 0.8884), 11 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 69286, 'completion_tokens': 35248}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00729452_9d771b9c563f325632902567_step_000
+done: best IoU 0.2802 (init 0.2802), 7 calls, stop=time, 1199.1s, tokens {'prompt_tokens': 23325, 'completion_tokens': 19440}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00730725_58fba91f2f389a1130828e8a_step_007
+done: best IoU 0.9027 (init 0.0184), 18 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 67064, 'completion_tokens': 37708}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00846352_4f29d4f2b8a8d78a463e69bb_step_001
+done: best IoU 0.9289 (init 0.9289), 7 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 31746, 'completion_tokens': 35087}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00862084_6c1777bbaabee941fe4215fc_step_000
+done: best IoU 0.6386 (init 0.6386), 23 calls, stop=time, 1200.0s, tokens {'prompt_tokens': 134274, 'completion_tokens': 49135}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00862085_6c1777bbaabee941fe4215fc_step_001
+done: best IoU 0.4747 (init 0.4747), 4 calls, stop=time, 1200.0s, tokens {'prompt_tokens': 13256, 'completion_tokens': 16855}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00862953_821592027d6e6743aa249206_step_000
+done: best IoU 0.8019 (init 0.8019), 8 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 33984, 'completion_tokens': 35333}, $0.0000
+pipeline                                      00095369_fd1df382218 iou=0.8926 cd=0.0132
+pipeline                                      00140273_08a59d45a97 iou=0.8842 cd=0.0029
+pipeline                                      00153120_0f4e90ea5d8 iou=0.8566 cd=0.0073
+pipeline                                      00181393_bc285ee6b12 iou=0.8628 cd=0.0093
+pipeline                                      00232213_8960d9c6b1f iou=0.8609 cd=0.0140
+pipeline                                      00256926_1c0f3eab2a7 iou=0.8994 cd=0.0075
+pipeline                                      00266468_fe3404af55d iou=0.7486 cd=0.0107
+pipeline                                      00317970_978820cff49 iou=0.7462 cd=0.0071
+pipeline                                      00365747_58451ba8376 iou=0.8876 cd=0.0034
+pipeline                                      00528181_ca079362860 iou=0.8817 cd=0.0200
+pipeline                                      00562677_0f955758ce2 iou=0.8894 cd=0.0138
+pipeline                                      00700032_492e0ac476d iou=0.8859 cd=0.0097
+pipeline                                      00709520_bb7e5d82d6f iou=0.8884 cd=0.0082
+pipeline                                      00729452_9d771b9c563 iou=0.2802 cd=0.0043
+pipeline                                      00730725_58fba91f2f3 iou=0.0184 cd=0.0083
+pipeline                                      00846352_4f29d4f2b8a iou=0.8666 cd=0.0169
+pipeline                                      00862084_6c1777bbaab iou=0.6386 cd=0.0338
+pipeline                                      00862085_6c1777bbaab iou=0.4747 cd=0.0883
+pipeline                                      00862953_821592027d6 iou=0.8019 cd=0.0076
+RedHatAI__Qwen3.8-27B-INT4/refine             00095369_fd1df382218 iou=0.8926 cd=0.0133
+RedHatAI__Qwen3.8-27B-INT4/refine             00140273_08a59d45a97 iou=0.8842 cd=0.0029
+RedHatAI__Qwen3.8-27B-INT4/refine             00153120_0f4e90ea5d8 iou=0.8566 cd=0.0073
+RedHatAI__Qwen3.8-27B-INT4/refine             00181393_bc285ee6b12 iou=0.8628 cd=0.0093
+RedHatAI__Qwen3.8-27B-INT4/refine             00232213_8960d9c6b1f iou=0.8609 cd=0.0141
+RedHatAI__Qwen3.8-27B-INT4/refine             00256926_1c0f3eab2a7 iou=0.8994 cd=0.0075
+RedHatAI__Qwen3.8-27B-INT4/refine             00266468_fe3404af55d iou=0.7463 cd=0.0106
+RedHatAI__Qwen3.8-27B-INT4/refine             00317970_978820cff49 iou=0.7375 cd=0.0071
+RedHatAI__Qwen3.8-27B-INT4/refine             00365747_58451ba8376 iou=0.8876 cd=0.0034
+RedHatAI__Qwen3.8-27B-INT4/refine             00528181_ca079362860 iou=0.8628 cd=0.0200
+RedHatAI__Qwen3.8-27B-INT4/refine             00562677_0f955758ce2 iou=0.8894 cd=0.0138
+RedHatAI__Qwen3.8-27B-INT4/refine             00700032_492e0ac476d iou=0.8859 cd=0.0097
+RedHatAI__Qwen3.8-27B-INT4/refine             00709520_bb7e5d82d6f iou=0.9183 cd=0.0081
+RedHatAI__Qwen3.8-27B-INT4/refine             00729452_9d771b9c563 iou=0.2802 cd=0.0044
+RedHatAI__Qwen3.8-27B-INT4/refine             00730725_58fba91f2f3 iou=0.9027 cd=0.0013
+RedHatAI__Qwen3.8-27B-INT4/refine             00846352_4f29d4f2b8a iou=0.8666 cd=0.0170
+RedHatAI__Qwen3.8-27B-INT4/refine             00862084_6c1777bbaab iou=0.6386 cd=0.0338
+RedHatAI__Qwen3.8-27B-INT4/refine             00862085_6c1777bbaab iou=0.4747 cd=0.0883
+RedHatAI__Qwen3.8-27B-INT4/refine             00862953_821592027d6 iou=0.8019 cd=0.0076
+noop/refine                                   00095369_fd1df382218 iou=0.8926 cd=0.0133
+noop/refine                                   00140273_08a59d45a97 iou=0.8842 cd=0.0029
+noop/refine                                   00153120_0f4e90ea5d8 iou=0.8566 cd=0.0073
+noop/refine                                   00181393_bc285ee6b12 iou=0.8628 cd=0.0093
+noop/refine                                   00232213_8960d9c6b1f iou=0.8609 cd=0.0141
+noop/refine                                   00256926_1c0f3eab2a7 iou=0.8994 cd=0.0075
+noop/refine                                   00266468_fe3404af55d iou=0.7463 cd=0.0106
+noop/refine                                   00317970_978820cff49 iou=0.7375 cd=0.0071
+noop/refine                                   00365747_58451ba8376 iou=0.8876 cd=0.0034
+noop/refine                                   00528181_ca079362860 iou=0.8628 cd=0.0200
+noop/refine                                   00562677_0f955758ce2 iou=0.8894 cd=0.0138
+noop/refine                                   00700032_492e0ac476d iou=0.8859 cd=0.0097
+noop/refine                                   00709520_bb7e5d82d6f iou=0.8884 cd=0.0082
+noop/refine                                   00729452_9d771b9c563 iou=0.2802 cd=0.0044
+noop/refine                                   00730725_58fba91f2f3 iou=0.0184 cd=0.0083
+noop/refine                                   00846352_4f29d4f2b8a iou=0.8666 cd=0.0170
+noop/refine                                   00862084_6c1777bbaab iou=0.6386 cd=0.0338
+noop/refine                                   00862085_6c1777bbaab iou=0.4747 cd=0.0883
+noop/refine                                   00862953_821592027d6 iou=0.8019 cd=0.0076
+search/refine                                 00095369_fd1df382218 iou=0.8926 cd=0.0133
+search/refine                                 00140273_08a59d45a97 iou=0.8875 cd=0.0029
+search/refine                                 00153120_0f4e90ea5d8 iou=0.8566 cd=0.0073
+search/refine                                 00181393_bc285ee6b12 iou=0.8673 cd=0.0092
+search/refine                                 00232213_8960d9c6b1f iou=0.8725 cd=0.0134
+search/refine                                 00256926_1c0f3eab2a7 iou=0.9151 cd=0.0073
+search/refine                                 00266468_fe3404af55d iou=0.7463 cd=0.0106
+search/refine                                 00317970_978820cff49 iou=0.7463 cd=0.0071
+search/refine                                 00365747_58451ba8376 iou=0.8888 cd=0.0034
+search/refine                                 00528181_ca079362860 iou=0.8674 cd=0.0191
+search/refine                                 00562677_0f955758ce2 iou=0.8891 cd=0.0138
+search/refine                                 00700032_492e0ac476d iou=0.8883 cd=0.0097
+search/refine                                 00709520_bb7e5d82d6f iou=0.8891 cd=0.0082
+search/refine                                 00729452_9d771b9c563 iou=0.2802 cd=0.0044
+search/refine                                 00730725_58fba91f2f3 iou=0.0184 cd=0.0083
+search/refine                                 00846352_4f29d4f2b8a iou=0.9296 cd=0.0170
+search/refine                                 00862084_6c1777bbaab iou=0.6447 cd=0.0197
+search/refine                                 00862085_6c1777bbaab iou=0.4747 cd=0.0883
+search/refine                                 00862953_821592027d6 iou=0.8019 cd=0.0076
+
+pipeline                                      n=19 IoU 0.7508 (pipeline 0.7508) W/L 0/0 invalid 0 cost $0.00
+RedHatAI__Qwen3.8-27B-INT4/refine             n=19 IoU 0.7973 (pipeline 0.7508) W/L 2/3 invalid 0 cost $0.00
+noop/refine                                   n=19 IoU 0.7492 (pipeline 0.7508) W/L 0/3 invalid 0 cost $0.00
+search/refine                                 n=19 IoU 0.7556 (pipeline 0.7508) W/L 8/2 invalid 0 cost $0.00

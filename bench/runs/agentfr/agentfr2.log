@@ -1,0 +1,69 @@
+== RedHatAI/Qwen3.8-27B-INT4 refine 00256926_1c0f3eab2a7c951e43efc577_step_003
+done: best IoU 0.9965 (init 0.8994), 8 calls, stop=time, 1200.2s, tokens {'prompt_tokens': 50657, 'completion_tokens': 45495}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00266468_fe3404af55d9e27b491d3a02_step_000
+done: best IoU 0.7463 (init 0.7463), 4 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 24521, 'completion_tokens': 33150}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00317970_978820cff49bf7ec00da570f_step_005
+done: best IoU 0.7375 (init 0.7375), 17 calls, stop=time, 1200.0s, tokens {'prompt_tokens': 38277, 'completion_tokens': 38926}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00365747_58451ba8376a4d109925d2a8_step_001
+done: best IoU 0.8876 (init 0.8876), 6 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 20528, 'completion_tokens': 34860}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00528181_ca079362860c563fb8b05377_step_000
+done: best IoU 0.8628 (init 0.8628), 16 calls, stop=time, 1200.0s, tokens {'prompt_tokens': 61543, 'completion_tokens': 40610}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00562677_0f955758ce24893c8aa0cb99_step_002
+done: best IoU 0.8894 (init 0.8894), 9 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 49209, 'completion_tokens': 36211}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00700032_492e0ac476d95f6170717f46_step_000
+done: best IoU 0.8859 (init 0.8859), 11 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 59493, 'completion_tokens': 36012}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00709520_bb7e5d82d6f0783bdd2b6e94_step_009
+done: best IoU 0.8884 (init 0.8884), 13 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 95397, 'completion_tokens': 30398}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00729452_9d771b9c563f325632902567_step_000
+done: best IoU 0.2802 (init 0.2802), 6 calls, stop=time, 1200.0s, tokens {'prompt_tokens': 25196, 'completion_tokens': 24396}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00730725_58fba91f2f389a1130828e8a_step_007
+done: best IoU 0.9702 (init 0.0184), 18 calls, stop=time, 1200.0s, tokens {'prompt_tokens': 112396, 'completion_tokens': 51510}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00846352_4f29d4f2b8a8d78a463e69bb_step_001
+done: best IoU 0.9289 (init 0.9289), 7 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 26440, 'completion_tokens': 42313}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00862084_6c1777bbaabee941fe4215fc_step_000
+done: best IoU 0.6386 (init 0.6386), 7 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 44759, 'completion_tokens': 39589}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00862085_6c1777bbaabee941fe4215fc_step_001
+done: best IoU 0.4747 (init 0.4747), 4 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 10492, 'completion_tokens': 14388}, $0.0000
+== RedHatAI/Qwen3.8-27B-INT4 refine 00862953_821592027d6e6743aa249206_step_000
+done: best IoU 0.8331 (init 0.8019), 13 calls, stop=time, 1200.1s, tokens {'prompt_tokens': 56538, 'completion_tokens': 41776}, $0.0000
+pipeline                                      00095369_fd1df382218 iou=0.8926 cd=0.0132
+pipeline                                      00140273_08a59d45a97 iou=0.8842 cd=0.0029
+pipeline                                      00153120_0f4e90ea5d8 iou=0.8566 cd=0.0073
+pipeline                                      00181393_bc285ee6b12 iou=0.8628 cd=0.0093
+pipeline                                      00232213_8960d9c6b1f iou=0.8609 cd=0.0140
+pipeline                                      00256926_1c0f3eab2a7 iou=0.8994 cd=0.0075
+pipeline                                      00266468_fe3404af55d iou=0.7486 cd=0.0107
+pipeline                                      00317970_978820cff49 iou=0.7463 cd=0.0071
+pipeline                                      00365747_58451ba8376 iou=0.8876 cd=0.0034
+pipeline                                      00528181_ca079362860 iou=0.8817 cd=0.0200
+pipeline                                      00562677_0f955758ce2 iou=0.8894 cd=0.0138
+pipeline                                      00700032_492e0ac476d iou=0.8859 cd=0.0097
+pipeline                                      00709520_bb7e5d82d6f iou=0.8884 cd=0.0082
+pipeline                                      00729452_9d771b9c563 iou=0.2802 cd=0.0043
+pipeline                                      00730725_58fba91f2f3 iou=0.0184 cd=0.0083
+pipeline                                      00846352_4f29d4f2b8a iou=0.8666 cd=0.0169
+pipeline                                      00862084_6c1777bbaab iou=0.6386 cd=0.0338
+pipeline                                      00862085_6c1777bbaab iou=0.4747 cd=0.0883
+pipeline                                      00862953_821592027d6 iou=0.8019 cd=0.0076
+RedHatAI__Qwen3.8-27B-INT4/refine             00095369_fd1df382218 iou=0.8926 cd=0.0133
+RedHatAI__Qwen3.8-27B-INT4/refine             00140273_08a59d45a97 iou=0.8842 cd=0.0029
+RedHatAI__Qwen3.8-27B-INT4/refine             00153120_0f4e90ea5d8 iou=0.8683 cd=0.0072
+RedHatAI__Qwen3.8-27B-INT4/refine             00181393_bc285ee6b12 iou=0.8628 cd=0.0093
+RedHatAI__Qwen3.8-27B-INT4/refine             00232213_8960d9c6b1f iou=0.8609 cd=0.0141
+RedHatAI__Qwen3.8-27B-INT4/refine             00256926_1c0f3eab2a7 iou=0.9965 cd=0.0071
+RedHatAI__Qwen3.8-27B-INT4/refine             00266468_fe3404af55d iou=0.7463 cd=0.0106
+RedHatAI__Qwen3.8-27B-INT4/refine             00317970_978820cff49 iou=0.7375 cd=0.0071
+RedHatAI__Qwen3.8-27B-INT4/refine             00365747_58451ba8376 iou=0.8876 cd=0.0034
+RedHatAI__Qwen3.8-27B-INT4/refine             00528181_ca079362860 iou=0.8628 cd=0.0200
+RedHatAI__Qwen3.8-27B-INT4/refine             00562677_0f955758ce2 iou=0.8894 cd=0.0138
+RedHatAI__Qwen3.8-27B-INT4/refine             00700032_492e0ac476d iou=0.8859 cd=0.0097
+RedHatAI__Qwen3.8-27B-INT4/refine             00709520_bb7e5d82d6f iou=0.8884 cd=0.0082
+RedHatAI__Qwen3.8-27B-INT4/refine             00729452_9d771b9c563 iou=0.2802 cd=0.0044
+RedHatAI__Qwen3.8-27B-INT4/refine             00730725_58fba91f2f3 iou=0.9702 cd=0.0012
+RedHatAI__Qwen3.8-27B-INT4/refine             00846352_4f29d4f2b8a iou=0.8666 cd=0.0170
+RedHatAI__Qwen3.8-27B-INT4/refine             00862084_6c1777bbaab iou=0.6386 cd=0.0338
+RedHatAI__Qwen3.8-27B-INT4/refine             00862085_6c1777bbaab iou=0.4747 cd=0.0883
+RedHatAI__Qwen3.8-27B-INT4/refine             00862953_821592027d6 iou=0.8331 cd=0.0075
+
+pipeline                                      n=19 IoU 0.7508 (pipeline 0.7508) W/L 0/0 invalid 0 cost $0.00
+RedHatAI__Qwen3.8-27B-INT4/refine             n=19 IoU 0.8067 (pipeline 0.7508) W/L 4/3 invalid 0 cost $0.00

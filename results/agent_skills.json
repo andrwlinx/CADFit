@@ -1,0 +1,509 @@
+{
+ "n_parts": 20,
+ "parts": [
+  "00046097_c3c229ed6e3a45b2b648027c_step_000",
+  "00095369_fd1df382218e6e0f90aa941b_step_000",
+  "00140273_08a59d45a975b822d5536007_step_000",
+  "00153120_0f4e90ea5d8add32e39298eb_step_000",
+  "00154184_5735b30ee4b055a05f141e16_step_001",
+  "00232213_8960d9c6b1f3965294d14e5d_step_000",
+  "00249450_a68e99eb4d98c0460771fdce_step_000",
+  "00354176_32dffe026b23004e82670fb7_step_002",
+  "00492401_0645a3b965579de6bfa80267_step_000",
+  "00528181_ca079362860c563fb8b05377_step_000",
+  "00589302_08220b2f3dc9641b23f012b8_step_001",
+  "00630878_06994d5b0030f8d7d981349b_step_000",
+  "00700032_492e0ac476d95f6170717f46_step_000",
+  "00771600_d04fd68f81426574544a9b96_step_000",
+  "00834538_fe2e27a617dfbf8ef543260d_step_003",
+  "00862084_6c1777bbaabee941fe4215fc_step_000",
+  "00883892_580f65badecb1e9fa11c79a3_step_000",
+  "00941601_071d956501ffc009e947b4d3_step_000",
+  "00953658_06f20e34a1e8e27016ff3bb1_step_000",
+  "00966049_820834e0f6797f5657423325_step_004"
+ ],
+ "bonferroni_alpha": 0.008333333333333333,
+ "conditions": {
+  "devstral2-24b/skills": {
+   "iou": 0.7757652643244553,
+   "iou_cad": 0.7760466119905522
+  },
+  "devstral2-24b/code": {
+   "iou": 0.3049419702014008,
+   "iou_cad": 0.3047815583166622
+  },
+  "gemma4-31b/skills": {
+   "iou": 0.892025006181518,
+   "iou_cad": 0.8920448525532689
+  },
+  "gemma4-31b/code": {
+   "iou": 0.5928429000689617,
+   "iou_cad": 0.5929389148043465
+  },
+  "gptoss-120b/skills": {
+   "iou": 0.8124283098739078,
+   "iou_cad": 0.8123319896800767
+  },
+  "gptoss-120b/code": {
+   "iou": 0.5514778635750995,
+   "iou_cad": 0.5565126536889637
+  },
+  "gptoss-20b/skills": {
+   "iou": 0.7321943795727007,
+   "iou_cad": 0.7323594677690847
+  },
+  "gptoss-20b/code": {
+   "iou": 0.4218255680740273,
+   "iou_cad": 0.4217816741497142
+  },
+  "qwen36-35b-a3b/skills": {
+   "iou": 0.8524640022200541,
+   "iou_cad": 0.8536996985873341
+  },
+  "qwen36-35b-a3b/code": {
+   "iou": 0.46477932995062865,
+   "iou_cad": 0.4647799733659572
+  },
+  "qwen38-27b/skills": {
+   "iou": 0.7302395259214778,
+   "iou_cad": 0.729923003800091
+  },
+  "qwen38-27b/code": {
+   "iou": 0.30702054634869186,
+   "iou_cad": 0.30692155994515324
+  },
+  "no-llm-policy/skills": {
+   "iou": 0.8095405094071729,
+   "iou_cad": 0.8095436427584776
+  },
+  "pipeline/beamkh": {
+   "iou": 0.9123930706584515,
+   "iou_cad": 0.8596913126188312
+  },
+  "pipeline/beamsec": {
+   "iou": 0.9536185875429188,
+   "iou_cad": 0.903648609756684
+  },
+  "pipeline/best_of_beam_section": {
+   "iou": 0.9493514394567562,
+   "iou_cad": 0.8963933455641347
+  }
+ },
+ "models": {
+  "gemma4-31b": {
+   "skills": 0.8920448525532689,
+   "code": 0.5929389148043465,
+   "skills_vs_code": {
+    "diff": 0.2991059377489226,
+    "ci_lo": 0.17256656467214998,
+    "ci_hi": 0.433928732778391,
+    "alpha": 0.05,
+    "wins": 17,
+    "losses": 3,
+    "sign_p": 0.0025768280029296875
+   },
+   "skills_vs_code_bonf": {
+    "diff": 0.2991059377489226,
+    "ci_lo": 0.13802611588108227,
+    "ci_hi": 0.48088265539373654,
+    "alpha": 0.008333333333333333,
+    "wins": 17,
+    "losses": 3,
+    "sign_p": 0.0025768280029296875
+   },
+   "skills_vs_policy": {
+    "diff": 0.08250120979479134,
+    "ci_lo": 0.01308093181789353,
+    "ci_hi": 0.18811369835949154,
+    "alpha": 0.05,
+    "wins": 10,
+    "losses": 4,
+    "sign_p": 0.1795654296875
+   },
+   "skills_vs_policy_bonf": {
+    "diff": 0.08250120979479134,
+    "ci_lo": -0.00010866351732875534,
+    "ci_hi": 0.2340303842181244,
+    "alpha": 0.008333333333333333,
+    "wins": 10,
+    "losses": 4,
+    "sign_p": 0.1795654296875
+   },
+   "skills_vs_beamsec": {
+    "diff": -0.011603757203414966,
+    "ci_lo": -0.04107447742281381,
+    "ci_hi": 0.026845938956971377,
+    "alpha": 0.05,
+    "wins": 6,
+    "losses": 10,
+    "sign_p": 0.454498291015625
+   },
+   "skills_vs_beamsec_bonf": {
+    "diff": -0.011603757203414966,
+    "ci_lo": -0.04964220802609638,
+    "ci_hi": 0.04135964114229583,
+    "alpha": 0.008333333333333333,
+    "wins": 6,
+    "losses": 10,
+    "sign_p": 0.454498291015625
+   },
+   "skills_stops": {
+    "budget": 6,
+    "time": 6,
+    "finish": 8
+   },
+   "code_stops": {
+    "budget": 2,
+    "time": 14,
+    "finish": 4
+   }
+  },
+  "qwen36-35b-a3b": {
+   "skills": 0.8536996985873341,
+   "code": 0.4647799733659572,
+   "skills_vs_code": {
+    "diff": 0.38891972522137686,
+    "ci_lo": 0.25555773182245584,
+    "ci_hi": 0.5194615057680249,
+    "alpha": 0.05,
+    "wins": 17,
+    "losses": 3,
+    "sign_p": 0.0025768280029296875
+   },
+   "skills_vs_code_bonf": {
+    "diff": 0.38891972522137686,
+    "ci_lo": 0.20632274281823437,
+    "ci_hi": 0.5667734129887342,
+    "alpha": 0.008333333333333333,
+    "wins": 17,
+    "losses": 3,
+    "sign_p": 0.0025768280029296875
+   },
+   "skills_vs_policy": {
+    "diff": 0.044156055828856455,
+    "ci_lo": -0.022649949280554832,
+    "ci_hi": 0.15153625074087956,
+    "alpha": 0.05,
+    "wins": 5,
+    "losses": 7,
+    "sign_p": 0.7744140625
+   },
+   "skills_vs_policy_bonf": {
+    "diff": 0.044156055828856455,
+    "ci_lo": -0.03384442034315731,
+    "ci_hi": 0.20421909121919982,
+    "alpha": 0.008333333333333333,
+    "wins": 5,
+    "losses": 7,
+    "sign_p": 0.7744140625
+   },
+   "skills_vs_beamsec": {
+    "diff": -0.04994891116934985,
+    "ci_lo": -0.10425107892665313,
+    "ci_hi": 0.006490126317052552,
+    "alpha": 0.05,
+    "wins": 5,
+    "losses": 11,
+    "sign_p": 0.210113525390625
+   },
+   "skills_vs_beamsec_bonf": {
+    "diff": -0.04994891116934985,
+    "ci_lo": -0.12169999527426709,
+    "ci_hi": 0.02632299050558772,
+    "alpha": 0.008333333333333333,
+    "wins": 5,
+    "losses": 11,
+    "sign_p": 0.210113525390625
+   },
+   "skills_stops": {
+    "budget": 16,
+    "finish": 4
+   },
+   "code_stops": {
+    "budget": 19,
+    "no tool call": 1
+   }
+  },
+  "gptoss-120b": {
+   "skills": 0.8123319896800767,
+   "code": 0.5565126536889637,
+   "skills_vs_code": {
+    "diff": 0.25581933599111306,
+    "ci_lo": 0.14400240913205692,
+    "ci_hi": 0.3739730209554325,
+    "alpha": 0.05,
+    "wins": 18,
+    "losses": 2,
+    "sign_p": 0.0004024505615234375
+   },
+   "skills_vs_code_bonf": {
+    "diff": 0.25581933599111306,
+    "ci_lo": 0.1117561302939791,
+    "ci_hi": 0.416502970441943,
+    "alpha": 0.008333333333333333,
+    "wins": 18,
+    "losses": 2,
+    "sign_p": 0.0004024505615234375
+   },
+   "skills_vs_policy": {
+    "diff": 0.002788346921599122,
+    "ci_lo": -0.10379074058403284,
+    "ci_hi": 0.12957630698177597,
+    "alpha": 0.05,
+    "wins": 6,
+    "losses": 7,
+    "sign_p": 1.0
+   },
+   "skills_vs_policy_bonf": {
+    "diff": 0.002788346921599122,
+    "ci_lo": -0.1374456142180902,
+    "ci_hi": 0.18413651440418852,
+    "alpha": 0.008333333333333333,
+    "wins": 6,
+    "losses": 7,
+    "sign_p": 1.0
+   },
+   "skills_vs_beamsec": {
+    "diff": -0.0913166200766072,
+    "ci_lo": -0.18345178463198947,
+    "ci_hi": -0.014909631882558639,
+    "alpha": 0.05,
+    "wins": 4,
+    "losses": 13,
+    "sign_p": 0.049041748046875
+   },
+   "skills_vs_beamsec_bonf": {
+    "diff": -0.0913166200766072,
+    "ci_lo": -0.22086225756614128,
+    "ci_hi": 0.009665993463514655,
+    "alpha": 0.008333333333333333,
+    "wins": 4,
+    "losses": 13,
+    "sign_p": 0.049041748046875
+   },
+   "skills_stops": {
+    "budget": 18,
+    "no tool call": 2
+   },
+   "code_stops": {
+    "budget": 20
+   }
+  },
+  "devstral2-24b": {
+   "skills": 0.7760466119905522,
+   "code": 0.3047815583166622,
+   "skills_vs_code": {
+    "diff": 0.47126505367389016,
+    "ci_lo": 0.3574988429775768,
+    "ci_hi": 0.578533316247961,
+    "alpha": 0.05,
+    "wins": 19,
+    "losses": 1,
+    "sign_p": 4.00543212890625e-05
+   },
+   "skills_vs_code_bonf": {
+    "diff": 0.47126505367389016,
+    "ci_lo": 0.3186906366392989,
+    "ci_hi": 0.613297765876517,
+    "alpha": 0.008333333333333333,
+    "wins": 19,
+    "losses": 1,
+    "sign_p": 4.00543212890625e-05
+   },
+   "skills_vs_policy": {
+    "diff": -0.03349703076792528,
+    "ci_lo": -0.13605112527130947,
+    "ci_hi": 0.09597956221432882,
+    "alpha": 0.05,
+    "wins": 4,
+    "losses": 14,
+    "sign_p": 0.0308837890625
+   },
+   "skills_vs_policy_bonf": {
+    "diff": -0.03349703076792528,
+    "ci_lo": -0.1666102956436411,
+    "ci_hi": 0.14964850718991943,
+    "alpha": 0.008333333333333333,
+    "wins": 4,
+    "losses": 14,
+    "sign_p": 0.0308837890625
+   },
+   "skills_vs_beamsec": {
+    "diff": -0.1276019977661316,
+    "ci_lo": -0.2253952536058613,
+    "ci_hi": -0.034338224627566756,
+    "alpha": 0.05,
+    "wins": 3,
+    "losses": 16,
+    "sign_p": 0.004425048828125
+   },
+   "skills_vs_beamsec_bonf": {
+    "diff": -0.1276019977661316,
+    "ci_lo": -0.2596077365441012,
+    "ci_hi": -0.0013043841577401905,
+    "alpha": 0.008333333333333333,
+    "wins": 3,
+    "losses": 16,
+    "sign_p": 0.004425048828125
+   },
+   "skills_stops": {
+    "budget": 16,
+    "finish": 4
+   },
+   "code_stops": {
+    "budget": 20
+   }
+  },
+  "gptoss-20b": {
+   "skills": 0.7323594677690847,
+   "code": 0.4217816741497142,
+   "skills_vs_code": {
+    "diff": 0.31057779361937043,
+    "ci_lo": 0.15707224520641222,
+    "ci_hi": 0.4600513416292317,
+    "alpha": 0.05,
+    "wins": 15,
+    "losses": 5,
+    "sign_p": 0.04138946533203125
+   },
+   "skills_vs_code_bonf": {
+    "diff": 0.31057779361937043,
+    "ci_lo": 0.10438056819911926,
+    "ci_hi": 0.5192449082013756,
+    "alpha": 0.008333333333333333,
+    "wins": 15,
+    "losses": 5,
+    "sign_p": 0.04138946533203125
+   },
+   "skills_vs_policy": {
+    "diff": -0.07718417498939296,
+    "ci_lo": -0.20699244267941289,
+    "ci_hi": 0.06827917576480699,
+    "alpha": 0.05,
+    "wins": 2,
+    "losses": 12,
+    "sign_p": 0.012939453125
+   },
+   "skills_vs_policy_bonf": {
+    "diff": -0.07718417498939296,
+    "ci_lo": -0.24907064918550406,
+    "ci_hi": 0.12745286624047636,
+    "alpha": 0.008333333333333333,
+    "wins": 2,
+    "losses": 12,
+    "sign_p": 0.012939453125
+   },
+   "skills_vs_beamsec": {
+    "diff": -0.17128914198759926,
+    "ci_lo": -0.2959765498742402,
+    "ci_hi": -0.07009682244175205,
+    "alpha": 0.05,
+    "wins": 2,
+    "losses": 14,
+    "sign_p": 0.004180908203125
+   },
+   "skills_vs_beamsec_bonf": {
+    "diff": -0.17128914198759926,
+    "ci_lo": -0.3398030900525214,
+    "ci_hi": -0.04748293821838585,
+    "alpha": 0.008333333333333333,
+    "wins": 2,
+    "losses": 14,
+    "sign_p": 0.004180908203125
+   },
+   "skills_stops": {
+    "finish": 10,
+    "no tool call": 4,
+    "api error: API failed after 5 attempts: HTTP 500: b'{\"error\":{\"message\":\"Encountered text corresponding to disallowed special token \\'<|end|>\\'.\\\\nIf you want this text to be encoded as a special token, pass it to `allowed_special`, e.g. `allowed_special={\\'<|end|>\\', ...}`.\\\\nIf you want this text to be encoded as normal text, disable the check for this token by passing `disallowed_special=(enc.special_tokens_set - {\\'<|end|>\\'})`.\\\\nTo disable this check for all special tokens, pass `disallowed_special=()`.\",\"type\":\"InternalServerError\",\"param\":null,\"co'": 1,
+    "budget": 4,
+    "api error: API failed after 5 attempts: HTTP 500: b'{\"error\":{\"message\":\"unexpected tokens remaining in message header: Some(\\\\\"to=functions=... We have issue: misuse of function call? I wrote \\\\\\\\\\\\\"functions=...\\\\\\\\\\\\\" incorrectly. Need correct.<|end|><|start|>assistant\\\\\")\",\"type\":\"InternalServerError\",\"param\":null,\"code\":500}}'": 1
+   },
+   "code_stops": {
+    "finish": 10,
+    "budget": 3,
+    "no tool call": 6,
+    "api error: API failed after 5 attempts: HTTP 500: b'{\"error\":{\"message\":\"unexpected tokens remaining in message header: Some(\\\\\"at step 1: we added a cylinder of radius 1 extruded along z from -0.018 to 0.018? Wait we used origin (0,0,-0.018) extrude 0.036, giving height 0.036. We used cut of circle 0.09 extrude 0.036, so cylinder 1 with centre hole. We need target shapes: The sections show a large shape roughly like a disk with irregular outer boundary but entire radius=1? The outer boundary at z=0 cross-section shows big shape that seems nearly '": 1
+   }
+  },
+  "qwen38-27b": {
+   "skills": 0.729923003800091,
+   "code": 0.30692155994515324,
+   "skills_vs_code": {
+    "diff": 0.4230014438549377,
+    "ci_lo": 0.23858644709331805,
+    "ci_hi": 0.6084922631311708,
+    "alpha": 0.05,
+    "wins": 15,
+    "losses": 3,
+    "sign_p": 0.007537841796875
+   },
+   "skills_vs_code_bonf": {
+    "diff": 0.4230014438549377,
+    "ci_lo": 0.17797680528302234,
+    "ci_hi": 0.6634278050513219,
+    "alpha": 0.008333333333333333,
+    "wins": 15,
+    "losses": 3,
+    "sign_p": 0.007537841796875
+   },
+   "skills_vs_policy": {
+    "diff": -0.07962063895838667,
+    "ci_lo": -0.244975342028819,
+    "ci_hi": 0.08582785046935441,
+    "alpha": 0.05,
+    "wins": 8,
+    "losses": 10,
+    "sign_p": 0.8145294189453125
+   },
+   "skills_vs_policy_bonf": {
+    "diff": -0.07962063895838667,
+    "ci_lo": -0.3048252907804595,
+    "ci_hi": 0.1464613824554138,
+    "alpha": 0.008333333333333333,
+    "wins": 8,
+    "losses": 10,
+    "sign_p": 0.8145294189453125
+   },
+   "skills_vs_beamsec": {
+    "diff": -0.17372560595659298,
+    "ci_lo": -0.3131113221681469,
+    "ci_hi": -0.05568988051801269,
+    "alpha": 0.05,
+    "wins": 3,
+    "losses": 15,
+    "sign_p": 0.007537841796875
+   },
+   "skills_vs_beamsec_bonf": {
+    "diff": -0.17372560595659298,
+    "ci_lo": -0.36926468453637296,
+    "ci_hi": -0.03072657774753551,
+    "alpha": 0.008333333333333333,
+    "wins": 3,
+    "losses": 15,
+    "sign_p": 0.007537841796875
+   },
+   "skills_stops": {
+    "no tool call": 8,
+    "time": 10,
+    "finish": 1,
+    "budget": 1
+   },
+   "code_stops": {
+    "no tool call": 16,
+    "time": 3,
+    "finish": 1
+   }
+  }
+ },
+ "qwen38_32k_posthoc": {
+  "skills": {
+   "iou_cad_16k": 0.729923003800091,
+   "iou_cad_32k": 0.783019923906563
+  },
+  "code": {
+   "iou_cad_16k": 0.30692155994515324,
+   "iou_cad_32k": 0.5407022192616276
+  }
+ },
+ "policy_trial_evaluations_mean": 69.1
+}

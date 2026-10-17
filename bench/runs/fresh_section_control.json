@@ -1,0 +1,482 @@
+{
+ "00038011_64f4a654731c4c01a8bbb127_step_240": {
+  "pipeline": 0.9403938334313869,
+  "pipeline_cad": 0.9404633037453994,
+  "sections": 0.31688234267643206,
+  "section_kind": "section_z",
+  "best_of": 0.9403938334313869,
+  "best_of_cad": 0.9404633037453994
+ },
+ "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+  "pipeline": 0.9423843177408694,
+  "pipeline_cad": 0.9429233991621784,
+  "sections": 0.7386130869957436,
+  "section_kind": "section_z",
+  "best_of": 0.9423843177408694,
+  "best_of_cad": 0.9429233991621784
+ },
+ "00053172_3eadeb68ef0f4a56b93a1aaf_step_003": {
+  "pipeline": 0.9941694678724333,
+  "pipeline_cad": 0.9942867015884919,
+  "sections": 0.997985409267849,
+  "section_kind": "section_y",
+  "best_of": 0.997985409267849,
+  "best_of_cad": 0.997985409267849
+ },
+ "00090768_56c5bfcbe4b0344778b0a660_step_001": {
+  "pipeline": 0.9992478818577849,
+  "pipeline_cad": 0.9669785082174462,
+  "sections": 0.8412669399072809,
+  "section_kind": "section_x",
+  "best_of": 0.9992478818577849,
+  "best_of_cad": 0.9669785082174462
+ },
+ "00095369_fd1df382218e6e0f90aa941b_step_000": {
+  "pipeline": 0.8926009105641476,
+  "pipeline_cad": 0.8926009103317891,
+  "sections": 0.8896910949296899,
+  "section_kind": "section_y",
+  "best_of": 0.8926009105641476,
+  "best_of_cad": 0.8926009103317891
+ },
+ "00101419_7fa694883d59247c8776551e_step_003": {
+  "pipeline": 0.9779833723503332,
+  "pipeline_cad": 0.9779833714890417,
+  "sections": 0.9999345428453192,
+  "section_kind": "section_x",
+  "best_of": 0.9999345428453192,
+  "best_of_cad": 0.9999345428453192
+ },
+ "00140273_08a59d45a975b822d5536007_step_000": {
+  "pipeline": 0.8842442131216034,
+  "pipeline_cad": 0.8842442131216034,
+  "sections": 0.894392068659356,
+  "section_kind": "section_y",
+  "best_of": 0.894392068659356,
+  "best_of_cad": 0.894392068659356
+ },
+ "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+  "pipeline": 0.8565909301422304,
+  "pipeline_cad": 0.8566964256891123,
+  "sections": 0.9957188726868037,
+  "section_kind": "section_z",
+  "best_of": 0.9957188726868037,
+  "best_of_cad": 0.9957188726868037
+ },
+ "00154184_5735b30ee4b055a05f141e16_step_001": {
+  "pipeline": 0.9836856605114802,
+  "pipeline_cad": 0.9837715027588445,
+  "sections": 0.7819536800474413,
+  "section_kind": "section_z",
+  "best_of": 0.9836856605114802,
+  "best_of_cad": 0.9837715027588445
+ },
+ "00161800_0bcf89a01d0d72565a0249ba_step_009": {
+  "pipeline": 0.9851063927911639,
+  "pipeline_cad": 0.9852463690298594,
+  "sections": 0.9782793849482363,
+  "section_kind": "section_x",
+  "best_of": 0.9851063927911639,
+  "best_of_cad": 0.9852463690298594
+ },
+ "00181393_bc285ee6b12aaccfed7b9c1d_step_000": {
+  "pipeline": 0.8627635674637361,
+  "pipeline_cad": 0.8628272909065474,
+  "sections": 0.42654213417836523,
+  "section_kind": "section_z",
+  "best_of": 0.8627635674637361,
+  "best_of_cad": 0.8628272909065474
+ },
+ "00208290_7848aab8189280f5988e1bdf_step_002": {
+  "pipeline": 0.9888809112762894,
+  "pipeline_cad": 0.9888809112762894,
+  "sections": 0.9915966309686085,
+  "section_kind": "section_z",
+  "best_of": 0.9915966309686085,
+  "best_of_cad": 0.9915966309686085
+ },
+ "00214289_5b9f3b8de63a947b2059756a_step_008": {
+  "pipeline": 0.9893174061433447,
+  "pipeline_cad": 0.9892821615413656,
+  "sections": 0.971097682899886,
+  "section_kind": "section_z",
+  "best_of": 0.9893174061433447,
+  "best_of_cad": 0.9892821615413656
+ },
+ "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+  "pipeline": 0.8609360756471788,
+  "pipeline_cad": 0.8725121032813341,
+  "sections": 0.3423250584162456,
+  "section_kind": "section_y",
+  "best_of": 0.8609360756471788,
+  "best_of_cad": 0.8725121032813341
+ },
+ "00246395_f7d2633917c081ba3b7e75a6_step_000": {
+  "pipeline": 0.959246371757454,
+  "pipeline_cad": 0.9592489438464684,
+  "sections": 0.996827471823344,
+  "section_kind": "section_z",
+  "best_of": 0.996827471823344,
+  "best_of_cad": 0.996827471823344
+ },
+ "00247424_6d951cb81022130e313163ea_step_000": {
+  "pipeline": 0.0,
+  "pipeline_cad": 0.0,
+  "sections": 0.3060311484180553,
+  "section_kind": "section_z",
+  "best_of": 0.3060311484180553,
+  "best_of_cad": 0.3060311484180553
+ },
+ "00249450_a68e99eb4d98c0460771fdce_step_000": {
+  "pipeline": 0.960216113106843,
+  "pipeline_cad": 0.9602107220499834,
+  "sections": 0.9948420693581964,
+  "section_kind": "section_z",
+  "best_of": 0.9948420693581964,
+  "best_of_cad": 0.9948420693581964
+ },
+ "00256926_1c0f3eab2a7c951e43efc577_step_003": {
+  "pipeline": 0.8994047549428166,
+  "pipeline_cad": 0.9016753270023293,
+  "sections": 0.9996191469600824,
+  "section_kind": "section_y",
+  "best_of": 0.9996191469600824,
+  "best_of_cad": 0.9996191469600824
+ },
+ "00266468_fe3404af55d9e27b491d3a02_step_000": {
+  "pipeline": 0.7485882764479537,
+  "pipeline_cad": 0.7463744177002369,
+  "sections": 0.9998928779944823,
+  "section_kind": "section_y",
+  "best_of": 0.9998928779944823,
+  "best_of_cad": 0.9998928779944823
+ },
+ "00273535_7182205e0d848bffa1853256_step_000": {
+  "pipeline": 0.9951949206848827,
+  "pipeline_cad": 0.9951949206848827,
+  "sections": 0.6156260386150862,
+  "section_kind": "section_x",
+  "best_of": 0.9951949206848827,
+  "best_of_cad": 0.9951949206848827
+ },
+ "00299355_002db1b41bdedfa31128c1e2_step_000": {
+  "pipeline": 0.9754213647435876,
+  "pipeline_cad": 0.9757569550993116,
+  "sections": 0.9898527258063283,
+  "section_kind": "section_z",
+  "best_of": 0.9898527258063283,
+  "best_of_cad": 0.9898527258063283
+ },
+ "00305871_e62e071fef231dc7475cc0ed_step_004": {
+  "pipeline": 0.9606112785191563,
+  "pipeline_cad": 0.9610501398751883,
+  "sections": 0.9999535181137637,
+  "section_kind": "section_y",
+  "best_of": 0.9999535181137637,
+  "best_of_cad": 0.9999535181137637
+ },
+ "00312587_f8c6c0107579f44a03cee7c3_step_001": {
+  "pipeline": 0.9745007854101729,
+  "pipeline_cad": 0.9744997830384325,
+  "sections": 0.9997185711538374,
+  "section_kind": "section_z",
+  "best_of": 0.9997185711538374,
+  "best_of_cad": 0.9997185711538374
+ },
+ "00317970_978820cff49bf7ec00da570f_step_005": {
+  "pipeline": 0.7461900803546689,
+  "pipeline_cad": 0.7468827930174564,
+  "sections": 0.9926969835776763,
+  "section_kind": "section_z",
+  "best_of": 0.9926969835776763,
+  "best_of_cad": 0.9926969835776763
+ },
+ "00354176_32dffe026b23004e82670fb7_step_002": {
+  "pipeline": 0.9033954391865532,
+  "pipeline_cad": 0.9036919322002166,
+  "sections": 0.9291199400843948,
+  "section_kind": "section_y",
+  "best_of": 0.9291199400843948,
+  "best_of_cad": 0.9291199400843948
+ },
+ "00365747_58451ba8376a4d109925d2a8_step_001": {
+  "pipeline": 0.8876261747389071,
+  "pipeline_cad": 0.0,
+  "sections": 0.8935889134042088,
+  "section_kind": "section_x",
+  "best_of": 0.8935889134042088,
+  "best_of_cad": 0.8935889134042088
+ },
+ "00382121_8cd0bb5b4e2d54e7239cfb11_step_001": {
+  "pipeline": 0.9359962625554777,
+  "pipeline_cad": 0.9338356031721887,
+  "sections": 0.47018933770919025,
+  "section_kind": "section_y",
+  "best_of": 0.9359962625554777,
+  "best_of_cad": 0.9338356031721887
+ },
+ "00492401_0645a3b965579de6bfa80267_step_000": {
+  "pipeline": 0.987410011619225,
+  "pipeline_cad": 0.9875078150305715,
+  "sections": 0.8471186154456101,
+  "section_kind": "section_y",
+  "best_of": 0.987410011619225,
+  "best_of_cad": 0.9875078150305715
+ },
+ "00528181_ca079362860c563fb8b05377_step_000": {
+  "pipeline": 0.8817316017316017,
+  "pipeline_cad": 0.881643457911295,
+  "sections": 0.7650536726411957,
+  "section_kind": "section_y",
+  "best_of": 0.8817316017316017,
+  "best_of_cad": 0.881643457911295
+ },
+ "00562677_0f955758ce24893c8aa0cb99_step_002": {
+  "pipeline": 0.8893855357138977,
+  "pipeline_cad": 0.8893943372766623,
+  "sections": 0.8646819775939895,
+  "section_kind": "section_z",
+  "best_of": 0.8893855357138977,
+  "best_of_cad": 0.8893943372766623
+ },
+ "00589302_08220b2f3dc9641b23f012b8_step_001": {
+  "pipeline": 0.9686832740213523,
+  "pipeline_cad": 0.9374822069122587,
+  "sections": 0.9484063376635004,
+  "section_kind": "section_z",
+  "best_of": 0.9686832740213523,
+  "best_of_cad": 0.9374822069122587
+ },
+ "00630878_06994d5b0030f8d7d981349b_step_000": {
+  "pipeline": 0.9437199501640801,
+  "pipeline_cad": 0.9438503233737875,
+  "sections": 0.746299901737136,
+  "section_kind": "section_x",
+  "best_of": 0.9437199501640801,
+  "best_of_cad": 0.9438503233737875
+ },
+ "00634093_a327ce01f8344eaecf589eb6_step_000": {
+  "pipeline": 0.9461621544571032,
+  "pipeline_cad": 0.9463071909146743,
+  "sections": 0.7309718869542039,
+  "section_kind": "section_y",
+  "best_of": 0.9461621544571032,
+  "best_of_cad": 0.9463071909146743
+ },
+ "00642725_384f51542e8a1ea67d2847ef_step_003": {
+  "pipeline": 0.930335579906375,
+  "pipeline_cad": 0.0,
+  "sections": 0.5839173199464707,
+  "section_kind": "section_x",
+  "best_of": 0.930335579906375,
+  "best_of_cad": 0.0
+ },
+ "00657371_8bb4e08000f183834c3c6de5_step_000": {
+  "pipeline": 0.9018845357154645,
+  "pipeline_cad": 0.902586613197206,
+  "sections": 0.9874565811924954,
+  "section_kind": "section_y",
+  "best_of": 0.9874565811924954,
+  "best_of_cad": 0.9874565811924954
+ },
+ "00678171_4879ae47b65cfac763782412_step_000": {
+  "pipeline": 0.945196413666144,
+  "pipeline_cad": 0.945233394722169,
+  "sections": 0.803438312748092,
+  "section_kind": "section_z",
+  "best_of": 0.945196413666144,
+  "best_of_cad": 0.945233394722169
+ },
+ "00700032_492e0ac476d95f6170717f46_step_000": {
+  "pipeline": 0.8859227669148064,
+  "pipeline_cad": 0.8858911668952625,
+  "sections": 0.9622744607433278,
+  "section_kind": "section_z",
+  "best_of": 0.9622744607433278,
+  "best_of_cad": 0.9622744607433278
+ },
+ "00709520_bb7e5d82d6f0783bdd2b6e94_step_009": {
+  "pipeline": 0.888393248230804,
+  "pipeline_cad": 0.8886354318553057,
+  "sections": 0.9448515681270548,
+  "section_kind": "section_z",
+  "best_of": 0.9448515681270548,
+  "best_of_cad": 0.9448515681270548
+ },
+ "00729452_9d771b9c563f325632902567_step_000": {
+  "pipeline": 0.2802022129940454,
+  "pipeline_cad": 0.28054676860877575,
+  "sections": 0.9816058705441161,
+  "section_kind": "section_z",
+  "best_of": 0.9816058705441161,
+  "best_of_cad": 0.9816058705441161
+ },
+ "00730725_58fba91f2f389a1130828e8a_step_007": {
+  "pipeline": 0.018432998196224477,
+  "pipeline_cad": 0.018433515654787465,
+  "sections": 0.9491311920162184,
+  "section_kind": "section_y",
+  "best_of": 0.9491311920162184,
+  "best_of_cad": 0.9491311920162184
+ },
+ "00771160_156dee5ab444b3f0c110a762_step_000": {
+  "pipeline": 0.9849736623232603,
+  "pipeline_cad": 0.9821063677030982,
+  "sections": 0.8438269059532902,
+  "section_kind": "section_z",
+  "best_of": 0.9849736623232603,
+  "best_of_cad": 0.9821063677030982
+ },
+ "00771600_d04fd68f81426574544a9b96_step_000": {
+  "pipeline": 0.9196534286155583,
+  "pipeline_cad": 0.9198752484662435,
+  "sections": 0.9988197663956785,
+  "section_kind": "section_y",
+  "best_of": 0.9988197663956785,
+  "best_of_cad": 0.9988197663956785
+ },
+ "00780711_d331d416c22f5f24f124c861_step_000": {
+  "pipeline": 0.9831276166161579,
+  "pipeline_cad": 0.983127329847049,
+  "sections": 0.6714540218407413,
+  "section_kind": "section_y",
+  "best_of": 0.9831276166161579,
+  "best_of_cad": 0.983127329847049
+ },
+ "00791454_8c58e086bb0f4cc5f4e258ec_step_004": {
+  "pipeline": 0.9696780990464937,
+  "pipeline_cad": 0.9698248996442798,
+  "sections": 0.9903439436809908,
+  "section_kind": "section_y",
+  "best_of": 0.9903439436809908,
+  "best_of_cad": 0.9903439436809908
+ },
+ "00795057_b7338c3a773739b1b8830d8c_step_015": {
+  "pipeline": 0.9802399921304132,
+  "pipeline_cad": 0.980239995024644,
+  "sections": 0.9968280513790793,
+  "section_kind": "section_z",
+  "best_of": 0.9968280513790793,
+  "best_of_cad": 0.9968280513790793
+ },
+ "00814797_852bd45b7e6bee4a72c959a4_step_002": {
+  "pipeline": 0.970212974434987,
+  "pipeline_cad": 0.9702129636949965,
+  "sections": 0.9993869139454679,
+  "section_kind": "section_z",
+  "best_of": 0.9993869139454679,
+  "best_of_cad": 0.9993869139454679
+ },
+ "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+  "pipeline": 0.9540970404670828,
+  "pipeline_cad": 0.9491003854915493,
+  "sections": 0.9677329508283683,
+  "section_kind": "section_z",
+  "best_of": 0.9677329508283683,
+  "best_of_cad": 0.9677329508283683
+ },
+ "00846352_4f29d4f2b8a8d78a463e69bb_step_001": {
+  "pipeline": 0.8665909850392581,
+  "pipeline_cad": 0.866612376836383,
+  "sections": 0.5577283316594431,
+  "section_kind": "section_y",
+  "best_of": 0.8665909850392581,
+  "best_of_cad": 0.866612376836383
+ },
+ "00862084_6c1777bbaabee941fe4215fc_step_000": {
+  "pipeline": 0.6386379355790264,
+  "pipeline_cad": 0.6481744902797535,
+  "sections": 0.9990251143436724,
+  "section_kind": "section_y",
+  "best_of": 0.9990251143436724,
+  "best_of_cad": 0.9990251143436724
+ },
+ "00862085_6c1777bbaabee941fe4215fc_step_001": {
+  "pipeline": 0.4747126448539265,
+  "pipeline_cad": 0.4747126448539265,
+  "sections": 0.9986147636655105,
+  "section_kind": "section_y",
+  "best_of": 0.9986147636655105,
+  "best_of_cad": 0.9986147636655105
+ },
+ "00862953_821592027d6e6743aa249206_step_000": {
+  "pipeline": 0.801898023493181,
+  "pipeline_cad": 0.8044085687674635,
+  "sections": 0.9804490976427002,
+  "section_kind": "section_z",
+  "best_of": 0.9804490976427002,
+  "best_of_cad": 0.9804490976427002
+ },
+ "00883892_580f65badecb1e9fa11c79a3_step_000": {
+  "pipeline": 0.9134813836374144,
+  "pipeline_cad": 0.0,
+  "sections": 0.6694090141723691,
+  "section_kind": "section_z",
+  "best_of": 0.9134813836374144,
+  "best_of_cad": 0.0
+ },
+ "00892314_591b2b21b3273ecae630b210_step_000": {
+  "pipeline": 0.9348090417667158,
+  "pipeline_cad": 0.0,
+  "sections": 0.9482964921303835,
+  "section_kind": "section_z",
+  "best_of": 0.9482964921303835,
+  "best_of_cad": 0.9482964921303835
+ },
+ "00904252_c83200b9faa4c406a3337666_step_020": {
+  "pipeline": 0.976683207864982,
+  "pipeline_cad": 0.9766940193882749,
+  "sections": 0.49898091658703947,
+  "section_kind": "section_y",
+  "best_of": 0.976683207864982,
+  "best_of_cad": 0.9766940193882749
+ },
+ "00941601_071d956501ffc009e947b4d3_step_000": {
+  "pipeline": 0.9471521331600572,
+  "pipeline_cad": 0.9471828766756999,
+  "sections": 0.5090502206524157,
+  "section_kind": "section_x",
+  "best_of": 0.9471521331600572,
+  "best_of_cad": 0.9471828766756999
+ },
+ "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+  "pipeline": 0.9783938211904049,
+  "pipeline_cad": 0.9782551047467515,
+  "sections": 0.9287402126029207,
+  "section_kind": "section_z",
+  "best_of": 0.9783938211904049,
+  "best_of_cad": 0.9782551047467515
+ },
+ "00966049_820834e0f6797f5657423325_step_004": {
+  "pipeline": 0.9449244060475162,
+  "pipeline_cad": 0.8182119679983884,
+  "sections": 0.5207190342891121,
+  "section_kind": "section_y",
+  "best_of": 0.9449244060475162,
+  "best_of_cad": 0.8182119679983884
+ },
+ "00966713_0fb1e0c765632bf26044e6b8_step_003": {
+  "pipeline": 0.9935058714331158,
+  "pipeline_cad": 0.9935575768284439,
+  "sections": 0.9981715787919263,
+  "section_kind": "section_z",
+  "best_of": 0.9981715787919263,
+  "best_of_cad": 0.9981715787919263
+ },
+ "00983172_a0cba3025923ce7ef52f7de0_step_001": {
+  "pipeline": 0.9934627287784848,
+  "pipeline_cad": 0.0,
+  "sections": 0.9838210757068568,
+  "section_kind": "section_z",
+  "best_of": 0.9934627287784848,
+  "best_of_cad": 0.0
+ },
+ "00992810_a1fc2335bb27aa520c2761e4_step_005": {
+  "pipeline": 0.9947931689646355,
+  "pipeline_cad": 0.994808425786567,
+  "sections": 0.9967544621780255,
+  "section_kind": "section_y",
+  "best_of": 0.9967544621780255,
+  "best_of_cad": 0.9967544621780255
+ }
+}
