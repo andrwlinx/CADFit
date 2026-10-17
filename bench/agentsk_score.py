@@ -25,7 +25,25 @@ RUNS = os.path.join(ROOT, 'bench', 'runs')
 ZERO = {'iou': 0.0, 'cd': None, 'valid': False, 'iou_cad': 0.0, 'cad_built': False, 'cad_valid': False}
 
 
-def score_all(jobs_list, jobs):
+def _capped_init(cap_gb):
+    """Pool worker with an address-space cap: a judge that needs more raises
+    MemoryError in that worker instead of the OOM killer taking the pool down."""
+    import resource
+    import score
+    score._init_worker()
+    cap = int(cap_gb * 2 ** 30)
+    resource.setrlimit(resource.RLIMIT_AS, (cap, cap))
+
+
+def _score_safe(job):
+    import score
+    try:
+        return score._score_one(job)
+    except MemoryError:
+        return job[0], job[1], {'iou': 0.0, 'cd': None, 'valid': True, 'judge_error': 'MemoryError'}
+
+
+def score_all(jobs_list, jobs, cap_gb=None):
     """[(cond, part, gt, recon)] -> {(cond, part): record}; halves the pool on a worker death (OOM)."""
     sys.argv = sys.argv[:1]
     import score
@@ -42,12 +60,14 @@ def score_all(jobs_list, jobs):
         left = {}
         try:
             with ProcessPoolExecutor(min(jobs, len(todo)), mp_context=mp.get_context('spawn'),
-                                     initializer=score._init_worker) as ex:
-                left = {ex.submit(score._score_one, j): j for j in todo}
+                                     initializer=_capped_init if cap_gb else score._init_worker,
+                                     initargs=(cap_gb,) if cap_gb else ()) as ex:
+                left = {ex.submit(_score_safe if cap_gb else score._score_one, j): j for j in todo}
                 for f in as_completed(left):
                     c, p, r = f.result()
                     out[(c, p)] = r
-                    print(f'{c:<34} {p[:8]} iou={r["iou"]:.4f} iou_cad={r.get("iou_cad", 0):.4f}', flush=True)
+                    print(f'{c:<34} {p[:8]} iou={r["iou"]:.4f} iou_cad={r.get("iou_cad", 0):.4f}'
+                          + (f' JUDGE ERROR {r["judge_error"]}' if 'judge_error' in r else ''), flush=True)
                     del left[f]
             todo = []
         except BrokenProcessPool:
@@ -63,6 +83,8 @@ def main():
     ap.add_argument('--tag', default='agentsk')
     ap.add_argument('--stl-dir', default=os.path.join(ROOT, 'bench', 'cadbench', 'fresh'))
     ap.add_argument('--jobs', type=int, default=16)
+    ap.add_argument('--mem-cap-gb', type=float, default=None,
+                    help='address-space cap per scoring worker; a part over it is recorded as judge_error')
     ap.add_argument('--out', default=os.path.join(RUNS, 'agentsk_scores.json'))
     a = ap.parse_args()
     parts = study_parts(a.stl_dir)
@@ -89,7 +111,12 @@ def main():
             stl = os.path.join(ep, 'agent_model.stl')
             if os.path.exists(stl):
                 jobs.append((cond, p, os.path.join(a.stl_dir, p + '.stl'), stl))
-    scored = score_all(jobs, a.jobs)
+    scored = score_all(jobs, a.jobs, a.mem_cap_gb)
+    # Parts over the per-worker cap: score them again one at a time, uncapped (whole job memory).
+    heavy = [j for j in jobs if 'judge_error' in scored[(j[0], j[1])]]
+    if heavy:
+        print(f'rescoring {len(heavy)} over the memory cap one at a time, uncapped', flush=True)
+        scored.update(score_all(heavy, 1))
     res = {c: {p: {**scored.get((c, p), ZERO), **meta[(c, p)]} for p in parts} for c in conds}
     # Pipeline references (frozen runs, same judge): arms and the best-of section control.
     ref = json.load(open(os.path.join(RUNS, 'fresh_scores.json')))
