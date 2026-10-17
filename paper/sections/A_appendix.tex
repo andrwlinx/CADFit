@@ -1,0 +1,43 @@
+\section{Agent harness details}
+\label{app:harness}
+\paragraph{Sandbox.} Agent-written code and the replay of every final program run in a sandbox with no network and writes confined to the episode folder: bubblewrap where available; otherwise an unprivileged user namespace in which every mount is remounted read-only and verified (the sandbox refuses to run if any mount stays writable), temporary directories are replaced by empty file systems, the episode folder is bound back read-write, and all capabilities are dropped with no-new-privileges set.
+
+\paragraph{Context.} The last six tool results are kept in full; older results, older assistant text and older code arguments are truncated to 300 characters in what is sent back. Tool results are capped at 8{,}000 characters while remaining valid JSON. On a context-length error the kept window halves.
+
+\paragraph{Models.}
+\begin{center}
+\scriptsize
+\resizebox{\linewidth}{!}{\input{generated/models.tex}}
+\end{center}
+
+\paragraph{Prompts.} The three system prompts differ only in the tool paragraph and the strategy phrase.
+\input{generated/prompts.tex}
+
+\section{Tool use}
+\label{app:tools}
+Tool calls per episode in the skills toolset, over the \nAgentParts{} episodes of each model (\texttt{results/tool\_usage.json}).
+\begin{center}
+\scriptsize
+\resizebox{\linewidth}{!}{\input{generated/tools.tex}}
+\end{center}
+
+\section{Qwen3.8 token-limit failures and a post-hoc sensitivity run}
+\label{app:qwen}
+The harness sends ``Your reply hit the token limit before you called a tool. Think briefly, then call a tool now.'' only when a reply ends because it reached the 16{,}384-token limit; after two consecutive nudges without a tool call the episode stops. In all \qwenTraceN{} Qwen3.8 code episodes that stopped this way, the last nudge was the token-limit message, and the final reply was \qwenTraceMinK--\qwenTraceMaxK{} thousand characters of reasoning with no content (\texttt{results/qwen38\_traces.json}). After seeing these outcomes we reran Qwen3.8 on the same parts with 32{,}768 tokens per turn. It scored \qwenPosthocSkills{} with skills and \qwenPosthocCode{} with code (versus \mQwenEightSkills{} and \mQwenEightCode{} at 16{,}384). Because this run was decided after seeing results, it is excluded from \cref{tab:agents}; most of its episodes ended at the 30-minute limit instead.
+
+\section{Refining pipeline output with an LLM agent}
+\label{app:refine}
+In an earlier study, Qwen3.8-27B (INT4) refined arm C's output on the \refN{} fresh parts whose C mesh IoU was below 0.90 (gate fixed before running), with access to C's candidate pool, 40 calls and 20 minutes, in two runs. Mean mesh IoU: pipeline \refPipe; agent \refAgentOne{} and \refAgentTwo{} (wins--losses against the pipeline at a $\pm 0.01$ threshold: \refAgentOneWL{} and \refAgentTwoWL); a no-op agent that only re-exports the pipeline model \refNoop; an equal-time scripted search over the same pool \refSearch{} (\refSearchWL). The mean gain comes from a few parts and does not repeat consistently. Per-part records were not retained, so no intervals or executed-program scores are available for this study.
+
+\section{Per-part results}
+\label{app:perpart}
+{\scriptsize
+\input{generated/per_part_arms.tex}
+}
+$^\dagger$ program does not build; $^*$ builds but fails OpenCascade validity.
+
+\begin{table}[h]
+\centering
+\caption{Per-part \iouc{} of the agent study (failures 0).}
+\resizebox{\linewidth}{!}{\input{generated/per_part_agents.tex}}
+\end{table}

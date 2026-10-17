@@ -1,0 +1,78 @@
+{
+ "note": "development/smoke/test-set case studies, not fresh-cohort evidence",
+ "cases": [
+  {
+   "id": "objective_alpha_wrap",
+   "defect": "stock greedy objective alpha-wraps the concatenated candidate STLs before taking IoU",
+   "code_path": "greedy_search.py (stock composition scoring); fix --exact-union",
+   "case": "smoke 00053793",
+   "before": "search-internal IoU 0.954",
+   "after": "strict judge 0.982",
+   "source": "bench/REPORT3.md \u00a73 finding 1"
+  },
+  {
+   "id": "judge_cavity_fill",
+   "defect": "body-wise union fills internal cavities (negative-volume shells unioned)",
+   "code_path": "iou._bodies_union_manifold",
+   "case": "00344388 (beam); 00014841 (rules)",
+   "before": "0.9758; 0.9102",
+   "after": "0.9862; 0.9475",
+   "source": "RESEARCH_REVIEW.md F1; review-stage/AUTO_REVIEW.md Actions 1"
+  },
+  {
+   "id": "program_not_executed",
+   "defect": "under --exact-union the scored mesh comes from manifold booleans; the final CadQuery program is not executed when scored",
+   "code_path": "bench/score.py (pre --cad); fix bench/cad_replay.py + score.py --cad",
+   "case": "p3test2 beam 00706786; 00409618; 00014841",
+   "before": "00706786 scored 0.980 as valid",
+   "after": "1/4 solids OCC-invalid; 00409618 2/33 invalid; 00014841 beam program does not build (Null TopoDS_Shape)",
+   "source": "RESEARCH_REVIEW.md F2; review-stage/AUTO_REVIEW.md Actions 2"
+  },
+  {
+   "id": "self_intersecting_loft",
+   "defect": "self-intersecting lofts pass watertight/winding/isValid checks but cancel volume",
+   "code_path": "analyze_sweep_loft.py candidates; fix: reject alpha-wrap/mesh volume ratio > 1.12",
+   "case": "one loft candidate; 00399282",
+   "before": "greedy believed 0.998",
+   "after": "true score 0.776; 15 of 85 loft/sweep candidates rejected on 00399282",
+   "source": "bench/REPORT3.md \u00a75.1 item 2"
+  },
+  {
+   "id": "remeasure_multibody_wrap",
+   "defect": "post-greedy re-measure alpha-wraps any multi-body mesh, filling gaps, triggering the single-candidate fallback",
+   "code_path": "run_pipeline re-measure; fix per-body exact union",
+   "case": "heatsink 00965166",
+   "before": "0.978 composition replaced by 0.878 single extrusion",
+   "after": "composition kept",
+   "source": "bench/REPORT3.md \u00a75.1 item 1"
+  },
+  {
+   "id": "stl_roundtrip_crack",
+   "defect": "exact-union exports crack on the STL float32 round trip; re-measure then alpha-wraps",
+   "code_path": "iou._merged_manifold",
+   "case": "benchA dev part (REPORT3 \u00a75.3)",
+   "before": "0.756",
+   "after": "0.840",
+   "source": "bench/REPORT3.md \u00a75.3 item 1",
+   "case_identified": false
+  },
+  {
+   "id": "silent_slice_loss",
+   "defect": "trimesh API change makes the discrete() fallback throw, silently dropping slices",
+   "code_path": "extract_sketches.py, extract_planar_contours.py; fix --fix-slice-fallback",
+   "case": "smoke set",
+   "before": "7 slices dropped on 4 smoke parts",
+   "after": "0 dropped",
+   "source": "bench/REPORT3.md \u00a73 finding 3"
+  },
+  {
+   "id": "success_on_crash",
+   "defect": "pipeline summary counts a part as successful when greedy_search crashed",
+   "code_path": "run_pipeline.py summary",
+   "case": "smoke run with a mid-run edit",
+   "before": "reported 5/5 successful",
+   "after": "3 parts had crashed; only the strict judge catches it",
+   "source": "bench/REPORT3.md \u00a73 finding 4 and \u00a75.1 item 3"
+  }
+ ]
+}

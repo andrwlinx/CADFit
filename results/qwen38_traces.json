@@ -1,0 +1,186 @@
+{
+ "code": {
+  "episodes_no_tool_call": 16,
+  "all_last_nudge_token_limit": true,
+  "final_reasoning_chars_min": 32465,
+  "final_reasoning_chars_max": 39399,
+  "episodes": [
+   {
+    "part": "00046097_c3c229ed6e3a45b2b648027c_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 35993,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00095369_fd1df382218e6e0f90aa941b_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 33253,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00140273_08a59d45a975b822d5536007_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 33265,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00153120_0f4e90ea5d8add32e39298eb_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 38798,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00154184_5735b30ee4b055a05f141e16_step_001",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 36113,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00232213_8960d9c6b1f3965294d14e5d_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 32465,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00492401_0645a3b965579de6bfa80267_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 33274,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00528181_ca079362860c563fb8b05377_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 34962,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00589302_08220b2f3dc9641b23f012b8_step_001",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 35005,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00630878_06994d5b0030f8d7d981349b_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 35649,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00771600_d04fd68f81426574544a9b96_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 35900,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00834538_fe2e27a617dfbf8ef543260d_step_003",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 35300,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00883892_580f65badecb1e9fa11c79a3_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 33971,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00941601_071d956501ffc009e947b4d3_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 34077,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00953658_06f20e34a1e8e27016ff3bb1_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 39399,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00966049_820834e0f6797f5657423325_step_004",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 34460,
+    "final_reply_content_chars": 0
+   }
+  ]
+ },
+ "skills": {
+  "episodes_no_tool_call": 8,
+  "all_last_nudge_token_limit": true,
+  "final_reasoning_chars_min": 31845,
+  "final_reasoning_chars_max": 38188,
+  "episodes": [
+   {
+    "part": "00046097_c3c229ed6e3a45b2b648027c_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 38188,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00140273_08a59d45a975b822d5536007_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 34257,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00232213_8960d9c6b1f3965294d14e5d_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 34272,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00492401_0645a3b965579de6bfa80267_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 37125,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00528181_ca079362860c563fb8b05377_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 34602,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00834538_fe2e27a617dfbf8ef543260d_step_003",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 35940,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00883892_580f65badecb1e9fa11c79a3_step_000",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 31845,
+    "final_reply_content_chars": 0
+   },
+   {
+    "part": "00966049_820834e0f6797f5657423325_step_004",
+    "token_limit_nudges": 2,
+    "last_nudge_is_token_limit": true,
+    "final_reasoning_chars": 35191,
+    "final_reply_content_chars": 0
+   }
+  ]
+ }
+}

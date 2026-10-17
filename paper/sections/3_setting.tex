@@ -1,0 +1,22 @@
+\section{Setting and measurement}
+\label{sec:measure}
+
+\paragraph{Task and optimizer.}
+Given a watertight triangle mesh, the goal is a CadQuery \citep{cadquery} program whose solid matches it. All geometry is normalized so the target is centred and its largest extent spans $[-1,1]$. CADFit \citep{nehme2026cadfit} slices the mesh into planar sections, fits lines and arcs to each loop, proposes extrusion candidates from a Chamfer-distance sweep over translations and revolve candidates from an axis analysis, and composes candidates greedily with union and cut. Backward pruning and residual refinement follow, and the final composition is emitted as one CadQuery program.
+
+\paragraph{Measurement defects.}
+While extending CADFit on development parts we found defects in how compositions were scored (\cref{tab:defects}). The stock objective alpha-wraps \citep{portaneri2022alphawrap} the concatenated candidate meshes before computing IoU, which fills concave detail: on one smoke-test part the search believed 0.954 where an exact judge measured 0.982. A body-wise union filled internal cavities. Self-intersecting lofts passed watertightness and kernel validity checks while cancelling their own volume. With our exact-union objective (manifold booleans of cached candidate solids), the scored mesh is never produced by running the composed program. \Cref{tab:defects} lists each with the case where we observed it. These are case studies on development data; all are fixed before the fresh evaluation, and aggregate gains are not attributed to individual fixes.
+
+\begin{table}[t]
+\centering
+\caption{Measurement defects found on development, smoke and earlier test parts (not the fresh cohort), each with the case where it was observed. All were fixed before the fresh evaluation. Records: \texttt{results/defect\_cases.json}.}
+\label{tab:defects}
+\scriptsize
+\resizebox{\linewidth}{!}{\input{generated/defects.tex}}
+\end{table}
+
+\paragraph{Evaluation protocol.}
+Mesh IoU compares the method's output mesh with the target: exact volumes from manifold booleans \citep{manifold3d} when the output is a closed, consistently wound volume, otherwise a seeded Monte Carlo estimate in which inside-tests use generalized winding numbers \citep{jacobson2013winding}. \iouc{} applies the same judge to the solid obtained by running the final program in a fresh, sandboxed process (no network; writes confined to its folder). A program that does not build scores 0. OpenCascade validity of the shape and every solid is recorded; \iouc{} keeps the measured score of a built but invalid solid, and the validity-gated \ioug{} is 0 unless the program builds and is valid. Chamfer distance (CD) is averaged over parts with an output, with its denominator stated.
+
+\paragraph{Fresh cohort and statistics.}
+CADBench's benchA and benchE splits stratify ABC-derived parts by B-rep face count; we use the hard tier. The fresh cohort is a seeded draw of 30 benchA-hard and 30 benchE-hard parts taken after, and disjoint from, all test, development and smoke sets used earlier. All arms run once per part from one code version. Differences are paired by part; intervals are percentile bootstrap over parts \citep{efron1993bootstrap} (10{,}000 resamples, seed 0) and reflect part sampling, not run-to-run randomness. Search-arm comparisons are exploratory with nominal 95\% intervals. For the agent study, comparisons across the six models use Bonferroni-corrected \bonfLevel\% intervals ($\alpha = 0.05/6$). Win/loss counts use a tie threshold of $10^{-9}$.

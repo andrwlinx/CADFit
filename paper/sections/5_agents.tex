@@ -1,0 +1,46 @@
+\section{Optimizer stages as tools for open-weight agents}
+\label{sec:agents}
+
+Having identified which geometric proposals survive execution, we test what LLM agents gain from access to the optimizer's operations, and whether a script with the same operations does as well.
+
+\paragraph{Harness.}
+An agent receives no image or mesh. It learns about the target only through tools, over an OpenAI-compatible tool-calling loop served by vLLM \citep{kwon2023vllm} on one GPU per model. Every toolset includes \texttt{describe\_target} (size, volume, flat faces), \texttt{section} (exact cross-section polygons of the target and the current model on an axis-aligned plane), \texttt{evaluate} (IoU against the target and where material is missing or extra), \texttt{add\_code} (union or cut of a solid built by agent-written CadQuery), \texttt{remove\_step}, \texttt{list\_steps} and \texttt{finish}. The \textbf{code} toolset is exactly this. The \textbf{skills} toolset adds five CADFit stages: \texttt{detect\_directions}; \texttt{extract\_sketch}, which slices the target at a plane, nests loops into profiles and fits lines and arcs; \texttt{fit\_extrude} (translation sweep, then extents); \texttt{fit\_revolve} (axis analysis); and \texttt{section\_extrude} (the whole-part proposal of \cref{sec:search}). Each stage's solids become candidates, scored against the target when created, which the agent can list, inspect and add. The \textbf{code+section} toolset adds only \texttt{section\_extrude} and the candidate tools. The system prompts differ only in the tool paragraph and one strategy phrase. Episodes start from an empty model, allow 40 tool calls, 30 minutes and 16{,}384 generated tokens per turn, and return the best model seen, as judged by IoU against the target; a failed episode scores 0. Target-score feedback is legitimate here, since the target mesh is the method's input. Agent-written code runs in a sandbox. Three implementation details make the skills differ from the frozen pipeline arms: even-odd loop nesting (the pipeline treated a material island inside a hole as a second hole), a $10^{-6}$ minimum profile area (the pipeline's $10^{-3}$ dropped all 67 profiles of one slice), and a fix to how revolve profiles are split at the axis (a stepped shaft went from 0.408 to 0.994 IoU).
+
+\paragraph{Models and parts.}
+Six open-weight models, each on one GPU, with model-card sampling and reasoning enabled where the model supports it: Gemma-4-31B \citep{gemma4}, Qwen3.6-35B-A3B and Qwen3.8-27B \citep{yang2025qwen3}, gpt-oss-120b and gpt-oss-20b \citep{openai2025gptoss}, and Devstral-Small-2-24B \citep{devstral2}. We use \nAgentParts{} parts (\nSampleA{} benchA, \nSampleE{} benchE) drawn by seed from the fresh cohort before any episode ran, with one episode per model, toolset and part.
+
+\paragraph{Scripted policies.}
+The \emph{unrestricted} policy calls \texttt{section\_extrude} on each axis, extracts mid-plane sketches along the detected directions, fits the three largest profiles per plane, and assembles greedily by best improvement. Its assembly scores every candidate union and cut against the target without spending calls: \policyTrials{} free trials per part on average. The \emph{budget-matched} policy charges every such trial as one of its 40 calls, keeps the first improving trial (candidates in IoU order, adds before cuts), and reserves 20 calls for assembly. It used \policyMatchedCalls{} calls per part, \policyMatchedTrials{} of them trials. An agent pays at least as much per trial, since adding a candidate reports the new IoU and undoing it costs another call.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Agents on \nAgentParts{} fresh parts, mean \iouc{} (failed episodes score 0). Brackets: Bonferroni-corrected \bonfLevel\% paired bootstrap intervals over parts ($\alpha=0.05/6$). W--L: parts where skills scored higher--lower than code. Pipeline D on the same parts: \agentPipeSec{} (\ioug{} \agentPipeSecGated); unrestricted policy \policyCad; budget-matched policy \policyMatchedCad.}
+\label{tab:agents}
+\setlength{\tabcolsep}{4pt}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+model & code & skills & skills $-$ code & W--L & \ioug{} skills & skills $-$ pipeline D & skills $-$ matched policy \\
+\midrule
+Gemma-4-31B & \mGemmaCode & \mGemmaSkills & \mGemmaVsCodeDiff{} \mGemmaVsCodeCI & \mGemmaVsCodeWins--\mGemmaVsCodeLosses & \mGemmaSkillsGated & \mGemmaVsPipeDiff{} \mGemmaVsPipeCI & \mGemmaVsMatchedDiff{} \mGemmaVsMatchedCI \\
+Qwen3.6-35B-A3B & \mQwenSixCode & \mQwenSixSkills & \mQwenSixVsCodeDiff{} \mQwenSixVsCodeCI & \mQwenSixVsCodeWins--\mQwenSixVsCodeLosses & \mQwenSixSkillsGated & \mQwenSixVsPipeDiff{} \mQwenSixVsPipeCI & \mQwenSixVsMatchedDiff{} \mQwenSixVsMatchedCI \\
+gpt-oss-120b & \mGptBigCode & \mGptBigSkills & \mGptBigVsCodeDiff{} \mGptBigVsCodeCI & \mGptBigVsCodeWins--\mGptBigVsCodeLosses & \mGptBigSkillsGated & \mGptBigVsPipeDiff{} \mGptBigVsPipeCI & \mGptBigVsMatchedDiff{} \mGptBigVsMatchedCI \\
+Devstral-S-2-24B & \mDevstralCode & \mDevstralSkills & \mDevstralVsCodeDiff{} \mDevstralVsCodeCI & \mDevstralVsCodeWins--\mDevstralVsCodeLosses & \mDevstralSkillsGated & \mDevstralVsPipeDiff{} \mDevstralVsPipeCI & \mDevstralVsMatchedDiff{} \mDevstralVsMatchedCI \\
+gpt-oss-20b & \mGptSmallCode & \mGptSmallSkills & \mGptSmallVsCodeDiff{} \mGptSmallVsCodeCI & \mGptSmallVsCodeWins--\mGptSmallVsCodeLosses & \mGptSmallSkillsGated & \mGptSmallVsPipeDiff{} \mGptSmallVsPipeCI & \mGptSmallVsMatchedDiff{} \mGptSmallVsMatchedCI \\
+Qwen3.8-27B & \mQwenEightCode & \mQwenEightSkills & \mQwenEightVsCodeDiff{} \mQwenEightVsCodeCI & \mQwenEightVsCodeWins--\mQwenEightVsCodeLosses & \mQwenEightSkillsGated & \mQwenEightVsPipeDiff{} \mQwenEightVsPipeCI & \mQwenEightVsMatchedDiff{} \mQwenEightVsMatchedCI \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\paragraph{The stages make every model a better CAD agent (Q3).}
+With the stages as tools, all six models improve over writing CadQuery alone (\cref{tab:agents}), by \skillsGainMin{} to \skillsGainMax{} \iouc, and every Bonferroni-corrected interval excludes zero. The largest gains go to the weakest code-writers: Devstral rises from \mDevstralCode{} to \mDevstralSkills{} and Qwen3.8 from \mQwenEightCode{} to \mQwenEightSkills. Validity gating lowers a skills score by at most \skillsGatedMaxDrop. Gemma-4-31B with skills reaches \mGemmaSkills, an observed \mGemmaVsPipeDiff{} relative to pipeline D on the same parts (\mGemmaVsPipeCI). Its three runs over the \nAgentParts{} parts score \gemmaRunOne, \gemmaRunTwo{} and \gemmaRunThree{} (mean \gemmaRunMean, range \gemmaRunMin--\gemmaRunMax); the first is the declared primary result, and the range describes three runs, not an interval.
+
+\paragraph{Ablation: code plus section extrusion only.}
+Given only \texttt{section\_extrude} beyond the code tools, Gemma scores \gemmaCodesec{}: \gemmaCodesecVsCodeDiff{} \gemmaCodesecVsCodeCI{} over code alone, and the full skills toolset adds \gemmaSkillsVsCodesecDiff{} \gemmaSkillsVsCodesecCI{} on top (nominal 95\% intervals, Gemma only).
+
+\paragraph{The LLM's added value over a script is not established.}
+Against the unrestricted policy (\policyCad), Gemma's difference is \mGemmaVsPolicyDiff{} with Bonferroni interval [\mGemmaVsPolicyLo, \mGemmaVsPolicyHi], and every other model's interval also includes zero. Against the budget-matched policy (\policyMatchedCad), the last column of \cref{tab:agents} gives each model's difference. An LLM benefit would require a lower bound above zero against this policy.
+
+\paragraph{How the agents use the stages.}
+Per episode, agents call \texttt{extract\_sketch} \useExtractMin--\useExtractMax{} times and \texttt{fit\_extrude} \useExtrudeMin--\useExtrudeMax{} times, but \texttt{fit\_revolve} at most \useRevolveMax{} times; these parts rarely call for revolves (\cref{app:tools}). The dominant failure is not geometric. At 16{,}384 tokens per turn, \qwenCodeNoTool{} of 20 Qwen3.8 code episodes terminated on a turn without a tool call. In all \qwenTraceN{} of them, the preceding reply had hit the token limit (the harness then asks the model to think briefly and call a tool), and the final reply was \qwenTraceMinK--\qwenTraceMaxK{} thousand characters of reasoning with no content (\cref{app:qwen}).
