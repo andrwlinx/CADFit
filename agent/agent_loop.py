@@ -20,6 +20,7 @@ and transcript.jsonl.
 """
 import argparse
 import json
+import re
 import os
 import sys
 import time
@@ -244,6 +245,7 @@ def compact(messages, keep):
     return out
 
 
+_SPECIAL = re.compile(r'<\|[a-z_]+\|>')
 _CHANNEL_JUNK = ('<|channel|>commentary', '<|channel|>analysis', '<|channel|>final', '<|constrain|>json',
                  'commentary', 'analysis', 'json')
 
@@ -359,6 +361,11 @@ def main():
             log.write(json.dumps({'role': 'reasoning', 'content': reasoning}) + '\n')
         msg = {k: v for k, v in msg.items() if k in ('role', 'content', 'tool_calls') and v is not None}
         msg.setdefault('content', '')
+        if _SPECIAL.search(msg['content']):
+            # gpt-oss can leak harmony control tokens (<|end|><|start|>assistant) into its
+            # text; sent back as history they make vLLM fail every later request (HTTP 500).
+            log.write(json.dumps({'role': 'harness', 'stripped_special_tokens_from': msg['content'][:2000]}) + '\n')
+            msg['content'] = _SPECIAL.sub(' ', msg['content']).strip()
         if not msg.get('tool_calls') and msg['content']:
             msg['tool_calls'] = text_tool_calls(msg['content'], tool_names) or None
             if not msg['tool_calls']:
