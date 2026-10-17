@@ -130,7 +130,9 @@ def robust_iou(gt_path, recon_path, n=40000, seed=0):
     hi = np.maximum(gt.bounds[1], rc.bounds[1]) + 0.01
     Q = np.random.default_rng(seed).uniform(lo, hi, (n, 3))
     if gt.is_watertight:  # ray-cast containment; chunked, its memory grows with rays x hits
-        in_gt = np.concatenate([gt.contains(Q[s:s + 4000]) for s in range(0, len(Q), 4000)])
+        # (x triangles: 4000 rays on a 1e6-triangle GT took > 200 GB). Same labels, any chunk.
+        step = max(250, 4000 * 100_000 // max(len(gt.faces), 100_000))
+        in_gt = np.concatenate([gt.contains(Q[s:s + step]) for s in range(0, len(Q), step)])
     else:
         in_gt = _gwn(gt, Q) > 0.5
     in_rc = _gwn(rc, Q) > 0.5

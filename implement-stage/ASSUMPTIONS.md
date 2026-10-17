@@ -49,7 +49,7 @@
 
 | A-038 | **post-hoc** (decided after seeing outcomes): does the 16,384-token per-turn cap (A-020) understate Qwen3.8? | 11 of its first 16 episodes ended `no tool call`: thinking used the whole turn, the reply was empty. One extra, separately reported sensitivity run, Qwen3.8 with `--max-tokens 32768` (tag `agentsk_sens`), both toolsets, same 20 parts. The declared panel result for Qwen3.8 stays as run; the sensitivity run is labelled post-hoc and never replaces it. | semantic | default |
 
-| A-039 | scoring parts whose judge needs more memory than a parallel worker has (part 00354176 for three models' answers: >45 GB; an uncapped pool was OOM-killed at 200 GB) | Workers run with an address-space cap (`--mem-cap-gb`, 45 GB with 4 workers); a part over it is rescored afterwards one at a time without the cap. No part is scored 0 for the judge's memory use. | interface | default |
+| A-039 | scoring parts whose judge needs more memory than a parallel worker has (part 00354176 for three models' answers: >45 GB; an uncapped pool was OOM-killed at 200 GB) | Workers run with an address-space cap (`--mem-cap-gb`, 45 GB with 4 workers); a part over it is rescored afterwards one at a time without the cap. No part is scored 0 for the judge's memory use. Root cause: on a non-watertight replay STL the Monte Carlo judge ray-casts 4000 points at a time into the 1.05M-triangle GT; the chunk is now scaled by GT size (labels per point are unchanged, so no other score moves). | interface | default |
 
 ## Notes
 
