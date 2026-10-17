@@ -52,7 +52,10 @@ def fresh():
     for name, arm in arms.items():
         rec = [S[arm][p] for p in parts]
         res['arms'][name] = {
-            'iou': mean(g(arm, 'iou')), 'iou_cad': mean(g(arm, 'iou_cad')), 'cd': mean(g(arm, 'cd')),
+            'iou': mean(g(arm, 'iou')), 'iou_cad': mean(g(arm, 'iou_cad')),
+            # CD is undefined without an output: averaged over measured outputs, with its denominator.
+            'cd_measured': mean([r['cd'] for r in rec if r.get('cd') is not None]),
+            'cd_n': sum(r.get('cd') is not None for r in rec),
             'cad_bad': sum(not (r.get('cad_built') and r.get('cad_valid')) for r in rec),
             'cad_unbuilt': sum(not r.get('cad_built') for r in rec),
             'mesh_cad_gap_parts': sum((r.get('iou') or 0) - (r.get('iou_cad') or 0) > 0.05 for r in rec),
@@ -68,6 +71,28 @@ def fresh():
     for k in ('iou', 'iou_cad'):
         for a, b in steps:
             res['paired'][f'{a}-{b}/{k}'] = paired(g(arms[a], k), g(arms[b], k))
+    # Validity-gated IoU(CAD): 0 unless the program builds AND OCC accepts the shape and every solid.
+    gated = lambda arm: [(S[arm][p].get('iou_cad') or 0.0) if (S[arm][p].get('cad_built') and S[arm][p].get('cad_valid'))
+                         else 0.0 for p in parts]  # noqa: E731
+    for name, arm in arms.items():
+        rec = [S[arm][p] for p in parts]
+        gap = [(r.get('iou') or 0) - (r.get('iou_cad') or 0) for r in rec]
+        res['arms'][name]['iou_cad_valid_gated'] = mean(gated(arm))
+        res['arms'][name]['gap'] = mean(gap)
+        res['arms'][name]['gap_from_unbuilt'] = sum(x for x, r in zip(gap, rec) if not r.get('cad_built')) / len(rec)
+        res['arms'][name]['gap_from_built'] = sum(x for x, r in zip(gap, rec) if r.get('cad_built')) / len(rec)
+        res['arms'][name]['cad_built_invalid'] = sum(bool(r.get('cad_built')) and not r.get('cad_valid') for r in rec)
+    for a, b in steps:
+        res['paired'][f'{a}-{b}/iou_cad_valid_gated'] = paired(gated(arms[a]), gated(arms[b]))
+        # Does the step's gain shrink when the program is executed? (CAD gain - mesh gain), paired over parts
+        dc = [x - y for x, y in zip(g(arms[a], 'iou_cad'), g(arms[b], 'iou_cad'))]
+        dm = [x - y for x, y in zip(g(arms[a], 'iou'), g(arms[b], 'iou'))]
+        res['paired'][f'{a}-{b}/cad_gain_minus_mesh_gain'] = paired(dc, dm)
+    for sp in ('benchA', 'benchE'):
+        idx_sp = [i for i, p in enumerate(parts) if split_of(p, split) == sp]
+        for k in ('iou', 'iou_cad'):
+            res['paired'][f'D_beam_sections-A_base/{k}/{sp}'] = paired(
+                [g('fresh_beamsec', k)[i] for i in idx_sp], [g('fresh_base', k)[i] for i in idx_sp])
     res['paired']['D_beam_sections-best_of/iou_cad'] = paired(g('fresh_beamsec', 'iou_cad'), boc)
     res['paired']['D_beam_sections-best_of/iou'] = paired(g('fresh_beamsec', 'iou'), bo)
     return res
@@ -102,6 +127,10 @@ def skills():
         res['qwen38_32k_posthoc'] = {t: {'iou_cad_16k': mean(col(f'qwen38-27b/{t}')),
                                          'iou_cad_32k': mean([T[f'qwen38-27b/{t}'][p].get('iou_cad') or 0 for p in P])}
                                      for t in ('skills', 'code')}
+    for c in C:  # validity-gated IoU(CAD) where validity is recorded
+        if all('cad_valid' in C[c][p] for p in P):
+            res['conditions'][c]['iou_cad_valid_gated'] = mean(
+                [(C[c][p].get('iou_cad') or 0) if C[c][p].get('cad_valid') and C[c][p].get('cad_built') else 0 for p in P])
     pol = [C['no-llm-policy/skills'][p].get('trial_evaluations') or 0 for p in P]
     res['policy_trial_evaluations_mean'] = mean(pol)
     return res

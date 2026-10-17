@@ -4,7 +4,8 @@
   "A_base": {
    "iou": 0.8204151122156168,
    "iou_cad": 0.8214506913017872,
-   "cd": 0.014979234556496959,
+   "cd_measured": 0.015495759886031336,
+   "cd_n": 58,
    "cad_bad": 2,
    "cad_unbuilt": 2,
    "mesh_cad_gap_parts": 0,
@@ -19,12 +20,18 @@
      "iou": 0.7767559609371836,
      "iou_cad": 0.7771610242343265
     }
-   }
+   },
+   "iou_cad_valid_gated": 0.8214506913017872,
+   "gap": -0.0010355790861704087,
+   "gap_from_unbuilt": 0.0,
+   "gap_from_built": -0.0010355790861704087,
+   "cad_built_invalid": 0
   },
   "B_rules": {
    "iou": 0.8767247344504753,
    "iou_cad": 0.8302739376467992,
-   "cd": 0.012798341337381067,
+   "cd_measured": 0.013015262376997697,
+   "cd_n": 59,
    "cad_bad": 6,
    "cad_unbuilt": 4,
    "mesh_cad_gap_parts": 4,
@@ -39,12 +46,18 @@
      "iou": 0.85204719268199,
      "iou_cad": 0.8236194766575072
     }
-   }
+   },
+   "iou_cad_valid_gated": 0.7993340101604459,
+   "gap": 0.046450796803676024,
+   "gap_from_unbuilt": 0.0446694422902248,
+   "gap_from_built": 0.0017813545134512296,
+   "cad_built_invalid": 2
   },
   "C_beam": {
    "iou": 0.8798864202022708,
    "iou_cad": 0.7993622695702044,
-   "cd": 0.012650064230068061,
+   "cd_measured": 0.012864472098374298,
+   "cd_n": 59,
    "cad_bad": 9,
    "cad_unbuilt": 6,
    "mesh_cad_gap_parts": 6,
@@ -59,12 +72,18 @@
      "iou": 0.8541090889963833,
      "iou_cad": 0.8241286694393675
     }
-   }
+   },
+   "iou_cad_valid_gated": 0.7528272582719262,
+   "gap": 0.08052415063206643,
+   "gap_from_unbuilt": 0.07766191514713162,
+   "gap_from_built": 0.002862235484934807,
+   "cad_built_invalid": 3
   },
   "D_beam_sections": {
    "iou": 0.937581278395283,
    "iou_cad": 0.8885738993403738,
-   "cd": 0.010360689157835508,
+   "cd_measured": 0.010536294058815772,
+   "cd_n": 59,
    "cad_bad": 5,
    "cad_unbuilt": 3,
    "mesh_cad_gap_parts": 4,
@@ -79,7 +98,12 @@
      "iou": 0.9468136483702094,
      "iou_cad": 0.9177325435007441
     }
-   }
+   },
+   "iou_cad_valid_gated": 0.856278561487391,
+   "gap": 0.04900737905490922,
+   "gap_from_unbuilt": 0.03008690844825297,
+   "gap_from_built": 0.018920470606656248,
+   "cad_built_invalid": 2
   },
   "best_of_C_and_sections": {
    "iou": 0.9525092565676015,
@@ -161,6 +185,114 @@
    "wins": 52,
    "losses": 4,
    "sign_p": 1.1008055578187737e-11
+  },
+  "B_rules-A_base/iou_cad_valid_gated": {
+   "diff": -0.022116681141341254,
+   "ci_lo": -0.09955489226309269,
+   "ci_hi": 0.04996864390669573,
+   "alpha": 0.05,
+   "wins": 39,
+   "losses": 7,
+   "sign_p": 1.831543272601266e-06
+  },
+  "B_rules-A_base/cad_gain_minus_mesh_gain": {
+   "diff": -0.04748637588984643,
+   "ci_lo": -0.10545122485938656,
+   "ci_hi": -0.0027931826822093623,
+   "alpha": 0.05,
+   "wins": 21,
+   "losses": 20,
+   "sign_p": 1.0
+  },
+  "C_beam-B_rules/iou_cad_valid_gated": {
+   "diff": -0.04650675188851967,
+   "ci_lo": -0.12236582226598372,
+   "ci_hi": 0.01648896977880209,
+   "alpha": 0.05,
+   "wins": 24,
+   "losses": 6,
+   "sign_p": 0.001430906355381012
+  },
+  "C_beam-B_rules/cad_gain_minus_mesh_gain": {
+   "diff": -0.0340733538283904,
+   "ci_lo": -0.09729369019204455,
+   "ci_hi": 0.026435620534169358,
+   "alpha": 0.05,
+   "wins": 10,
+   "losses": 23,
+   "sign_p": 0.03508203336969018
+  },
+  "D_beam_sections-C_beam/iou_cad_valid_gated": {
+   "diff": 0.10345130321546477,
+   "ci_lo": 0.029170437024929895,
+   "ci_hi": 0.1820046731305852,
+   "alpha": 0.05,
+   "wins": 38,
+   "losses": 4,
+   "sign_p": 5.65314621780999e-08
+  },
+  "D_beam_sections-C_beam/cad_gain_minus_mesh_gain": {
+   "diff": 0.03151677157715721,
+   "ci_lo": -0.04399298071646627,
+   "ci_hi": 0.10912235676945548,
+   "alpha": 0.05,
+   "wins": 13,
+   "losses": 26,
+   "sign_p": 0.05325191409792751
+  },
+  "D_beam_sections-A_base/iou_cad_valid_gated": {
+   "diff": 0.03482787018560385,
+   "ci_lo": -0.05696834492977671,
+   "ci_hi": 0.12134263867855503,
+   "alpha": 0.05,
+   "wins": 50,
+   "losses": 6,
+   "sign_p": 1.0182093779231849e-09
+  },
+  "D_beam_sections-A_base/cad_gain_minus_mesh_gain": {
+   "diff": -0.050042958141079626,
+   "ci_lo": -0.10915905536804486,
+   "ci_hi": -0.003295835840224872,
+   "alpha": 0.05,
+   "wins": 10,
+   "losses": 32,
+   "sign_p": 0.0009406740282429382
+  },
+  "D_beam_sections-A_base/iou/benchA": {
+   "diff": 0.06427464492630675,
+   "ci_lo": 0.03835037836728442,
+   "ci_hi": 0.09614806542157002,
+   "alpha": 0.05,
+   "wins": 26,
+   "losses": 1,
+   "sign_p": 4.172325134277344e-07
+  },
+  "D_beam_sections-A_base/iou_cad/benchA": {
+   "diff": -0.006325103189244239,
+   "ci_lo": -0.11205608215002472,
+   "ci_hi": 0.07331618593783804,
+   "alpha": 0.05,
+   "wins": 24,
+   "losses": 3,
+   "sign_p": 4.9233436584472656e-05
+  },
+  "D_beam_sections-A_base/iou/benchE": {
+   "diff": 0.1700576874330258,
+   "ci_lo": 0.08155838166854966,
+   "ci_hi": 0.2768394085435466,
+   "alpha": 0.05,
+   "wins": 29,
+   "losses": 0,
+   "sign_p": 3.725290298461914e-09
+  },
+  "D_beam_sections-A_base/iou_cad/benchE": {
+   "diff": 0.1405715192664175,
+   "ci_lo": 0.024659194451347212,
+   "ci_hi": 0.2614510855857368,
+   "alpha": 0.05,
+   "wins": 28,
+   "losses": 1,
+   "sign_p": 1.1175870895385742e-07
   },
   "D_beam_sections-best_of/iou_cad": {
    "diff": -0.0136054096745632,

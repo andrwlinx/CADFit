@@ -86,15 +86,20 @@ def main():
     ap.add_argument('--mem-cap-gb', type=float, default=None,
                     help='address-space cap per scoring worker; a part over it is recorded as judge_error')
     ap.add_argument('--out', default=os.path.join(RUNS, 'agentsk_scores.json'))
+    ap.add_argument('--toolsets', nargs='+', default=['skills', 'code'])
+    ap.add_argument('--models', nargs='+', default=None, help='default: every MODELS key (the declared panel)')
+    ap.add_argument('--policy-dir', default=os.path.join(RUNS, 'agentsk_policy'),
+                    help="'' to leave the policy out; references are always added")
     a = ap.parse_args()
     parts = study_parts(a.stl_dir)
     conds, meta, jobs = {}, {}, []
     # The declared panel (ledger A-004 x A-003), whether or not a run produced anything:
     # a model whose server never came up scores 0 on every part instead of vanishing.
-    for key in sorted(MODELS):
-        for toolset in ('skills', 'code'):
+    for key in sorted(a.models or MODELS):
+        for toolset in a.toolsets:
             conds[f'{key}/{toolset}'] = os.path.join(RUNS, a.tag, key, toolset)
-    conds['no-llm-policy/skills'] = os.path.join(RUNS, 'agentsk_policy')
+    if a.policy_dir:
+        conds['no-llm-policy/skills'] = a.policy_dir
     extra = [d for d in glob.glob(os.path.join(RUNS, a.tag, '*', '*'))
              if os.path.isdir(d) and os.path.relpath(d, os.path.join(RUNS, a.tag)) not in conds]
     if extra:
