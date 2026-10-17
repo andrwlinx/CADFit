@@ -8,8 +8,8 @@
 | F3 | real fit_revolve + section_extrude; `code` toolset | `.venv/bin/python -m pytest -q tests/test_agent_skills.py` | MUST | ✅ |
 | F4 | skills on real fresh parts via a scripted no-LLM policy | `.venv/bin/python agent/scripted_skills_policy.py --smoke && test -f /tmp/agentsk_policy/summary.json` | MUST | ✅ |
 | F5 | ORCD harness: vLLM env, per-model serve config, Slurm episode runner; smoke with one model | `ssh orcd test -f /orcd/pool/007/a_lin/cadfit/bench/runs/agentsk_smoke/gptoss-20b/summary.json` | MUST | ✅ |
-| F6 | study: models × {skills, code} × 20 parts, scored | `ssh orcd 'cd /orcd/pool/007/a_lin/cadfit && test -f bench/runs/agentsk_scores.json'` | MUST | ⬜ |
-| F7 | report: tables, tool-use stats, figure | `.venv/bin/python bench/agent_skills_report.py && test -f bench/AGENT_SKILLS_RESULTS.md` | SHOULD | ⬜ |
+| F6 | study: models × {skills, code} × 20 parts, scored | `ssh orcd 'cd /orcd/pool/007/a_lin/cadfit && test -f bench/runs/agentsk_scores.json'` | MUST | ✅ |
+| F7 | report: tables, tool-use stats, figure | `.venv/bin/python bench/agent_skills_report.py && test -f bench/AGENT_SKILLS_RESULTS.md` | SHOULD | ✅ |
 
 ## Run record
 <!-- one line per rung attempt: command, exit code, artifact, fix attempts used -->
@@ -20,6 +20,9 @@
 - F4: smoke exit 0 on the first 3 study parts (00046097 0.781, 00095369 0.899, 00140273 0.894 agent-visible IoU; 34-247 s, 16-19 calls, within 40 calls / 30 min); slowest calls fit_revolve ~50 s, off-axis extract_sketch ~22 s. 0 fixes. F0-F3 green.
 - F5: 4 smoke attempts (gpt-oss-20b, 1 part, both toolsets). Fixes: (1) vLLM venv on system python3.12 lacked Python.h → uv-managed Python; (2) FlashInfer JIT sampler needs nvcc → cuda module + VLLM_USE_FLASHINFER_SAMPLER=0; (3) bwrap cannot rebind / on GPU nodes → ns_sandbox fallback (A-018); (4) cold cadquery import 88 s → warm-up in job; (5) gpt-oss tool-name residue → clean_tool_name (A-021). Attempt 4: summary.json exists, 2/2 episodes, skills IoU 0.727 in 8 calls, code-toolset add_code ran in the sandbox. Acceptance path corrected to <tag>/<model>/summary.json. Local tests 13/13 also pass on ORCD CPU nodes.
 - Sweep rounds 1-2 (Codex): 9 + 3 semantic undeclared; fixes committed 9fba247, bd18460 and after. Post-sweep fixes found while verifying on ORCD (executor-verified only): mount source canonicalization in ns_sandbox (workdir under /tmp was bound empty; `mount -c`), toolsets test now asserts add_code builds; a silent replay crash retried once (A-035). On a GPU node: 15/15 tests, spine 0.9182 with workdir in /tmp and in pool, sandbox probe (pool write, remount rw, network blocked). Scorer + report smoke on agentsk_smoke: declared panel scored, missing = 0, replay IoU(CAD) 0.7270.
+
+- F6: 6 models x {skills, code} x 20 parts + no-LLM policy run on ORCD H200s; scored by job 26132382 (`agentsk_score.py --jobs 8 --mem-cap-gb 25`), exit 0, `bench/runs/agentsk_scores.json`, 0 judge errors. Fix attempts: 3 (pool OOM -> per-worker cap + uncapped rescore; uncapped rescore hit 90 min -> GT containment chunk scaled by triangle count). Check exit 0.
+- F7: `agent_skills_report.py` run on ORCD (transcripts live there), exit 0, `bench/AGENT_SKILLS_RESULTS.md` + `bench/figures/agent_skills_iou_cad.png`; post-hoc 32k Qwen3.8 section (A-038) from `agentsk_sens_scores.json`. Check exit 0.
 
 ## Deferred
 - Loft/sweep (`analyze_sweep_loft.py`) as a skill — exists only behind CADFIT_SWEEP_LOFT; low hit rate on CADBench.

@@ -119,6 +119,20 @@ def main():
                  f' | {tot["add_code"] / n:.1f} | {tot["add_candidate"] / n:.1f} | '
                  f'{sum(err.values())}/{sum(tot.values())} |')
 
+    sens = os.path.join(os.path.dirname(a.scores), 'agentsk_sens_scores.json')
+    if os.path.exists(sens):  # post-hoc (A-038): Qwen3.8 with a 32k per-turn token cap
+        T = json.load(open(sens))['conditions']
+        L += ['', '## Post-hoc sensitivity: qwen38-27b with a 32k per-turn token cap (A-038)', '',
+              'Not part of the declared study; the 16k rows above are the result.', '',
+              '| toolset | IoU(CAD) 16k | IoU(CAD) 32k | 32k − 16k [95% CI] | stops (32k) |', '|---|---|---|---|---|']
+        for t in ('skills', 'code'):
+            c = f'qwen38-27b/{t}'
+            s32 = [T[c][p].get('iou_cad') or 0.0 for p in parts]
+            d, lo, hi = paired_ci(s32, col(c, 'iou_cad'))
+            st = collections.Counter(T[c][p].get('stop') for p in parts)
+            L.append(f'| {t} | {mean(col(c, "iou_cad")):.4f} | {mean(s32):.4f} | {d:+.4f} [{lo:+.4f}, {hi:+.4f}] | '
+                     + ', '.join(f'{k} {v}' for k, v in st.most_common()) + ' |')
+
     L += ['', '## Caveats', '',
           '- One episode per (model, toolset, part); no repeat variance (deferred). Confidence intervals: paired '
           'percentile bootstrap over parts (10,000 resamples, seed 0) — part sampling only (A-028). '
