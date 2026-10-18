@@ -1,3 +1,20 @@
+\section{Arm configurations}
+\label{app:arms}
+All arms: \texttt{--max-iterations 1 --seed 0}, one part per process, frozen code snapshot per arm (\texttt{bench/run\_parallel\_arms.sh}).
+\begin{center}
+\small
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{10.5cm}@{}}
+\toprule
+arm & flags added to the defaults \\
+\midrule
+A base & none (defaults: slice fallback fix, candidate identity in pruning, IoU validity check, refinement guard, volume/solid caching, persistent pool, lossless CD sweep, at most 200 loops per slice) \\
+B rules & \texttt{--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400} \\
+C beam & B + \texttt{--beam 4 --keep-history} (\texttt{--keep-history} only skips deleting intermediate files after the run) \\
+D sections & B + \texttt{--beam 4 --section-extrude} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
 \section{Agent harness details}
 \label{app:harness}
 \paragraph{Sandbox.} Agent-written code and the replay of every final program run in a sandbox with no network and writes confined to the episode folder: bubblewrap where available; otherwise an unprivileged user namespace in which every mount is remounted read-only and verified (the sandbox refuses to run if any mount stays writable), temporary directories are replaced by empty file systems, the episode folder is bound back read-write, and all capabilities are dropped with no-new-privileges set.
@@ -12,6 +29,28 @@
 
 \paragraph{Prompts.} The three system prompts differ only in the tool paragraph and the strategy phrase.
 \input{generated/prompts.tex}
+
+\section{Agent study: validity-gated scores and win/loss counts}
+\label{app:agents_extra}
+\begin{table}[h]
+\centering
+\small
+\caption{Validity-gated \ioug{} (0 unless the program builds and is OpenCascade-valid) and win--loss counts of the skills condition against code, pipeline D and the unrestricted policy (tie threshold $10^{-9}$). Pipeline D \ioug{} on these parts: \agentPipeSecGated; unrestricted policy \policyGated; budget-matched policy \policyMatchedGated.}
+\label{tab:agents_extra}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+model & \ioug{} code & \ioug{} skills & W--L vs code & W--L vs pipeline D & W--L vs unrestricted \\
+\midrule
+Gemma-4-31B & \mGemmaCodeGated & \mGemmaSkillsGated & \mGemmaVsCodeWins--\mGemmaVsCodeLosses & \mGemmaVsPipeWins--\mGemmaVsPipeLosses & \mGemmaVsPolicyWins--\mGemmaVsPolicyLosses \\
+Qwen3.6-35B-A3B & \mQwenSixCodeGated & \mQwenSixSkillsGated & \mQwenSixVsCodeWins--\mQwenSixVsCodeLosses & \mQwenSixVsPipeWins--\mQwenSixVsPipeLosses & \mQwenSixVsPolicyWins--\mQwenSixVsPolicyLosses \\
+gpt-oss-120b & \mGptBigCodeGated & \mGptBigSkillsGated & \mGptBigVsCodeWins--\mGptBigVsCodeLosses & \mGptBigVsPipeWins--\mGptBigVsPipeLosses & \mGptBigVsPolicyWins--\mGptBigVsPolicyLosses \\
+Devstral-S-2-24B & \mDevstralCodeGated & \mDevstralSkillsGated & \mDevstralVsCodeWins--\mDevstralVsCodeLosses & \mDevstralVsPipeWins--\mDevstralVsPipeLosses & \mDevstralVsPolicyWins--\mDevstralVsPolicyLosses \\
+gpt-oss-20b & \mGptSmallCodeGated & \mGptSmallSkillsGated & \mGptSmallVsCodeWins--\mGptSmallVsCodeLosses & \mGptSmallVsPipeWins--\mGptSmallVsPipeLosses & \mGptSmallVsPolicyWins--\mGptSmallVsPolicyLosses \\
+Qwen3.8-27B & \mQwenEightCodeGated & \mQwenEightSkillsGated & \mQwenEightVsCodeWins--\mQwenEightVsCodeLosses & \mQwenEightVsPipeWins--\mQwenEightVsPipeLosses & \mQwenEightVsPolicyWins--\mQwenEightVsPolicyLosses \\
+\bottomrule
+\end{tabular}}
+\end{table}
 
 \section{Tool use}
 \label{app:tools}

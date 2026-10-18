@@ -1,0 +1,27 @@
+{
+ "persistent_cq": {
+  "median_call_s": 1.54,
+  "import_cadquery_s": 1.37,
+  "source": "bench/REPORT3.md \u00a73 finding 2"
+ },
+ "objective_case": {
+  "part": "00053793",
+  "search_believed": 0.954,
+  "strict_judge": 0.982,
+  "source": "bench/REPORT3.md \u00a73 finding 1"
+ },
+ "area_filter_case": {
+  "part": "00140273",
+  "plane": "x=0",
+  "profiles_dropped": 67,
+  "old_threshold": 0.001,
+  "new_threshold": 1e-06,
+  "source": "implement-stage/ASSUMPTIONS.md A-023; SILENT_ASSUMPTION_SWEEP.json round 1"
+ },
+ "revolve_split_case": {
+  "mesh": "tests/meshes/shaft.stl",
+  "before": 0.408,
+  "after": 0.994,
+  "source": "implement-stage/ASSUMPTIONS.md A-016; tests/test_agent_skills.py"
+ }
+}

@@ -32,10 +32,10 @@ def write(name, lines):
 def defects():
     D = json.load(open(os.path.join(ROOT, 'results', 'defect_cases.json')))['cases']
     keep = [c for c in D if c.get('case_identified', True)]
-    L = ['\\begin{tabular}{@{}' + ''.join('>{\\raggedright\\arraybackslash}p{%s}' % w for w in ('3.4cm', '3.4cm', '2.4cm', '2.6cm', '3.0cm')) + '@{}}', '\\toprule',
-         'defect & code path / fix & case & before & after \\\\', '\\midrule']
+    L = ['\\begin{tabular}{@{}' + ''.join('>{\\raggedright\\arraybackslash}p{%s}' % w for w in ('3.6cm', '2.2cm', '1.6cm', '2.4cm', '2.4cm', '2.6cm')) + '@{}}', '\\toprule',
+         'defect & origin & case & before & after & in the fresh arms \\\\', '\\midrule']
     for c in keep:
-        L.append(' & '.join(tex(c[k]) for k in ('defect', 'code_path', 'case', 'before', 'after')) + ' \\\\')
+        L.append(' & '.join(tex(c[k]) for k in ('short', 'provenance', 'case', 'before', 'after', 'status_in_fresh_arms')) + ' \\\\')
     L += ['\\bottomrule', '\\end{tabular}']
     write('defects.tex', L)
 

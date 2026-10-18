@@ -102,23 +102,23 @@ def main():
     fig.tight_layout()
     fig.savefig(os.path.join(HERE, 'hero.pdf'))
 
-    fig, axs = plt.subplots(1, 2, figsize=(5.0, 2.4), sharey=True)
+    fig, axs = plt.subplots(1, 2, figsize=(5.2, 2.5), sharey=True)
     for ax, (lab, arm) in zip(axs, arms[2:]):
-        x = [S[arm][p]['iou'] for p in parts]
-        y = [S[arm][p].get('iou_cad') or 0.0 for p in parts]
-        bad = [not (S[arm][p].get('cad_built') and S[arm][p].get('cad_valid')) for p in parts]
+        rec = [S[arm][p] for p in parts]
+        kind = ['unbuilt' if not r.get('cad_built') else ('invalid' if not r.get('cad_valid') else 'valid') for r in rec]
+        x = [r.get('iou') or 0.0 for r in rec]
+        y = [r.get('iou_cad') or 0.0 for r in rec]
         ax.plot([0, 1], [0, 1], color='0.7', lw=0.8)
-        ax.scatter([u for u, q in zip(x, bad) if not q], [v for v, q in zip(y, bad) if not q], s=9, color=CAD,
-                   label='valid program')
-        ax.scatter([u for u, q in zip(x, bad) if q], [v for v, q in zip(y, bad) if q], s=14, marker='x',
-                   color='#b03a2e', label='unbuilt / OCC-invalid')
-        ax.set_title(lab.replace('\n', ' '), fontsize=8)
+        for k, mk, c, sz, nm in (('valid', 'o', CAD, 9, 'built, valid'), ('invalid', 'D', '#d68910', 14, 'built, OCC-invalid'),
+                                 ('unbuilt', 'x', '#b03a2e', 18, 'unbuilt (IoU$_{CAD}$ = 0)')):
+            ax.scatter([u for u, q in zip(x, kind) if q == k], [v for v, q in zip(y, kind) if q == k], s=sz, marker=mk,
+                       color=c, label=nm, linewidths=1)
+        ax.set_title(lab.replace('\n', ' ') + f' ({len(parts)} parts)', fontsize=8)
         ax.set_xlabel('mesh IoU')
-        ax.set_xlim(0.4, 1.01)
-        ax.set_title(lab.replace('\n', ' ') + ' (failures at 0)', fontsize=8)
-        ax.set_ylim(-0.03, 1.01)
+        ax.set_xlim(-0.02, 1.02)
+        ax.set_ylim(-0.03, 1.02)
     axs[0].set_ylabel('IoU(CAD)')
-    axs[0].legend(frameon=False, fontsize=6, loc='upper left')
+    axs[0].legend(frameon=False, fontsize=5.5, loc='upper left')
     fig.tight_layout()
     fig.savefig(os.path.join(HERE, 'mesh_vs_cad.pdf'))
     print('ok')

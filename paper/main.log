@@ -495,25 +495,31 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 30.
  (umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-(sections/0_abstract) (sections/1_introduction [1
-
-]
+(sections/0_abstract) (sections/1_introduction
 File: figures/hero.pdf Graphic file (type pdf)
 <use figures/hero.pdf>
-) (sections/2_related_work
+ [1
+
+]) (sections/2_related_work
 [2]) (sections/3_setting
 LaTeX Font Info:    Trying to load font information for T1+pcr on input line 12
 .
  (t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
-) (generated/defects.tex)) (sections/4_search [3] [4]
+) (generated/defects.tex) [3])
+(sections/4_search [4]
 File: figures/mesh_vs_cad.pdf Graphic file (type pdf)
 <use figures/mesh_vs_cad.pdf>
-) (sections/5_agents [5]) (sections/6_discussion [6])
-(sections/7_reproducibility)
+) (sections/5_agents [5] [6]) (sections/6_discussion
+Underfull \hbox (badness 3861) in paragraph at lines 45--1
+ []\T1/ptm/b/n/10 How the agents use the stages.[] \T1/ptm/m/n/10 Av-er-aged pe
+r model over its episodes, agents call
+ []
+
+) (sections/7_reproducibility)
 Underfull \hbox (badness 10000) in paragraph at lines 2--43
-\T1/ptm/m/n/10 Every num-ber in the pa-per is a macro gen-er-ated from re-sult 
-files:
+\T1/ptm/m/n/10 Numbers, ta-bles and fig-ures are gen-er-ated from re-sult files
+.
  []
 
 
@@ -530,23 +536,51 @@ Underfull \hbox (badness 10000) in paragraph at lines 2--43
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 2--43
-\T1/pcr/m/n/10 agentsk_*scores.json\T1/ptm/m/n/10 ), and \T1/pcr/m/n/10 bench/p
-aper_numbers.py \T1/ptm/m/n/10 writes
+\T1/pcr/m/n/10 agentsk_*scores.json\T1/ptm/m/n/10 ); \T1/pcr/m/n/10 bench/paper
+_numbers.py \T1/ptm/m/n/10 writes the macros in
  []
 
-(main.bbl [7]
-Underfull \hbox (badness 3838) in paragraph at lines 62--67
+
+Underfull \hbox (badness 10000) in paragraph at lines 2--43
+\T1/pcr/m/n/10 paper/numbers.tex\T1/ptm/m/n/10 , \T1/pcr/m/n/10 bench/paper_tab
+les.py \T1/ptm/m/n/10 the gen-er-ated ta-bles, and
+ []
+
+
+Underfull \hbox (badness 1102) in paragraph at lines 2--43
+\T1/ptm/m/n/10 scores come from \T1/pcr/m/n/10 bench/agentsk_score.py \T1/ptm/m
+/n/10 and \T1/pcr/m/n/10 bench/score.py --cad\T1/ptm/m/n/10 . Model
+ []
+
+
+Underfull \hbox (badness 4556) in paragraph at lines 2--43
+\T1/ptm/m/n/10 iden-ti-fiers, serv-ing flags and sam-pling set-tings are in \T1
+/pcr/m/n/10 bench/agentsk_models.py\T1/ptm/m/n/10 ;
+ []
+
+
+Underfull \hbox (badness 4303) in paragraph at lines 2--43
+\T1/ptm/m/n/10 arm flags are in \T1/pcr/m/n/10 bench/run_parallel_arms.sh \T1/p
+tm/m/n/10 (Ap-pendix []A[]); the co-hort man-i-
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [7]
+(main.bbl
+Underfull \hbox (badness 3838) in paragraph at lines 79--84
 []\T1/ptm/m/n/10 Dimitrios Mallis, Ah-met Ser-dar Ka-rad-eniz, Se-bas-tian Cava
 da, Danila Rukhovich, Niki
  []
 
 
-Underfull \hbox (badness 1360) in paragraph at lines 69--74
+Underfull \hbox (badness 1360) in paragraph at lines 86--91
 []\T1/ptm/m/n/10 Mistral AI.  De-vs-tral small 2 (mistralai/Devstral-Small-2-24
 B-Instruct-2512).  []$\T1/pcr/m/n/10 https : / /
  []
 
-[8]) (sections/A_appendix (generated/models.tex
+[8] [9]) (sections/A_appendix (generated/models.tex
 Underfull \hbox (badness 10000) in paragraph at lines 6--7
 []|\T1/pcr/m/n/7 {"top_p": 0.95, "top_k": 64,
  []
@@ -635,18 +669,18 @@ Underfull \hbox (badness 10000) in paragraph at lines 11--12
  []
 
 )
-Underfull \vbox (badness 5036) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [9]
-(generated/prompts.tex [10])
-Underfull \hbox (badness 6658) in paragraph at lines 18--19
+ [10]
+(generated/prompts.tex [11])
+Underfull \hbox (badness 6658) in paragraph at lines 57--58
 \T1/ptm/m/n/10 Tool calls per episode in the skills toolset, over the 20 episod
 es of each model
  []
 
-(generated/tools.tex) [11] (generated/per_part_arms.tex [12])
-(generated/per_part_agents.tex)) [13] (main.aux)
+(generated/tools.tex) [12] (generated/per_part_arms.tex [13])
+(generated/per_part_agents.tex)) [14] (main.aux)
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 67BA1E86C21CBC85FBACAB6493D9201F;2218.
+(rerunfilecheck)             Checksum: A74B9792F7318247CA8AF5BBC860BF1C;2689.
  )
-Output written on main.xdv (13 pages, 105472 bytes).
+Output written on main.xdv (14 pages, 115440 bytes).

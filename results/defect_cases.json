@@ -8,7 +8,10 @@
    "case": "smoke 00053793",
    "before": "search-internal IoU 0.954",
    "after": "strict judge 0.982",
-   "source": "bench/REPORT3.md \u00a73 finding 1"
+   "source": "bench/REPORT3.md \u00a73 finding 1",
+   "provenance": "upstream CADFit",
+   "short": "Search objective alpha-wraps concatenated candidate meshes before IoU",
+   "status_in_fresh_arms": "fixed from arm B on (exact-union scoring); arm A keeps it"
   },
   {
    "id": "judge_cavity_fill",
@@ -17,7 +20,10 @@
    "case": "00344388 (beam); 00014841 (rules)",
    "before": "0.9758; 0.9102",
    "after": "0.9862; 0.9475",
-   "source": "RESEARCH_REVIEW.md F1; review-stage/AUTO_REVIEW.md Actions 1"
+   "source": "RESEARCH_REVIEW.md F1; review-stage/AUTO_REVIEW.md Actions 1",
+   "provenance": "our extension (body-wise union)",
+   "short": "Body-wise union fills internal cavities",
+   "status_in_fresh_arms": "fixed in judge for all arms"
   },
   {
    "id": "program_not_executed",
@@ -26,7 +32,10 @@
    "case": "p3test2 beam 00706786; 00409618; 00014841",
    "before": "00706786 scored 0.980 as valid",
    "after": "1/4 solids OCC-invalid; 00409618 2/33 invalid; 00014841 beam program does not build (Null TopoDS_Shape)",
-   "source": "RESEARCH_REVIEW.md F2; review-stage/AUTO_REVIEW.md Actions 2"
+   "source": "RESEARCH_REVIEW.md F2; review-stage/AUTO_REVIEW.md Actions 2",
+   "provenance": "our extension (exact-union scoring)",
+   "short": "Scored mesh is a boolean of cached solids; final program never run",
+   "status_in_fresh_arms": "evaluation now replays every program"
   },
   {
    "id": "self_intersecting_loft",
@@ -35,7 +44,10 @@
    "case": "one loft candidate; 00399282",
    "before": "greedy believed 0.998",
    "after": "true score 0.776; 15 of 85 loft/sweep candidates rejected on 00399282",
-   "source": "bench/REPORT3.md \u00a75.1 item 2"
+   "source": "bench/REPORT3.md \u00a75.1 item 2",
+   "provenance": "our extension (loft/sweep candidates)",
+   "short": "Self-intersecting lofts pass validity checks but cancel volume",
+   "status_in_fresh_arms": "loft/sweep not used in any fresh arm"
   },
   {
    "id": "remeasure_multibody_wrap",
@@ -44,7 +56,10 @@
    "case": "heatsink 00965166",
    "before": "0.978 composition replaced by 0.878 single extrusion",
    "after": "composition kept",
-   "source": "bench/REPORT3.md \u00a75.1 item 1"
+   "source": "bench/REPORT3.md \u00a75.1 item 1",
+   "provenance": "upstream CADFit",
+   "short": "Final re-measure alpha-wraps multi-body results, triggering a worse fallback",
+   "status_in_fresh_arms": "fixed from arm B on (per-body exact union)"
   },
   {
    "id": "stl_roundtrip_crack",
@@ -54,7 +69,10 @@
    "before": "0.756",
    "after": "0.840",
    "source": "bench/REPORT3.md \u00a75.3 item 1",
-   "case_identified": false
+   "case_identified": false,
+   "provenance": "our extension (exact-union export)",
+   "short": "Exact-union exports crack on STL round trip",
+   "status_in_fresh_arms": "fixed from arm B on"
   },
   {
    "id": "silent_slice_loss",
@@ -63,7 +81,10 @@
    "case": "smoke set",
    "before": "7 slices dropped on 4 smoke parts",
    "after": "0 dropped",
-   "source": "bench/REPORT3.md \u00a73 finding 3"
+   "source": "bench/REPORT3.md \u00a73 finding 3",
+   "provenance": "upstream CADFit (with current trimesh)",
+   "short": "Section fallback throws; slices silently dropped",
+   "status_in_fresh_arms": "fixed in all arms (default on)"
   },
   {
    "id": "success_on_crash",
@@ -72,7 +93,10 @@
    "case": "smoke run with a mid-run edit",
    "before": "reported 5/5 successful",
    "after": "3 parts had crashed; only the strict judge catches it",
-   "source": "bench/REPORT3.md \u00a73 finding 4 and \u00a75.1 item 3"
+   "source": "bench/REPORT3.md \u00a73 finding 4 and \u00a75.1 item 3",
+   "provenance": "upstream CADFit (run summary)",
+   "short": "Run summary counts crashed parts as successful",
+   "status_in_fresh_arms": "harness trusts only the external judge"
   }
  ]
 }

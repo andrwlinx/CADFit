@@ -258,6 +258,15 @@
    "losses": 32,
    "sign_p": 0.0009406740282429382
   },
+  "D_beam_sections-C_beam/iou/benchA": {
+   "diff": 0.022685157012198184,
+   "ci_lo": 0.004667514109764907,
+   "ci_hi": 0.050649968152585725,
+   "alpha": 0.05,
+   "wins": 13,
+   "losses": 4,
+   "sign_p": 0.049041748046875
+  },
   "D_beam_sections-A_base/iou/benchA": {
    "diff": 0.06427464492630675,
    "ci_lo": 0.03835037836728442,
@@ -266,6 +275,15 @@
    "wins": 26,
    "losses": 1,
    "sign_p": 4.172325134277344e-07
+  },
+  "D_beam_sections-C_beam/iou_cad/benchA": {
+   "diff": 0.08481938547896214,
+   "ci_lo": -0.036071317754200784,
+   "ci_hi": 0.21229408590105148,
+   "alpha": 0.05,
+   "wins": 14,
+   "losses": 2,
+   "sign_p": 0.004180908203125
   },
   "D_beam_sections-A_base/iou_cad/benchA": {
    "diff": -0.006325103189244239,
@@ -276,6 +294,15 @@
    "losses": 3,
    "sign_p": 4.9233436584472656e-05
   },
+  "D_beam_sections-C_beam/iou/benchE": {
+   "diff": 0.09270455937382614,
+   "ci_lo": 0.036160804775550434,
+   "ci_hi": 0.1714734342438954,
+   "alpha": 0.05,
+   "wins": 25,
+   "losses": 2,
+   "sign_p": 5.647540092468262e-06
+  },
   "D_beam_sections-A_base/iou/benchE": {
    "diff": 0.1700576874330258,
    "ci_lo": 0.08155838166854966,
@@ -284,6 +311,15 @@
    "wins": 29,
    "losses": 0,
    "sign_p": 3.725290298461914e-09
+  },
+  "D_beam_sections-C_beam/iou_cad/benchE": {
+   "diff": 0.09360387406137659,
+   "ci_lo": -0.012490429041693996,
+   "ci_hi": 0.2030927875891426,
+   "alpha": 0.05,
+   "wins": 25,
+   "losses": 3,
+   "sign_p": 2.744048833847046e-05
   },
   "D_beam_sections-A_base/iou_cad/benchE": {
    "diff": 0.1405715192664175,
@@ -312,5 +348,9 @@
    "losses": 11,
    "sign_p": 0.8388197422027588
   }
+ },
+ "B_rules-A_base_gated_losses": {
+  "n": 7,
+  "to_zero": 5
  }
 }

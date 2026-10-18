@@ -88,9 +88,14 @@ def fresh():
         dc = [x - y for x, y in zip(g(arms[a], 'iou_cad'), g(arms[b], 'iou_cad'))]
         dm = [x - y for x, y in zip(g(arms[a], 'iou'), g(arms[b], 'iou'))]
         res['paired'][f'{a}-{b}/cad_gain_minus_mesh_gain'] = paired(dc, dm)
+    ga, gb = gated(arms['B_rules']), gated(arms['A_base'])
+    worse = [i for i in range(len(parts)) if ga[i] < gb[i] - 1e-9]
+    res['B_rules-A_base_gated_losses'] = {'n': len(worse), 'to_zero': sum(ga[i] == 0.0 for i in worse)}
     for sp in ('benchA', 'benchE'):
         idx_sp = [i for i, p in enumerate(parts) if split_of(p, split) == sp]
         for k in ('iou', 'iou_cad'):
+            res['paired'][f'D_beam_sections-C_beam/{k}/{sp}'] = paired(
+                [g('fresh_beamsec', k)[i] for i in idx_sp], [g('fresh_beamkh', k)[i] for i in idx_sp])
             res['paired'][f'D_beam_sections-A_base/{k}/{sp}'] = paired(
                 [g('fresh_beamsec', k)[i] for i in idx_sp], [g('fresh_base', k)[i] for i in idx_sp])
     res['paired']['D_beam_sections-best_of/iou_cad'] = paired(g('fresh_beamsec', 'iou_cad'), boc)
@@ -152,9 +157,50 @@ def refine():
     return out
 
 
+def extra():
+    """Gemma repeats (A-042), code+section_extrude ablation (A-041), budget-matched policy (A-040).
+    Inputs: bench/runs/agentsk_{rep1,rep2,ab}_scores.json (bench/agentsk_score.py, see paper reproducibility)"""
+    need = {k: os.path.join(RUNS, f'agentsk_{k}_scores.json') for k in ('rep1', 'rep2', 'ab')}
+    if not all(os.path.exists(v) for v in need.values()):
+        return None
+    S = json.load(open(os.path.join(RUNS, 'agentsk_scores.json')))
+    P, C = S['parts'], S['conditions']
+    X = {k: json.load(open(v))['conditions'] for k, v in need.items()}
+    cad = lambda conds, c: [conds[c][p].get('iou_cad') or 0.0 for p in P]  # noqa: E731
+    gated = lambda conds, c: [(conds[c][p].get('iou_cad') or 0.0) if conds[c][p].get('cad_built') and conds[c][p].get('cad_valid')  # noqa: E731
+                              else 0.0 for p in P]
+    runs = [mean(cad(C, 'gemma4-31b/skills')), mean(cad(X['rep1'], 'gemma4-31b/skills')),
+            mean(cad(X['rep2'], 'gemma4-31b/skills'))]
+    a = 0.05 / len(MODELS)
+    pol = 'no-llm-policy/skills'  # in agentsk_ab_scores.json this is the budget-matched policy
+    trials = [X['ab'][pol][p].get('trial_evaluations') or 0 for p in P]
+    calls = [X['ab'][pol][p].get('tool_calls') or 0 for p in P]
+    return {
+        'n_parts': len(P),
+        'episodes_with_result': {
+            'rep1': sum(X['rep1']['gemma4-31b/skills'][p].get('stop') != 'missing' for p in P),
+            'rep2': sum(X['rep2']['gemma4-31b/skills'][p].get('stop') != 'missing' for p in P),
+            'codesec': sum(X['ab']['gemma4-31b/codesec'][p].get('stop') != 'missing' for p in P),
+            'policy_matched': sum(X['ab'][pol][p].get('stop') != 'missing' for p in P)},
+        'gemma_skills_runs': runs,
+        'gemma_codesec': mean(cad(X['ab'], 'gemma4-31b/codesec')),
+        'gemma_codesec_gated': mean(gated(X['ab'], 'gemma4-31b/codesec')),
+        'codesec_vs_code': paired(cad(X['ab'], 'gemma4-31b/codesec'), cad(C, 'gemma4-31b/code')),
+        'skills_vs_codesec': paired(cad(C, 'gemma4-31b/skills'), cad(X['ab'], 'gemma4-31b/codesec')),
+        'policy_matched': mean(cad(X['ab'], pol)),
+        'policy_matched_gated': mean(gated(X['ab'], pol)),
+        'policy_matched_trials_mean': mean(trials),
+        'policy_matched_calls_mean': mean(calls),
+        'vs_matched_bonf': {m: paired(cad(C, f'{m}/skills'), cad(X['ab'], pol), a) for m in MODELS},
+        'vs_matched_nominal': {m: paired(cad(C, f'{m}/skills'), cad(X['ab'], pol)) for m in MODELS}}
+
+
 if __name__ == '__main__':
     os.makedirs(OUT, exist_ok=True)
-    for name, fn in (('fresh_arms', fresh), ('agent_skills', skills), ('refine_study', refine)):
+    for name, fn in (('fresh_arms', fresh), ('agent_skills', skills), ('refine_study', refine), ('agent_extra', extra)):
         r = fn()
+        if r is None:
+            print(name, 'skipped (inputs pending)')
+            continue
         json.dump(r, open(os.path.join(OUT, name + '.json'), 'w'), indent=1)
         print(name, 'written')
