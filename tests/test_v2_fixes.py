@@ -152,3 +152,15 @@ def test_collinear_arc_is_emitted_as_line():
     with pytest.raises((StdFail_NotDone, Exception)):
         cq.Workplane('XY').moveTo(*start).threePointArc(mid, end)
     assert not _arc_degenerate((1.0, 0.0), (0.0, 1.0), (-1.0, 0.0))
+
+
+def test_repair_pass_keeps_valid_solids(tmp_path):
+    """The repair suffix leaves valid solids as they are (same volume, still valid)."""
+    import json
+    import subprocess
+    prog = tmp_path / 'p.py'
+    prog.write_text("import cadquery as cq\nresult = cq.Workplane('XY').box(1, 1, 1).add("
+                    "cq.Workplane('XY').box(0.5, 0.5, 2))\n" + exec_verify.REPAIR)
+    r = json.loads(subprocess.run([sys.executable, os.path.join(ROOT, 'bench', 'cad_replay.py'), str(prog),
+                                   str(tmp_path / 'p.stl')], capture_output=True, text=True).stdout.splitlines()[-1])
+    assert r['built'] and r['valid'] and r['n_solids'] == 2, r

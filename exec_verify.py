@@ -95,6 +95,36 @@ _ADD = re.compile(r'^(\s*)(result|final_result)\s*=\s*(\w+)\.add\((\w+)\)\s*$')
 _CUT = re.compile(r'^(\s*)(result|final_result)\s*=\s*(\w+)\.cut\((\w+)\)\s*$')
 
 
+# Repair pass (lit scan: repair before discarding): appended to a program whose
+# shape builds but is OCC-invalid. Each invalid solid is replaced by its
+# ShapeFix_Shape result when that is valid, else dropped; the variant is judged
+# like any other, so a repair that loses geometry loses on IoU (00365747: an
+# invalid solid held ~60% of the volume) and one that keeps it wins (00232213:
+# valid 0.8725 vs the fused rewrite's 0.8609).
+REPAIR = '''
+
+def _repair(res):
+    from OCP.ShapeFix import ShapeFix_Shape
+    shape = res.val() if isinstance(res, cq.Workplane) else res
+    if isinstance(res, cq.Workplane) and len(res.vals()) > 1:
+        shape = cq.Compound.makeCompound([v for v in res.vals() if isinstance(v, cq.Shape)])
+    keep = []
+    for s in shape.Solids():
+        if not s.isValid():
+            f = ShapeFix_Shape(s.wrapped)
+            f.Perform()
+            s = cq.Shape.cast(f.Shape())
+            if not s.isValid():
+                continue
+        keep.extend(s.Solids())
+    return cq.Workplane('XY').newObject([cq.Compound.makeCompound(keep)])
+
+
+result = _repair(final_result if 'final_result' in globals() else result)
+final_result = result
+'''
+
+
 def fuse_program(src):
     """Rewrite a generated program so solids are fused/cut, not compounded."""
     out, n = [], 0
@@ -182,6 +212,13 @@ def verify(program, target, out_dir, alternatives=()):
     with ProcessPoolExecutor(max_workers=min(len(jobs), 6)) as ex:
         futs = {k: ex.submit(execute, *v) for k, v in jobs.items()}
         recs = {k: f.result() for k, f in futs.items()}
+        # Second pass: a repaired copy of every program that builds an invalid shape.
+        rep = {}
+        for name in [k for k, r in recs.items() if r.get('built') and not r.get('valid')]:
+            py = os.path.join(out_dir, f'exec_{name}_repair.py')
+            open(py, 'w').write(uniq[name] + REPAIR)
+            rep[name + '_repair'] = ex.submit(execute, py, os.path.join(out_dir, f'exec_{name}_repair.stl'), target)
+        recs.update({k: f.result() for k, f in rep.items()})
     pick = choose(recs)
     for name, same in alias.items():
         recs[name] = {'same_program_as': same}
