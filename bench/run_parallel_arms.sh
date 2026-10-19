@@ -14,7 +14,7 @@ ARMS=${@:-base speed}
 JOBS=${JOBS:-7}
 MIN_FREE_GB=${MIN_FREE_GB:-80}
 MAX_RUNS_GB=${MAX_RUNS_GB:-60}
-PY=.venv/bin/python
+PY=${PY:-.venv/bin/python}
 COMMON="--max-iterations 1 --seed 0"
 export CADFIT_MAX_PARALLEL=$JOBS
 # A part killed mid-run (timeout, OOM) otherwise loses its block-buffered log:
@@ -33,6 +33,12 @@ flags_for() {
     beam)    echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4" ;;
     beamkh)  echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --keep-history" ;;
     beamsec) echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --section-extrude" ;;
+    # CADFit++ v2 (2026-10-18). d0 = beamsec flags run from the pre-v2 code snapshot
+    # (bench/runs/<tag>_d0_code from git e260397); dx = + execution-verified delivery
+    # only; v2 = + original-mesh sections/scoring + shared geometry fixes.
+    d0)      echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --section-extrude" ;;
+    dx)      echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --section-extrude --exec-verify" ;;
+    v2)      echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --section-extrude --exec-verify --section-original --score-original --shared-fixes" ;;
     basegwn) echo "--gwn-repair" ;;
     beamgwn) echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --gwn-repair" ;;
     *) return 1 ;;
@@ -55,6 +61,8 @@ run_part() {  # <arm> <part>
   [ -f "$OUT/$part/final_iou.json" ] && return 0
   disk_ok "$arm/$part" || return 1
   echo "[$(date +%T)] start $arm/$part"
+  # dx isolates execution-verified delivery: stock revolve axes (no origin fix).
+  if [ "$arm" = dx ]; then export CADFIT_FIX_REVOLVE_ORIGIN=0; else unset CADFIT_FIX_REVOLVE_ORIGIN; fi
   # Per-part log: concurrent parts would interleave in one file.
   mkdir -p "$OUT/logs"
   CADFIT_PROFILE="$OUT/profile.jsonl" $PY "bench/runs/${TAG}_${arm}_code/run_pipeline.py" \

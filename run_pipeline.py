@@ -842,7 +842,11 @@ def run_analysis_steps(stl_path, output_folder, n_slices=5, delta=0.05, normaliz
     if ANALYSIS_OPTS.get('section_extrude'):
         # Step 6c: whole-part section extrusions (one per axis).
         print(f"\n▭ Step 6c: Section-extrusion candidates...")
-        cmd6c = [sys.executable, _release_script("section_extrude.py"), stl_path,
+        # The main pass may run on a decimated copy (see process_single_stl);
+        # --section-original sections the undecimated input instead.
+        sec_src = ANALYSIS_OPTS.get('original_of', {}).get(stl_path, stl_path) \
+            if ANALYSIS_OPTS.get('section_original') else stl_path
+        cmd6c = [sys.executable, _release_script("section_extrude.py"), sec_src,
                  "--out", f"{output_folder}/section_extrude_candidates.json"]
         if normalize:
             cmd6c.append("--normalize")
@@ -850,8 +854,10 @@ def run_analysis_steps(stl_path, output_folder, n_slices=5, delta=0.05, normaliz
 
     # Step 7: Run greedy CAD reconstruction with precomputed operations
     print(f"\n🏗️  Step 7/7: Running greedy CAD reconstruction with precomputed operations...")
+    score_gt = ANALYSIS_OPTS.get('original_of', {}).get(stl_path, stl_path) \
+        if ANALYSIS_OPTS.get('score_original') else stl_path
     cmd7 = [sys.executable, _release_script("greedy_search.py"),
-            loops_split_path, loops_split_revolve_path, stl_path,
+            loops_split_path, loops_split_revolve_path, score_gt,
             translation_analysis_folder, revolve_analysis_folder,
             "--output-folder", output_folder,
             "--num-workers", str(inner_workers)]
@@ -1005,6 +1011,8 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
     # beam's 0.51 model on 00001945.
     reference_gt_path = stl_path
     stl_path = _decimate_input_if_needed(stl_path, output_folder)
+    if stl_path != reference_gt_path:
+        ANALYSIS_OPTS.setdefault('original_of', {})[stl_path] = reference_gt_path
 
     # If the input STL is non-watertight or composed of multiple bodies, save
     # the alpha-wrap surface alongside the outputs — that is what `iou.py`
@@ -1291,6 +1299,32 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
             if sp and os.path.exists(sp):
                 _copy_script_stripped(sp, final_script_output)
             final_iou = best_candidate_iou
+    exec_record = None
+    if ANALYSIS_OPTS.get('exec_verify'):
+        # Deliver what the program builds: execute it (and its fused variant),
+        # judge each executed shape against the target, keep the best valid one.
+        import exec_verify
+        print(f"\n🧪 EXEC-VERIFY: executing the final program")
+        try:
+            alts = [('search', f"{output_folder}/best_greedy_parallel.py")]
+            ev_ops = [op for op in (evaluated if os.path.exists(eval_path) else [])
+                      if op.get('script_path') and op.get('op', 'add') != 'cut']
+            if ev_ops:
+                alts.append(('single', max(ev_ops, key=lambda o: o.get('iou', 0.0))['script_path']))
+            exec_record = exec_verify.verify(os.path.abspath(final_script_output),
+                                             os.path.abspath(reference_gt_path),
+                                             os.path.abspath(f"{output_folder}/exec_verify"), alts)
+        except Exception as e:  # noqa: BLE001
+            exec_record = {'chosen': None, 'error': f'{type(e).__name__}: {e}'}
+        for k, v in (exec_record.get('variants') or {}).items():
+            print(f"   {k}: built={v.get('built')} valid={v.get('valid')} iou_exec={v.get('iou_exec', 0):.6f}"
+                  f" {v.get('error') or ''}")
+        if exec_record.get('chosen'):
+            _copy_script_stripped(exec_record['program'], final_script_output)
+            shutil.copy2(exec_record['stl'], final_output)
+            print(f"   ✓ delivered '{exec_record['chosen']}' program and its executed shape")
+            final_iou = exec_record['variants'][exec_record['chosen']]['iou_exec']
+        log_event("exec_verify", stl=stl_path, record=exec_record)
     iou_duration = time.time() - iou_start
 
     print(f"✓ Final IoU: {final_iou:.6f}  (CPU boolean took {iou_duration:.2f}s)")
@@ -1309,6 +1343,8 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
         "num_iterations": iteration,
         "duration": total_duration
     }
+    if exec_record is not None:
+        iou_data["exec_verify"] = exec_record
     with open(iou_output_path, 'w') as f:
         json.dump(iou_data, f, indent=2)
     print(f"✓ IoU data saved to {iou_output_path}")
@@ -1469,6 +1505,20 @@ def main():
     parser.add_argument('--detect-directions', action=argparse.BooleanOptionalAction, default=False,
                         help='Also slice along Gauss-map extrusion directions not covered by X/Y/Z or '
                              'planar caps (detect_directions.py).')
+    parser.add_argument('--exec-verify', action=argparse.BooleanOptionalAction, default=False,
+                        help='CADFit++: after search, execute the final program (and a variant with real '
+                             'boolean fuse/cut instead of .add() compounds), judge each executed shape against '
+                             'the target and deliver the best valid one (exec_verify.py).')
+    parser.add_argument('--section-original', action=argparse.BooleanOptionalAction, default=False,
+                        help='CADFit++: build section-extrusion proposals from the undecimated input, not '
+                             'from the decimated copy (decimation tripled the thickness of thin plates).')
+    parser.add_argument('--score-original', action=argparse.BooleanOptionalAction, default=False,
+                        help='CADFit++: score the main greedy/beam search against the undecimated input.')
+    parser.add_argument('--shared-fixes', action=argparse.BooleanOptionalAction, default=False,
+                        help='CADFit++: the geometry fixes the agent skills already had, in the pipeline: '
+                             'even-odd loop nesting, loops down to 1e-4 area (stock drops < 1e-3), revolve '
+                             'profiles densified at the split. (The revolve-axis origin fix is default-on: '
+                             'CADFIT_FIX_REVOLVE_ORIGIN=0 restores stock.)')
     parser.add_argument('--seed', type=int, default=None,
                         help='Seed for all analysis-stage sampling (default: unseeded, as stock).')
     args = parser.parse_args()
@@ -1485,6 +1535,13 @@ def main():
     ANALYSIS_OPTS['event_slices'] = args.event_slices
     ANALYSIS_OPTS['sweep_loft'] = args.sweep_loft
     ANALYSIS_OPTS['section_extrude'] = args.section_extrude
+    ANALYSIS_OPTS['section_original'] = args.section_original
+    ANALYSIS_OPTS['score_original'] = args.score_original
+    ANALYSIS_OPTS['exec_verify'] = args.exec_verify
+    if args.shared_fixes:
+        os.environ['CADFIT_EVEN_ODD'] = '1'
+        os.environ['CADFIT_MIN_LOOP_AREA'] = '1e-4'
+        os.environ['CADFIT_DENSIFY_REVOLVE_SPLIT'] = '1'
     os.environ['CADFIT_SECTION_EXTRUDE'] = '1' if args.section_extrude else '0'
     os.environ['CADFIT_SWEEP_LOFT'] = '1' if args.sweep_loft else '0'
     os.environ['CADFIT_CUT_PHASE'] = '1' if args.cut_phase else '0'

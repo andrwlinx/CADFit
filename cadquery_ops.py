@@ -457,8 +457,12 @@ def generate_cadquery_revolve_script(sketch_actions: List[str], axis_start: Tupl
                 script_lines.append(f"{sketch_name} = {sketch_name}.{operation}")
     
     # Add revolve operation
-    axis_start_str = f"({round(axis_start[0], 3)+1e-3}, {round(axis_start[1], 3)+1e-3}, {round(axis_start[2], 3)+1e-3})"
-    axis_end_str = f"({round(axis_end[0], 3)+1e-3}, {round(axis_end[1], 3)+1e-3}, {round(axis_end[2], 3)+1e-3})"
+    # Stock nudges both endpoints by 1e-3 on all three local axes (keeps the
+    # axis off a profile edge lying on it). The local z nudge also lifts the
+    # axis out of the sketch plane; with the origin fix it is in-plane only.
+    dz = 0.0 if os.environ.get('CADFIT_FIX_REVOLVE_ORIGIN', '1') == '1' else 1e-3
+    axis_start_str = f"({round(axis_start[0], 3)+1e-3}, {round(axis_start[1], 3)+1e-3}, {round(axis_start[2], 3)+dz})"
+    axis_end_str = f"({round(axis_end[0], 3)+1e-3}, {round(axis_end[1], 3)+1e-3}, {round(axis_end[2], 3)+dz})"
     
     script_lines.append(f"result = {sketch_name}.revolve(angleDegrees={round(angle_degrees, 3)}, axisStart={axis_start_str}, axisEnd={axis_end_str})")
     script_lines.append(f"cq.exporters.export(result, '{output_stl_path}')")

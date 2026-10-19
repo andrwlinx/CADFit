@@ -40,6 +40,12 @@ SETS = [
     # and select() also excludes any file_id already on disk in another set.
     ('fresh', 'benchA', 'hard', 30),
     ('fresh', 'benchE', 'hard', 30),
+    # Held-out cohort 2 (2026-10-18): drawn after the CADFit++ v2 repairs were
+    # developed on test/dev/smoke/beamfix5/fresh; excludes every file_id on disk
+    # in any earlier set (including fresh) and is not inspected before the
+    # frozen evaluation.
+    ('fresh2', 'benchA', 'hard', 150),
+    ('fresh2', 'benchE', 'hard', 150),
 ]
 
 
@@ -72,23 +78,27 @@ def build_index(splits, workers=8):
     return index
 
 
-def _on_disk(exclude_set):
-    """file_ids already downloaded into any other set folder."""
+def _on_disk(exclude_set, later=()):
+    """file_ids already downloaded into any other set folder (except sets
+    listed after `exclude_set` in SETS, so adding a cohort never changes an
+    earlier one's selection)."""
     ids = set()
     for d in os.listdir(ROOT):
-        if d != exclude_set and os.path.isdir(os.path.join(ROOT, d)):
+        if d != exclude_set and d not in later and os.path.isdir(os.path.join(ROOT, d)):
             ids.update(f.split('_')[0] for f in os.listdir(os.path.join(ROOT, d)) if f.endswith('.stl'))
     return ids
 
 
 def select(index, seed):
     taken, out = set(), {}
-    seen = _on_disk('fresh')
+    order = list(dict.fromkeys(name for name, *_ in SETS))
+    fresh_sets = [nm for nm in order if nm.startswith('fresh')]
+    seen = {nm: _on_disk(nm, later=order[order.index(nm) + 1:]) for nm in fresh_sets}
     for name, split, tier, n in SETS:
         pool = sorted((r for r in index[split] if r['label'] == tier), key=lambda r: r['file_id'])
         random.Random(f'{seed}:{split}:{tier}').shuffle(pool)
         picked = [r for r in pool if (split, r['file_id']) not in taken
-                  and not (name == 'fresh' and r['file_id'].split('_')[0] in seen)][:n]
+                  and not (name in seen and r['file_id'].split('_')[0] in seen[name])][:n]
         taken.update((split, r['file_id']) for r in picked)
         out.setdefault(name, []).extend(dict(r, split=split) for r in picked)
     return out

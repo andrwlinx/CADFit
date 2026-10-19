@@ -14,6 +14,12 @@ PARTS = {
     # Revolve: stepped shaft along Z.
     'shaft': (cq.Workplane('XZ').polyline([(0, 0), (0.6, 0), (0.6, 0.5), (0.35, 0.5), (0.35, 1.6), (0, 1.6)])
               .close().revolve(360, (0, 0, 0), (0, 1, 0))),
+    # The same shaft next to a block, so after normalization its axis plane is
+    # off the origin (y != 0): catches revolve axes built without the plane origin.
+    'shaft_offset': (cq.Workplane('XZ').polyline([(0, 0), (0.6, 0), (0.6, 0.5), (0.35, 0.5), (0.35, 1.6), (0, 1.6)])
+                     .close().revolve(360, (0, 0, 0), (0, 1, 0))
+                     .union(cq.Workplane('XY').box(0.6, 0.8, 0.3, centered=(True, False, False))
+                            .translate((0, 0.7, 0)))),
     # Two extrusions along different axes: an L-bracket (section_extrude along Y recovers it whole).
     'bracket': (cq.Workplane('XZ').polyline([(0, 0), (1.6, 0), (1.6, 0.25), (0.25, 0.25), (0.25, 1.2), (0, 1.2)])
                 .close().extrude(-0.9)),

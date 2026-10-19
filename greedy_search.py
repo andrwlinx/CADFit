@@ -173,7 +173,7 @@ def create_extrusion_from_translation(entry: Dict, translation_data: Dict, sketc
 # it and drops the profile's corner on the axis (a stepped shaft revolved to 40%
 # of its volume). Densifying the half-loop fixes it. Off by default so pipeline
 # runs stay comparable with earlier ones; agent/skills.py turns it on.
-DENSIFY_REVOLVE_SPLIT = False
+DENSIFY_REVOLVE_SPLIT = os.environ.get('CADFIT_DENSIFY_REVOLVE_SPLIT') == '1'
 
 
 def _densify_closed_2d(pts: np.ndarray, step: float) -> np.ndarray:
@@ -373,8 +373,15 @@ def create_revolve_from_analysis(entry: Dict, revolve_configs: List[Dict], sketc
         if not insts:
             continue
 
-        # Axis in plane-local coords (existing convention used by the script generator)
-        mp_local = inverse_matrix @ mp_for_axis
+        # Axis in plane-local coords: CadQuery's revolve(axisStart, axisEnd) takes
+        # workplane coordinates, i.e. relative to the plane origin. Stock omitted
+        # the origin, which lifted the axis off the sketch plane by the plane's
+        # offset (00958981 sketch 10: axis at z=0.267 for a plane at z=0.133).
+        # CADFIT_FIX_REVOLVE_ORIGIN=0 restores the stock transform.
+        if os.environ.get('CADFIT_FIX_REVOLVE_ORIGIN', '1') == '1':
+            mp_local = inverse_matrix @ (np.asarray(mp_for_axis) - np.asarray(origin, dtype=float))
+        else:
+            mp_local = inverse_matrix @ mp_for_axis
         ad_local = inverse_matrix @ ad_for_axis
         ad_local = ad_local / (np.linalg.norm(ad_local) + 1e-12)
         axis_start = mp_local

@@ -32,6 +32,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cad_tools import ROOT, TOOL_SPECS, CadWorkspace, _r  # noqa: E402,F401  (ROOT: CADFit on sys.path)
+from cad_tools import EXEC as _EXEC  # noqa: E402
 import analyze_loop_translation as _alt  # noqa: E402
 import analyze_revolve_axis as _ara  # noqa: E402
 import cadquery_ops as _cqo  # noqa: E402
@@ -123,6 +124,8 @@ class SkillWorkspace(CadWorkspace):
         self._slices = {}   # rounded (normal, offset) -> first reply, so a repeated call is free and identical
         self._fits = {}     # (skill, sketch/axis key) -> candidate ids
         self._surf = None
+        self._failed = []   # candidates proposed but not built, for the reply (tools v2 reports them)
+        self._fail_by_key = {}
 
     def _surface_points(self):
         if self._surf is None:
@@ -134,9 +137,11 @@ class SkillWorkspace(CadWorkspace):
         stl = os.path.join(self.workdir, f'{stem}.stl')
         py = os.path.join(self.workdir, f'{stem}.py')
         if not _cqo.execute_cadquery_script(script, stl, py) or not os.path.exists(stl):
+            self._failed.append(f'{stem}: CadQuery build failed')
             return None
         m = iou._cached_manifold(stl, False)
         if m is None or m.volume() <= 1e-9:
+            self._failed.append(f'{stem}: built shape is not a closed solid')
             return None
         vi, vc = (m ^ self.gt).volume(), m.volume()
         lo, hi = np.array(m.bounding_box()[:3]), np.array(m.bounding_box()[3:])
@@ -146,6 +151,15 @@ class SkillWorkspace(CadWorkspace):
                                     vol_frac_of_target=round(vc / self.gt_vol, 4),
                                     bbox_min=_r(lo), bbox_max=_r(hi), _stl=stl, _py=py, _m=m)
         return cid
+
+    def _fail_report(self, key):
+        """Tools v2: proposals that were made but did not build, so 'no candidate'
+        is not mistaken for 'no fit'."""
+        if not _EXEC:
+            return {}
+        f = self._fail_by_key.setdefault(key, list(self._failed))
+        self._failed = []
+        return {'proposals_failed_to_build': f} if f else {}
 
     def _public(self, cid):
         return dict(id=cid, **{k: v for k, v in self.candidates[cid].items() if not k.startswith('_')})
@@ -173,7 +187,53 @@ class SkillWorkspace(CadWorkspace):
                                        'planes_at': f['planes_at']} for f in flat],
                 'note': 'other_directions: off-axis directions with many faces parallel to them (walls an '
                         'extrusion along them would make). flat_face_normals: normals of the flat faces, with '
-                        'the offsets of their planes. Any of these is a good extract_sketch normal.'}
+                        'the offsets of their planes. Any of these is a good extract_sketch normal.',
+                **(self._revolve_hints() if _EXEC else {})}
+
+    def _turns_into_itself(self, c, a, tol=0.01):
+        """Surface points rotated 45 and 90 degrees about (c, a) stay on the surface."""
+        pts = self._surface_points()[:1500]
+        q = pts - c
+        tree = getattr(self, '_surf_tree', None)
+        if tree is None:
+            from scipy.spatial import cKDTree
+            tree = self._surf_tree = cKDTree(self._surface_points())
+        for ang in (np.pi / 4, np.pi / 2):
+            K = np.array([[0, -a[2], a[1]], [a[2], 0, -a[0]], [-a[1], a[0], 0]])
+            R = np.eye(3) + np.sin(ang) * K + (1 - np.cos(ang)) * K @ K
+            if tree.query(q @ R.T + c)[0].mean() > tol:
+                return False
+        return True
+
+    def _revolve_hints(self):
+        """Tools v2: axes the whole part may be turned about (two near-equal
+        principal moments of inertia), with the slice that contains each axis,
+        which is what fit_revolve needs."""
+        m = self.gt_mesh
+        try:
+            c = np.asarray(m.center_mass, float)
+            vals, vecs = np.linalg.eigh(np.asarray(m.moment_inertia, float))
+        except Exception:
+            return {}
+        hints = []
+        for k in range(3):
+            others = [vals[j] for j in range(3) if j != k]
+            if abs(others[0] - others[1]) <= 0.03 * max(others):  # symmetric about axis k
+                a = vecs[:, k] / np.linalg.norm(vecs[:, k])
+                if not self._turns_into_itself(c, a):  # equal moments by coincidence (e.g. an L-bracket)
+                    continue
+                # a slice plane containing the axis: normal perpendicular to it
+                ref = np.eye(3)[int(np.argmin(np.abs(a)))]
+                nrm = np.cross(a, ref)
+                nrm /= np.linalg.norm(nrm)
+                hints.append({'axis_point': _r(c), 'axis_direction': _r(a),
+                              'slice_containing_axis': {'normal': _r(nrm), 'offset': round(float(nrm @ c), 3)}})
+        if not hints:
+            return {'revolve_axes': [], 'revolve_note': 'the part as a whole is not rotationally symmetric; '
+                                                        'revolve may still fit single features'}
+        return {'revolve_axes': hints,
+                'revolve_note': 'the part has near rotational symmetry about these axes: extract_sketch with '
+                                'slice_containing_axis, then fit_revolve on its sketches'}
 
     @_quiet
     def extract_sketch(self, normal, offset):
@@ -253,7 +313,7 @@ class SkillWorkspace(CadWorkspace):
             self._fits[key] = ids
         ids = self._fits[key]
         return {'sketch': sketch, 'candidates': [self._public(c) for c in ids],
-                **({} if ids else {'note': 'no extent of this sketch matches the target surface'})}
+                **({} if ids else {'note': 'no extent of this sketch matches the target surface'}), **self._fail_report(key)}
 
     @_quiet
     def fit_revolve(self, sketch):
@@ -292,7 +352,7 @@ class SkillWorkspace(CadWorkspace):
             self._fits[key] = ids
         ids = self._fits[key]
         return {'sketch': sketch, 'candidates': [self._public(c) for c in ids],
-                **({} if ids else {'note': 'no symmetry axis of this sketch revolves into the target'})}
+                **({} if ids else {'note': 'no symmetry axis of this sketch revolves into the target'}), **self._fail_report(key)}
 
     @_quiet
     def section_extrude(self, axis, offset=None):
@@ -317,7 +377,7 @@ class SkillWorkspace(CadWorkspace):
                     ids.append(cid)
             self._fits[key] = ids
         ids = self._fits[key]
-        return {'candidates': [self._public(c) for c in ids],
+        return {**self._fail_report(key), 'candidates': [self._public(c) for c in ids],
                 **({} if ids else {'note': f'no cross-section at {axis}={value:.3f}; the target spans '
                                            f'{lo:.3f} to {hi:.3f} along {axis}'})}
 

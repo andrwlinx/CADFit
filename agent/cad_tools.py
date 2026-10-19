@@ -36,6 +36,12 @@ import iou  # noqa: E402
 
 PY = sys.executable
 _R = 3  # decimals in everything shown to the model
+# Tools v2 (CADFIT_AGENT_EXEC=1): after every model change the assembled
+# CadQuery program is executed (OCC booleans with fuzzy retries, exec_verify.py)
+# and its build/validity status and executed IoU are returned with the reply;
+# the answer is the best executed valid program, not the best mesh model.
+EXEC = os.environ.get('CADFIT_AGENT_EXEC') == '1'
+from exec_verify import HELPERS as _HELPERS  # noqa: E402
 
 
 def _r(x, n=_R):
@@ -114,6 +120,10 @@ class CadWorkspace:
         self.n_code = 0
         self.history = []      # (time, iou, n_steps) after every model change
         self.best = (0.0, [])  # best IoU seen and the steps that gave it
+        self.best_exec = (-1.0, [], False)  # tools v2: best executed (iou, steps, valid)
+        self._exec_cache = {}  # tuple of step ids -> executed record
+        self.n_exec = 0
+        self.deadline = None   # set by the agent loop: tool subprocesses stop there
         if init_script:
             # Start from a pipeline reconstruction: its STL is the solid (what the
             # judge scores), its script is kept for the CadQuery export.
@@ -182,7 +192,100 @@ class CadWorkspace:
         self.history.append((time.time(), s, len(self.steps)))
         if s > self.best[0]:
             self.best = (s, list(self.steps))
+        if EXEC:
+            r = self._exec()
+            if r is not None and r.get('built'):
+                cur = self.best_exec
+                better = ((r['valid'], r['iou']) > (cur[2], cur[0]))
+                if better:
+                    self.best_exec = (r['iou'], list(self.steps), r['valid'])
         return s
+
+    def _time_left(self, cap):
+        if self.deadline is None:
+            return cap
+        return max(1.0, min(cap, self.deadline - time.time()))
+
+    # ---------- executed program (tools v2) ----------
+    def program(self, steps=None, export_name=None):
+        """The CadQuery program of a step list: one function per step, combined
+        with exec_verify's _fuse/_cut (OCC booleans, fuzzy retries)."""
+        steps = self.steps if steps is None else steps
+        parts = ['import cadquery as cq', 'import math', _HELPERS]
+        for i, s in enumerate(steps):
+            parts += [f'def _step_{i}():  # {s["mode"]} {s["source"]}',
+                      textwrap.indent(s['code'], '    ').rstrip(), '    return result', '']
+        body, started = [], False
+        for i, s in enumerate(steps):
+            if not started:
+                if s['mode'] == 'add':
+                    body.append(f'model = _step_{i}()')
+                    started = True
+                else:
+                    body.append(f'# cut _step_{i} skipped (empty model)')
+                continue
+            body.append(f'model = {"_fuse" if s["mode"] == "add" else "_cut"}(model, _step_{i}())')
+        parts += body + ['result = model' if started else 'result = None']
+        if export_name:
+            parts.append(f"cq.exporters.export(result, {export_name!r})")
+        return '\n'.join(parts) + '\n'
+
+    def _exec(self, steps=None):
+        """Execute the assembled program in the sandbox; judge it against the target."""
+        steps = self.steps if steps is None else steps
+        if not steps or not any(s['mode'] == 'add' for s in steps):
+            return None
+        key = tuple(id(s) for s in steps)
+        if key in self._exec_cache:
+            return self._exec_cache[key]
+        self.n_exec += 1
+        tag = f'exec{self.n_exec}'
+        py, stl = (os.path.join(self.workdir, f'{tag}.py'), os.path.join(self.workdir, f'{tag}.stl'))
+        open(py, 'w').write(self.program(steps))
+        rec = {'built': False, 'valid': False, 'iou': 0.0}
+        argv = [PY, os.path.join(ROOT, 'bench', 'cad_replay.py'), py, stl]
+        t = self._time_left(180)
+        try:
+            p = subprocess.run(_sandboxed(self.workdir, argv), capture_output=True, text=True, timeout=t,
+                               cwd=self.workdir)
+            r = json.loads(p.stdout.strip().splitlines()[-1])
+            rec.update(built=r['built'], valid=r['valid'], n_solids=r.get('n_solids'))
+            if r.get('error'):
+                rec['error'] = r['error'].replace(self.workdir + os.sep, '')[:400]
+        except subprocess.TimeoutExpired:
+            rec['error'] = f'program did not finish in {t:.0f}s'
+        except (IndexError, json.JSONDecodeError, KeyError):
+            rec['error'] = 'program crashed the CAD kernel'
+        rec['_m'], rec['_stl'] = None, stl
+        if rec['built'] and os.path.exists(stl):
+            m = iou._cached_manifold(stl, False)
+            if m is not None and m.volume() > 1e-12:
+                rec['iou'], rec['_m'] = self._score(m), m
+            else:  # tessellation not a clean volume: winding-number Monte Carlo judge
+                sys.path.insert(0, os.path.join(ROOT, 'bench'))
+                import score
+                rec['iou'] = float(score.robust_iou(self.gt_stl, stl)['iou'])
+        self._exec_cache[key] = rec
+        return rec
+
+    def _exec_report(self):
+        """What the program builds, for tool replies (tools v2)."""
+        if not EXEC:
+            return {}
+        r = self._exec()
+        if r is None:
+            return {}
+        out = {'program_builds': r['built'], 'program_valid': r['valid'], 'program_iou': round(r['iou'], 4)}
+        if r.get('error'):
+            out['program_error'] = r['error']
+        if r['built'] and not r['valid']:
+            out['note'] = ('the CadQuery program builds an OCC-invalid solid; the answer kept is the best valid '
+                           'program so far')
+        elif not r['built']:
+            out['note'] = 'the CadQuery program fails to build; the answer kept is the best valid program so far'
+        b = self.best_exec
+        out['best_valid_program_iou'] = round(b[0], 4) if b[2] else None
+        return out
 
     def _run_code(self, code, tag, timeout=90):
         stl = os.path.join(self.workdir, f'{tag}.stl')
@@ -194,6 +297,7 @@ class CadWorkspace:
         if os.path.exists(stl):
             os.remove(stl)
         try:
+            timeout = self._time_left(timeout)
             p = subprocess.run(_sandboxed(self.workdir, [PY, py]),
                                capture_output=True, text=True, timeout=timeout, cwd=self.workdir)
         except subprocess.TimeoutExpired:
@@ -218,7 +322,8 @@ class CadWorkspace:
         before = self._score(self._model())
         self.steps.append({'mode': mode, 'source': source, 'code': code, 'm': m})
         after = self._changed()
-        return {'step': len(self.steps) - 1, 'iou_before': round(before, 4), 'iou_after': round(after, 4)}
+        return {'step': len(self.steps) - 1, 'iou_before': round(before, 4), 'iou_after': round(after, 4),
+                **self._exec_report()}
 
     # ---------- tools ----------
     def describe_target(self):
@@ -284,7 +389,8 @@ class CadWorkspace:
         self.steps.append({'mode': mode, 'source': id, 'code': _strip_export(open(c['_py']).read()),
                            'm': c['_m']})
         after = self._changed()
-        return {'step': len(self.steps) - 1, 'iou_before': round(before, 4), 'iou_after': round(after, 4)}
+        return {'step': len(self.steps) - 1, 'iou_before': round(before, 4), 'iou_after': round(after, 4),
+                **self._exec_report()}
 
     def add_code(self, code, mode='add'):
         if mode not in ('add', 'cut'):
@@ -297,7 +403,8 @@ class CadWorkspace:
         before = self._score(self._model())
         self.steps.pop(step)
         after = self._changed()
-        return {'removed': step, 'iou_before': round(before, 4), 'iou_after': round(after, 4)}
+        return {'removed': step, 'iou_before': round(before, 4), 'iou_after': round(after, 4),
+                **self._exec_report()}
 
     def list_steps(self):
         return {'steps': [{'step': i, 'mode': s['mode'], 'source': s['source'],
@@ -310,8 +417,15 @@ class CadWorkspace:
         m = self._model()
         if m is None:
             return {'iou': 0.0, 'note': 'model is empty'}
+        rep = {}
+        if EXEC:  # regions of what the program builds, when it builds a clean volume
+            r = self._exec()
+            rep = self._exec_report()
+            if r is not None and r.get('_m') is not None:
+                m = r['_m']
+                rep['regions_from'] = 'executed program'
         miss, extra = self.gt - m, m - self.gt
-        return {'iou': round(self._score(m), 4),
+        return {**rep, 'iou': round(self._score(m), 4),
                 'model_vol_frac_of_target': round(m.volume() / self.gt_vol, 4),
                 'missing_frac': round(miss.volume() / self.gt_vol, 4),
                 'extra_frac': round(extra.volume() / self.gt_vol, 4),
@@ -352,6 +466,24 @@ class CadWorkspace:
     # ---------- output ----------
     def export(self, out_dir, steps=None):
         """Write the model as STL (exact booleans) and as one CadQuery script."""
+        if EXEC and steps is None:
+            # tools v2: the answer is the best executed program (valid first), and
+            # the STL is what that program builds.
+            steps = self.best_exec[1] if self.best_exec[0] >= 0 else self.best[1]
+            os.makedirs(out_dir, exist_ok=True)
+            open(os.path.join(out_dir, 'agent_model.py'), 'w').write(
+                self.program(steps, export_name='agent_model_cq.stl'))
+            r = self._exec(steps) if steps else None
+            stl = os.path.join(out_dir, 'agent_model.stl')
+            if r is not None and r.get('built') and os.path.exists(r['_stl']):
+                import shutil
+                shutil.copy2(r['_stl'], stl)
+                return stl
+            m = self._model(steps)
+            if m is not None:
+                _mesh_of(m).export(stl)
+                return stl
+            return None
         steps = self.best[1] if steps is None else steps
         os.makedirs(out_dir, exist_ok=True)
         m = self._model(steps)

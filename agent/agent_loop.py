@@ -82,8 +82,15 @@ _LOOK = {'pool': 'look at candidates and sections',
          'codesec': 'read sections to get exact profile shapes and extrude whole cross-sections'}
 
 
+_EXEC_NOTE = """
+
+Your model is also a CadQuery program: after every change it is executed by the CAD kernel, and replies report program_builds, program_valid and program_iou (the IoU of what the program builds). The answer kept is the best valid program, so a step that breaks the program (program_valid false) does not count until you remove or replace it."""
+
+
 def system_prompt(toolset):
-    return _INTRO + _TOOLS[toolset] + _OUTRO.replace('{look}', _LOOK[toolset])
+    from cad_tools import EXEC
+    return (_INTRO + _TOOLS[toolset] + _OUTRO.replace('{look}', _LOOK[toolset])
+            + (_EXEC_NOTE if EXEC else ''))
 
 
 SYSTEM = system_prompt('pool')
@@ -292,6 +299,32 @@ def call_tool(ws, name, args, allowed=None):
         return {'error': f'{type(e).__name__}: {e}'}
 
 
+# Harness v2 (with tools v2): nudge counter reset after every turn with a tool
+# call (v1 never reset it: 3 tool-less replies anywhere in a session ended it),
+# and in-process skills (slicing, fitting) are interrupted at the deadline.
+HARNESS_V2 = os.environ.get('CADFIT_AGENT_EXEC') == '1'
+
+
+def call_tool_until(ws, name, args, allowed, deadline):
+    """call_tool, interrupted by SIGALRM at the session deadline."""
+    import signal
+    left = deadline - time.time()
+    if left <= 0:
+        return {'error': 'session time limit reached'}
+
+    def _alarm(*_):
+        raise TimeoutError('session time limit reached during the tool call')
+    old = signal.signal(signal.SIGALRM, _alarm)
+    signal.setitimer(signal.ITIMER_REAL, left)
+    try:
+        return call_tool(ws, name, args, allowed)
+    except TimeoutError as e:
+        return {'error': str(e)}
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, old)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--gt', required=True)
@@ -326,6 +359,8 @@ def main():
     ws = (CadWorkspace(a.gt, work, a.cands, a.init) if a.toolset == 'pool' else
           SkillWorkspace(a.gt, work) if a.toolset in ('skills', 'codesec') else CadWorkspace(a.gt, work))
     init_iou = ws.best[0]
+    if HARNESS_V2:
+        ws.deadline = t0 + 60 * a.max_minutes  # tool subprocesses stop at the session deadline
     tools = openai_tools(a.toolset)
     tool_names = {t['function']['name'] for t in tools}
     user = (f'Build a CAD model of the target. Budget: {a.max_calls} tool calls.'
@@ -397,6 +432,8 @@ def main():
             log.write(json.dumps(nudge) + '\n')
             continue
         done = False
+        if HARNESS_V2:
+            nudges = 0  # the limit is on consecutive replies without a tool call
         for tc in tcs:
             if time.time() >= deadline:  # tool calls returned at the deadline are not run
                 stop, done = 'time', True
@@ -414,7 +451,8 @@ def main():
             except json.JSONDecodeError as e:
                 args, res = None, {'error': f'arguments are not valid JSON: {e}'}
             if args is not None:
-                res = call_tool(ws, name, args, tool_names)
+                res = (call_tool_until(ws, name, args, tool_names, deadline) if HARNESS_V2
+                       else call_tool(ws, name, args, tool_names))
             txt = fit_json(res, MAX_RESULT_CHARS)
             tm = {'role': 'tool', 'tool_call_id': tc.get('id', ''), 'content': txt}
             messages.append(tm)
@@ -435,6 +473,8 @@ def main():
               'best_iou': ws.best[0], 'n_steps': len(ws.best[1]),
               'sources': [s['source'] for s in ws.best[1]], 'modes': [s['mode'] for s in ws.best[1]],
               'tool_calls': calls, 'stop': stop, 'seconds': round(time.time() - t0, 1),
+              **({'tools': 'v2', 'best_exec_iou': ws.best_exec[0], 'best_exec_valid': ws.best_exec[2],
+                  'n_exec': ws.n_exec} if HARNESS_V2 else {}),
               'usage': usage, 'cost_usd': round(cost, 4), 'stl': stl,
               'iou_trace': [(round(t - t0, 1), round(s, 4), n) for t, s, n in ws.history]}
     json.dump(result, open(os.path.join(a.out, 'result.json'), 'w'), indent=1)

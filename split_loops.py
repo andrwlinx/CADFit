@@ -36,6 +36,10 @@ import numpy as np
 from shapely.geometry import Polygon, Point
 from shapely.errors import TopologicalError
 import warnings
+
+# Loops (and holes) smaller than this are dropped. Stock 0.001 drops real small
+# features: all 67 loops at x=0 of 00140273 (areas 2.2e-4..2.4e-4).
+MIN_LOOP_AREA = float(os.environ.get('CADFIT_MIN_LOOP_AREA', '0.001'))
 warnings.filterwarnings('ignore', category=RuntimeWarning)
 
 
@@ -201,6 +205,24 @@ def group_contained_loops(loops: List[List[List[float]]], origin: List[float], n
     # Sort loops by area (largest first - these are likely outer loops)
     loop_indices = list(range(len(loops)))
     loop_indices.sort(key=lambda i: loop_areas[i], reverse=True)
+
+    if os.environ.get('CADFIT_EVEN_ODD') == '1':
+        # Even-odd nesting (as agent/skills.py): a loop inside an even number of
+        # others is an outer boundary, one inside an odd number is a hole of its
+        # innermost container. Stock makes every contained loop a hole of the
+        # outermost one, so a boss standing inside a pocket was cut away.
+        inside = {i: [j for j in loop_indices if j != i and loop_areas[j] > loop_areas[i] and contained(i, j)]
+                  for i in loop_indices}
+        prof = {}
+        for i in loop_indices:
+            d = len(inside[i])
+            if d % 2 == 0:
+                prof[i] = [i]
+            else:
+                parents = [j for j in inside[i] if len(inside[j]) == d - 1]
+                if parents:
+                    prof.setdefault(min(parents, key=lambda j: loop_areas[j]), []).append(i)
+        return [[loops[k] for k in ks] for ks in prof.values()]
     
     groups = []
     used_indices = set()
@@ -280,8 +302,8 @@ def split_loops(input_path: str, output_path: str, merge: bool = False, group_co
             elif len(loops) == 1:
                 # Single loop, just add it with area
                 loop_area = compute_loop_area(loops[0], origin, normal, xdir)
-                # Skip loops with area < 0.001
-                if loop_area < 0.001:
+                # Skip loops with area < MIN_LOOP_AREA (stock 0.001; CADFIT_MIN_LOOP_AREA)
+                if loop_area < MIN_LOOP_AREA:
                     continue
                 entry_out = {
                     'origin': origin,
@@ -299,7 +321,7 @@ def split_loops(input_path: str, output_path: str, merge: bool = False, group_co
                     # Compute area for each loop in the group
                     group_areas = [compute_loop_area(loop, origin, normal, xdir) for loop in group]
                     # Filter out loops with area < 0.001
-                    filtered_group = [(loop, area) for loop, area in zip(group, group_areas) if area >= 0.001]
+                    filtered_group = [(loop, area) for loop, area in zip(group, group_areas) if area >= MIN_LOOP_AREA]
                     if not filtered_group:
                         continue
                     filtered_loops = [loop for loop, area in filtered_group]
@@ -356,8 +378,8 @@ def split_loops(input_path: str, output_path: str, merge: bool = False, group_co
             for loop in loops:
                 total_loops += 1
                 loop_area = compute_loop_area(loop, origin, normal, xdir)
-                # Skip loops with area < 0.001
-                if loop_area < 0.001:
+                # Skip loops with area < MIN_LOOP_AREA (stock 0.001; CADFIT_MIN_LOOP_AREA)
+                if loop_area < MIN_LOOP_AREA:
                     continue
                 entry_out = {
                     'origin': origin,

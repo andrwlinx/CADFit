@@ -121,6 +121,21 @@ def test_revolve_recovers_shaft(tmp_path):
     assert abs(best['axis_direction'][2]) > 0.999  # the shaft's axis is Z
 
 
+def test_revolve_recovers_offset_shaft(tmp_path):
+    """Shaft whose axis plane is not through the origin (y = -0.35 after normalization)."""
+    w = ws('shaft_offset', tmp_path)
+    raw = trimesh.load(os.path.join(MESHES, 'shaft_offset.stl'), force='mesh')
+    lo, hi = raw.bounds
+    y_axis = float((0.0 - 0.5 * (lo[1] + hi[1])) * 2.0 / (hi - lo).max())  # source axis y = 0, normalized
+    sk = w.extract_sketch([0, 1, 0], y_axis)['sketches']
+    sid = max(sk, key=lambda s: s['outer_area'])['id']
+    out = w.fit_revolve(sid)
+    assert out['candidates'], out
+    best = max(out['candidates'], key=lambda c: c['precision'] * c['coverage'])
+    assert best['precision'] > 0.97, best          # the revolved shaft lies inside the target
+    assert abs(best['axis_point'][1] - y_axis) < 0.02, best  # axis lies in the sketch plane
+
+
 def test_section_extrude_bracket(tmp_path):
     w = ws('bracket', tmp_path)
     out = w.section_extrude('y')
