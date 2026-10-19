@@ -457,12 +457,34 @@ def generate_cadquery_revolve_script(sketch_actions: List[str], axis_start: Tupl
                 script_lines.append(f"{sketch_name} = {sketch_name}.{operation}")
     
     # Add revolve operation
-    # Stock nudges both endpoints by 1e-3 on all three local axes (keeps the
-    # axis off a profile edge lying on it). The local z nudge also lifts the
-    # axis out of the sketch plane; with the origin fix it is in-plane only.
-    dz = 0.0 if os.environ.get('CADFIT_FIX_REVOLVE_ORIGIN', '1') == '1' else 1e-3
-    axis_start_str = f"({round(axis_start[0], 3)+1e-3}, {round(axis_start[1], 3)+1e-3}, {round(axis_start[2], 3)+dz})"
-    axis_end_str = f"({round(axis_end[0], 3)+1e-3}, {round(axis_end[1], 3)+1e-3}, {round(axis_end[2], 3)+dz})"
+    # Stock rounds both endpoints to 3 decimals and nudges them by 1e-3 on all
+    # three local axes. The in-plane part can push the axis across the profile
+    # (profiles are written to 5 decimals: 00729452 sketch 1 crossed by 6e-4, so
+    # OCC refused the revolve), and the out-of-plane part tilts the axis off the
+    # sketch plane. With CADFIT_FIX_REVOLVE_ORIGIN (default on): 6 decimals, no
+    # out-of-plane nudge, and an in-plane shift that puts the whole profile on one side.
+    if os.environ.get('CADFIT_FIX_REVOLVE_ORIGIN', '1') == '1':
+        import re as _re
+        a0 = np.asarray(axis_start, float)[:2]
+        a1 = np.asarray(axis_end, float)[:2]
+        d = a1 - a0
+        d = d / (np.linalg.norm(d) + 1e-12)
+        nrm = np.array([-d[1], d[0]])
+        pts = [tuple(map(float, m)) for a in sketch_actions for m in
+               _re.findall(r'(?:moveTo|lineTo|threePointArc)\(\(?\s*([-0-9.e]+)\s*,\s*([-0-9.e]+)', a)]
+        sd = np.array([(np.asarray(q) - a0) @ nrm for q in pts]) if pts else np.zeros(0)
+        side = float(np.sign(sd[np.argmax(np.abs(sd))])) if len(sd) else 0.0
+        # Move the axis just past the profile's deepest crossing (the split points
+        # sit on it within ~3e-5), toward the side with no profile.
+        pen = float(max(0.0, (-side * sd).max())) if len(sd) else 0.0
+        shift = -(pen + 1e-6) * side * nrm
+        s0 = (a0[0] + shift[0], a0[1] + shift[1], float(axis_start[2]))
+        s1 = (a1[0] + shift[0], a1[1] + shift[1], float(axis_end[2]))
+        axis_start_str = f"({s0[0]:.6f}, {s0[1]:.6f}, {s0[2]:.6f})"
+        axis_end_str = f"({s1[0]:.6f}, {s1[1]:.6f}, {s1[2]:.6f})"
+    else:
+        axis_start_str = f"({round(axis_start[0], 3)+1e-3}, {round(axis_start[1], 3)+1e-3}, {round(axis_start[2], 3)+1e-3})"
+        axis_end_str = f"({round(axis_end[0], 3)+1e-3}, {round(axis_end[1], 3)+1e-3}, {round(axis_end[2], 3)+1e-3})"
     
     script_lines.append(f"result = {sketch_name}.revolve(angleDegrees={round(angle_degrees, 3)}, axisStart={axis_start_str}, axisEnd={axis_end_str})")
     script_lines.append(f"cq.exporters.export(result, '{output_stl_path}')")
