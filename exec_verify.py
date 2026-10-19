@@ -39,6 +39,10 @@ import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+# Arm code snapshots (bench/runs/<tag>_<arm>_code) hold only the top-level
+# modules; bench/ then comes from the checkout the runner starts in.
+if not os.path.exists(os.path.join(HERE, 'bench', 'cad_replay.py')):
+    HERE = os.getcwd()
 VALID_MARGIN = 0.005   # an invalid program must beat the best valid one by this much
 TIMEOUT = 600
 
