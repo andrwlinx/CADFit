@@ -1,0 +1,1123 @@
+diff --git a/NARRATIVE_REPORT.md b/NARRATIVE_REPORT.md
+index 4d38549..648c9e3 100644
+--- a/NARRATIVE_REPORT.md
++++ b/NARRATIVE_REPORT.md
+@@ -130,7 +130,8 @@ Results (mean IoU(CAD), 20 parts, failures = 0; `results/agent_skills.json`):
+   different; within ~0.05. (Not an equivalence test.)
+ - LLM vs no-LLM policy: Gemma +0.083 (95% CI [+0.013, +0.188]; Bonferroni [0.000, +0.233]; sign test
+   10–4, p = 0.18) — not significant after correction. Others: −0.080 … +0.044, none significant.
+-  So the skills, not the LLM's planning, explain most of the gain at this sample size.
++  At this sample size the study does not distinguish LLM planning from the scripted policy: the
++  skills-vs-code gap is shown, any planning contribution is neither shown nor ruled out.
+ - Failure modes: Qwen3.8 at 16k/turn ends 16/20 code episodes with no tool call (thinking exhausts the
+   turn). Post-hoc 32k sensitivity (decided after seeing outcomes; not part of the study): skills
+   0.730 → 0.783, code 0.307 → 0.541. gpt-oss-20b: 3 episodes lost to leaked harmony tokens (HTTP 500).
+diff --git a/agent/agent_loop.py b/agent/agent_loop.py
+index ff3a5ba..8249022 100644
+--- a/agent/agent_loop.py
++++ b/agent/agent_loop.py
+@@ -28,7 +28,7 @@ import urllib.error
+ import urllib.request
+ 
+ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+-from cad_tools import CadWorkspace  # noqa: E402
++from cad_tools import CadWorkspace, run_until  # noqa: E402
+ from skills import SkillWorkspace, openai_tools  # noqa: E402
+ 
+ _INTRO = """You are a CAD engineer. Your job: build a solid CAD model that matches a target 3D part as closely \
+@@ -306,23 +306,9 @@ HARNESS_V2 = os.environ.get('CADFIT_AGENT_EXEC') == '1'
+ 
+ 
+ def call_tool_until(ws, name, args, allowed, deadline):
+-    """call_tool, interrupted by SIGALRM at the session deadline."""
+-    import signal
+-    left = deadline - time.time()
+-    if left <= 0:
+-        return {'error': 'session time limit reached'}
+-
+-    def _alarm(*_):
+-        raise TimeoutError('session time limit reached during the tool call')
+-    old = signal.signal(signal.SIGALRM, _alarm)
+-    signal.setitimer(signal.ITIMER_REAL, left)
+-    try:
+-        return call_tool(ws, name, args, allowed)
+-    except TimeoutError as e:
+-        return {'error': str(e)}
+-    finally:
+-        signal.setitimer(signal.ITIMER_REAL, 0)
+-        signal.signal(signal.SIGALRM, old)
++    """call_tool, interrupted by SIGALRM at the session deadline (cad_tools.run_until)."""
++    res, err = run_until(deadline, call_tool, ws, name, args, allowed)
++    return {'error': err} if err else res
+ 
+ 
+ def main():
+@@ -470,8 +456,8 @@ def main():
+ 
+     stl = ws.export(a.out)
+     result = {'model': a.model, 'toolset': a.toolset, 'gt': a.gt, 'init': a.init, 'init_iou': init_iou,
+-              'best_iou': ws.best[0], 'n_steps': len(ws.best[1]),
+-              'sources': [s['source'] for s in ws.best[1]], 'modes': [s['mode'] for s in ws.best[1]],
++              'best_iou': ws.best[0], 'n_steps': len(ws.answer_steps()),
++              'sources': [s['source'] for s in ws.answer_steps()], 'modes': [s['mode'] for s in ws.answer_steps()],
+               'tool_calls': calls, 'stop': stop, 'seconds': round(time.time() - t0, 1),
+               **({'tools': 'v2', 'best_exec_iou': ws.best_exec[0], 'best_exec_valid': ws.best_exec[2],
+                   'n_exec': ws.n_exec} if HARNESS_V2 else {}),
+diff --git a/agent/cad_tools.py b/agent/cad_tools.py
+index 14aa02a..e641fe5 100644
+--- a/agent/cad_tools.py
++++ b/agent/cad_tools.py
+@@ -44,6 +44,34 @@ EXEC = os.environ.get('CADFIT_AGENT_EXEC') == '1'
+ from exec_verify import HELPERS as _HELPERS  # noqa: E402
+ 
+ 
++class SessionTimeout(BaseException):
++    """Session deadline reached inside a tool. A BaseException so the generic
++    `except Exception` handlers of the geometry stages (axis refinement, slice
++    fallbacks) cannot swallow it and keep working past the deadline."""
++
++
++def run_until(deadline, fn, *args, **kwargs):
++    """fn(*args, **kwargs), interrupted by SIGALRM at `deadline` (epoch seconds).
++    Returns (value, None), or (None, error message) once the deadline passes.
++    The same rule bounds agent episodes and the scripted policy."""
++    import signal
++    left = deadline - time.time()
++    if left <= 0:
++        return None, 'session time limit reached'
++
++    def _alarm(*_):
++        raise SessionTimeout('session time limit reached during the tool call')
++    old = signal.signal(signal.SIGALRM, _alarm)
++    signal.setitimer(signal.ITIMER_REAL, left)
++    try:
++        return fn(*args, **kwargs), None
++    except SessionTimeout as e:
++        return None, str(e)
++    finally:
++        signal.setitimer(signal.ITIMER_REAL, 0)
++        signal.signal(signal.SIGALRM, old)
++
++
+ def _r(x, n=_R):
+     return np.round(np.asarray(x, dtype=float), n).tolist()
+ 
+@@ -121,7 +149,7 @@ class CadWorkspace:
+         self.history = []      # (time, iou, n_steps) after every model change
+         self.best = (0.0, [])  # best IoU seen and the steps that gave it
+         self.best_exec = (-1.0, [], False)  # tools v2: best executed (iou, steps, valid)
+-        self._exec_cache = {}  # tuple of step ids -> executed record
++        self._exec_cache = {}  # program text -> executed record
+         self.n_exec = 0
+         self.deadline = None   # set by the agent loop: tool subprocesses stop there
+         if init_script:
+@@ -235,13 +263,15 @@ class CadWorkspace:
+         steps = self.steps if steps is None else steps
+         if not steps or not any(s['mode'] == 'add' for s in steps):
+             return None
+-        key = tuple(id(s) for s in steps)
++        # Keyed by the program text: it fully determines the executed result,
++        # while step dicts' id()s are reused after remove_step (stale replies).
++        key = self.program(steps)
+         if key in self._exec_cache:
+             return self._exec_cache[key]
+         self.n_exec += 1
+         tag = f'exec{self.n_exec}'
+         py, stl = (os.path.join(self.workdir, f'{tag}.py'), os.path.join(self.workdir, f'{tag}.stl'))
+-        open(py, 'w').write(self.program(steps))
++        open(py, 'w').write(key)
+         rec = {'built': False, 'valid': False, 'iou': 0.0}
+         argv = [PY, os.path.join(ROOT, 'bench', 'cad_replay.py'), py, stl]
+         t = self._time_left(180)
+@@ -464,12 +494,19 @@ class CadWorkspace:
+                 'target': polys(self.gt_mesh), 'model': polys(_mesh_of(m) if m is not None else None)}
+ 
+     # ---------- output ----------
++    def answer_steps(self):
++        """The steps of the delivered answer: under tools v2 the best executed
++        program (valid first), otherwise the best mesh-scored model."""
++        if EXEC and self.best_exec[0] >= 0:
++            return self.best_exec[1]
++        return self.best[1]
++
+     def export(self, out_dir, steps=None):
+         """Write the model as STL (exact booleans) and as one CadQuery script."""
+         if EXEC and steps is None:
+             # tools v2: the answer is the best executed program (valid first), and
+             # the STL is what that program builds.
+-            steps = self.best_exec[1] if self.best_exec[0] >= 0 else self.best[1]
++            steps = self.answer_steps()
+             os.makedirs(out_dir, exist_ok=True)
+             open(os.path.join(out_dir, 'agent_model.py'), 'w').write(
+                 self.program(steps, export_name='agent_model_cq.stl'))
+diff --git a/agent/scripted_skills_policy.py b/agent/scripted_skills_policy.py
+index 9de7b22..acf134f 100644
+--- a/agent/scripted_skills_policy.py
++++ b/agent/scripted_skills_policy.py
+@@ -27,6 +27,7 @@ import time
+ 
+ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+ from skills import SkillWorkspace  # noqa: E402
++from cad_tools import EXEC, run_until  # noqa: E402
+ 
+ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ FRESH = os.path.join(ROOT, 'bench', 'cadbench', 'fresh')
+@@ -43,16 +44,28 @@ class Budget(Exception):
+ 
+ 
+ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3, reserve=8, charge_trials=False,
+-             agent_economy=False):
++             agent_economy=False, reserve_minutes=5.0):
+     t0 = time.time()
+     ws = SkillWorkspace(gt, os.path.join(out, 'work'))
+     calls = []
++    # Same deadline rule as an agent episode under harness v2: tool subprocess
++    # timeouts are capped by the time left, in-process skills are interrupted.
++    deadline = t0 + 60 * max_minutes
++    ws.deadline = deadline
+ 
+     def call(name, assembly=False, **args):
+-        # Analysis may not use the last `reserve` calls: they are kept for assembly.
+-        if len(calls) >= max_calls - (0 if assembly else reserve) or time.time() - t0 > 60 * max_minutes:
++        # Analysis may not use the last `reserve` calls or the last `reserve_minutes`:
++        # they are kept for assembly (an agent assembles as it goes; this policy at the end).
++        until = deadline if assembly else deadline - 60 * reserve_minutes
++        if len(calls) >= max_calls - (0 if assembly else reserve) or time.time() > until:
+             raise Budget()
+-        res = {} if name == 'trial' else getattr(ws, name)(**args)
++        if name == 'trial':
++            res = {}
++        else:
++            res, err = run_until(until, getattr(ws, name), **args)
++            if err:
++                calls.append({'name': name, 'args': args, 't': round(time.time() - t0, 1), 'error': err})
++                raise Budget()
+         calls.append({'name': name, 'args': args, 't': round(time.time() - t0, 1),
+                       'error': res.get('error') if isinstance(res, dict) else None})
+         return res
+@@ -63,9 +76,9 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3
+         cands = sorted(ws.candidates, key=lambda c: -ws.candidates[c]['iou'])
+         if not cands:
+             return
+-        call('add_candidate', assembly=True, id=cands[0])
++        r0 = call('add_candidate', assembly=True, id=cands[0])
+         if agent_economy:
+-            return assemble_interface(cands)
++            return assemble_interface(cands, r0)
+         if charge_trials:
+             return assemble_charged(cands)
+         while True:
+@@ -107,14 +120,17 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3
+                         used.add(c)
+                         improved = True
+ 
+-    def assemble_interface(cands):
++    def assemble_interface(cands, r0):
+         """Agent economy (review round 1): trials go through the agent's own tools.
+         A trial is add_candidate (1 call; its reply reports the new IoU, and under
+         tools v2 what the program builds); a trial that does not gain min_gain is
+         undone with remove_step (1 more call). First improving trial kept, in order
+-        of candidate IoU, adds then cuts, until a full pass gains nothing."""
++        of candidate IoU, adds then cuts, until a full pass gains nothing. Under
++        tools v2 the gain is in the executed program's IoU and the trial program
++        must be valid (the answer is the best executed valid program)."""
+         nonlocal trials
+         used = {cands[0]}
++        cur = r0.get('program_iou', 0.0) if r0.get('program_valid') else 0.0
+         improved = True
+         while improved:
+             improved = False
+@@ -124,11 +140,17 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3
+                         continue
+                     trials += 1
+                     r = call('add_candidate', assembly=True, id=c, mode=mode)
+-                    gain = r.get('iou_after', 0) - r.get('iou_before', 0)
+-                    ok = gain > min_gain and r.get('program_valid', True)
++                    if 'step' not in r:
++                        continue
++                    if EXEC:
++                        ok = bool(r.get('program_valid')) and r.get('program_iou', 0.0) - cur > min_gain
++                    else:
++                        ok = r.get('iou_after', 0) - r.get('iou_before', 0) > min_gain
+                     if ok:
+                         used.add(c)
+                         improved = True
++                        if EXEC:
++                            cur = r['program_iou']
+                     else:
+                         call('remove_step', assembly=True, step=r['step'])
+ 
+@@ -159,8 +181,8 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3
+         stop = 'budget'
+     stl = ws.export(out)
+     result = {'model': 'scripted-skills-policy', 'toolset': 'skills', 'gt': gt, 'init': None, 'init_iou': 0.0,
+-              'best_iou': ws.best[0], 'n_steps': len(ws.best[1]),
+-              'sources': [s['source'] for s in ws.best[1]], 'modes': [s['mode'] for s in ws.best[1]],
++              'best_iou': ws.best[0], 'n_steps': len(ws.answer_steps()),
++              'sources': [s['source'] for s in ws.answer_steps()], 'modes': [s['mode'] for s in ws.answer_steps()],
+               'tool_calls': len(calls), 'trial_evaluations': trials, 'stop': stop, 'seconds': round(time.time() - t0, 1),
+               'n_candidates': len(ws.candidates), 'n_sketches': len(ws.sketches), 'calls': calls, 'stl': stl,
+               'target_n_faces': info['n_faces'] if calls else None,
+@@ -182,6 +204,7 @@ def main():
+     ap.add_argument('--agent-economy', action='store_true',
+                     help='assembly trials through add_candidate/remove_step, paid like an agent (round-1 review)')
+     ap.add_argument('--reserve', type=int, default=8, help='calls kept for assembly')
++    ap.add_argument('--reserve-minutes', type=float, default=5.0, help='minutes kept for assembly')
+     ap.add_argument('--smoke', action='store_true', help='first 3 study parts into /tmp/agentsk_policy')
+     a = ap.parse_args()
+     parts = a.parts or study_parts(a.stl_dir)
+@@ -194,7 +217,8 @@ def main():
+             r = json.load(open(os.path.join(out, 'result.json')))
+         else:
+             r = run_part(os.path.join(a.stl_dir, p + '.stl'), out, a.max_calls, a.max_minutes,
+-                         reserve=a.reserve, charge_trials=a.charge_trials, agent_economy=a.agent_economy)
++                         reserve=a.reserve, charge_trials=a.charge_trials, agent_economy=a.agent_economy,
++                         reserve_minutes=a.reserve_minutes)
+         summary[p] = {k: r[k] for k in ('best_iou', 'tool_calls', 'stop', 'seconds', 'n_candidates')}
+         if 'best_exec_iou' in r:
+             summary[p]['best_exec_iou'] = r['best_exec_iou']
+diff --git a/agent/skills.py b/agent/skills.py
+index 8fb602c..b6c934c 100644
+--- a/agent/skills.py
++++ b/agent/skills.py
+@@ -51,6 +51,8 @@ os.environ.setdefault('CADFIT_TRANSLATION_MAXPTS', '400')
+ _T_RANGE, _T_STEP = (-2.0, 2.0), 0.01
+ _N_SURFACE = 100000
+ _gs.DENSIFY_REVOLVE_SPLIT = True  # see greedy_search.py: fixes revolve profiles split at the axis
++if _EXEC:  # tools v2: degenerate arcs emitted as lines (fit_primitives.py)
++    os.environ.setdefault('CADFIT_ARC_LINE_FALLBACK', '1')
+ # Revolve analysis as run_pipeline.py calls it: 0 and 90 degree trial rotations, CD threshold 0.01.
+ _ANGLES, _ANGLE_STEP, _REV_CD = (0.0, 90.0), 90.0, 0.01
+ _SEED = 0
+@@ -233,7 +235,8 @@ class SkillWorkspace(CadWorkspace):
+                                                         'revolve may still fit single features'}
+         return {'revolve_axes': hints,
+                 'revolve_note': 'the part has near rotational symmetry about these axes: extract_sketch with '
+-                                'slice_containing_axis, then fit_revolve on its sketches'}
++                                'slice_containing_axis, then fit_revolve on its sketches with this axis_point '
++                                'and axis_direction'}
+ 
+     @_quiet
+     def extract_sketch(self, normal, offset):
+@@ -316,22 +319,38 @@ class SkillWorkspace(CadWorkspace):
+                 **({} if ids else {'note': 'no extent of this sketch matches the target surface'}), **self._fail_report(key)}
+ 
+     @_quiet
+-    def fit_revolve(self, sketch):
+-        """analyze_revolve_axis.py on one sketch -> symmetry axes -> revolve candidates."""
++    def fit_revolve(self, sketch, axis_point=None, axis_direction=None):
++        """analyze_revolve_axis.py on one sketch -> symmetry axes -> revolve candidates.
++        With axis_point/axis_direction (e.g. a detect_directions revolve axis) that axis
++        is used instead: the sketch's own axis search tries only its plane's two
++        in-plane directions, so it misses axes oblique to them."""
+         try:
+             e = self._sketch(sketch)
+         except KeyError as err:
+             return {'error': str(err)}
+-        key = ('revolve', sketch)
++        given = axis_point is not None and axis_direction is not None
++        if given:
++            try:
++                ap, ad = np.asarray(axis_point, float).reshape(3), np.asarray(axis_direction, float).reshape(3)
++            except ValueError:
++                return {'error': 'axis_point and axis_direction must be 3 numbers each'}
++            nrm = np.asarray(e['normal'], float)
++            if np.linalg.norm(ad) < 1e-9 or abs(ad @ nrm) > 0.05 * np.linalg.norm(ad) * np.linalg.norm(nrm):
++                return {'error': "the axis must lie in the sketch's plane (axis_direction perpendicular to its normal)"}
++        key = ('revolve', sketch) + ((tuple(_r(ap)), tuple(_r(ad))) if given else ())
+         if key not in self._fits:
+             idx = int(sketch[1:])
+-            folder = os.path.join(self.workdir, 'revolve')
+-            os.makedirs(folder, exist_ok=True)
+-            mesh_data = {'vertices': self.gt_mesh.vertices, 'faces': self.gt_mesh.faces}
+             entry = {k: v for k, v in e.items() if k != 'actions'}
+-            _ara.process_single_sketch((idx, entry, self._surface_points(), mesh_data, folder,
+-                                        _ANGLES, _ANGLE_STEP, False, _REV_CD))
+-            configs = _gs.load_revolve_analysis(folder, idx)
++            if given:
++                configs = [{'mean_point': ap.tolist(), 'axis_direction': (ad / np.linalg.norm(ad)).tolist(),
++                            'axis_idx': f'given{len(self._fits)}', 'rotation_type': 'given'}]
++            else:
++                folder = os.path.join(self.workdir, 'revolve')
++                os.makedirs(folder, exist_ok=True)
++                mesh_data = {'vertices': self.gt_mesh.vertices, 'faces': self.gt_mesh.faces}
++                _ara.process_single_sketch((idx, entry, self._surface_points(), mesh_data, folder,
++                                            _ANGLES, _ANGLE_STEP, False, _REV_CD))
++                configs = _gs.load_revolve_analysis(folder, idx)
+             ids = []
+             for op in (_gs.create_revolve_from_analysis(entry, configs, idx) if configs else []):
+                 stem = f'sketch_{idx}_revolve_{op.get("axis_idx", len(ids))}'
+@@ -396,7 +415,11 @@ SKILL_SPECS = [
+      'surface and build an extrusion candidate for each. Candidates are scored against the target (iou, precision, '
+      'coverage) and listed by list_candidates; add them with add_candidate.', {'sketch': {'type': 'string'}}),
+     ('fit_revolve', 'CADFit stage: find symmetry axes of a sketch for which revolving its half-profile matches the '
+-     'target, and build a revolve candidate for each (scored like fit_extrude).', {'sketch': {'type': 'string'}}),
++     'target, and build a revolve candidate for each (scored like fit_extrude).' + (
++         " Optionally pass axis_point and axis_direction (an axis in the sketch's plane, e.g. a revolve axis from "
++         'detect_directions) to revolve about that axis instead of searching.' if _EXEC else ''),
++     # tools v1 (the earlier study) had no axis arguments
++     {'sketch': {'type': 'string'}, **({'axis_point': _VEC, 'axis_direction': _VEC} if _EXEC else {})}),
+     ('section_extrude', "CADFit stage: take the target's cross-section in the plane axis=offset (default: middle) and "
+      'extrude it through the full extent of the target along that axis. One scored candidate.',
+      {'axis': {'type': 'string', 'enum': ['x', 'y', 'z']}, 'offset': {'type': 'number'}}),
+diff --git a/bench/agentsk_job.sh b/bench/agentsk_job.sh
+index 7fe1235..6f67004 100755
+--- a/bench/agentsk_job.sh
++++ b/bench/agentsk_job.sh
+@@ -12,7 +12,7 @@
+ set -u
+ KEY=$1; shift
+ P=/orcd/pool/007/a_lin
+-cd $P/cadfit
++cd ${CADFIT_SRC:-$P/cadfit}  # a frozen source tree (bench/v2_submit.sh) or the checkout
+ export HF_HOME=$P/cache/huggingface AGENT_API_KEY=local
+ # vLLM JIT-compiles some kernels: nvcc from the CUDA module matching torch (cu130);
+ # sampling without FlashInfer's JIT sampler.
+diff --git a/bench/agentsk_score.py b/bench/agentsk_score.py
+index 3a64863..2dd3e75 100644
+--- a/bench/agentsk_score.py
++++ b/bench/agentsk_score.py
+@@ -86,6 +86,12 @@ def main():
+     ap.add_argument('--mem-cap-gb', type=float, default=None,
+                     help='address-space cap per scoring worker; a part over it is recorded as judge_error')
+     ap.add_argument('--out', default=os.path.join(RUNS, 'agentsk_scores.json'))
++    ap.add_argument('--ref-scores', default=os.path.join(RUNS, 'fresh_scores.json'),
++                    help='score.py output of the pipeline arms on this cohort')
++    ap.add_argument('--ref-arms', nargs='*', default=['fresh_beamkh', 'fresh_beamsec'],
++                    help='arm keys of --ref-scores reported as pipeline references (e.g. h2_d0 h2_v2)')
++    ap.add_argument('--section-control', default=os.path.join(RUNS, 'fresh_section_control.json'),
++                    help="section_control.py output on this cohort ('' to omit)")
+     ap.add_argument('--toolsets', nargs='+', default=['skills', 'code'])
+     ap.add_argument('--models', nargs='+', default=None, help='default: every MODELS key (the declared panel)')
+     ap.add_argument('--policy-dir', default=os.path.join(RUNS, 'agentsk_policy'),
+@@ -124,12 +130,15 @@ def main():
+         scored.update(score_all(heavy, 1))
+     res = {c: {p: {**scored.get((c, p), ZERO), **meta[(c, p)]} for p in parts} for c in conds}
+     # Pipeline references (frozen runs, same judge): arms and the best-of section control.
+-    ref = json.load(open(os.path.join(RUNS, 'fresh_scores.json')))
+-    for arm in ('fresh_beamkh', 'fresh_beamsec'):
+-        res[f'pipeline/{arm[6:]}'] = {p: ref[arm].get(p, ZERO) for p in parts}
+-    sc = json.load(open(os.path.join(RUNS, 'fresh_section_control.json')))
+-    res['pipeline/best_of_beam_section'] = {p: {'iou': sc[p]['best_of'], 'iou_cad': sc[p]['best_of_cad']}
+-                                            for p in parts}
++    # A part a reference run has no record for scores as missing (0), never silently dropped.
++    ref = json.load(open(a.ref_scores))
++    for arm in a.ref_arms:
++        name = arm.split('_', 1)[1] if '_' in arm else arm
++        res[f'pipeline/{name}'] = {p: ref[arm].get(p, ZERO) for p in parts}
++    if a.section_control:
++        sc = json.load(open(a.section_control))
++        res['pipeline/best_of_beam_section'] = {
++            p: ({'iou': sc[p]['best_of'], 'iou_cad': sc[p]['best_of_cad']} if p in sc else ZERO) for p in parts}
+     json.dump({'parts': parts, 'conditions': res}, open(a.out, 'w'), indent=1)
+     print(f'\n{"condition":<36} {"n":>3} {"IoU":>7} {"IoU(CAD)":>9} {"CAD bad":>8} {"calls":>6}')
+     for c, r in res.items():
+diff --git a/bench/score.py b/bench/score.py
+index 40aa347..3bd1e59 100644
+--- a/bench/score.py
++++ b/bench/score.py
+@@ -233,7 +233,14 @@ def _score_one(job):
+         rec, stl = cad_replay(recon)
+         r['cad_built'], r['cad_valid'] = rec['built'], rec['valid']
+         r['cad_error'] = rec.get('error')
+-        r['iou_cad'] = judge(gt, stl)['iou'] if rec['built'] and os.path.exists(stl) else 0.0
++        if rec['built'] and os.path.exists(stl):
++            jc = judge(gt, stl)
++            r['iou_cad'] = jc['iou']
++            r['cad_judge'] = {k: v for k, v in jc.items() if k != 'iou'}  # method, MC se/samples
++        else:
++            r['iou_cad'] = 0.0
++        # Primary metric (ledger A-050): executed CAD IoU, 0 unless built and OCC-valid.
++        r['iou_cad_gated'] = r['iou_cad'] if rec['valid'] else 0.0
+     return name, part, r
+ 
+ 
+@@ -271,8 +278,13 @@ def score_runs(run_dirs, stl_dir, jobs=1, cad=False):
+             recon = next((os.path.join(run, part, r) for r in RUN_RECON
+                           if os.path.exists(os.path.join(run, part, r))), None)
+             if recon is None:
+-                if os.path.isdir(os.path.join(run, part)):
+-                    res[part] = {'iou': 0.0, 'cd': None, 'valid': False}
++                # Every part of the cohort is in the denominator: a part that
++                # crashed (folder, no model) or never started (no folder, e.g. a
++                # job cut short) scores 0, and the record says which.
++                res[part] = {'iou': 0.0, 'cd': None, 'valid': False,
++                             'status': 'no_model' if os.path.isdir(os.path.join(run, part)) else 'not_run'}
++                if cad:
++                    res[part].update(iou_cad=0.0, iou_cad_gated=0.0, cad_built=False, cad_valid=False)
+                 continue
+             res[part] = None  # filled in below
+             todo.append((name, part, os.path.join(stl_dir, part + '.stl'), recon, JUDGE, cad))
+@@ -319,8 +331,11 @@ def score_runs(run_dirs, stl_dir, jobs=1, cad=False):
+             if cad:
+                 ic = [res[p].get('iou_cad', 0.0) for p in common]
+                 bad = sum(not res[p].get('cad_valid', False) for p in common)
+-                line += f'  mean IoU(CAD) {sum(ic) / len(ic):.4f}  CAD invalid/unbuilt {bad}'
+-            print(line)
++                ig = [res[p].get('iou_cad_gated', 0.0) for p in common]
++                line += (f'  mean IoU(CAD) {sum(ic) / len(ic):.4f}  gated {sum(ig) / len(ig):.4f}'
++                         f'  CAD invalid/unbuilt {bad}')
++            nr = sum(res[p].get('status') == 'not_run' for p in res)
++            print(line + (f'  NOT RUN {nr}' if nr else ''))
+     return out
+ 
+ 
+diff --git a/bench/v2_submit.sh b/bench/v2_submit.sh
+index 260ba91..54aabb4 100644
+--- a/bench/v2_submit.sh
++++ b/bench/v2_submit.sh
+@@ -1,38 +1,65 @@
+ #!/bin/bash
+-# CADFit++ v2 held-out evaluation on ORCD (run on the login node, from the
+-# cadfit checkout, after syncing code + bench/cadbench/fresh2 from the Mac):
++# CADFit++ v2 evaluation on ORCD (run on the login node, from the cadfit checkout,
++# after syncing code + cohort from the Mac):
+ #
+ #   rsync -a --exclude bench/runs --exclude .venv ~/CADFit/ orcd:/orcd/pool/007/a_lin/cadfit/
+-#   rsync -a ~/CADFit/bench/runs/dev2_d0_code/ orcd:/orcd/pool/007/a_lin/cadfit/bench/runs/h2_d0_code/
+-#   ssh orcd 'cd /orcd/pool/007/a_lin/cadfit && bash bench/v2_submit.sh'
++#   ssh orcd 'cd /orcd/pool/007/a_lin/cadfit && COMMIT=<sha> TAG=h2 STLS=bench/cadbench/fresh2 bash bench/v2_submit.sh'
+ #
+-# Pipeline arms (300 parts, 4 chunks): d0 = pre-v2 code (git e260397), dx = +exec-verify
+-# only, v2 = all fixes. Agents (20 prespecified fresh2 parts, study_parts seed 1):
+-# Gemma-4-31B and Qwen3.6-35B-A3B, skills toolset, tools v1 vs v2, 3 episodes each.
+-# Scripted policy: agent economy, tools v1 vs v2.
++# Every job runs from a frozen full source tree (git archive of one commit, review
++# round 1 finding 5): arms d0/dx/v2 from bench/runs/<TAG>_<arm>_code, agents, the
++# scripted policy and scoring from bench/runs/<TAG>_src. bench/runs and
++# bench/cadbench inside a frozen tree are links to the checkout's, so outputs land
++# in the shared run folder.
++#
++# Pipeline arms (4 chunks): d0 = pre-v2 code (git e260397), dx = d0 + execution-verified
++# delivery (revolve and geometry fixes off), v2 = all fixes.
++# Agents (20 prespecified parts, study_parts seed 1), Gemma-4-31B and Qwen3.6-35B-A3B,
++# 3 episodes per condition:
++#   skills v1 (earlier tools + harness) vs skills v2 (tools v2 + harness v2): the v2
++#     *package* (feedback, executed answer, deadline, nudges), not tools alone;
++#   code v2 and codesec v2: the toolset attribution under the corrected tools.
++# Scripted policy (agent economy): tools v1 and v2, same deadline rule as agents.
+ set -eu
++COMMIT=${COMMIT:?set COMMIT to the evaluated commit}
++TAG=${TAG:-h2}
++STLS=${STLS:-bench/cadbench/fresh2}
++D0=${D0:-e260397}
+ mkdir -p bench/runs/arms_logs bench/runs/agentsk_logs
+-test -f bench/runs/h2_d0_code/run_pipeline.py || { echo "missing h2_d0_code snapshot"; exit 1; }
+-for arm in dx v2; do  # freeze the v2 code now (run_parallel_arms.sh only copies when missing)
+-  mkdir -p bench/runs/h2_${arm}_code
+-  [ -f bench/runs/h2_${arm}_code/run_pipeline.py ] || cp ./*.py bench/runs/h2_${arm}_code/
+-done
+-sbatch -J h2arms --array=0-3 bench/arms_job.sh bench/cadbench/fresh2 h2 4 "d0 dx v2"
++
++freeze() {  # <commit> <dir>: full tree of <commit>, made once
++  [ -f "$2/run_pipeline.py" ] && { echo "frozen: $2 ($(cat "$2/SOURCE.txt"))"; return; }
++  mkdir -p "$2"
++  git archive "$1" | tar -x -C "$2"
++  rm -rf "$2/bench/runs" "$2/bench/cadbench"
++  ln -s "$PWD/bench/runs" "$2/bench/runs"
++  ln -s "$PWD/bench/cadbench" "$2/bench/cadbench"
++  echo "git archive $(git rev-parse "$1")" > "$2/SOURCE.txt"
++  echo "froze $1 -> $2"
++}
++freeze "$D0" bench/runs/${TAG}_d0_code
++for d in ${TAG}_dx_code ${TAG}_v2_code ${TAG}_src; do freeze "$COMMIT" bench/runs/$d; done
++SRC=$PWD/bench/runs/${TAG}_src
++N=$(ls $STLS/*.stl | wc -l)
++echo "cohort $STLS: $N parts"
++
++sbatch -J ${TAG}arms --array=0-3 bench/arms_job.sh $STLS $TAG 4 "d0 dx v2"
+ 
+ for model in gemma4-31b qwen36-35b-a3b; do
+   for rep in 0 1 2; do
+-    sbatch -J ag_${model}_v1_r$rep --gres=gpu:h100:1 bench/agentsk_job.sh $model \
+-      --stl-dir bench/cadbench/fresh2 --toolsets skills --tag h2ag_v1_r$rep
+-    sbatch -J ag_${model}_v2_r$rep --gres=gpu:h100:1 --export=ALL,CADFIT_AGENT_EXEC=1 bench/agentsk_job.sh $model \
+-      --stl-dir bench/cadbench/fresh2 --toolsets skills --tag h2ag_v2_r$rep
++    sbatch -J ag_${model}_v1_r$rep --gres=gpu:h100:1 --export=ALL,CADFIT_SRC=$SRC bench/agentsk_job.sh $model \
++      --stl-dir $STLS --toolsets skills --tag ${TAG}ag_v1_r$rep
++    for ts in skills code codesec; do
++      sbatch -J ag_${model}_v2${ts}_r$rep --gres=gpu:h100:1 --export=ALL,CADFIT_SRC=$SRC,CADFIT_AGENT_EXEC=1 \
++        bench/agentsk_job.sh $model --stl-dir $STLS --toolsets $ts --tag ${TAG}ag_v2_r$rep
++    done
+   done
+ done
+ 
+ for v in v1 v2; do
+   E=$([ $v = v2 ] && echo 1 || echo 0)
+-  sbatch -J h2pol_$v -p mit_normal -c 16 --mem=64G -t 12:00:00 -o bench/runs/agentsk_logs/%x_%j.log \
+-    --export=ALL,CADFIT_AGENT_EXEC=$E --wrap "module load apptainer/1.5.2; apptainer exec -B /orcd \
++  sbatch -J ${TAG}pol_$v -p mit_normal -c 16 --mem=64G -t 12:00:00 -o bench/runs/agentsk_logs/%x_%j.log \
++    --export=ALL,CADFIT_AGENT_EXEC=$E --wrap "cd $SRC; module load apptainer/1.5.2; apptainer exec -B /orcd \
+     /orcd/pool/007/a_lin/envs/cadfit-sandbox /orcd/pool/007/a_lin/envs/cadfit-venv/bin/python \
+-    agent/scripted_skills_policy.py --stl-dir bench/cadbench/fresh2 --out bench/runs/h2pol_$v --agent-economy --reserve 20"
++    agent/scripted_skills_policy.py --stl-dir $STLS --out bench/runs/${TAG}pol_$v --agent-economy --reserve 20"
+ done
+ squeue -u $USER
+diff --git a/cadquery_ops.py b/cadquery_ops.py
+index 3a22aab..0fe7574 100644
+--- a/cadquery_ops.py
++++ b/cadquery_ops.py
+@@ -386,6 +386,71 @@ def cut_loop_at_symmetry_axis(loop_2d, axis_angle_deg):
+     return cut_points.tolist()
+ 
+ 
++# Largest crossing of the revolve axis by the emitted profile that is treated as
++# numerical (split points on the axis, 5-decimal rounding); larger ones reject.
++REVOLVE_AXIS_TOL = 2e-4
++
++
++def _profile_points(sketch_actions, n_arc=32, n_circle=64):
++    """Dense 2D samples of the curves a sketch action list emits (moveTo, lineTo,
++    threePointArc through the current point, circle at the current point, spline)."""
++    import re as _re
++    num = r'([-0-9.e]+)'
++    out, cur = [], None
++    for a in sketch_actions:
++        for line in a.split('\n'):
++            line = line.strip()
++            m = _re.search(r'moveTo\(\s*' + num + r'\s*,\s*' + num, line) or \
++                _re.search(r'lineTo\(\s*' + num + r'\s*,\s*' + num, line)
++            if m:
++                cur = np.array([float(m.group(1)), float(m.group(2))])
++                out.append(cur)
++                continue
++            m = _re.search(r'threePointArc\(\(\s*' + num + r'\s*,\s*' + num + r'\s*\)\s*,\s*\(\s*' + num
++                           + r'\s*,\s*' + num, line)
++            if m:
++                p2 = np.array([float(m.group(1)), float(m.group(2))])
++                p3 = np.array([float(m.group(3)), float(m.group(4))])
++                out.extend(_arc_samples(cur, p2, p3, n_arc) if cur is not None else [p2, p3])
++                cur = p3
++                continue
++            m = _re.search(r'circle\(\s*' + num, line)
++            if m and cur is not None:
++                r = float(m.group(1))
++                t = np.linspace(0, 2 * np.pi, n_circle, endpoint=False)
++                out.extend(cur + r * np.c_[np.cos(t), np.sin(t)])
++                continue
++            if 'spline(' in line:
++                q = [np.array([float(x), float(y)]) for x, y in
++                     _re.findall(r'\(\s*' + num + r'\s*,\s*' + num + r'\s*\)', line)]
++                out.extend(q)
++                if q:
++                    cur = q[-1]
++    return np.asarray(out, dtype=float).reshape(-1, 2)
++
++
++def _arc_samples(p1, p2, p3, n):
++    """Points on the circular arc from p1 through p2 to p3 (the chord if collinear)."""
++    ax, ay = p1
++    bx, by = p2
++    cx, cy = p3
++    dd = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by))
++    if abs(dd) < 1e-14:
++        return [p1, p2, p3]
++    ux = ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx * cx + cy * cy) * (ay - by)) / dd
++    uy = ((ax * ax + ay * ay) * (cx - bx) + (bx * bx + by * by) * (ax - cx) + (cx * cx + cy * cy) * (bx - ax)) / dd
++    c = np.array([ux, uy])
++    r = np.linalg.norm(p1 - c)
++    t1, t2, t3 = (np.arctan2(p[1] - uy, p[0] - ux) for p in (p1, p2, p3))
++    # Sweep from t1 to t3 in the direction that passes t2.
++    ccw = (t3 - t1) % (2 * np.pi)
++    if (t2 - t1) % (2 * np.pi) <= ccw:
++        ts = t1 + np.linspace(0, ccw, n)
++    else:
++        ts = t1 - np.linspace(0, (t1 - t3) % (2 * np.pi), n)
++    return list(c + r * np.c_[np.cos(ts), np.sin(ts)])
++
++
+ def generate_cadquery_revolve_script(sketch_actions: List[str], axis_start: Tuple[float, float, float], 
+                                      axis_end: Tuple[float, float, float], angle_degrees: float, 
+                                      output_stl_path: str, origin=None, normal=None, xdir=None) -> str:
+@@ -463,21 +528,28 @@ def generate_cadquery_revolve_script(sketch_actions: List[str], axis_start: Tupl
+     # OCC refused the revolve), and the out-of-plane part tilts the axis off the
+     # sketch plane. With CADFIT_FIX_REVOLVE_ORIGIN (default on): 6 decimals, no
+     # out-of-plane nudge, and an in-plane shift that puts the whole profile on one side.
++    reject = None
+     if os.environ.get('CADFIT_FIX_REVOLVE_ORIGIN', '1') == '1':
+-        import re as _re
+         a0 = np.asarray(axis_start, float)[:2]
+         a1 = np.asarray(axis_end, float)[:2]
+         d = a1 - a0
+         d = d / (np.linalg.norm(d) + 1e-12)
+         nrm = np.array([-d[1], d[0]])
+-        pts = [tuple(map(float, m)) for a in sketch_actions for m in
+-               _re.findall(r'(?:moveTo|lineTo|threePointArc)\(\(?\s*([-0-9.e]+)\s*,\s*([-0-9.e]+)', a)]
+-        sd = np.array([(np.asarray(q) - a0) @ nrm for q in pts]) if pts else np.zeros(0)
++        # Signed distance of the emitted curves (arcs and circles sampled densely,
++        # not just their written end points) to the axis line.
++        pts = _profile_points(sketch_actions)
++        sd = (pts - a0) @ nrm if len(pts) else np.zeros(0)
+         side = float(np.sign(sd[np.argmax(np.abs(sd))])) if len(sd) else 0.0
++        pen = float(max(0.0, (-side * sd).max())) if len(sd) else 0.0
++        if pen > REVOLVE_AXIS_TOL:
++            # The profile is on both sides of the axis by more than rounding: a
++            # fitted curve that bulges across it (00941601 refine sketch 9: a
++            # r=112.7 circle crossing by 1.1e-3). Moving the axis would build a
++            # different (often huge) solid, so the candidate fails with a reason.
++            reject = f'revolve profile crosses the axis by {pen:.2e} (tolerance {REVOLVE_AXIS_TOL:.0e})'
+         # Move the axis just past the profile's deepest crossing (the split points
+         # sit on it within ~3e-5), toward the side with no profile.
+-        pen = float(max(0.0, (-side * sd).max())) if len(sd) else 0.0
+-        shift = -(pen + 1e-6) * side * nrm
++        shift = -(min(pen, REVOLVE_AXIS_TOL) + 1e-6) * side * nrm
+         s0 = (a0[0] + shift[0], a0[1] + shift[1], float(axis_start[2]))
+         s1 = (a1[0] + shift[0], a1[1] + shift[1], float(axis_end[2]))
+         axis_start_str = f"({s0[0]:.6f}, {s0[1]:.6f}, {s0[2]:.6f})"
+@@ -486,6 +558,8 @@ def generate_cadquery_revolve_script(sketch_actions: List[str], axis_start: Tupl
+         axis_start_str = f"({round(axis_start[0], 3)+1e-3}, {round(axis_start[1], 3)+1e-3}, {round(axis_start[2], 3)+1e-3})"
+         axis_end_str = f"({round(axis_end[0], 3)+1e-3}, {round(axis_end[1], 3)+1e-3}, {round(axis_end[2], 3)+1e-3})"
+     
++    if reject:
++        script_lines.append(f"raise ValueError({reject!r})")
+     script_lines.append(f"result = {sketch_name}.revolve(angleDegrees={round(angle_degrees, 3)}, axisStart={axis_start_str}, axisEnd={axis_end_str})")
+     script_lines.append(f"cq.exporters.export(result, '{output_stl_path}')")
+ 
+@@ -662,7 +736,9 @@ def execute_cadquery_script(script_content: str, output_stl_path: str, save_scri
+                                 stderr=subprocess.PIPE, text=True, start_new_session=True)
+         try:
+             out, err = proc.communicate(timeout=60)
+-        except subprocess.TimeoutExpired:
++        except BaseException:
++            # Timeout, or the caller's deadline alarm (agent tools): never leave
++            # the script's process group running.
+             try:
+                 os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+             except Exception:
+diff --git a/exec_verify.py b/exec_verify.py
+index 3f82d58..930f6a3 100644
+--- a/exec_verify.py
++++ b/exec_verify.py
+@@ -21,10 +21,11 @@ This stage runs after search, on the final program:
+      (bench/cad_replay.py: shape + per-solid OCC validity, tessellation) and the
+      tessellation is judged against the target mesh — the method's input — with
+      the robust judge (bench/score.py).
+-  3. Selection: the highest executed IoU among valid programs, unless an
+-     invalid program beats it by more than VALID_MARGIN (then the highest
+-     executed IoU overall). The chosen program and its executed tessellation
+-     become the final outputs, so the saved STL is what the program builds.
++  3. Selection: the highest executed IoU among valid programs; only when no
++     program is valid, the highest executed IoU among those that build (the
++     record says so: `chosen_valid` False, validity-gated score 0). The chosen
++     program and its executed tessellation become the final outputs, so the
++     saved STL is what the program builds.
+ 
+ Programs whose composition can be rewritten get both variants; fallbacks
+ passed as `alternatives` (pre-refinement program, best single candidate) are
+@@ -43,7 +44,6 @@ HERE = os.path.dirname(os.path.abspath(__file__))
+ # modules; bench/ then comes from the checkout the runner starts in.
+ if not os.path.exists(os.path.join(HERE, 'bench', 'cad_replay.py')):
+     HERE = os.getcwd()
+-VALID_MARGIN = 0.005   # an invalid program must beat the best valid one by this much
+ TIMEOUT = 600
+ 
+ HELPERS = '''
+@@ -132,24 +132,22 @@ def execute(prog, out_stl, target):
+         sys.path.insert(0, os.path.join(HERE, 'bench'))
+         import score
+         try:
+-            rec['iou_exec'] = float(score.robust_iou(target, out_stl)['iou'])
++            j = score.robust_iou(target, out_stl)
++            rec['iou_exec'] = float(j['iou'])
++            rec['judge'] = {k: j[k] for k in ('method', 'se') if k in j}
+         except Exception as e:  # noqa: BLE001
+             rec['judge_error'] = f'{type(e).__name__}: {e}'
+     return rec
+ 
+ 
+ def choose(recs):
+-    """recs: {name: record}. Best valid unless an invalid one wins by VALID_MARGIN."""
++    """recs: {name: record}. The best valid program; the best built one only if none is valid."""
+     built = {k: r for k, r in recs.items() if r.get('built')}
+     if not built:
+         return None
+-    best = max(built, key=lambda k: built[k]['iou_exec'])
+     valid = {k: r for k, r in built.items() if r.get('valid')}
+-    if valid:
+-        bv = max(valid, key=lambda k: valid[k]['iou_exec'])
+-        if built[best]['iou_exec'] <= valid[bv]['iou_exec'] + VALID_MARGIN:
+-            return bv
+-    return best
++    pool = valid or built
++    return max(pool, key=lambda k: pool[k]['iou_exec'])
+ 
+ 
+ def verify(program, target, out_dir, alternatives=()):
+@@ -180,13 +178,16 @@ def verify(program, target, out_dir, alternatives=()):
+         open(py, 'w').write(code)
+         jobs[name] = (py, os.path.join(out_dir, f'exec_{name}.stl'), target)
+     from concurrent.futures import ProcessPoolExecutor
+-    with ProcessPoolExecutor(max_workers=len(jobs)) as ex:
++    # Up to ~10 variants; each replay + judge can take a few GB on a big target.
++    with ProcessPoolExecutor(max_workers=min(len(jobs), 6)) as ex:
+         futs = {k: ex.submit(execute, *v) for k, v in jobs.items()}
+         recs = {k: f.result() for k, f in futs.items()}
+     pick = choose(recs)
+     for name, same in alias.items():
+         recs[name] = {'same_program_as': same}
+-    return {'chosen': pick, 'n_rewritten_ops': n_ops, 'variants': recs,
++    ok = bool(pick) and bool(recs[pick].get('valid'))
++    return {'chosen': pick, 'chosen_valid': ok, 'n_rewritten_ops': n_ops, 'variants': recs,
++            'validity_gated_iou': recs[pick]['iou_exec'] if ok else 0.0,
+             'program': os.path.join(out_dir, f'exec_{pick}.py') if pick else None,
+             'stl': os.path.join(out_dir, f'exec_{pick}.stl') if pick else None}
+ 
+diff --git a/extract_planar_contours.py b/extract_planar_contours.py
+index 4b5ba16..c1e5bab 100644
+--- a/extract_planar_contours.py
++++ b/extract_planar_contours.py
+@@ -738,7 +738,7 @@ def is_loop_contained_in_loop_planar(inner_loop, outer_loop, origin, normal, tol
+                 
+                 # Consider contained if most points (>80%) are inside
+                 return inside_count / len(inner_2d[:-1]) > 0.8
+-            except:
++            except Exception:
+                 return False
+                 
+     except ImportError:
+@@ -772,7 +772,7 @@ def group_contained_loops_planar(loops, origin, normal):
+                 loop_areas.append(area)
+             else:
+                 loop_areas.append(0)
+-        except:
++        except Exception:
+             loop_areas.append(0)
+     
+     # Sort loops by area (largest first - these are likely outer loops)
+diff --git a/fit_primitives.py b/fit_primitives.py
+index 85e700d..f046c69 100644
+--- a/fit_primitives.py
++++ b/fit_primitives.py
+@@ -177,6 +177,16 @@ def sample_arc_points(cx: float, cy: float, r: float, a0: float, a1: float, n_sa
+     return np.column_stack([x, y])
+ 
+ 
++def _arc_degenerate(start, mid, end, tol: float = 2e-5) -> bool:
++    """True when the arc through start/mid/end, as emitted (rounded to 5
++    decimals), has a coincident pair or a sagitta below tol (OCC then fails)."""
++    a, b, c = (np.round(np.asarray(p, dtype=float), 5) for p in (start, mid, end))
++    if min(np.linalg.norm(b - a), np.linalg.norm(c - b), np.linalg.norm(c - a)) < tol:
++        return True
++    ab, ac = b - a, c - a
++    return abs(ab[0] * ac[1] - ab[1] * ac[0]) / np.linalg.norm(ac) < tol
++
++
+ def try_circle_arc(pts: np.ndarray, rms_tol: float, min_pts: int = 7):
+     if pts.shape[0] < min_pts:
+         return None
+@@ -802,7 +812,16 @@ def primitives_to_instances(primitives: List[Tuple], original_pts: np.ndarray =
+                 p2_y = cy + r * np.sin(angles[25])
+                 p2 = (float(p2_x), float(p2_y))
+             
+-            #     continue
++            # OCC cannot build an arc through (nearly) collinear or coincident
++            # points (GC_MakeArcOfCircle "no result"), which killed the whole
++            # candidate; after rounding to the emitted 5 decimals such an arc
++            # is a line to within the emitted precision. Part of --shared-fixes
++            # (CADFIT_ARC_LINE_FALLBACK=1) so the dx arm stays d0 + exec-verify.
++            if (os.environ.get('CADFIT_ARC_LINE_FALLBACK') == '1' and prev_point is not None
++                    and _arc_degenerate(prev_point, p2, p3)):
++                inst.append("sketch.lineTo({}, {})".format(round(float(p3[0]), 5), round(float(p3[1]), 5)))
++                prev_point = p3_point
++                continue
+             inst.append("sketch = sketch.threePointArc(({}, {}), ({}, {}))".format(round(float(p2[0]), 5), round(float(p2[1]), 5), round(float(p3[0]), 5), round(float(p3[1]), 5)))
+             prev_point = p3_point
+     if spline_pts:
+diff --git a/implement-stage/ASSUMPTIONS.md b/implement-stage/ASSUMPTIONS.md
+index 6fad044..5f3c10a 100644
+--- a/implement-stage/ASSUMPTIONS.md
++++ b/implement-stage/ASSUMPTIONS.md
+@@ -91,3 +91,17 @@
+ | A-048 | harness v2 (with tools v2) | nudge counter resets after each turn with a tool call (v1 never reset); in-process tool calls are interrupted by SIGALRM at the session deadline and tool subprocess timeouts are capped by the time left | interface | default |
+ | A-049 | held-out cohort for v2 | `fresh2`: 150 benchA-hard + 150 benchE-hard, seed 0 shuffle continuing after all earlier sets, excluding every file_id on disk in any earlier set (incl. fresh); downloaded before any v2 evaluation, not inspected; earlier sets' selections verified unchanged | semantic | default |
+ | A-050 | primary metric for v2 claims | validity-gated IoU(CAD) (0 unless the program builds and is OCC-valid), with ungated IoU(CAD), mesh IoU and failure categories reported alongside; paired bootstrap by part, split-stratified | semantic | default |
++
++### CADFit++ v2 round 2 (auto-review-loop run_20261019_e1c2d949, round 1 fixes, 2026-10-19)
++
++| ID | Under-determined by the request | Chosen | Class | Source |
++|----|--------------------------------|--------|-------|--------|
++| A-051 | exec_verify selection (replaces A-043's margin rule) | the best *valid* executed program whenever one exists; only when none is valid, the best built one (`chosen_valid` False). `validity_gated_iou` is recorded; when nothing builds or verification raises, the unverified search output stays and the record says `delivered_unverified`, gated 0. Fallback pool widened: three best single candidates + best whole-part section extrusion (≤ 6 variants executed at once) | semantic | review |
++| A-052 | tools v2 execution cache | keyed by the assembled program text (the id()-keyed cache returned a removed step's record after add/remove/add); answer metadata (n_steps, sources, modes) describe the delivered program (`answer_steps`) for agents and the policy | interface | review |
++| A-053 | session deadline inside tools | `cad_tools.run_until`: SIGALRM raises `SessionTimeout` (a BaseException, so the stages' `except Exception` handlers cannot swallow it; four bare `except:` in loop-area/containment code narrowed); candidate subprocess groups are killed on any interruption; the scripted policy uses the same deadline rule and `ws.deadline` | interface | review |
++| A-054 | scripted policy acceptance under tools v2 | a trial is kept iff the executed program is valid and its executed IoU gains > min_gain over the current program (v1: mesh IoU gain) | semantic | review |
++| A-055 | revolve profiles that cross the axis | the emitted curves are sampled (arcs through their mid point, circles, splines); a crossing ≤ 2e-4 (split points, rounding) moves the axis just past it; a larger one makes the candidate fail with a reason (moving the axis builds a different, often huge, solid: 00941601 refine sketch 9). Only with CADFIT_FIX_REVOLVE_ORIGIN=1 (off in dx) | semantic | review |
++| A-056 | degenerate three-point arcs | emitted as lineTo when the rounded points are coincident or within 2e-5 of collinear (OCC "GC_MakeArcOfCircle no result" killed 6 of 46 failed candidates on dev2 v2, 2 real cases verified collinear). Part of --shared-fixes (CADFIT_ARC_LINE_FALLBACK) and tools v2 | interface | default |
++| A-057 | revolve about an axis oblique to the sketch plane's axes | tools v2: `fit_revolve(sketch, axis_point, axis_direction)` revolves about a given in-plane axis (e.g. detect_directions' revolve hint); the sketch's own search tries only 0°/90° of its plane, so a rotated shaft got no candidate (test_revolve_recovers_rotated_translated_shaft). Hidden from the v1 tool spec | semantic | review |
++| A-058 | refinement under --score-original | acceptance (`_refine_improves`) and volume ratios use the undecimated input; residual meshes (proposal source) still come from the decimated copy, like sketch extraction | semantic | review |
++| A-059 | what the evaluation runs | every job from a full `git archive` tree of one commit (arms d0 = e260397, dx/v2/agents/policy/scoring = COMMIT); agents: skills v1 vs v2 is the *v2 package* comparison (tools + harness), code/codesec v2 give toolset attribution under the corrected tools; score.py counts parts with no folder as `not_run` (0) and reports gated IoU(CAD) with the judge method/MC info | semantic | review |
+diff --git a/run_pipeline.py b/run_pipeline.py
+index 5002cb7..2170084 100644
+--- a/run_pipeline.py
++++ b/run_pipeline.py
+@@ -1062,7 +1062,10 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
+         print(f"✗ CadQuery script not found: {current_cadquery_script}")
+         return
+     
+-    # Iterative refinement loop
++    # Iterative refinement loop. Residual meshes (the proposals' source) come
++    # from the copy the search ran on, like sketch extraction; with
++    # --score-original, acceptance and volume ratios use the undecimated input.
++    refine_gt = reference_gt_path if ANALYSIS_OPTS.get('score_original') else stl_path
+     print(f"\n🔧 REFINEMENT PHASE: Removing over-reconstruction and adding under-reconstruction")
+     print(f"{'='*80}")
+ 
+@@ -1088,7 +1091,7 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
+             break
+         
+         over_volume = compute_mesh_volume(over_recon_path)
+-        gt_mesh_volume = compute_mesh_volume(stl_path, normalize=True)
++        gt_mesh_volume = compute_mesh_volume(refine_gt, normalize=True)
+         over_ratio = over_volume / gt_mesh_volume if gt_mesh_volume > 0 else 0
+         print(f"Over-reconstruction volume: {over_ratio:.6f}")
+ 
+@@ -1135,7 +1138,7 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
+             new_reconstruction = f"{output_folder}/reconstruction_cut_{iteration}.stl"
+             
+             if os.path.exists(new_reconstruction):
+-                if guard_refine and not _refine_improves(stl_path, current_reconstruction, new_reconstruction, 'cut'):
++                if guard_refine and not _refine_improves(refine_gt, current_reconstruction, new_reconstruction, 'cut'):
+                     break
+                 current_reconstruction = new_reconstruction
+                 current_cadquery_script = cut_script_path
+@@ -1158,7 +1161,7 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
+             break
+         
+         under_volume = compute_mesh_volume(under_recon_path)
+-        gt_mesh_volume = compute_mesh_volume(stl_path, normalize=True)
++        gt_mesh_volume = compute_mesh_volume(refine_gt, normalize=True)
+         under_ratio = under_volume / gt_mesh_volume if gt_mesh_volume > 0 else 0
+         print(f"Under-reconstruction volume: {under_ratio:.6f}")
+         
+@@ -1201,7 +1204,7 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
+             new_reconstruction = f"{output_folder}/reconstruction_union_{iteration}.stl"
+             
+             if os.path.exists(new_reconstruction):
+-                if guard_refine and not _refine_improves(stl_path, current_reconstruction, new_reconstruction, 'union'):
++                if guard_refine and not _refine_improves(refine_gt, current_reconstruction, new_reconstruction, 'union'):
+                     continue
+                 current_reconstruction = new_reconstruction
+                 current_cadquery_script = union_script_path
+@@ -1309,8 +1312,15 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
+             alts = [('search', f"{output_folder}/best_greedy_parallel.py")]
+             ev_ops = [op for op in (evaluated if os.path.exists(eval_path) else [])
+                       if op.get('script_path') and op.get('op', 'add') != 'cut']
+-            if ev_ops:
+-                alts.append(('single', max(ev_ops, key=lambda o: o.get('iou', 0.0))['script_path']))
++            # Fallbacks that do not depend on composing booleans: the three best
++            # single candidates and the best whole-part section extrusion
++            # (scored against the input, so a valid one survives a failed search).
++            ev_ops.sort(key=lambda o: -o.get('iou', 0.0))
++            for k, op in enumerate(ev_ops[:3]):
++                alts.append(('single' if k == 0 else f'single{k + 1}', op['script_path']))
++            sec = [op for op in ev_ops if '_section_' in os.path.basename(op['script_path'])]
++            if sec and sec[0] not in ev_ops[:3]:
++                alts.append(('section', sec[0]['script_path']))
+             exec_record = exec_verify.verify(os.path.abspath(final_script_output),
+                                              os.path.abspath(reference_gt_path),
+                                              os.path.abspath(f"{output_folder}/exec_verify"), alts)
+@@ -1324,6 +1334,15 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
+             shutil.copy2(exec_record['stl'], final_output)
+             print(f"   ✓ delivered '{exec_record['chosen']}' program and its executed shape")
+             final_iou = exec_record['variants'][exec_record['chosen']]['iou_exec']
++            if not exec_record.get('chosen_valid'):
++                print(f"   ⚠️  no variant is OCC-valid: validity-gated result 0")
++        else:
++            # Nothing built (or verification raised): the outputs left in place
++            # are the unverified mesh-scored model, so the gated result is 0.
++            exec_record['chosen_valid'] = False
++            exec_record['validity_gated_iou'] = 0.0
++            exec_record['delivered_unverified'] = True
++            print(f"   ✗ no variant builds: delivering the unverified search output, validity-gated result 0")
+         log_event("exec_verify", stl=stl_path, record=exec_record)
+     iou_duration = time.time() - iou_start
+ 
+@@ -1542,6 +1561,7 @@ def main():
+         os.environ['CADFIT_EVEN_ODD'] = '1'
+         os.environ['CADFIT_MIN_LOOP_AREA'] = '1e-4'
+         os.environ['CADFIT_DENSIFY_REVOLVE_SPLIT'] = '1'
++        os.environ['CADFIT_ARC_LINE_FALLBACK'] = '1'
+     os.environ['CADFIT_SECTION_EXTRUDE'] = '1' if args.section_extrude else '0'
+     os.environ['CADFIT_SWEEP_LOFT'] = '1' if args.sweep_loft else '0'
+     os.environ['CADFIT_CUT_PHASE'] = '1' if args.cut_phase else '0'
+diff --git a/split_loops.py b/split_loops.py
+index a8bcbe9..2fd7a0e 100644
+--- a/split_loops.py
++++ b/split_loops.py
+@@ -137,7 +137,7 @@ def is_loop_contained_in_loop(inner_loop: List[List[float]], outer_loop: List[Li
+                 
+                 # Consider contained if most points (>80%) are inside
+                 return inside_count / len(inner_2d[:-1]) > 0.8
+-            except:
++            except Exception:
+                 return False
+                 
+     except Exception as e:
+@@ -199,7 +199,7 @@ def group_contained_loops(loops: List[List[List[float]]], origin: List[float], n
+                     loop_areas.append(0)
+             else:
+                 loop_areas.append(0)
+-        except:
++        except Exception:
+             loop_areas.append(0)
+     
+     # Sort loops by area (largest first - these are likely outer loops)
+diff --git a/tests/test_v2_fixes.py b/tests/test_v2_fixes.py
+new file mode 100644
+index 0000000..6988f7f
+--- /dev/null
++++ b/tests/test_v2_fixes.py
+@@ -0,0 +1,154 @@
++"""Regressions for the CADFit++ v2 review (run_20261019_e1c2d949, round 1).
++
++  .venv/bin/python -m pytest -q tests/test_v2_fixes.py
++"""
++import os
++import sys
++import time
++
++import numpy as np
++import pytest
++import trimesh
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++ROOT = os.path.dirname(HERE)
++sys.path.insert(0, ROOT)
++sys.path.insert(0, os.path.join(ROOT, 'agent'))
++import cad_tools  # noqa: E402
++import cadquery_ops  # noqa: E402
++import exec_verify  # noqa: E402
++import skills  # noqa: E402
++from fit_primitives import _arc_degenerate  # noqa: E402
++
++MESHES = os.path.join(HERE, 'meshes')
++
++
++# ---------- exec cache (finding 1) ----------
++def test_exec_cache_after_remove_matches_fresh_execution(tmp_path, monkeypatch):
++    """add / add / remove / add: the reply must describe the program now assembled
++    (the id()-keyed cache could return the removed step's record)."""
++    monkeypatch.setattr(cad_tools, 'EXEC', True)
++    ws = cad_tools.CadWorkspace(os.path.join(MESHES, 'plate_hole.stl'), str(tmp_path / 'w'))
++    big = "result = cq.Workplane('XY').box(2.0, 1.2, 0.3)\n"
++    ws.add_code(big)
++    bad = ws.add_code("result = cq.Workplane('XY').box(0.2, 0.2, 0.2).translate((3, 0, 0))\n")
++    ws.remove_step(bad['step'])
++    good = ws.add_code("result = cq.Workplane('XY').box(0.5, 0.5, 0.3)\n", mode='cut')
++    ws._exec_cache.clear()
++    fresh = ws._exec()
++    assert abs(good['program_iou'] - round(fresh['iou'], 4)) < 1e-4, (good, fresh)
++
++
++def test_answer_metadata_describes_delivered_program(tmp_path, monkeypatch):
++    monkeypatch.setattr(cad_tools, 'EXEC', True)
++    ws = cad_tools.CadWorkspace(os.path.join(MESHES, 'plate_hole.stl'), str(tmp_path / 'w'))
++    ws.add_code("result = cq.Workplane('XY').box(2.0, 1.2, 0.3)\n")
++    assert ws.answer_steps() is ws.best_exec[1]
++
++
++# ---------- exec_verify selection (finding 2) ----------
++def test_choose_prefers_any_valid_program():
++    recs = {'original': {'built': True, 'valid': False, 'iou_exec': 0.99},
++            'fused': {'built': True, 'valid': True, 'iou_exec': 0.90},
++            'single': {'built': True, 'valid': True, 'iou_exec': 0.60}}
++    assert exec_verify.choose(recs) == 'fused'
++
++
++def test_choose_without_valid_programs_takes_best_built():
++    recs = {'original': {'built': True, 'valid': False, 'iou_exec': 0.7},
++            'fused': {'built': False, 'valid': False, 'iou_exec': 0.0}}
++    assert exec_verify.choose(recs) == 'original'
++    assert exec_verify.choose({'a': {'built': False}}) is None
++
++
++# ---------- deadline (finding 3) ----------
++def test_session_timeout_is_not_swallowed_by_generic_handlers():
++    """Geometry stages catch Exception and continue; the deadline must still stop the call."""
++    def stage():
++        for _ in range(200):
++            try:
++                time.sleep(0.01)
++            except Exception:  # what greedy_search's axis refinement does
++                pass
++        return 'finished'
++    t0 = time.time()
++    res, err = cad_tools.run_until(time.time() + 0.1, stage)
++    assert res is None and 'time limit' in err
++    assert time.time() - t0 < 0.5
++
++
++def test_run_until_past_deadline_does_not_call():
++    called = []
++    res, err = cad_tools.run_until(time.time() - 1, lambda: called.append(1))
++    assert err and not called
++
++
++# ---------- revolve emission (finding 4) ----------
++def _revolve_script(actions, x_axis):
++    return cadquery_ops.generate_cadquery_revolve_script(
++        actions, (x_axis, 0.0, 0.0), (x_axis, 1.0, 0.0), 360.0, '/tmp/unused.stl',
++        origin=(0, 0, 0), normal=(0, 0, 1), xdir=(1, 0, 0))
++
++
++def test_revolve_rejects_circle_crossing_axis():
++    """00941601 refine sketch 9: a fitted r=112.7 circle whose leftmost point is
++    1.06e-3 past the axis (only the circle centre was checked before)."""
++    actions = ['sketch.moveTo(112.98129, 0.5)', 'sketch.circle(112.68804)']
++    assert 'raise ValueError' in _revolve_script(actions, 0.294312)
++
++
++def test_revolve_rejects_arc_bulging_across_axis():
++    # Half profile whose closing arc's end points are on the axis but whose middle bulges 0.05 across.
++    actions = ['sketch.moveTo(0.0, 0.0)', 'sketch.lineTo(0.5, 0.0)', 'sketch.lineTo(0.5, 1.0)',
++               'sketch.lineTo(0.0, 1.0)', 'sketch = sketch.threePointArc((-0.05, 0.5), (0.0, 0.0))']
++    assert 'raise ValueError' in _revolve_script(actions, 0.0)
++
++
++def test_revolve_on_axis_profile_builds():
++    """Split profile with its closing edge on the axis (within rounding): accepted and builds."""
++    import cadquery as cq
++    actions = ['sketch.moveTo(0.00003, 0.0)', 'sketch.lineTo(0.5, 0.0)', 'sketch.lineTo(0.5, 1.0)',
++               'sketch.lineTo(-0.00002, 1.0)', 'sketch.close()']
++    script = _revolve_script(actions, 0.0)
++    assert 'raise ValueError' not in script
++    ns = {'cq': cq}
++    exec(script.replace("cq.exporters.export(result, '/tmp/unused.stl')", ''), ns)
++    vol = ns['result'].val().Volume()
++    assert abs(vol - np.pi * 0.25) < 0.01 * np.pi * 0.25
++
++
++def test_revolve_recovers_rotated_translated_shaft(tmp_path, monkeypatch):
++    """Shaft about an oblique axis away from the origin: the v2 revolve hint gives the
++    slice containing the axis, and fit_revolve must rebuild the shaft there."""
++    import cadquery as cq
++    shaft = (cq.Workplane('XZ').polyline([(0, 0), (0.6, 0), (0.6, 0.5), (0.35, 0.5), (0.35, 1.6), (0, 1.6)])
++             .close().revolve(360, (0, 0, 0), (0, 1, 0))
++             .rotate((0, 0, 0), (1, 0, 0), 35).rotate((0, 0, 0), (0, 0, 1), 20).translate((0.3, -0.2, 0.1)))
++    stl = str(tmp_path / 'shaft_rot.stl')
++    cq.exporters.export(shaft, stl, tolerance=0.002, angularTolerance=0.05)
++    monkeypatch.setattr(skills, '_EXEC', True)
++    w = skills.SkillWorkspace(stl, str(tmp_path / 'work'))
++    hints = w._revolve_hints()['revolve_axes']
++    assert hints, 'no revolve axis found for a shaft'
++    h = hints[0]
++    sk = w.extract_sketch(h['slice_containing_axis']['normal'], h['slice_containing_axis']['offset'])['sketches']
++    sid = max(sk, key=lambda s: s['outer_area'])['id']
++    # The sketch's own axis search tries only its plane's 0°/90° directions: no axis here.
++    assert not w.fit_revolve(sid)['candidates']
++    out = w.fit_revolve(sid, axis_point=h['axis_point'], axis_direction=h['axis_direction'])
++    assert out['candidates'], out
++    best = max(out['candidates'], key=lambda c: c['precision'] * c['coverage'])
++    assert best['precision'] > 0.95 and best['coverage'] > 0.95, best
++    assert abs(np.dot(best['axis_direction'], h['axis_direction'])) > 0.99, (best, h)
++
++
++# ---------- degenerate arcs ----------
++def test_collinear_arc_is_emitted_as_line():
++    """00642725 sketch 1: threePointArc through collinear points, which OCC refuses."""
++    import cadquery as cq
++    from OCP.StdFail import StdFail_NotDone
++    start, mid, end = (0.35302, -0.13224), (0.38295, -0.10231), (0.41272, -0.07254)
++    assert _arc_degenerate(start, mid, end)
++    with pytest.raises((StdFail_NotDone, Exception)):
++        cq.Workplane('XY').moveTo(*start).threePointArc(mid, end)
++    assert not _arc_degenerate((1.0, 0.0), (0.0, 1.0), (-1.0, 0.0))

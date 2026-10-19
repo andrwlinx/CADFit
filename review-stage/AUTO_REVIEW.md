@@ -92,3 +92,83 @@ Verbatim in review-stage/REVIEWER_MEMORY.md, "run_20261018_3f681321 / Round 1".
 
 ### Status
 - Pending: dev check of v2 arm on fresh (local), held-out runs (ORCD, needs `ssh -fN orcd`).
+
+---
+
+# Auto review loop — CADFit++ v2, continued (run_20261019_e1c2d949)
+
+Started 2026-10-19 13:10. Previous run run_20261018_3f681321 was stale (state timestamp > 24 h) and is archived as
+REVIEW_STATE.run_20261018_3f681321.stale.json. Backend probe: Copilot-native challenge exit 3 (no Copilot root
+session) → codex. Reviewer: Codex gpt-6-astra xhigh, fresh thread 01a15522-2119-7033-b0b4-d4a27983fd3f, given
+review-stage/REVIEWER_MEMORY.md as its memory. Goal (user): more research, further improve the system and tools.
+Difficulty: medium.
+
+## Round 1 (2026-10-19 13:15)
+
+### Assessment (Summary)
+- Score: 4/10
+- Verdict: not ready (hold the held-out evaluation)
+- Key criticisms: (1) tools-v2 exec cache keyed by id() returns a removed step's record; answer metadata from
+  ws.best; (2) exec_verify prefers an invalid program that beats the best valid one by > 0.005, and a failed
+  verification leaves the unverified output; (3) deadline: TimeoutError swallowed by `except Exception` in
+  geometry stages, candidate subprocess survives, policy has no in-tool deadline and accepts on mesh IoU;
+  (4) revolve crossing check ignores circle radii / arc extrema (00941601 refine sketch 9); (5) agentsk_score
+  hard-codes fresh references (KeyError on fresh2), score.py drops never-started parts, freeze covers only
+  top-level modules; (6) no early valid incumbent; refinement acceptance on the decimated mesh; attribution
+  controls and an unsupported "skills not planning" inference.
+
+### Reviewer Raw Response
+Verbatim: review-stage/ROUND1_run_20261019_e1c2d949.response.md (also appended to REVIEWER_MEMORY.md);
+trace .aris/traces/auto-review-loop/2026-10-19_run01/001-round-1-review.
+
+### Research (parallel)
+Literature scan review-stage/LIT_SCAN_2026-10-19.md (37 arXiv IDs verified): CADFather (2610.09127) already has
+execution-aware selection with per-call executed feedback and original-mesh sections; what remains ours is OCC
+BRep-level validity and *repair* (fused rewrite) instead of discarding, plus the matched-budget tool/policy study.
+Top cheap ideas: repair ladder before discarding (ShapeFix → fuzzy booleans → fused), axis fit from normals,
+local edits on the delivered program, thin-wall handling.
+
+### Actions Taken (commit e72cc73; ledger A-051..A-059)
+1. exec cache keyed by program text; answer metadata from the delivered program (agents, policy).
+2. exec_verify: best valid program always; best built only if none valid (`chosen_valid`, `validity_gated_iou`);
+   failed verification recorded `delivered_unverified`, gated 0; fallback pool + top-3 singles + best section.
+3. `cad_tools.run_until` / `SessionTimeout(BaseException)`; candidate process group killed on any interruption;
+   4 bare excepts in geometry narrowed; policy uses the same deadline, reserves 5 min for assembly, and under
+   tools v2 accepts a trial only on executed-IoU gain of a valid program.
+4. Revolve: emitted curves sampled (arcs, circles, splines); crossing ≤ 2e-4 → axis moved; larger → candidate
+   fails with a reason. New: fit_revolve takes a given in-plane axis (tools v2) — an oblique shaft got no
+   candidate before.
+5. Degenerate three-point arcs emitted as lines (--shared-fixes / tools v2): 2 real dev failures verified collinear.
+6. Refinement acceptance/volume ratios on the original mesh under --score-original.
+7. Evaluation: full git-archive freezes per arm / agents / policy / scoring; agentsk_score references
+   parametrized; score.py counts never-started parts (`not_run`) and reports gated IoU(CAD) + judge info;
+   submit plan adds code/codesec v2 controls; skills v1 vs v2 labelled a package comparison.
+8. NARRATIVE_REPORT: removed the "skills, not planning" inference.
+
+### Results
+- tests: 27 passed (16 old + 11 new regressions: cache add/remove/add, valid-first choose, timeout through
+  `except Exception`, circle/arc crossing rejection, on-axis profile builds, rotated+translated shaft, collinear arc).
+- smoke (00589302, v2 flags + exec-verify): delivered 'original' valid 0.9484; revolve: 6 candidates rejected
+  with a reason (previously 11 opaque BRep failures).
+- policy smoke (tools v2, 3 min): deadline hit at the limit inside a tool call; assembly still delivered a valid
+  executed 0.974.
+- Dev diagnosis (local, HEAD a299bef): candidate build failures on 11 dev2 parts — 32/46 revolve
+  (BRep_API, mostly junk: 1e-4 circles, discs about tangent axes), 6/46 degenerate arcs.
+- ORCD dev3 (a299bef, d0/dx/v2 on fresh, job 26375744): running; partial.
+
+### Status
+- Continuing to round 2 (code review of the fixes) while dev3 runs; dev4 (dx/v2 at e72cc73) once ORCD is reachable.
+
+## Round 2 — REVIEW_UNAVAILABLE (2026-10-19 ~15:00)
+
+The round-2 Codex call (thread 01a15522-…) failed: "You've hit your usage limit … try again at Oct 24th, 2026
+5:05 PM." No other cross-family reviewer is configured (manual/oracle/agy absent; Copilot-native unbound), so no
+round-2 verdict exists. The loop is paused at round 1 (4/10, not ready); fixes in e72cc73 are unreviewed.
+
+### Experiments while the reviewer is unavailable (user: keep experimenting, hold fresh2)
+- dev3 (a299bef; d0/dx/v2 on fresh, ORCD 26375744), partial 35/60: the old margin rule delivered an invalid program on
+  2 parts where a valid one existed (00232213: invalid 0.8725 over fused valid 0.8609; 00365747: invalid 0.9556
+  over single valid 0.8936) — the round-1 finding 2, observed.
+- 4af3aa8: ShapeFix repair pass (A-060); 00232213 → `original_repair` valid 0.8725.
+- dev4 (4af3aa8; dx/v2 on fresh, ORCD 26392902) queued; scoring of dev3+dev4 with --cad from the frozen 4af3aa8
+  tree (26392922, after both) → bench/runs/dev34_scores.json.
