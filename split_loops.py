@@ -137,7 +137,7 @@ def is_loop_contained_in_loop(inner_loop: List[List[float]], outer_loop: List[Li
                 
                 # Consider contained if most points (>80%) are inside
                 return inside_count / len(inner_2d[:-1]) > 0.8
-            except:
+            except Exception:
                 return False
                 
     except Exception as e:
@@ -199,7 +199,7 @@ def group_contained_loops(loops: List[List[List[float]]], origin: List[float], n
                     loop_areas.append(0)
             else:
                 loop_areas.append(0)
-        except:
+        except Exception:
             loop_areas.append(0)
     
     # Sort loops by area (largest first - these are likely outer loops)

@@ -86,6 +86,12 @@ def main():
     ap.add_argument('--mem-cap-gb', type=float, default=None,
                     help='address-space cap per scoring worker; a part over it is recorded as judge_error')
     ap.add_argument('--out', default=os.path.join(RUNS, 'agentsk_scores.json'))
+    ap.add_argument('--ref-scores', default=os.path.join(RUNS, 'fresh_scores.json'),
+                    help='score.py output of the pipeline arms on this cohort')
+    ap.add_argument('--ref-arms', nargs='*', default=['fresh_beamkh', 'fresh_beamsec'],
+                    help='arm keys of --ref-scores reported as pipeline references (e.g. h2_d0 h2_v2)')
+    ap.add_argument('--section-control', default=os.path.join(RUNS, 'fresh_section_control.json'),
+                    help="section_control.py output on this cohort ('' to omit)")
     ap.add_argument('--toolsets', nargs='+', default=['skills', 'code'])
     ap.add_argument('--models', nargs='+', default=None, help='default: every MODELS key (the declared panel)')
     ap.add_argument('--policy-dir', default=os.path.join(RUNS, 'agentsk_policy'),
@@ -124,12 +130,15 @@ def main():
         scored.update(score_all(heavy, 1))
     res = {c: {p: {**scored.get((c, p), ZERO), **meta[(c, p)]} for p in parts} for c in conds}
     # Pipeline references (frozen runs, same judge): arms and the best-of section control.
-    ref = json.load(open(os.path.join(RUNS, 'fresh_scores.json')))
-    for arm in ('fresh_beamkh', 'fresh_beamsec'):
-        res[f'pipeline/{arm[6:]}'] = {p: ref[arm].get(p, ZERO) for p in parts}
-    sc = json.load(open(os.path.join(RUNS, 'fresh_section_control.json')))
-    res['pipeline/best_of_beam_section'] = {p: {'iou': sc[p]['best_of'], 'iou_cad': sc[p]['best_of_cad']}
-                                            for p in parts}
+    # A part a reference run has no record for scores as missing (0), never silently dropped.
+    ref = json.load(open(a.ref_scores))
+    for arm in a.ref_arms:
+        name = arm.split('_', 1)[1] if '_' in arm else arm
+        res[f'pipeline/{name}'] = {p: ref[arm].get(p, ZERO) for p in parts}
+    if a.section_control:
+        sc = json.load(open(a.section_control))
+        res['pipeline/best_of_beam_section'] = {
+            p: ({'iou': sc[p]['best_of'], 'iou_cad': sc[p]['best_of_cad']} if p in sc else ZERO) for p in parts}
     json.dump({'parts': parts, 'conditions': res}, open(a.out, 'w'), indent=1)
     print(f'\n{"condition":<36} {"n":>3} {"IoU":>7} {"IoU(CAD)":>9} {"CAD bad":>8} {"calls":>6}')
     for c, r in res.items():

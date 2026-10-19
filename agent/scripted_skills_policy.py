@@ -27,6 +27,7 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from skills import SkillWorkspace  # noqa: E402
+from cad_tools import EXEC, run_until  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRESH = os.path.join(ROOT, 'bench', 'cadbench', 'fresh')
@@ -43,16 +44,28 @@ class Budget(Exception):
 
 
 def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3, reserve=8, charge_trials=False,
-             agent_economy=False):
+             agent_economy=False, reserve_minutes=5.0):
     t0 = time.time()
     ws = SkillWorkspace(gt, os.path.join(out, 'work'))
     calls = []
+    # Same deadline rule as an agent episode under harness v2: tool subprocess
+    # timeouts are capped by the time left, in-process skills are interrupted.
+    deadline = t0 + 60 * max_minutes
+    ws.deadline = deadline
 
     def call(name, assembly=False, **args):
-        # Analysis may not use the last `reserve` calls: they are kept for assembly.
-        if len(calls) >= max_calls - (0 if assembly else reserve) or time.time() - t0 > 60 * max_minutes:
+        # Analysis may not use the last `reserve` calls or the last `reserve_minutes`:
+        # they are kept for assembly (an agent assembles as it goes; this policy at the end).
+        until = deadline if assembly else deadline - 60 * reserve_minutes
+        if len(calls) >= max_calls - (0 if assembly else reserve) or time.time() > until:
             raise Budget()
-        res = {} if name == 'trial' else getattr(ws, name)(**args)
+        if name == 'trial':
+            res = {}
+        else:
+            res, err = run_until(until, getattr(ws, name), **args)
+            if err:
+                calls.append({'name': name, 'args': args, 't': round(time.time() - t0, 1), 'error': err})
+                raise Budget()
         calls.append({'name': name, 'args': args, 't': round(time.time() - t0, 1),
                       'error': res.get('error') if isinstance(res, dict) else None})
         return res
@@ -63,9 +76,9 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3
         cands = sorted(ws.candidates, key=lambda c: -ws.candidates[c]['iou'])
         if not cands:
             return
-        call('add_candidate', assembly=True, id=cands[0])
+        r0 = call('add_candidate', assembly=True, id=cands[0])
         if agent_economy:
-            return assemble_interface(cands)
+            return assemble_interface(cands, r0)
         if charge_trials:
             return assemble_charged(cands)
         while True:
@@ -107,14 +120,17 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3
                         used.add(c)
                         improved = True
 
-    def assemble_interface(cands):
+    def assemble_interface(cands, r0):
         """Agent economy (review round 1): trials go through the agent's own tools.
         A trial is add_candidate (1 call; its reply reports the new IoU, and under
         tools v2 what the program builds); a trial that does not gain min_gain is
         undone with remove_step (1 more call). First improving trial kept, in order
-        of candidate IoU, adds then cuts, until a full pass gains nothing."""
+        of candidate IoU, adds then cuts, until a full pass gains nothing. Under
+        tools v2 the gain is in the executed program's IoU and the trial program
+        must be valid (the answer is the best executed valid program)."""
         nonlocal trials
         used = {cands[0]}
+        cur = r0.get('program_iou', 0.0) if r0.get('program_valid') else 0.0
         improved = True
         while improved:
             improved = False
@@ -124,11 +140,17 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3
                         continue
                     trials += 1
                     r = call('add_candidate', assembly=True, id=c, mode=mode)
-                    gain = r.get('iou_after', 0) - r.get('iou_before', 0)
-                    ok = gain > min_gain and r.get('program_valid', True)
+                    if 'step' not in r:
+                        continue
+                    if EXEC:
+                        ok = bool(r.get('program_valid')) and r.get('program_iou', 0.0) - cur > min_gain
+                    else:
+                        ok = r.get('iou_after', 0) - r.get('iou_before', 0) > min_gain
                     if ok:
                         used.add(c)
                         improved = True
+                        if EXEC:
+                            cur = r['program_iou']
                     else:
                         call('remove_step', assembly=True, step=r['step'])
 
@@ -159,8 +181,8 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3
         stop = 'budget'
     stl = ws.export(out)
     result = {'model': 'scripted-skills-policy', 'toolset': 'skills', 'gt': gt, 'init': None, 'init_iou': 0.0,
-              'best_iou': ws.best[0], 'n_steps': len(ws.best[1]),
-              'sources': [s['source'] for s in ws.best[1]], 'modes': [s['mode'] for s in ws.best[1]],
+              'best_iou': ws.best[0], 'n_steps': len(ws.answer_steps()),
+              'sources': [s['source'] for s in ws.answer_steps()], 'modes': [s['mode'] for s in ws.answer_steps()],
               'tool_calls': len(calls), 'trial_evaluations': trials, 'stop': stop, 'seconds': round(time.time() - t0, 1),
               'n_candidates': len(ws.candidates), 'n_sketches': len(ws.sketches), 'calls': calls, 'stl': stl,
               'target_n_faces': info['n_faces'] if calls else None,
@@ -182,6 +204,7 @@ def main():
     ap.add_argument('--agent-economy', action='store_true',
                     help='assembly trials through add_candidate/remove_step, paid like an agent (round-1 review)')
     ap.add_argument('--reserve', type=int, default=8, help='calls kept for assembly')
+    ap.add_argument('--reserve-minutes', type=float, default=5.0, help='minutes kept for assembly')
     ap.add_argument('--smoke', action='store_true', help='first 3 study parts into /tmp/agentsk_policy')
     a = ap.parse_args()
     parts = a.parts or study_parts(a.stl_dir)
@@ -194,7 +217,8 @@ def main():
             r = json.load(open(os.path.join(out, 'result.json')))
         else:
             r = run_part(os.path.join(a.stl_dir, p + '.stl'), out, a.max_calls, a.max_minutes,
-                         reserve=a.reserve, charge_trials=a.charge_trials, agent_economy=a.agent_economy)
+                         reserve=a.reserve, charge_trials=a.charge_trials, agent_economy=a.agent_economy,
+                         reserve_minutes=a.reserve_minutes)
         summary[p] = {k: r[k] for k in ('best_iou', 'tool_calls', 'stop', 'seconds', 'n_candidates')}
         if 'best_exec_iou' in r:
             summary[p]['best_exec_iou'] = r['best_exec_iou']

@@ -1,0 +1,15 @@
+{
+  "run_id": "run_20261014_49c46147",
+  "round": 2,
+  "threadId": "01a13934-b637-7593-9656-6b4e23834789",
+  "reviewer_backend": "codex",
+  "reviewer_model": "gpt-6-astra",
+  "executor_model": "claude-opus-5-5",
+  "requires_external_acquittal": false,
+  "status": "in_progress",
+  "difficulty": "medium",
+  "last_score": null,
+  "last_verdict": "not ready",
+  "pending_experiments": ["workstation:bench/overnight.sh (fresh_beamkh, agent study, fresh_base/rules/beamsec, scoring, section control)", "mac:p3test rescore with fixed judge + CAD replay"],
+  "timestamp": "2026-10-14T11:15:00"
+}

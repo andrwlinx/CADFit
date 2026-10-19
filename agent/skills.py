@@ -51,6 +51,8 @@ os.environ.setdefault('CADFIT_TRANSLATION_MAXPTS', '400')
 _T_RANGE, _T_STEP = (-2.0, 2.0), 0.01
 _N_SURFACE = 100000
 _gs.DENSIFY_REVOLVE_SPLIT = True  # see greedy_search.py: fixes revolve profiles split at the axis
+if _EXEC:  # tools v2: degenerate arcs emitted as lines (fit_primitives.py)
+    os.environ.setdefault('CADFIT_ARC_LINE_FALLBACK', '1')
 # Revolve analysis as run_pipeline.py calls it: 0 and 90 degree trial rotations, CD threshold 0.01.
 _ANGLES, _ANGLE_STEP, _REV_CD = (0.0, 90.0), 90.0, 0.01
 _SEED = 0
@@ -233,7 +235,8 @@ class SkillWorkspace(CadWorkspace):
                                                         'revolve may still fit single features'}
         return {'revolve_axes': hints,
                 'revolve_note': 'the part has near rotational symmetry about these axes: extract_sketch with '
-                                'slice_containing_axis, then fit_revolve on its sketches'}
+                                'slice_containing_axis, then fit_revolve on its sketches with this axis_point '
+                                'and axis_direction'}
 
     @_quiet
     def extract_sketch(self, normal, offset):
@@ -316,22 +319,38 @@ class SkillWorkspace(CadWorkspace):
                 **({} if ids else {'note': 'no extent of this sketch matches the target surface'}), **self._fail_report(key)}
 
     @_quiet
-    def fit_revolve(self, sketch):
-        """analyze_revolve_axis.py on one sketch -> symmetry axes -> revolve candidates."""
+    def fit_revolve(self, sketch, axis_point=None, axis_direction=None):
+        """analyze_revolve_axis.py on one sketch -> symmetry axes -> revolve candidates.
+        With axis_point/axis_direction (e.g. a detect_directions revolve axis) that axis
+        is used instead: the sketch's own axis search tries only its plane's two
+        in-plane directions, so it misses axes oblique to them."""
         try:
             e = self._sketch(sketch)
         except KeyError as err:
             return {'error': str(err)}
-        key = ('revolve', sketch)
+        given = axis_point is not None and axis_direction is not None
+        if given:
+            try:
+                ap, ad = np.asarray(axis_point, float).reshape(3), np.asarray(axis_direction, float).reshape(3)
+            except ValueError:
+                return {'error': 'axis_point and axis_direction must be 3 numbers each'}
+            nrm = np.asarray(e['normal'], float)
+            if np.linalg.norm(ad) < 1e-9 or abs(ad @ nrm) > 0.05 * np.linalg.norm(ad) * np.linalg.norm(nrm):
+                return {'error': "the axis must lie in the sketch's plane (axis_direction perpendicular to its normal)"}
+        key = ('revolve', sketch) + ((tuple(_r(ap)), tuple(_r(ad))) if given else ())
         if key not in self._fits:
             idx = int(sketch[1:])
-            folder = os.path.join(self.workdir, 'revolve')
-            os.makedirs(folder, exist_ok=True)
-            mesh_data = {'vertices': self.gt_mesh.vertices, 'faces': self.gt_mesh.faces}
             entry = {k: v for k, v in e.items() if k != 'actions'}
-            _ara.process_single_sketch((idx, entry, self._surface_points(), mesh_data, folder,
-                                        _ANGLES, _ANGLE_STEP, False, _REV_CD))
-            configs = _gs.load_revolve_analysis(folder, idx)
+            if given:
+                configs = [{'mean_point': ap.tolist(), 'axis_direction': (ad / np.linalg.norm(ad)).tolist(),
+                            'axis_idx': f'given{len(self._fits)}', 'rotation_type': 'given'}]
+            else:
+                folder = os.path.join(self.workdir, 'revolve')
+                os.makedirs(folder, exist_ok=True)
+                mesh_data = {'vertices': self.gt_mesh.vertices, 'faces': self.gt_mesh.faces}
+                _ara.process_single_sketch((idx, entry, self._surface_points(), mesh_data, folder,
+                                            _ANGLES, _ANGLE_STEP, False, _REV_CD))
+                configs = _gs.load_revolve_analysis(folder, idx)
             ids = []
             for op in (_gs.create_revolve_from_analysis(entry, configs, idx) if configs else []):
                 stem = f'sketch_{idx}_revolve_{op.get("axis_idx", len(ids))}'
@@ -396,7 +415,11 @@ SKILL_SPECS = [
      'surface and build an extrusion candidate for each. Candidates are scored against the target (iou, precision, '
      'coverage) and listed by list_candidates; add them with add_candidate.', {'sketch': {'type': 'string'}}),
     ('fit_revolve', 'CADFit stage: find symmetry axes of a sketch for which revolving its half-profile matches the '
-     'target, and build a revolve candidate for each (scored like fit_extrude).', {'sketch': {'type': 'string'}}),
+     'target, and build a revolve candidate for each (scored like fit_extrude).' + (
+         " Optionally pass axis_point and axis_direction (an axis in the sketch's plane, e.g. a revolve axis from "
+         'detect_directions) to revolve about that axis instead of searching.' if _EXEC else ''),
+     # tools v1 (the earlier study) had no axis arguments
+     {'sketch': {'type': 'string'}, **({'axis_point': _VEC, 'axis_direction': _VEC} if _EXEC else {})}),
     ('section_extrude', "CADFit stage: take the target's cross-section in the plane axis=offset (default: middle) and "
      'extrude it through the full extent of the target along that axis. One scored candidate.',
      {'axis': {'type': 'string', 'enum': ['x', 'y', 'z']}, 'offset': {'type': 'number'}}),

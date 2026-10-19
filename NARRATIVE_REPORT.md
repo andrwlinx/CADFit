@@ -130,7 +130,8 @@ Results (mean IoU(CAD), 20 parts, failures = 0; `results/agent_skills.json`):
   different; within ~0.05. (Not an equivalence test.)
 - LLM vs no-LLM policy: Gemma +0.083 (95% CI [+0.013, +0.188]; Bonferroni [0.000, +0.233]; sign test
   10–4, p = 0.18) — not significant after correction. Others: −0.080 … +0.044, none significant.
-  So the skills, not the LLM's planning, explain most of the gain at this sample size.
+  At this sample size the study does not distinguish LLM planning from the scripted policy: the
+  skills-vs-code gap is shown, any planning contribution is neither shown nor ruled out.
 - Failure modes: Qwen3.8 at 16k/turn ends 16/20 code episodes with no tool call (thinking exhausts the
   turn). Post-hoc 32k sensitivity (decided after seeing outcomes; not part of the study): skills
   0.730 → 0.783, code 0.307 → 0.541. gpt-oss-20b: 3 episodes lost to leaked harmony tokens (HTTP 500).

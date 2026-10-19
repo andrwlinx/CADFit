@@ -738,7 +738,7 @@ def is_loop_contained_in_loop_planar(inner_loop, outer_loop, origin, normal, tol
                 
                 # Consider contained if most points (>80%) are inside
                 return inside_count / len(inner_2d[:-1]) > 0.8
-            except:
+            except Exception:
                 return False
                 
     except ImportError:
@@ -772,7 +772,7 @@ def group_contained_loops_planar(loops, origin, normal):
                 loop_areas.append(area)
             else:
                 loop_areas.append(0)
-        except:
+        except Exception:
             loop_areas.append(0)
     
     # Sort loops by area (largest first - these are likely outer loops)

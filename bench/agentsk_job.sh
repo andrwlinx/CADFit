@@ -12,7 +12,7 @@
 set -u
 KEY=$1; shift
 P=/orcd/pool/007/a_lin
-cd $P/cadfit
+cd ${CADFIT_SRC:-$P/cadfit}  # a frozen source tree (bench/v2_submit.sh) or the checkout
 export HF_HOME=$P/cache/huggingface AGENT_API_KEY=local
 # vLLM JIT-compiles some kernels: nvcc from the CUDA module matching torch (cu130);
 # sampling without FlashInfer's JIT sampler.

@@ -233,7 +233,14 @@ def _score_one(job):
         rec, stl = cad_replay(recon)
         r['cad_built'], r['cad_valid'] = rec['built'], rec['valid']
         r['cad_error'] = rec.get('error')
-        r['iou_cad'] = judge(gt, stl)['iou'] if rec['built'] and os.path.exists(stl) else 0.0
+        if rec['built'] and os.path.exists(stl):
+            jc = judge(gt, stl)
+            r['iou_cad'] = jc['iou']
+            r['cad_judge'] = {k: v for k, v in jc.items() if k != 'iou'}  # method, MC se/samples
+        else:
+            r['iou_cad'] = 0.0
+        # Primary metric (ledger A-050): executed CAD IoU, 0 unless built and OCC-valid.
+        r['iou_cad_gated'] = r['iou_cad'] if rec['valid'] else 0.0
     return name, part, r
 
 
@@ -271,8 +278,13 @@ def score_runs(run_dirs, stl_dir, jobs=1, cad=False):
             recon = next((os.path.join(run, part, r) for r in RUN_RECON
                           if os.path.exists(os.path.join(run, part, r))), None)
             if recon is None:
-                if os.path.isdir(os.path.join(run, part)):
-                    res[part] = {'iou': 0.0, 'cd': None, 'valid': False}
+                # Every part of the cohort is in the denominator: a part that
+                # crashed (folder, no model) or never started (no folder, e.g. a
+                # job cut short) scores 0, and the record says which.
+                res[part] = {'iou': 0.0, 'cd': None, 'valid': False,
+                             'status': 'no_model' if os.path.isdir(os.path.join(run, part)) else 'not_run'}
+                if cad:
+                    res[part].update(iou_cad=0.0, iou_cad_gated=0.0, cad_built=False, cad_valid=False)
                 continue
             res[part] = None  # filled in below
             todo.append((name, part, os.path.join(stl_dir, part + '.stl'), recon, JUDGE, cad))
@@ -319,8 +331,11 @@ def score_runs(run_dirs, stl_dir, jobs=1, cad=False):
             if cad:
                 ic = [res[p].get('iou_cad', 0.0) for p in common]
                 bad = sum(not res[p].get('cad_valid', False) for p in common)
-                line += f'  mean IoU(CAD) {sum(ic) / len(ic):.4f}  CAD invalid/unbuilt {bad}'
-            print(line)
+                ig = [res[p].get('iou_cad_gated', 0.0) for p in common]
+                line += (f'  mean IoU(CAD) {sum(ic) / len(ic):.4f}  gated {sum(ig) / len(ig):.4f}'
+                         f'  CAD invalid/unbuilt {bad}')
+            nr = sum(res[p].get('status') == 'not_run' for p in res)
+            print(line + (f'  NOT RUN {nr}' if nr else ''))
     return out
 
 

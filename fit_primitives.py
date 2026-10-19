@@ -177,6 +177,16 @@ def sample_arc_points(cx: float, cy: float, r: float, a0: float, a1: float, n_sa
     return np.column_stack([x, y])
 
 
+def _arc_degenerate(start, mid, end, tol: float = 2e-5) -> bool:
+    """True when the arc through start/mid/end, as emitted (rounded to 5
+    decimals), has a coincident pair or a sagitta below tol (OCC then fails)."""
+    a, b, c = (np.round(np.asarray(p, dtype=float), 5) for p in (start, mid, end))
+    if min(np.linalg.norm(b - a), np.linalg.norm(c - b), np.linalg.norm(c - a)) < tol:
+        return True
+    ab, ac = b - a, c - a
+    return abs(ab[0] * ac[1] - ab[1] * ac[0]) / np.linalg.norm(ac) < tol
+
+
 def try_circle_arc(pts: np.ndarray, rms_tol: float, min_pts: int = 7):
     if pts.shape[0] < min_pts:
         return None
@@ -802,7 +812,16 @@ def primitives_to_instances(primitives: List[Tuple], original_pts: np.ndarray = 
                 p2_y = cy + r * np.sin(angles[25])
                 p2 = (float(p2_x), float(p2_y))
             
-            #     continue
+            # OCC cannot build an arc through (nearly) collinear or coincident
+            # points (GC_MakeArcOfCircle "no result"), which killed the whole
+            # candidate; after rounding to the emitted 5 decimals such an arc
+            # is a line to within the emitted precision. Part of --shared-fixes
+            # (CADFIT_ARC_LINE_FALLBACK=1) so the dx arm stays d0 + exec-verify.
+            if (os.environ.get('CADFIT_ARC_LINE_FALLBACK') == '1' and prev_point is not None
+                    and _arc_degenerate(prev_point, p2, p3)):
+                inst.append("sketch.lineTo({}, {})".format(round(float(p3[0]), 5), round(float(p3[1]), 5)))
+                prev_point = p3_point
+                continue
             inst.append("sketch = sketch.threePointArc(({}, {}), ({}, {}))".format(round(float(p2[0]), 5), round(float(p2[1]), 5), round(float(p3[0]), 5), round(float(p3[1]), 5)))
             prev_point = p3_point
     if spline_pts:

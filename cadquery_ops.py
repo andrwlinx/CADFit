@@ -386,6 +386,71 @@ def cut_loop_at_symmetry_axis(loop_2d, axis_angle_deg):
     return cut_points.tolist()
 
 
+# Largest crossing of the revolve axis by the emitted profile that is treated as
+# numerical (split points on the axis, 5-decimal rounding); larger ones reject.
+REVOLVE_AXIS_TOL = 2e-4
+
+
+def _profile_points(sketch_actions, n_arc=32, n_circle=64):
+    """Dense 2D samples of the curves a sketch action list emits (moveTo, lineTo,
+    threePointArc through the current point, circle at the current point, spline)."""
+    import re as _re
+    num = r'([-0-9.e]+)'
+    out, cur = [], None
+    for a in sketch_actions:
+        for line in a.split('\n'):
+            line = line.strip()
+            m = _re.search(r'moveTo\(\s*' + num + r'\s*,\s*' + num, line) or \
+                _re.search(r'lineTo\(\s*' + num + r'\s*,\s*' + num, line)
+            if m:
+                cur = np.array([float(m.group(1)), float(m.group(2))])
+                out.append(cur)
+                continue
+            m = _re.search(r'threePointArc\(\(\s*' + num + r'\s*,\s*' + num + r'\s*\)\s*,\s*\(\s*' + num
+                           + r'\s*,\s*' + num, line)
+            if m:
+                p2 = np.array([float(m.group(1)), float(m.group(2))])
+                p3 = np.array([float(m.group(3)), float(m.group(4))])
+                out.extend(_arc_samples(cur, p2, p3, n_arc) if cur is not None else [p2, p3])
+                cur = p3
+                continue
+            m = _re.search(r'circle\(\s*' + num, line)
+            if m and cur is not None:
+                r = float(m.group(1))
+                t = np.linspace(0, 2 * np.pi, n_circle, endpoint=False)
+                out.extend(cur + r * np.c_[np.cos(t), np.sin(t)])
+                continue
+            if 'spline(' in line:
+                q = [np.array([float(x), float(y)]) for x, y in
+                     _re.findall(r'\(\s*' + num + r'\s*,\s*' + num + r'\s*\)', line)]
+                out.extend(q)
+                if q:
+                    cur = q[-1]
+    return np.asarray(out, dtype=float).reshape(-1, 2)
+
+
+def _arc_samples(p1, p2, p3, n):
+    """Points on the circular arc from p1 through p2 to p3 (the chord if collinear)."""
+    ax, ay = p1
+    bx, by = p2
+    cx, cy = p3
+    dd = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by))
+    if abs(dd) < 1e-14:
+        return [p1, p2, p3]
+    ux = ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx * cx + cy * cy) * (ay - by)) / dd
+    uy = ((ax * ax + ay * ay) * (cx - bx) + (bx * bx + by * by) * (ax - cx) + (cx * cx + cy * cy) * (bx - ax)) / dd
+    c = np.array([ux, uy])
+    r = np.linalg.norm(p1 - c)
+    t1, t2, t3 = (np.arctan2(p[1] - uy, p[0] - ux) for p in (p1, p2, p3))
+    # Sweep from t1 to t3 in the direction that passes t2.
+    ccw = (t3 - t1) % (2 * np.pi)
+    if (t2 - t1) % (2 * np.pi) <= ccw:
+        ts = t1 + np.linspace(0, ccw, n)
+    else:
+        ts = t1 - np.linspace(0, (t1 - t3) % (2 * np.pi), n)
+    return list(c + r * np.c_[np.cos(ts), np.sin(ts)])
+
+
 def generate_cadquery_revolve_script(sketch_actions: List[str], axis_start: Tuple[float, float, float], 
                                      axis_end: Tuple[float, float, float], angle_degrees: float, 
                                      output_stl_path: str, origin=None, normal=None, xdir=None) -> str:
@@ -463,21 +528,28 @@ def generate_cadquery_revolve_script(sketch_actions: List[str], axis_start: Tupl
     # OCC refused the revolve), and the out-of-plane part tilts the axis off the
     # sketch plane. With CADFIT_FIX_REVOLVE_ORIGIN (default on): 6 decimals, no
     # out-of-plane nudge, and an in-plane shift that puts the whole profile on one side.
+    reject = None
     if os.environ.get('CADFIT_FIX_REVOLVE_ORIGIN', '1') == '1':
-        import re as _re
         a0 = np.asarray(axis_start, float)[:2]
         a1 = np.asarray(axis_end, float)[:2]
         d = a1 - a0
         d = d / (np.linalg.norm(d) + 1e-12)
         nrm = np.array([-d[1], d[0]])
-        pts = [tuple(map(float, m)) for a in sketch_actions for m in
-               _re.findall(r'(?:moveTo|lineTo|threePointArc)\(\(?\s*([-0-9.e]+)\s*,\s*([-0-9.e]+)', a)]
-        sd = np.array([(np.asarray(q) - a0) @ nrm for q in pts]) if pts else np.zeros(0)
+        # Signed distance of the emitted curves (arcs and circles sampled densely,
+        # not just their written end points) to the axis line.
+        pts = _profile_points(sketch_actions)
+        sd = (pts - a0) @ nrm if len(pts) else np.zeros(0)
         side = float(np.sign(sd[np.argmax(np.abs(sd))])) if len(sd) else 0.0
+        pen = float(max(0.0, (-side * sd).max())) if len(sd) else 0.0
+        if pen > REVOLVE_AXIS_TOL:
+            # The profile is on both sides of the axis by more than rounding: a
+            # fitted curve that bulges across it (00941601 refine sketch 9: a
+            # r=112.7 circle crossing by 1.1e-3). Moving the axis would build a
+            # different (often huge) solid, so the candidate fails with a reason.
+            reject = f'revolve profile crosses the axis by {pen:.2e} (tolerance {REVOLVE_AXIS_TOL:.0e})'
         # Move the axis just past the profile's deepest crossing (the split points
         # sit on it within ~3e-5), toward the side with no profile.
-        pen = float(max(0.0, (-side * sd).max())) if len(sd) else 0.0
-        shift = -(pen + 1e-6) * side * nrm
+        shift = -(min(pen, REVOLVE_AXIS_TOL) + 1e-6) * side * nrm
         s0 = (a0[0] + shift[0], a0[1] + shift[1], float(axis_start[2]))
         s1 = (a1[0] + shift[0], a1[1] + shift[1], float(axis_end[2]))
         axis_start_str = f"({s0[0]:.6f}, {s0[1]:.6f}, {s0[2]:.6f})"
@@ -486,6 +558,8 @@ def generate_cadquery_revolve_script(sketch_actions: List[str], axis_start: Tupl
         axis_start_str = f"({round(axis_start[0], 3)+1e-3}, {round(axis_start[1], 3)+1e-3}, {round(axis_start[2], 3)+1e-3})"
         axis_end_str = f"({round(axis_end[0], 3)+1e-3}, {round(axis_end[1], 3)+1e-3}, {round(axis_end[2], 3)+1e-3})"
     
+    if reject:
+        script_lines.append(f"raise ValueError({reject!r})")
     script_lines.append(f"result = {sketch_name}.revolve(angleDegrees={round(angle_degrees, 3)}, axisStart={axis_start_str}, axisEnd={axis_end_str})")
     script_lines.append(f"cq.exporters.export(result, '{output_stl_path}')")
 
@@ -662,7 +736,9 @@ def execute_cadquery_script(script_content: str, output_stl_path: str, save_scri
                                 stderr=subprocess.PIPE, text=True, start_new_session=True)
         try:
             out, err = proc.communicate(timeout=60)
-        except subprocess.TimeoutExpired:
+        except BaseException:
+            # Timeout, or the caller's deadline alarm (agent tools): never leave
+            # the script's process group running.
             try:
                 os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
             except Exception:

@@ -1,0 +1,1 @@
+(Round 1 response saved verbatim in RESEARCH_REVIEW.md appendix; threadId 01a13934-b637-7593-9656-6b4e23834789)

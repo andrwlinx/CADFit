@@ -28,7 +28,7 @@ import urllib.error
 import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from cad_tools import CadWorkspace  # noqa: E402
+from cad_tools import CadWorkspace, run_until  # noqa: E402
 from skills import SkillWorkspace, openai_tools  # noqa: E402
 
 _INTRO = """You are a CAD engineer. Your job: build a solid CAD model that matches a target 3D part as closely \
@@ -306,23 +306,9 @@ HARNESS_V2 = os.environ.get('CADFIT_AGENT_EXEC') == '1'
 
 
 def call_tool_until(ws, name, args, allowed, deadline):
-    """call_tool, interrupted by SIGALRM at the session deadline."""
-    import signal
-    left = deadline - time.time()
-    if left <= 0:
-        return {'error': 'session time limit reached'}
-
-    def _alarm(*_):
-        raise TimeoutError('session time limit reached during the tool call')
-    old = signal.signal(signal.SIGALRM, _alarm)
-    signal.setitimer(signal.ITIMER_REAL, left)
-    try:
-        return call_tool(ws, name, args, allowed)
-    except TimeoutError as e:
-        return {'error': str(e)}
-    finally:
-        signal.setitimer(signal.ITIMER_REAL, 0)
-        signal.signal(signal.SIGALRM, old)
+    """call_tool, interrupted by SIGALRM at the session deadline (cad_tools.run_until)."""
+    res, err = run_until(deadline, call_tool, ws, name, args, allowed)
+    return {'error': err} if err else res
 
 
 def main():
@@ -470,8 +456,8 @@ def main():
 
     stl = ws.export(a.out)
     result = {'model': a.model, 'toolset': a.toolset, 'gt': a.gt, 'init': a.init, 'init_iou': init_iou,
-              'best_iou': ws.best[0], 'n_steps': len(ws.best[1]),
-              'sources': [s['source'] for s in ws.best[1]], 'modes': [s['mode'] for s in ws.best[1]],
+              'best_iou': ws.best[0], 'n_steps': len(ws.answer_steps()),
+              'sources': [s['source'] for s in ws.answer_steps()], 'modes': [s['mode'] for s in ws.answer_steps()],
               'tool_calls': calls, 'stop': stop, 'seconds': round(time.time() - t0, 1),
               **({'tools': 'v2', 'best_exec_iou': ws.best_exec[0], 'best_exec_valid': ws.best_exec[2],
                   'n_exec': ws.n_exec} if HARNESS_V2 else {}),

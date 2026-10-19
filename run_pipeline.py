@@ -1062,7 +1062,10 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
         print(f"✗ CadQuery script not found: {current_cadquery_script}")
         return
     
-    # Iterative refinement loop
+    # Iterative refinement loop. Residual meshes (the proposals' source) come
+    # from the copy the search ran on, like sketch extraction; with
+    # --score-original, acceptance and volume ratios use the undecimated input.
+    refine_gt = reference_gt_path if ANALYSIS_OPTS.get('score_original') else stl_path
     print(f"\n🔧 REFINEMENT PHASE: Removing over-reconstruction and adding under-reconstruction")
     print(f"{'='*80}")
 
@@ -1088,7 +1091,7 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
             break
         
         over_volume = compute_mesh_volume(over_recon_path)
-        gt_mesh_volume = compute_mesh_volume(stl_path, normalize=True)
+        gt_mesh_volume = compute_mesh_volume(refine_gt, normalize=True)
         over_ratio = over_volume / gt_mesh_volume if gt_mesh_volume > 0 else 0
         print(f"Over-reconstruction volume: {over_ratio:.6f}")
 
@@ -1135,7 +1138,7 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
             new_reconstruction = f"{output_folder}/reconstruction_cut_{iteration}.stl"
             
             if os.path.exists(new_reconstruction):
-                if guard_refine and not _refine_improves(stl_path, current_reconstruction, new_reconstruction, 'cut'):
+                if guard_refine and not _refine_improves(refine_gt, current_reconstruction, new_reconstruction, 'cut'):
                     break
                 current_reconstruction = new_reconstruction
                 current_cadquery_script = cut_script_path
@@ -1158,7 +1161,7 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
             break
         
         under_volume = compute_mesh_volume(under_recon_path)
-        gt_mesh_volume = compute_mesh_volume(stl_path, normalize=True)
+        gt_mesh_volume = compute_mesh_volume(refine_gt, normalize=True)
         under_ratio = under_volume / gt_mesh_volume if gt_mesh_volume > 0 else 0
         print(f"Under-reconstruction volume: {under_ratio:.6f}")
         
@@ -1201,7 +1204,7 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
             new_reconstruction = f"{output_folder}/reconstruction_union_{iteration}.stl"
             
             if os.path.exists(new_reconstruction):
-                if guard_refine and not _refine_improves(stl_path, current_reconstruction, new_reconstruction, 'union'):
+                if guard_refine and not _refine_improves(refine_gt, current_reconstruction, new_reconstruction, 'union'):
                     continue
                 current_reconstruction = new_reconstruction
                 current_cadquery_script = union_script_path
@@ -1309,8 +1312,15 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
             alts = [('search', f"{output_folder}/best_greedy_parallel.py")]
             ev_ops = [op for op in (evaluated if os.path.exists(eval_path) else [])
                       if op.get('script_path') and op.get('op', 'add') != 'cut']
-            if ev_ops:
-                alts.append(('single', max(ev_ops, key=lambda o: o.get('iou', 0.0))['script_path']))
+            # Fallbacks that do not depend on composing booleans: the three best
+            # single candidates and the best whole-part section extrusion
+            # (scored against the input, so a valid one survives a failed search).
+            ev_ops.sort(key=lambda o: -o.get('iou', 0.0))
+            for k, op in enumerate(ev_ops[:3]):
+                alts.append(('single' if k == 0 else f'single{k + 1}', op['script_path']))
+            sec = [op for op in ev_ops if '_section_' in os.path.basename(op['script_path'])]
+            if sec and sec[0] not in ev_ops[:3]:
+                alts.append(('section', sec[0]['script_path']))
             exec_record = exec_verify.verify(os.path.abspath(final_script_output),
                                              os.path.abspath(reference_gt_path),
                                              os.path.abspath(f"{output_folder}/exec_verify"), alts)
@@ -1324,6 +1334,15 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
             shutil.copy2(exec_record['stl'], final_output)
             print(f"   ✓ delivered '{exec_record['chosen']}' program and its executed shape")
             final_iou = exec_record['variants'][exec_record['chosen']]['iou_exec']
+            if not exec_record.get('chosen_valid'):
+                print(f"   ⚠️  no variant is OCC-valid: validity-gated result 0")
+        else:
+            # Nothing built (or verification raised): the outputs left in place
+            # are the unverified mesh-scored model, so the gated result is 0.
+            exec_record['chosen_valid'] = False
+            exec_record['validity_gated_iou'] = 0.0
+            exec_record['delivered_unverified'] = True
+            print(f"   ✗ no variant builds: delivering the unverified search output, validity-gated result 0")
         log_event("exec_verify", stl=stl_path, record=exec_record)
     iou_duration = time.time() - iou_start
 
@@ -1542,6 +1561,7 @@ def main():
         os.environ['CADFIT_EVEN_ODD'] = '1'
         os.environ['CADFIT_MIN_LOOP_AREA'] = '1e-4'
         os.environ['CADFIT_DENSIFY_REVOLVE_SPLIT'] = '1'
+        os.environ['CADFIT_ARC_LINE_FALLBACK'] = '1'
     os.environ['CADFIT_SECTION_EXTRUDE'] = '1' if args.section_extrude else '0'
     os.environ['CADFIT_SWEEP_LOFT'] = '1' if args.sweep_loft else '0'
     os.environ['CADFIT_CUT_PHASE'] = '1' if args.cut_phase else '0'

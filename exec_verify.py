@@ -21,10 +21,11 @@ This stage runs after search, on the final program:
      (bench/cad_replay.py: shape + per-solid OCC validity, tessellation) and the
      tessellation is judged against the target mesh — the method's input — with
      the robust judge (bench/score.py).
-  3. Selection: the highest executed IoU among valid programs, unless an
-     invalid program beats it by more than VALID_MARGIN (then the highest
-     executed IoU overall). The chosen program and its executed tessellation
-     become the final outputs, so the saved STL is what the program builds.
+  3. Selection: the highest executed IoU among valid programs; only when no
+     program is valid, the highest executed IoU among those that build (the
+     record says so: `chosen_valid` False, validity-gated score 0). The chosen
+     program and its executed tessellation become the final outputs, so the
+     saved STL is what the program builds.
 
 Programs whose composition can be rewritten get both variants; fallbacks
 passed as `alternatives` (pre-refinement program, best single candidate) are
@@ -43,7 +44,6 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # modules; bench/ then comes from the checkout the runner starts in.
 if not os.path.exists(os.path.join(HERE, 'bench', 'cad_replay.py')):
     HERE = os.getcwd()
-VALID_MARGIN = 0.005   # an invalid program must beat the best valid one by this much
 TIMEOUT = 600
 
 HELPERS = '''
@@ -132,24 +132,22 @@ def execute(prog, out_stl, target):
         sys.path.insert(0, os.path.join(HERE, 'bench'))
         import score
         try:
-            rec['iou_exec'] = float(score.robust_iou(target, out_stl)['iou'])
+            j = score.robust_iou(target, out_stl)
+            rec['iou_exec'] = float(j['iou'])
+            rec['judge'] = {k: j[k] for k in ('method', 'se') if k in j}
         except Exception as e:  # noqa: BLE001
             rec['judge_error'] = f'{type(e).__name__}: {e}'
     return rec
 
 
 def choose(recs):
-    """recs: {name: record}. Best valid unless an invalid one wins by VALID_MARGIN."""
+    """recs: {name: record}. The best valid program; the best built one only if none is valid."""
     built = {k: r for k, r in recs.items() if r.get('built')}
     if not built:
         return None
-    best = max(built, key=lambda k: built[k]['iou_exec'])
     valid = {k: r for k, r in built.items() if r.get('valid')}
-    if valid:
-        bv = max(valid, key=lambda k: valid[k]['iou_exec'])
-        if built[best]['iou_exec'] <= valid[bv]['iou_exec'] + VALID_MARGIN:
-            return bv
-    return best
+    pool = valid or built
+    return max(pool, key=lambda k: pool[k]['iou_exec'])
 
 
 def verify(program, target, out_dir, alternatives=()):
@@ -180,13 +178,16 @@ def verify(program, target, out_dir, alternatives=()):
         open(py, 'w').write(code)
         jobs[name] = (py, os.path.join(out_dir, f'exec_{name}.stl'), target)
     from concurrent.futures import ProcessPoolExecutor
-    with ProcessPoolExecutor(max_workers=len(jobs)) as ex:
+    # Up to ~10 variants; each replay + judge can take a few GB on a big target.
+    with ProcessPoolExecutor(max_workers=min(len(jobs), 6)) as ex:
         futs = {k: ex.submit(execute, *v) for k, v in jobs.items()}
         recs = {k: f.result() for k, f in futs.items()}
     pick = choose(recs)
     for name, same in alias.items():
         recs[name] = {'same_program_as': same}
-    return {'chosen': pick, 'n_rewritten_ops': n_ops, 'variants': recs,
+    ok = bool(pick) and bool(recs[pick].get('valid'))
+    return {'chosen': pick, 'chosen_valid': ok, 'n_rewritten_ops': n_ops, 'variants': recs,
+            'validity_gated_iou': recs[pick]['iou_exec'] if ok else 0.0,
             'program': os.path.join(out_dir, f'exec_{pick}.py') if pick else None,
             'stl': os.path.join(out_dir, f'exec_{pick}.stl') if pick else None}
 

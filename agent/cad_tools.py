@@ -44,6 +44,34 @@ EXEC = os.environ.get('CADFIT_AGENT_EXEC') == '1'
 from exec_verify import HELPERS as _HELPERS  # noqa: E402
 
 
+class SessionTimeout(BaseException):
+    """Session deadline reached inside a tool. A BaseException so the generic
+    `except Exception` handlers of the geometry stages (axis refinement, slice
+    fallbacks) cannot swallow it and keep working past the deadline."""
+
+
+def run_until(deadline, fn, *args, **kwargs):
+    """fn(*args, **kwargs), interrupted by SIGALRM at `deadline` (epoch seconds).
+    Returns (value, None), or (None, error message) once the deadline passes.
+    The same rule bounds agent episodes and the scripted policy."""
+    import signal
+    left = deadline - time.time()
+    if left <= 0:
+        return None, 'session time limit reached'
+
+    def _alarm(*_):
+        raise SessionTimeout('session time limit reached during the tool call')
+    old = signal.signal(signal.SIGALRM, _alarm)
+    signal.setitimer(signal.ITIMER_REAL, left)
+    try:
+        return fn(*args, **kwargs), None
+    except SessionTimeout as e:
+        return None, str(e)
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, old)
+
+
 def _r(x, n=_R):
     return np.round(np.asarray(x, dtype=float), n).tolist()
 
@@ -121,7 +149,7 @@ class CadWorkspace:
         self.history = []      # (time, iou, n_steps) after every model change
         self.best = (0.0, [])  # best IoU seen and the steps that gave it
         self.best_exec = (-1.0, [], False)  # tools v2: best executed (iou, steps, valid)
-        self._exec_cache = {}  # tuple of step ids -> executed record
+        self._exec_cache = {}  # program text -> executed record
         self.n_exec = 0
         self.deadline = None   # set by the agent loop: tool subprocesses stop there
         if init_script:
@@ -235,13 +263,15 @@ class CadWorkspace:
         steps = self.steps if steps is None else steps
         if not steps or not any(s['mode'] == 'add' for s in steps):
             return None
-        key = tuple(id(s) for s in steps)
+        # Keyed by the program text: it fully determines the executed result,
+        # while step dicts' id()s are reused after remove_step (stale replies).
+        key = self.program(steps)
         if key in self._exec_cache:
             return self._exec_cache[key]
         self.n_exec += 1
         tag = f'exec{self.n_exec}'
         py, stl = (os.path.join(self.workdir, f'{tag}.py'), os.path.join(self.workdir, f'{tag}.stl'))
-        open(py, 'w').write(self.program(steps))
+        open(py, 'w').write(key)
         rec = {'built': False, 'valid': False, 'iou': 0.0}
         argv = [PY, os.path.join(ROOT, 'bench', 'cad_replay.py'), py, stl]
         t = self._time_left(180)
@@ -464,12 +494,19 @@ class CadWorkspace:
                 'target': polys(self.gt_mesh), 'model': polys(_mesh_of(m) if m is not None else None)}
 
     # ---------- output ----------
+    def answer_steps(self):
+        """The steps of the delivered answer: under tools v2 the best executed
+        program (valid first), otherwise the best mesh-scored model."""
+        if EXEC and self.best_exec[0] >= 0:
+            return self.best_exec[1]
+        return self.best[1]
+
     def export(self, out_dir, steps=None):
         """Write the model as STL (exact booleans) and as one CadQuery script."""
         if EXEC and steps is None:
             # tools v2: the answer is the best executed program (valid first), and
             # the STL is what that program builds.
-            steps = self.best_exec[1] if self.best_exec[0] >= 0 else self.best[1]
+            steps = self.answer_steps()
             os.makedirs(out_dir, exist_ok=True)
             open(os.path.join(out_dir, 'agent_model.py'), 'w').write(
                 self.program(steps, export_name='agent_model_cq.stl'))
