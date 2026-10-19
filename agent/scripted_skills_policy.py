@@ -42,7 +42,8 @@ class Budget(Exception):
     pass
 
 
-def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3, reserve=8, charge_trials=False):
+def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3, reserve=8, charge_trials=False,
+             agent_economy=False):
     t0 = time.time()
     ws = SkillWorkspace(gt, os.path.join(out, 'work'))
     calls = []
@@ -63,6 +64,8 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3
         if not cands:
             return
         call('add_candidate', assembly=True, id=cands[0])
+        if agent_economy:
+            return assemble_interface(cands)
         if charge_trials:
             return assemble_charged(cands)
         while True:
@@ -104,6 +107,31 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3
                         used.add(c)
                         improved = True
 
+    def assemble_interface(cands):
+        """Agent economy (review round 1): trials go through the agent's own tools.
+        A trial is add_candidate (1 call; its reply reports the new IoU, and under
+        tools v2 what the program builds); a trial that does not gain min_gain is
+        undone with remove_step (1 more call). First improving trial kept, in order
+        of candidate IoU, adds then cuts, until a full pass gains nothing."""
+        nonlocal trials
+        used = {cands[0]}
+        improved = True
+        while improved:
+            improved = False
+            for mode in ('add', 'cut'):
+                for c in cands:
+                    if c in used:
+                        continue
+                    trials += 1
+                    r = call('add_candidate', assembly=True, id=c, mode=mode)
+                    gain = r.get('iou_after', 0) - r.get('iou_before', 0)
+                    ok = gain > min_gain and r.get('program_valid', True)
+                    if ok:
+                        used.add(c)
+                        improved = True
+                    else:
+                        call('remove_step', assembly=True, step=r['step'])
+
     stop = 'done'
     trials = 0  # GT-scored trial unions/cuts in the greedy assembly (not tool calls; ledger A-017)
     try:
@@ -135,7 +163,9 @@ def run_part(gt, out, max_calls=40, max_minutes=30.0, min_gain=1e-3, per_plane=3
               'sources': [s['source'] for s in ws.best[1]], 'modes': [s['mode'] for s in ws.best[1]],
               'tool_calls': len(calls), 'trial_evaluations': trials, 'stop': stop, 'seconds': round(time.time() - t0, 1),
               'n_candidates': len(ws.candidates), 'n_sketches': len(ws.sketches), 'calls': calls, 'stl': stl,
-              'target_n_faces': info['n_faces'] if calls else None}
+              'target_n_faces': info['n_faces'] if calls else None,
+              **({'tools': 'v2', 'best_exec_iou': ws.best_exec[0], 'best_exec_valid': ws.best_exec[2]}
+                 if hasattr(ws, 'best_exec') and ws.best_exec[0] >= 0 else {})}
     json.dump(result, open(os.path.join(out, 'result.json'), 'w'), indent=1)
     return result
 
@@ -149,6 +179,8 @@ def main():
     ap.add_argument('--max-minutes', type=float, default=30)
     ap.add_argument('--charge-trials', action='store_true',
                     help='budget-matched control: GT-scored assembly trials count as tool calls (A-040)')
+    ap.add_argument('--agent-economy', action='store_true',
+                    help='assembly trials through add_candidate/remove_step, paid like an agent (round-1 review)')
     ap.add_argument('--reserve', type=int, default=8, help='calls kept for assembly')
     ap.add_argument('--smoke', action='store_true', help='first 3 study parts into /tmp/agentsk_policy')
     a = ap.parse_args()
@@ -162,8 +194,10 @@ def main():
             r = json.load(open(os.path.join(out, 'result.json')))
         else:
             r = run_part(os.path.join(a.stl_dir, p + '.stl'), out, a.max_calls, a.max_minutes,
-                         reserve=a.reserve, charge_trials=a.charge_trials)
+                         reserve=a.reserve, charge_trials=a.charge_trials, agent_economy=a.agent_economy)
         summary[p] = {k: r[k] for k in ('best_iou', 'tool_calls', 'stop', 'seconds', 'n_candidates')}
+        if 'best_exec_iou' in r:
+            summary[p]['best_exec_iou'] = r['best_exec_iou']
         print(f'{p[:8]} IoU {r["best_iou"]:.4f}  calls {r["tool_calls"]}  cands {r["n_candidates"]}  '
               f'{r["seconds"]}s  stop={r["stop"]}', flush=True)
     os.makedirs(a.out, exist_ok=True)
