@@ -130,7 +130,14 @@ _client = _Client()
 
 
 def run_script(script, path=None, timeout=60.0):
-    return _client.run(script, path, timeout)
+    ok, err = _client.run(script, path, timeout)
+    if not ok and err == 'cq_worker died':
+        # One retry in a fresh child. A death is usually not the script's doing:
+        # on dev3/dev4 the node's OOM killer took the workers of parts running next
+        # to 00247424, every later candidate of those parts failed the same way,
+        # and the parts ended with "no valid operations".
+        ok, err = _client.run(script, path, timeout)
+    return ok, err
 
 
 if __name__ == '__main__':

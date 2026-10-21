@@ -164,3 +164,41 @@ def test_repair_pass_keeps_valid_solids(tmp_path):
     r = json.loads(subprocess.run([sys.executable, os.path.join(ROOT, 'bench', 'cad_replay.py'), str(prog),
                                    str(tmp_path / 'p.stl')], capture_output=True, text=True).stdout.splitlines()[-1])
     assert r['built'] and r['valid'] and r['n_solids'] == 2, r
+
+
+# ---------- dev3/dev4 infrastructure failures ----------
+def test_cq_worker_retries_after_child_death(monkeypatch):
+    """A worker killed mid-script (OOM killer) costs one retry, not the candidate."""
+    import cq_worker
+    monkeypatch.setenv('CADFIT_CQ_WORKER', '1')
+    calls = []
+
+    def run(script, path=None, timeout=60.0):
+        calls.append(script)
+        return (False, 'cq_worker died') if len(calls) == 1 else (True, '')
+    monkeypatch.setattr(cq_worker._client, 'run', run)
+    assert cq_worker.run_script('x = 1') == (True, '') and len(calls) == 2
+
+
+def test_stalled_decimation_keeps_input_without_voxelizing(tmp_path, monkeypatch):
+    """00247424: edge collapse stalls (80,168 -> 80,070 faces). The input must be kept
+    as is, never sent through trimesh's subdividing voxelizer, which exhausted memory."""
+    import fast_simplification
+    import run_pipeline
+    sphere = trimesh.creation.icosphere(subdivisions=5)  # 20,480 faces
+    stl = str(tmp_path / 'stalls.stl')
+    sphere.export(stl)
+    monkeypatch.setattr(fast_simplification, 'simplify', lambda v, f, **k: (v, f[:-10]))
+    monkeypatch.setattr(trimesh.Trimesh, 'voxelized',
+                        lambda *a, **k: (_ for _ in ()).throw(AssertionError('voxelized called')))
+    assert run_pipeline._decimate_input_if_needed(stl, str(tmp_path / 'out'), target_faces=1_000) == stl
+
+
+def test_voxel_remesh_is_in_world_coordinates():
+    pytest.importorskip('skimage')
+    import run_pipeline
+    box = trimesh.creation.box((2.0, 1.0, 0.5))
+    box.apply_translation((3.0, -1.0, 0.2))
+    r = run_pipeline._voxel_remesh(box, 0.05)
+    assert np.allclose(r.bounds, box.bounds, atol=0.1), (r.bounds, box.bounds)
+    assert abs(r.volume / box.volume - 1) < 0.25

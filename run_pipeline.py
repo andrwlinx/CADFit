@@ -896,8 +896,34 @@ def _winding_repair_if_open(stl_path: str) -> str:
         return stl_path
 
 
+def _voxel_remesh(mesh, pitch, max_points=5_000_000):
+    """Filled voxel grid of `mesh` at `pitch`, meshed by marching cubes.
+
+    Occupancy comes from area-uniform surface samples, not trimesh's
+    voxelized(), which subdivides every face until its edges are shorter than
+    the pitch: on long sliver triangles that is 4^k faces per triangle, and on
+    00247424 it grew past 100 GB until the node's OOM killer also took the
+    CadQuery workers of the parts running next to it."""
+    from trimesh.voxel import VoxelGrid
+    from trimesh.voxel.ops import sparse_to_matrix
+    n = int(np.clip(32.0 * mesh.area / pitch ** 2, 100_000, max_points))  # 8/pitch^2 left holes that fill() leaked through
+    pts, _ = trimesh.sample.sample_surface(mesh, n, seed=0)
+    pts = np.vstack([pts, mesh.vertices])
+    origin = pts.min(axis=0)
+    index = np.round((pts - origin) / pitch).astype(np.int64)
+    # Indices start at 0: origin is the minimum of the samples.
+    filled = VoxelGrid(sparse_to_matrix(index)).fill()
+    # VoxelGrid.marching_cubes returns index coordinates and ignores the grid
+    # transform (trimesh 4.x): the old m.voxelized(...).fill().marching_cubes
+    # fallback handed the pipeline a mesh scaled by 1/pitch.
+    rm = filled.marching_cubes.copy()
+    rm.apply_scale(pitch)
+    rm.apply_translation(origin)
+    return rm
+
+
 def _decimate_input_if_needed(stl_path: str, output_folder: str,
-                               target_faces: int = 30_000) -> str:
+                               target_faces: int = 30_000, stall_keep_faces: int = 300_000) -> str:
     """If the input STL has more than `target_faces`, write a decimated copy
     into `output_folder/decimated_input.stl` and return that path. Otherwise
     return the original path unchanged. All downstream sketch-extraction
@@ -936,6 +962,15 @@ def _decimate_input_if_needed(stl_path: str, output_folder: str,
             trimesh.Trimesh(vertices=v, faces=f, process=False).export(out_path)
             print(f"📉 Decimated input {n_in:,} → {len(f):,} faces (fast_simplification) → {out_path}")
             return out_path
+        # A mesh that stalls at a moderate size is kept as it is. This is what every
+        # stalled dev part already got: the voxel tier below needs scikit-image, which
+        # the ORCD env lacks, so it failed into "using original" -- but only after
+        # trimesh's voxelizer, which on 00247424 (a 0.006-thick plate of slivers)
+        # exhausted the node's memory. A pitch coarser than that plate would also
+        # thicken it 3x.
+        if len(f) <= stall_keep_faces:
+            print(f"   fast_simplification stalled at {len(f):,} faces; keeping the {n_in:,}-face input")
+            return stl_path
         # else fall through to voxel remesh — topology blocked the collapse.
         print(f"   fast_simplification stalled at {len(f):,} faces; voxel-remeshing")
     except Exception as e:
@@ -948,7 +983,7 @@ def _decimate_input_if_needed(stl_path: str, output_folder: str,
         diag = float(np.linalg.norm(m.extents))
         for res in (128, 96, 72):
             pitch = diag / res
-            rm = m.voxelized(pitch=pitch).fill().marching_cubes
+            rm = _voxel_remesh(m, pitch)
             if len(rm.faces) <= target_faces * 1.5:
                 rm.export(out_path)
                 print(f"📉 Voxel-remeshed input {n_in:,} → {len(rm.faces):,} faces (res={res}) → {out_path}")
