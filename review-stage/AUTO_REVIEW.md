@@ -193,7 +193,7 @@ round-2 verdict exists. The loop is paused at round 1 (4/10, not ready); fixes i
 | dev4_v2 − dev3_v2 (round-1 fixes) | +0.037 | [+0.001, +0.086] | 5/0 |
 | dev4_dx − dev3_dx | +0.030 | [−0.032, +0.094] | 4/1 |
 
-- In dev4 the IoU(CAD) and gated means are equal. Every built delivery was valid; the only zeros come from parts with no model. In dev3, v2 delivered invalid programs on 00232213 and 00365747 (dx as well). With the valid-first choice plus the repair pass, dev4 delivers valid programs for both (00232213 is now 0.873 from `original_repair`).
+- In dev4 the IoU(CAD) and gated means are equal. Every built delivery was valid; the only zeros come from parts with no model. In dev3, invalid programs were delivered on 00232213 (dx and v2) and 00365747 (dx). With the valid-first choice plus the repair pass, dev4 delivers valid programs for both (00232213 is now 0.873 from `original_repair`).
 - Remaining zeros:
   - 00247424 in every arm: OOM kill, exit 137. This is an infrastructure failure, not a method result.
   - 00814797 in dev4_dx: no model, exit 0. v2 delivers 0.999 on it.
