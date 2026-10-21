@@ -172,3 +172,33 @@ round-2 verdict exists. The loop is paused at round 1 (4/10, not ready); fixes i
 - 4af3aa8: ShapeFix repair pass (A-060); 00232213 → `original_repair` valid 0.8725.
 - dev4 (4af3aa8; dx/v2 on fresh, ORCD 26392902) queued; scoring of dev3+dev4 with --cad from the frozen 4af3aa8
   tree (26392922, after both) → bench/runs/dev34_scores.json.
+
+### Dev-cohort results: dev3 (a299bef) vs dev4 (4af3aa8), scored 2026-10-20 (job 26392922)
+
+`bench/runs/dev34_scores.json`. 60 dev parts (cohort `fresh`), every run scores all 60; a missing model counts as 0. Metric: validity-gated IoU(CAD). Paired bootstrap over parts (10k resamples); wins and losses count parts that differ by more than 0.005.
+
+| run | mean IoU(mesh) | mean IoU(CAD) | gated IoU(CAD) | invalid or unbuilt |
+|---|---|---|---|---|
+| dev3_d0 | 0.9048 | 0.8540 | 0.8080 | 8 |
+| dev3_dx | 0.9203 | 0.9202 | 0.8898 | 4 |
+| dev3_v2 | 0.9267 | 0.9267 | 0.9122 | 3 |
+| dev4_dx | 0.9200 | 0.9200 | 0.9200 | 2 |
+| dev4_v2 | 0.9489 | 0.9489 | 0.9489 | 1 |
+
+| contrast | Δ gated | 95% CI | wins/losses |
+|---|---|---|---|
+| dev4_v2 − dev3_d0 | +0.141 | [+0.062, +0.233] | 13/2 |
+| dev4_dx − dev3_d0 | +0.112 | [+0.045, +0.193] | 9/0 |
+| dev4_v2 − dev4_dx | +0.029 | [−0.002, +0.074] | 8/3 |
+| dev4_v2 − dev3_v2 (round-1 fixes) | +0.037 | [+0.001, +0.086] | 5/0 |
+| dev4_dx − dev3_dx | +0.030 | [−0.032, +0.094] | 4/1 |
+
+- In dev4 the IoU(CAD) and gated means are equal. Every built delivery was valid; the only zeros come from parts with no model. In dev3, v2 delivered invalid programs on 00232213 and 365747 (dx as well). With the valid-first choice plus the repair pass, dev4 delivers valid programs for both (00232213 is now 0.873 from `original_repair`).
+- Remaining zeros:
+  - 00247424 in every arm: OOM kill, exit 137. This is an infrastructure failure, not a method result.
+  - 00814797 in dev4_dx: no model, exit 0. v2 delivers 0.999 on it.
+- v2 regression: 00966049 drops from 0.950 (dx) to 0.821 (v2). Not yet diagnosed.
+- Caveats:
+  - This is the development cohort, used while fixing the code, so the effects are optimistic.
+  - The no-model outcomes (for example 00730725, 00966713) vary from run to run, so part of each Δ is run-to-run variance.
+  - The held-out fresh2 run is still on hold until the round-2 review.
