@@ -202,3 +202,24 @@ round-2 verdict exists. The loop is paused at round 1 (4/10, not ready); fixes i
   - This is the development cohort, used while fixing the code, so the effects are optimistic.
   - The no-model outcomes (for example 00730725, 00966713) vary from run to run, so part of each Δ is run-to-run variance.
   - The held-out fresh2 run is still on hold until the round-2 review.
+
+### Post-dev4 diagnosis (2026-10-21/22): the remaining dev zeros and the 00966049 "regression" are infrastructure and judge artifacts
+
+- **00247424, out of memory in every arm.**
+  - The part is a 0.006-thick plate made of sliver triangles. fast_simplification stalls (80,168 → 80,070 faces), and the voxel fallback calls trimesh's `voxelized()`. That subdivides every face down to the pitch: 4^k faces per sliver, more than 1 GB/s of memory growth.
+  - The voxel tier could never have succeeded anyway: scikit-image is missing on ORCD, and `VoxelGrid.marching_cubes` ignores the grid transform. Every stalled part therefore already fell back to the original mesh.
+  - Fix (516d08a): a stalled mesh keeps the input. The voxel tier (stall above 300k faces only) samples the surface and returns world coordinates.
+- **00730725, 00814797, 00966713: no model in some runs.**
+  - The log shows every candidate failing with `cq_worker died` from one point on.
+  - Each of these parts started while 00247424 was running or just after it, in the same chunk. The node's out-of-memory killer took their persistent CadQuery workers.
+  - So the zeros depend on scheduling, not on the arm, and part of the dev3 → dev4 difference is this noise.
+  - Fix (516d08a): one retry in a fresh worker, and the root cause above is removed.
+- **00966049, dx 0.950 vs v2 0.821: a judge artifact.**
+  - Both arms delivered the same program (coordinates differ by about 3e-5).
+  - The true IoU against the GT STEP is 0.958: exact manifold boolean of the tessellations 0.9576/0.9576, 400k-point Monte Carlo 0.9557/0.9558.
+  - The GT STL is not watertight. The exact path alpha-wrapped it (1.21× the volume) and scored the closed v2 export 0.821. The dx export had a crack, took the winding-number path, and scored 0.950.
+  - Fix (f708bb2): an open GT never takes the exact path, and the estimate samples until the union has 10k points. This affects 5 of 60 dev GTs and 26 of 300 fresh2 GTs; only watertightness was checked on fresh2, no outcomes.
+  - The judge is shared by exec_verify and the agent tools, so selection and agent feedback on open GTs change too.
+- **Next:**
+  - Re-score dev3/dev4 with the fixed judge.
+  - Run dev5: d0 = e260397 plus the infrastructure patch only (decimation and worker retry, no method change; documented), and dx and v2 at f708bb2.
