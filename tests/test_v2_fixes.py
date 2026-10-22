@@ -202,3 +202,17 @@ def test_voxel_remesh_is_in_world_coordinates():
     r = run_pipeline._voxel_remesh(box, 0.05)
     assert np.allclose(r.bounds, box.bounds, atol=0.1), (r.bounds, box.bounds)
     assert abs(r.volume / box.volume - 1) < 0.25
+
+
+def test_judge_does_not_alpha_wrap_open_ground_truth(tmp_path):
+    """00966049: a GT STL that is not watertight must not take the exact path (its
+    alpha wrap is a fatter solid); the winding-number estimate judges it."""
+    sys.path.insert(0, os.path.join(ROOT, 'bench'))
+    import score
+    plate = trimesh.creation.box((2.0, 1.3, 0.1))
+    gt = trimesh.Trimesh(plate.vertices, plate.faces[:-1], process=False)  # one triangle missing
+    assert not gt.is_watertight
+    gt.export(str(tmp_path / 'gt.stl'))
+    plate.export(str(tmp_path / 'rc.stl'))
+    j = score.robust_iou(str(tmp_path / 'gt.stl'), str(tmp_path / 'rc.stl'))
+    assert j['method'] == 'gwn-mc' and j['iou'] > 0.97, j

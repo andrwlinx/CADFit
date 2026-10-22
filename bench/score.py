@@ -103,7 +103,7 @@ def soup_iou(gt_path, recon_path, n=100000, seed=0, min_union=10000, max_chunks=
             'se': float(np.sqrt(j * (1 - j) / union)) if union else None}
 
 
-def robust_iou(gt_path, recon_path, n=40000, seed=0):
+def robust_iou(gt_path, recon_path, n=40000, seed=0, min_union=10000, max_batches=5):
     """Judge that does not depend on how clean the reconstruction's STL is.
 
     GT (a clean CADBench solid) is normalized to [-1,1]. If the reconstruction
@@ -115,9 +115,13 @@ def robust_iou(gt_path, recon_path, n=40000, seed=0):
     import numpy as np
     gt = iou.normalize_mesh(trimesh.load(gt_path, force='mesh'))
     rc = trimesh.load(recon_path, force='mesh')
+    # A GT that is not watertight gets no exact path. Its alpha wrap is a different,
+    # fatter solid: on 00966049 (a 0.104-thick plate) the wrap has 1.21x the volume,
+    # and a closed reconstruction judged against it scored 0.821, where the STEP
+    # solid gives 0.958 (exact boolean of the tessellations) and the winding-number
+    # estimate below 0.950. The same program, exported with a crack, had been judged
+    # by that estimate, so the exact-vs-MC split decided a 0.13 "regression".
     ma = iou._to_manifold(gt) if gt.is_watertight else None
-    if ma is None:
-        ma = iou._to_manifold(iou._alpha_wrap(gt))
     closed = rc.is_watertight and rc.is_winding_consistent and rc.volume > 0
     mb = None
     if closed:
@@ -128,16 +132,25 @@ def robust_iou(gt_path, recon_path, n=40000, seed=0):
             return {'iou': vols[0] / vols[1] if vols[1] > 0 else 0.0, 'method': 'exact'}
     lo = np.minimum(gt.bounds[0], rc.bounds[0]) - 0.01
     hi = np.maximum(gt.bounds[1], rc.bounds[1]) + 0.01
-    Q = np.random.default_rng(seed).uniform(lo, hi, (n, 3))
-    if gt.is_watertight:  # ray-cast containment; chunked, its memory grows with rays x hits
-        # (x triangles: 4000 rays on a 1e6-triangle GT took > 200 GB). Same labels, any chunk.
-        step = max(250, 4000 * 100_000 // max(len(gt.faces), 100_000))
-        in_gt = np.concatenate([gt.contains(Q[s:s + step]) for s in range(0, len(Q), step)])
-    else:
-        in_gt = _gwn(gt, Q) > 0.5
-    in_rc = _gwn(rc, Q) > 0.5
-    u = (in_gt | in_rc).sum()
-    return {'iou': float((in_gt & in_rc).sum() / u) if u else 0.0, 'method': 'gwn-mc'}
+    rng = np.random.default_rng(seed)
+    inter = u = 0
+    # Thin parts fill little of their box (00966049: 2,765 of 40,000 samples in the
+    # union, se 0.004): draw further batches until the union has min_union samples.
+    for _ in range(max_batches):
+        Q = rng.uniform(lo, hi, (n, 3))
+        if gt.is_watertight:  # ray-cast containment; chunked, its memory grows with rays x hits
+            # (x triangles: 4000 rays on a 1e6-triangle GT took > 200 GB). Same labels, any chunk.
+            step = max(250, 4000 * 100_000 // max(len(gt.faces), 100_000))
+            in_gt = np.concatenate([gt.contains(Q[s:s + step]) for s in range(0, len(Q), step)])
+        else:
+            in_gt = _gwn(gt, Q) > 0.5
+        in_rc = _gwn(rc, Q) > 0.5
+        inter += int((in_gt & in_rc).sum())
+        u += int((in_gt | in_rc).sum())
+        if u >= min_union:
+            break
+    j = inter / u if u else 0.0
+    return {'iou': j, 'method': 'gwn-mc', 'union_samples': u, 'se': float(np.sqrt(j * (1 - j) / u)) if u else None}
 
 
 def strict_iou(gt_path, recon_path):
