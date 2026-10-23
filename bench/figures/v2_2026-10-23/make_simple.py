@@ -95,7 +95,7 @@ def results():
     plt.close(fig)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__' and len(sys.argv) == 1:
     pipeline()
     results()
     example('00642725', '00642725_search.py', '00642725_v2.py',
@@ -105,3 +105,32 @@ if __name__ == '__main__':
             'Before: 2 broken pieces', 'After: repaired',
             [0.872512, 0.872512], 'simple_00232213.png')
     print('done')
+
+
+def open_models():
+    # 20 parts, pre-v2 tools (paper/numbers.tex: m*Code / m*Skills, agentPipeSec).
+    from matplotlib.patches import Patch
+    rows = [('Gemma-4-31B', 0.593, 0.892), ('Qwen3.6-35B', 0.465, 0.854), ('gpt-oss-120b', 0.557, 0.812),
+            ('Devstral-24B', 0.305, 0.776), ('gpt-oss-20b', 0.422, 0.732), ('Qwen3.8-27B', 0.307, 0.730)]
+    fmt = lambda v: f'{v + 1e-9:.2f}'  # 0.305 -> 0.31, as the slide text rounds
+    fig, ax = plt.subplots(figsize=(9, 4.4))
+    y = list(range(len(rows)))[::-1]
+    for yi, (name, code, ours) in zip(y, rows):
+        ax.barh(yi + 0.2, code, height=0.38, color=GREY)
+        ax.barh(yi - 0.2, ours, height=0.38, color=BLUE)
+        ax.text(code - 0.01, yi + 0.2, fmt(code), va='center', ha='right', fontsize=11, color='white', weight='bold')
+        ax.text(ours - 0.01, yi - 0.2, fmt(ours), va='center', ha='right', fontsize=11, color='white', weight='bold')
+    ax.set_yticks(y, [r[0] for r in rows], fontsize=12)
+    ax.axvline(0.904, color='black', lw=1, ls='--')
+    ax.text(0.915, -0.45, 'our pipeline\n0.90', fontsize=10.5, va='bottom')
+    ax.set_xlim(0, 1.08); ax.set_xticks([])
+    ax.spines[['top', 'right', 'bottom']].set_visible(False)
+    ax.legend(handles=[Patch(color=GREY, label='basic coding tools'), Patch(color=BLUE, label='CADFit tools')],
+              loc='lower center', bbox_to_anchor=(0.5, 1.0), ncol=2, frameon=False, fontsize=12)
+    fig.tight_layout()
+    fig.savefig(os.path.join(HERE, 'simple_open_models.png'), dpi=220)
+    plt.close(fig)
+
+
+if __name__ == '__main__' and len(sys.argv) > 1 and sys.argv[1] == 'open_models':
+    open_models()
