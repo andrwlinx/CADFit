@@ -45,43 +45,35 @@ def slide(title, bullets=(), image=None, img_top=Inches(1.3), img_h=None, bullet
     return s
 
 
-slide('CADFit v2: CAD files that actually work',
-      ['Goal: turn a 3D shape into an editable CAD program',
-       'Update, Oct 23 2026'],
-      bullets_top=Inches(1.6), size=24)
+slide('CADFit v2',
+      ['3D shape in, working CAD file out'],
+      bullets_top=Inches(1.6), size=28)
 
 slide('The problem',
-      ['The old system often produced CAD that looked right but was broken',
-       'Broken = the program fails to build, or the solid is invalid in CAD software',
-       'A broken file is useless to an engineer, so we score it as 0'],
-      bullets_top=Inches(1.6), size=24)
+      ['Old outputs often looked right but were broken',
+       'Broken files count as 0'],
+      bullets_top=Inches(1.6), size=28)
 
-slide('The fix: test every answer before handing it over',
-      ['Before, the first answer was delivered without being checked',
-       'Now: build every candidate, check it, repair it if needed, and deliver the best one that works'],
-      image='simple_pipeline.png', img_h=Inches(2.6), size=20)
+slide('The fix',
+      ['Test every answer. Fix it. Hand over one that works.'],
+      image='simple_pipeline.png', img_h=Inches(2.6), size=24)
 
-slide('Example 1: merging overlapping pieces',
-      ['The old answer stacked 208 overlapping pieces, so CAD software rejects it',
-       'v2 merges them into one clean solid'],
-      image='simple_00642725.png', img_h=Inches(4.2), size=20)
+slide('Example: merge',
+      ['208 overlapping pieces become 1 solid'],
+      image='simple_00642725.png', img_h=Inches(4.2), size=24)
 
-slide('Example 2: repairing broken pieces',
-      ['2 pieces were broken, so the whole answer counted as 0',
-       'v2 repairs them; the shape stays the same and now works'],
-      image='simple_00232213.png', img_h=Inches(4.2), size=20)
+slide('Example: repair',
+      ['2 broken pieces get fixed'],
+      image='simple_00232213.png', img_h=Inches(4.2), size=24)
 
-slide('Results so far (60 test parts)',
-      ['Score: 0.81 -> 0.95.  Broken outputs: 8 -> 1.  The improvement is statistically clear',
-       'Most of the gain comes from no longer handing over broken files'],
-      image='simple_results.png', img_h=Inches(3.9), size=20)
+slide('Results (60 parts)',
+      ['Better score, far fewer broken files'],
+      image='simple_results.png', img_h=Inches(3.9), size=24)
 
-slide('What is next',
-      ['Oct 24: outside review of the method',
-       'Then: final test on 300 new parts the system has never seen',
-       'Closest competing work (CADFather, Oct 2026) checks answers too, but does not repair broken ones',
-       'Questions: is this a strong enough angle? Which venue should we target?'],
-      bullets_top=Inches(1.6), size=24)
+slide('Next',
+      ['Outside review: Oct 24',
+       'Final test: 300 new parts'],
+      bullets_top=Inches(1.6), size=28)
 
 out = os.path.join(HERE, 'CADFit_v2_update.pptx')
 prs.save(out)
