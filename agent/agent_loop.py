@@ -345,6 +345,7 @@ def main():
     ws = (CadWorkspace(a.gt, work, a.cands, a.init) if a.toolset == 'pool' else
           SkillWorkspace(a.gt, work) if a.toolset in ('skills', 'codesec') else CadWorkspace(a.gt, work))
     init_iou = ws.best[0]
+    secs = {'setup': time.time() - t0, 'model': 0.0, 'tools': 0.0}  # where the wall time goes
     if HARNESS_V2:
         ws.deadline = t0 + 60 * a.max_minutes  # tool subprocesses stop at the session deadline
     tools = openai_tools(a.toolset)
@@ -364,6 +365,7 @@ def main():
     stop = 'budget'
     deadline = t0 + 60 * a.max_minutes
     while calls < a.max_calls and time.time() < deadline:
+        t_model = time.time()
         try:
             resp = (scripted or chat)(a.base_url, key, a.model, compact(messages, keep), tools,
                                       a.temperature, a.max_tokens, extra=a.extra_body, deadline=deadline)
@@ -378,6 +380,8 @@ def main():
                 continue
             stop = f'api error: {e}'
             break
+        finally:
+            secs['model'] += time.time() - t_model
         u = resp.get('usage') or {}
         for k in usage:
             usage[k] += u.get(k, 0) or 0
@@ -436,13 +440,16 @@ def main():
                 args = json.loads(tc['function'].get('arguments') or '{}') or {}
             except json.JSONDecodeError as e:
                 args, res = None, {'error': f'arguments are not valid JSON: {e}'}
+            t_tool = time.time()
             if args is not None:
                 res = (call_tool_until(ws, name, args, tool_names, deadline) if HARNESS_V2
                        else call_tool(ws, name, args, tool_names))
+            dt = time.time() - t_tool
+            secs['tools'] += dt
             txt = fit_json(res, MAX_RESULT_CHARS)
             tm = {'role': 'tool', 'tool_call_id': tc.get('id', ''), 'content': txt}
             messages.append(tm)
-            log.write(json.dumps({**tm, 'name': name, 'args': args}) + '\n')
+            log.write(json.dumps({**tm, 'name': name, 'args': args, 'seconds': round(dt, 2)}) + '\n')
             log.flush()
             iou_now = ws._score(ws._model())
             print(f'  [{calls:2d}] {name}({json.dumps(args)[:80]}) -> IoU {iou_now:.4f}'
@@ -459,6 +466,7 @@ def main():
               'best_iou': ws.best[0], 'n_steps': len(ws.answer_steps()),
               'sources': [s['source'] for s in ws.answer_steps()], 'modes': [s['mode'] for s in ws.answer_steps()],
               'tool_calls': calls, 'stop': stop, 'seconds': round(time.time() - t0, 1),
+              'seconds_split': {k: round(v, 1) for k, v in secs.items()},
               **({'tools': 'v2', 'best_exec_iou': ws.best_exec[0], 'best_exec_valid': ws.best_exec[2],
                   'n_exec': ws.n_exec} if HARNESS_V2 else {}),
               'usage': usage, 'cost_usd': round(cost, 4), 'stl': stl,

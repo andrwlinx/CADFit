@@ -164,7 +164,12 @@ def test_toolsets(tmp_path):
         # Agent code runs in the sandbox and builds (workdir under the pytest tmp dir).
         added = json.loads(tool_msgs[1]['content'])
         assert 'error' not in added and added['iou_after'] > 0, added
-        assert json.load(open(out / 'result.json'))['toolset'] == toolset
+        res = json.load(open(out / 'result.json'))
+        assert res['toolset'] == toolset
+        # Wall time splits into setup, model and tools; each tool message carries its own time.
+        assert set(res['seconds_split']) == {'setup', 'model', 'tools'}
+        assert sum(res['seconds_split'].values()) <= res['seconds'] + 0.5
+        assert all('seconds' in m for m in tool_msgs)
 
 
 def test_island_inside_hole(tmp_path):
