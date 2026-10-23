@@ -134,3 +134,40 @@ def open_models():
 
 if __name__ == '__main__' and len(sys.argv) > 1 and sys.argv[1] == 'open_models':
     open_models()
+
+
+def runtime():
+    # Same 20 parts. Agents: results/runtime_raw.json (result.json "seconds", 1 H100 each, 40 calls / 30 min cap).
+    # Pipeline: dev4_v2 final_iou.json "duration" on those 20 parts (gated IoU(CAD) 0.95, dev34_scores.json).
+    import json
+    import statistics as st
+    from matplotlib.patches import Patch
+    raw = json.load(open(os.path.join(mr.ROOT, 'results', 'runtime_raw.json')))
+    names = [('gemma4-31b', 'Gemma-4-31B', 0.593, 0.892), ('qwen36-35b-a3b', 'Qwen3.6-35B', 0.465, 0.854),
+             ('gptoss-120b', 'gpt-oss-120b', 0.557, 0.812), ('devstral2-24b', 'Devstral-24B', 0.305, 0.776),
+             ('gptoss-20b', 'gpt-oss-20b', 0.422, 0.732), ('qwen38-27b', 'Qwen3.8-27B', 0.307, 0.730)]
+    mins = lambda key: st.mean(r['seconds'] for p, r in raw['agents'][key].items() if p in raw['parts']) / 60
+    pipe = st.mean(raw['pipeline']['dev4_v2'][p]['seconds'] for p in raw['parts']) / 60
+    fmt = lambda v: f'{v + 1e-9:.2f}'
+    fig, ax = plt.subplots(figsize=(9, 4.6))
+    y = list(range(len(names)))[::-1]
+    for yi, (key, name, s_code, s_sk) in zip(y, names):
+        for dy, cond, s, c in ((0.2, 'code', s_code, GREY), (-0.2, 'skills', s_sk, BLUE)):
+            m = mins(f'{key}/{cond}')
+            ax.barh(yi + dy, m, height=0.38, color=c)
+            ax.text(m + 0.4, yi + dy, f'{m:.0f} min  (score {fmt(s)})', va='center', fontsize=10.5,
+                    bbox=dict(fc='white', ec='none', pad=0.5))
+    ax.set_yticks(y, [n[1] for n in names], fontsize=12)
+    ax.axvline(pipe, color='black', lw=1, ls='--')
+    ax.text(pipe + 0.3, len(names) - 0.45, f'our pipeline: {pipe:.0f} min (score 0.95)', fontsize=10.5, va='bottom')
+    ax.set_xlim(0, 42); ax.set_xlabel('average minutes per part (lower is faster)', fontsize=11)
+    ax.spines[['top', 'right']].set_visible(False)
+    ax.legend(handles=[Patch(color=GREY, label='basic coding tools'), Patch(color=BLUE, label='CADFit tools')],
+              loc='lower center', bbox_to_anchor=(0.5, 1.04), ncol=2, frameon=False, fontsize=12)
+    fig.tight_layout()
+    fig.savefig(os.path.join(HERE, 'simple_runtime.png'), dpi=220)
+    plt.close(fig)
+
+
+if __name__ == '__main__' and len(sys.argv) > 1 and sys.argv[1] == 'runtime':
+    runtime()
