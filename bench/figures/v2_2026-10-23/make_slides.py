@@ -45,50 +45,43 @@ def slide(title, bullets=(), image=None, img_top=Inches(1.3), img_h=None, bullet
     return s
 
 
-slide('CADFit++ v2: execution-verified CAD delivery',
-      ['Update, Oct 23 2026',
-       'Mesh -> CadQuery program reverse engineering',
-       'All numbers are on the 60-part development cohort; the 300-part held-out run (fresh2) comes after the external review on Oct 24'],
-      bullets_top=Inches(1.6), size=22)
+slide('CADFit v2: CAD files that actually work',
+      ['Goal: turn a 3D shape into an editable CAD program',
+       'Update, Oct 23 2026'],
+      bullets_top=Inches(1.6), size=24)
 
-slide('Why validity matters: mesh IoU hides failed CAD (pre-v2 pipeline)',
-      ['(a) Pre-v2 search arms: the reported mesh scores well while the executed program is unbuilt or OCC-invalid (red counts)',
-       '(b) Open-weight agents: CADFit skills vs code-only tools (pre-v2 tools and harness)'],
-      image='hero_pre_v2.png', img_h=Inches(4.5), size=16)
+slide('The problem',
+      ['The old system often produced CAD that looked right but was broken',
+       'Broken = the program fails to build, or the solid is invalid in CAD software',
+       'A broken file is useless to an engineer, so we score it as 0'],
+      bullets_top=Inches(1.6), size=24)
 
-slide('v2: run the programs, deliver the best valid one',
-      ['Each candidate program is executed; every solid is checked with OCC BRepCheck',
-       'Invalid solids are repaired (ShapeFix) or dropped; overlapping .add() bodies are fused',
-       'Metric: validity-gated IoU(CAD) = IoU of the delivered program, 0 if it does not build or is invalid'],
-      image='pipeline_v2.png', img_h=Inches(4.1), size=16)
+slide('The fix: test every answer before handing it over',
+      ['Before, the first answer was delivered without being checked',
+       'Now: build every candidate, check it, repair it if needed, and deliver the best one that works'],
+      image='simple_pipeline.png', img_h=Inches(2.6), size=20)
 
-slide('Example: fusing overlapping solids (part 00642725)',
-      ['The search program stacks 208 solids with .add(); 34 are OCC-invalid and the result is not one solid',
-       'v2 executes the fused rewrite: one valid solid, IoU 0.938'],
-      image='render_00642725_fuse.png', img_h=Inches(4.3), size=16)
+slide('Example 1: merging overlapping pieces',
+      ['The old answer stacked 208 overlapping pieces, so CAD software rejects it',
+       'v2 merges them into one clean solid'],
+      image='simple_00642725.png', img_h=Inches(4.2), size=20)
 
-slide('Example: repairing invalid solids (part 00232213)',
-      ['2 of 138 solids fail OCC validity, so the program scores 0 under the gate',
-       'The repair pass fixes them: same geometry, valid, IoU 0.873'],
-      image='render_00232213_repair.png', img_h=Inches(4.3), size=16)
+slide('Example 2: repairing broken pieces',
+      ['2 pieces were broken, so the whole answer counted as 0',
+       'v2 repairs them; the shape stays the same and now works'],
+      image='simple_00232213.png', img_h=Inches(4.2), size=20)
 
-slide('Development results (60 parts, dev4 run)',
-      ['Validity-gated IoU(CAD): pre-v2 code 0.808 -> v2 0.949',
-       'Paired gain +0.141, 95% CI [+0.062, +0.233], 13 parts better / 2 worse, Holm-corrected p < 0.001',
-       'Invalid or missing deliveries: 8 -> 1',
-       'Most of the gain is avoiding zeros: on parts both versions build validly, the gain is +0.035',
-       'Fixes after round-1 review: +0.037, p = 0.10 after correction (suggestive only)',
-       'Since then fixed: an out-of-memory part that killed neighbouring jobs, and a judge error on non-watertight targets',
-       'Clean re-run (dev5) with all fixes is in progress; results chart to follow'],
-      bullets_top=Inches(1.5), size=20)
+slide('Results so far (60 test parts)',
+      ['Score: 0.81 -> 0.95.  Broken outputs: 8 -> 1.  The improvement is statistically clear',
+       'Most of the gain comes from no longer handing over broken files'],
+      image='simple_results.png', img_h=Inches(3.9), size=20)
 
-slide('Related work and next steps',
-      ['Closest work: CADFather (arXiv 2610.09127, Oct 6): an agent that executes candidates and keeps the best valid one',
-       'It has no repair step and no OCC B-rep validity check; MIRAGE-CAD reports 55-70% build success, so validity is the bottleneck',
-       'Our angle: OCC validity + repair, and a controlled study of agent toolsets under matched budgets',
-       'Next: external review (Oct 24), then the 300-part held-out run for the pipeline and the open-weight agents',
-       'Questions: is this angle enough against CADFather? Target venue? Run CADFather head-to-head on CADBench?'],
-      bullets_top=Inches(1.5), size=20)
+slide('What is next',
+      ['Oct 24: outside review of the method',
+       'Then: final test on 300 new parts the system has never seen',
+       'Closest competing work (CADFather, Oct 2026) checks answers too, but does not repair broken ones',
+       'Questions: is this a strong enough angle? Which venue should we target?'],
+      bullets_top=Inches(1.6), size=24)
 
 out = os.path.join(HERE, 'CADFit_v2_update.pptx')
 prs.save(out)
