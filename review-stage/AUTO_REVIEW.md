@@ -223,3 +223,10 @@ round-2 verdict exists. The loop is paused at round 1 (4/10, not ready); fixes i
 - **Next:**
   - Re-score dev3/dev4 with the fixed judge.
   - Run dev5: d0 = e260397 plus the infrastructure patch only (decimation and worker retry, no method change; documented), and dx and v2 at f708bb2.
+
+### Detail recovered, dev3_d0 vs dev4_v2 (2026-10-24, `bench/detail_scores.py`, `results/detail_dev34.json`)
+Share of the input surface within 0.01 (0.5% of part size) of the delivered CAD, normalized frame; 0 unless the CAD builds and is OCC-valid.
+- All 60 parts, gated: d0 0.851, v2 0.964 (status d0: 52 valid, 3 invalid, 5 no CAD; v2: 59 valid, 1 no CAD = 00247424, the OOM part fixed in 516d08a).
+- The 52 parts valid in both: within 0.5% 0.982 vs 0.982, within 1% 0.991 vs 0.990, CAD surface within 0.5% of the input 0.921 vs 0.941, F-score 0.947 vs 0.958, chamfer 0.0032 vs 0.0026; 4 parts better, 4 worse (> 0.005).
+- Reading: v2 recovers the same surface detail on parts both deliver; it adds slightly less extra material; the gated gain is from delivering valid CAD. v2 lowest valid part 0.889 (00046097); 49 of 60 at >= 0.95.
+- Agent loop now records setup / model / tool seconds (2dc2571); agent-study runtimes in results/runtime_raw.json.

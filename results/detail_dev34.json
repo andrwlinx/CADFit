@@ -1,0 +1,969 @@
+{
+ "dev3_d0": {
+  "00038011_64f4a654731c4c01a8bbb127_step_240": {
+   "status": "valid",
+   "within_half": 0.989175,
+   "within_1pct": 0.99243,
+   "cad_within_half": 0.919175,
+   "fscore_half": 0.952891168417743,
+   "chamfer": 0.002863332397068598
+  },
+  "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+   "status": "valid",
+   "within_half": 0.909155,
+   "within_1pct": 0.948365,
+   "cad_within_half": 0.494015,
+   "fscore_half": 0.6401736173450117,
+   "chamfer": 0.014945621391295301
+  },
+  "00053172_3eadeb68ef0f4a56b93a1aaf_step_003": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0014216312404174915
+  },
+  "00090768_56c5bfcbe4b0344778b0a660_step_001": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.828115,
+   "fscore_half": 0.9059769215831609,
+   "chamfer": 0.004598842334497244
+  },
+  "00095369_fd1df382218e6e0f90aa941b_step_000": {
+   "status": "valid",
+   "within_half": 0.912195,
+   "within_1pct": 0.93257,
+   "cad_within_half": 0.804945,
+   "fscore_half": 0.8552206625842971,
+   "chamfer": 0.004952825247879458
+  },
+  "00101419_7fa694883d59247c8776551e_step_003": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0003241289307141504
+  },
+  "00140273_08a59d45a975b822d5536007_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0005082525810536545
+  },
+  "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0005764623957649096
+  },
+  "00154184_5735b30ee4b055a05f141e16_step_001": {
+   "status": "valid",
+   "within_half": 0.988885,
+   "within_1pct": 0.99994,
+   "cad_within_half": 0.969205,
+   "fscore_half": 0.9789461019922476,
+   "chamfer": 0.002118636749523714
+  },
+  "00161800_0bcf89a01d0d72565a0249ba_step_009": {
+   "status": "valid",
+   "within_half": 0.937265,
+   "within_1pct": 0.9762,
+   "cad_within_half": 0.99632,
+   "fscore_half": 0.965890679540853,
+   "chamfer": 0.0014854453252193844
+  },
+  "00181393_bc285ee6b12aaccfed7b9c1d_step_000": {
+   "status": "valid",
+   "within_half": 0.95291,
+   "within_1pct": 0.996105,
+   "cad_within_half": 0.842025,
+   "fscore_half": 0.894042450283715,
+   "chamfer": 0.00450761931338731
+  },
+  "00208290_7848aab8189280f5988e1bdf_step_002": {
+   "status": "valid",
+   "within_half": 0.99955,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.999495,
+   "fscore_half": 0.9995224992433888,
+   "chamfer": 0.0032179144848860164
+  },
+  "00214289_5b9f3b8de63a947b2059756a_step_008": {
+   "status": "valid",
+   "within_half": 0.984615,
+   "within_1pct": 0.99369,
+   "cad_within_half": 0.6323,
+   "fscore_half": 0.7700739550316498,
+   "chamfer": 0.0177682575486931
+  },
+  "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+   "status": "invalid",
+   "within_half": 0.0,
+   "within_1pct": 0.0,
+   "fscore_half": 0.0,
+   "ungated": {
+    "within_half": 0.93497,
+    "within_1pct": 0.954235,
+    "cad_within_half": 0.890845,
+    "fscore_half": 0.9123743091715206,
+    "chamfer": 0.0047471637440072625
+   }
+  },
+  "00246395_f7d2633917c081ba3b7e75a6_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0005414464231379272
+  },
+  "00247424_6d951cb81022130e313163ea_step_000": {
+   "status": "no_cad",
+   "within_half": 0.0,
+   "within_1pct": 0.0,
+   "fscore_half": 0.0
+  },
+  "00249450_a68e99eb4d98c0460771fdce_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0007952975773935819
+  },
+  "00256926_1c0f3eab2a7c951e43efc577_step_003": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0005851773872048132
+  },
+  "00266468_fe3404af55d9e27b491d3a02_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0007545767120345795
+  },
+  "00273535_7182205e0d848bffa1853256_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.96112,
+   "fscore_half": 0.9801745941094885,
+   "chamfer": 0.0013949163357565503
+  },
+  "00299355_002db1b41bdedfa31128c1e2_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0007192396334860418
+  },
+  "00305871_e62e071fef231dc7475cc0ed_step_004": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0014489649702601574
+  },
+  "00312587_f8c6c0107579f44a03cee7c3_step_001": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0007987720615286926
+  },
+  "00317970_978820cff49bf7ec00da570f_step_005": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.000677816968055352
+  },
+  "00354176_32dffe026b23004e82670fb7_step_002": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.99999,
+   "fscore_half": 0.999994999975,
+   "chamfer": 0.0019297242847971616
+  },
+  "00365747_58451ba8376a4d109925d2a8_step_001": {
+   "status": "invalid",
+   "within_half": 0.0,
+   "within_1pct": 0.0,
+   "fscore_half": 0.0,
+   "ungated": {
+    "within_half": 0.998735,
+    "within_1pct": 1.0,
+    "cad_within_half": 0.981755,
+    "fscore_half": 0.9901722098319102,
+    "chamfer": 0.0013074786189616562
+   }
+  },
+  "00382121_8cd0bb5b4e2d54e7239cfb11_step_001": {
+   "status": "valid",
+   "within_half": 0.96382,
+   "within_1pct": 0.968745,
+   "cad_within_half": 0.915435,
+   "fscore_half": 0.9390046180002181,
+   "chamfer": 0.0031430031874666456
+  },
+  "00492401_0645a3b965579de6bfa80267_step_000": {
+   "status": "valid",
+   "within_half": 0.96269,
+   "within_1pct": 0.996145,
+   "cad_within_half": 0.658925,
+   "fscore_half": 0.7823564881306598,
+   "chamfer": 0.011428484130743221
+  },
+  "00528181_ca079362860c563fb8b05377_step_000": {
+   "status": "valid",
+   "within_half": 0.95178,
+   "within_1pct": 0.98775,
+   "cad_within_half": 0.725505,
+   "fscore_half": 0.8233796270758994,
+   "chamfer": 0.0070726740380715365
+  },
+  "00562677_0f955758ce24893c8aa0cb99_step_002": {
+   "status": "valid",
+   "within_half": 0.898045,
+   "within_1pct": 0.953285,
+   "cad_within_half": 0.739355,
+   "fscore_half": 0.8110102125015268,
+   "chamfer": 0.005919717217898653
+  },
+  "00589302_08220b2f3dc9641b23f012b8_step_001": {
+   "status": "valid",
+   "within_half": 0.956125,
+   "within_1pct": 0.9801,
+   "cad_within_half": 0.92521,
+   "fscore_half": 0.9404134949384347,
+   "chamfer": 0.002465056487835035
+  },
+  "00630878_06994d5b0030f8d7d981349b_step_000": {
+   "status": "valid",
+   "within_half": 0.979285,
+   "within_1pct": 0.980675,
+   "cad_within_half": 0.968265,
+   "fscore_half": 0.9737438222638699,
+   "chamfer": 0.00242965108709536
+  },
+  "00634093_a327ce01f8344eaecf589eb6_step_000": {
+   "status": "valid",
+   "within_half": 0.938735,
+   "within_1pct": 0.959435,
+   "cad_within_half": 0.54006,
+   "fscore_half": 0.6856572061712408,
+   "chamfer": 0.018163203423550513
+  },
+  "00642725_384f51542e8a1ea67d2847ef_step_003": {
+   "status": "no_cad",
+   "within_half": 0.0,
+   "within_1pct": 0.0,
+   "fscore_half": 0.0
+  },
+  "00657371_8bb4e08000f183834c3c6de5_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0010351169762134959
+  },
+  "00678171_4879ae47b65cfac763782412_step_000": {
+   "status": "valid",
+   "within_half": 0.998285,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.88513,
+   "fscore_half": 0.9383083410188408,
+   "chamfer": 0.003187846954143155
+  },
+  "00700032_492e0ac476d95f6170717f46_step_000": {
+   "status": "valid",
+   "within_half": 0.999735,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.938215,
+   "fscore_half": 0.9679985273355867,
+   "chamfer": 0.0021528222862771985
+  },
+  "00709520_bb7e5d82d6f0783bdd2b6e94_step_009": {
+   "status": "valid",
+   "within_half": 0.989675,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.988945,
+   "fscore_half": 0.9893098653354359,
+   "chamfer": 0.002778873269581302
+  },
+  "00729452_9d771b9c563f325632902567_step_000": {
+   "status": "valid",
+   "within_half": 0.99528,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 0.9976344172246502,
+   "chamfer": 0.0013433418661603735
+  },
+  "00730725_58fba91f2f389a1130828e8a_step_007": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0001455067590825609
+  },
+  "00771160_156dee5ab444b3f0c110a762_step_000": {
+   "status": "invalid",
+   "within_half": 0.0,
+   "within_1pct": 0.0,
+   "fscore_half": 0.0,
+   "ungated": {
+    "within_half": 0.980315,
+    "within_1pct": 0.991215,
+    "cad_within_half": 0.60025,
+    "fscore_half": 0.7445870036980446,
+    "chamfer": 0.007844921211308144
+   }
+  },
+  "00771600_d04fd68f81426574544a9b96_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0005650781376466118
+  },
+  "00780711_d331d416c22f5f24f124c861_step_000": {
+   "status": "valid",
+   "within_half": 0.992905,
+   "within_1pct": 0.995215,
+   "cad_within_half": 0.837035,
+   "fscore_half": 0.9083316793720012,
+   "chamfer": 0.006169269119176081
+  },
+  "00791454_8c58e086bb0f4cc5f4e258ec_step_004": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0009328276459405502
+  },
+  "00795057_b7338c3a773739b1b8830d8c_step_015": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0005985293238102453
+  },
+  "00814797_852bd45b7e6bee4a72c959a4_step_002": {
+   "status": "no_cad",
+   "within_half": 0.0,
+   "within_1pct": 0.0,
+   "fscore_half": 0.0
+  },
+  "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.9658,
+   "fscore_half": 0.9826025027978431,
+   "chamfer": 0.001422844367410997
+  },
+  "00846352_4f29d4f2b8a8d78a463e69bb_step_001": {
+   "status": "valid",
+   "within_half": 0.928165,
+   "within_1pct": 0.943765,
+   "cad_within_half": 0.883085,
+   "fscore_half": 0.9050640044444445,
+   "chamfer": 0.006106276400855279
+  },
+  "00862084_6c1777bbaabee941fe4215fc_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0004152282597149653
+  },
+  "00862085_6c1777bbaabee941fe4215fc_step_001": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0003965832773964695
+  },
+  "00862953_821592027d6e6743aa249206_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0006879129383078408
+  },
+  "00883892_580f65badecb1e9fa11c79a3_step_000": {
+   "status": "no_cad",
+   "within_half": 0.0,
+   "within_1pct": 0.0,
+   "fscore_half": 0.0
+  },
+  "00892314_591b2b21b3273ecae630b210_step_000": {
+   "status": "valid",
+   "within_half": 0.994945,
+   "within_1pct": 0.99758,
+   "cad_within_half": 0.953445,
+   "fscore_half": 0.9737530325294218,
+   "chamfer": 0.0017282505322337668
+  },
+  "00904252_c83200b9faa4c406a3337666_step_020": {
+   "status": "valid",
+   "within_half": 0.976775,
+   "within_1pct": 0.986415,
+   "cad_within_half": 0.816305,
+   "fscore_half": 0.8893594445033127,
+   "chamfer": 0.005955105715393838
+  },
+  "00941601_071d956501ffc009e947b4d3_step_000": {
+   "status": "valid",
+   "within_half": 0.9249,
+   "within_1pct": 0.943565,
+   "cad_within_half": 0.87433,
+   "fscore_half": 0.8989043279625174,
+   "chamfer": 0.006195793630832927
+  },
+  "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+   "status": "valid",
+   "within_half": 0.98706,
+   "within_1pct": 0.994765,
+   "cad_within_half": 0.89123,
+   "fscore_half": 0.9367003857764243,
+   "chamfer": 0.0020977749053215037
+  },
+  "00966049_820834e0f6797f5657423325_step_004": {
+   "status": "valid",
+   "within_half": 0.9992,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.98872,
+   "fscore_half": 0.9939323755483119,
+   "chamfer": 0.0013073715034665916
+  },
+  "00966713_0fb1e0c765632bf26044e6b8_step_003": {
+   "status": "no_cad",
+   "within_half": 0.0,
+   "within_1pct": 0.0,
+   "fscore_half": 0.0
+  },
+  "00983172_a0cba3025923ce7ef52f7de0_step_001": {
+   "status": "valid",
+   "within_half": 0.965695,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.931735,
+   "fscore_half": 0.9484110937689402,
+   "chamfer": 0.0018675810512374124
+  },
+  "00992810_a1fc2335bb27aa520c2761e4_step_005": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.00039399804441555056
+  }
+ },
+ "dev4_v2": {
+  "00038011_64f4a654731c4c01a8bbb127_step_240": {
+   "status": "valid",
+   "within_half": 0.99218,
+   "within_1pct": 0.995775,
+   "cad_within_half": 0.938615,
+   "fscore_half": 0.9646544876074363,
+   "chamfer": 0.002465124927697184
+  },
+  "00046097_c3c229ed6e3a45b2b648027c_step_000": {
+   "status": "valid",
+   "within_half": 0.889315,
+   "within_1pct": 0.93694,
+   "cad_within_half": 0.49213,
+   "fscore_half": 0.6336243440021136,
+   "chamfer": 0.015294779478362847
+  },
+  "00053172_3eadeb68ef0f4a56b93a1aaf_step_003": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0014216312404174915
+  },
+  "00090768_56c5bfcbe4b0344778b0a660_step_001": {
+   "status": "valid",
+   "within_half": 0.99952,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.998585,
+   "fscore_half": 0.9990522812364716,
+   "chamfer": 0.0009407326712576696
+  },
+  "00095369_fd1df382218e6e0f90aa941b_step_000": {
+   "status": "valid",
+   "within_half": 0.912195,
+   "within_1pct": 0.93257,
+   "cad_within_half": 0.804945,
+   "fscore_half": 0.8552206625842971,
+   "chamfer": 0.004952825247879458
+  },
+  "00101419_7fa694883d59247c8776551e_step_003": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0003241289307141504
+  },
+  "00140273_08a59d45a975b822d5536007_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0005082525810536545
+  },
+  "00153120_0f4e90ea5d8add32e39298eb_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0005764623957649096
+  },
+  "00154184_5735b30ee4b055a05f141e16_step_001": {
+   "status": "valid",
+   "within_half": 0.995235,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.95145,
+   "fscore_half": 0.9728500920796123,
+   "chamfer": 0.00218484865521904
+  },
+  "00161800_0bcf89a01d0d72565a0249ba_step_009": {
+   "status": "valid",
+   "within_half": 0.936825,
+   "within_1pct": 0.97657,
+   "cad_within_half": 0.99624,
+   "fscore_half": 0.9656194054519637,
+   "chamfer": 0.0014663091340273164
+  },
+  "00181393_bc285ee6b12aaccfed7b9c1d_step_000": {
+   "status": "valid",
+   "within_half": 0.95291,
+   "within_1pct": 0.996105,
+   "cad_within_half": 0.842025,
+   "fscore_half": 0.894042450283715,
+   "chamfer": 0.00450761931338731
+  },
+  "00208290_7848aab8189280f5988e1bdf_step_002": {
+   "status": "valid",
+   "within_half": 0.99953,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.999455,
+   "fscore_half": 0.9994924985930359,
+   "chamfer": 0.0032225272427388214
+  },
+  "00214289_5b9f3b8de63a947b2059756a_step_008": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.898405,
+   "fscore_half": 0.9464840221133004,
+   "chamfer": 0.003533499987856504
+  },
+  "00232213_8960d9c6b1f3965294d14e5d_step_000": {
+   "status": "valid",
+   "within_half": 0.93497,
+   "within_1pct": 0.95422,
+   "cad_within_half": 0.891315,
+   "fscore_half": 0.9126207416148081,
+   "chamfer": 0.004743276717222881
+  },
+  "00246395_f7d2633917c081ba3b7e75a6_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0005414464231379272
+  },
+  "00247424_6d951cb81022130e313163ea_step_000": {
+   "status": "no_cad",
+   "within_half": 0.0,
+   "within_1pct": 0.0,
+   "fscore_half": 0.0
+  },
+  "00249450_a68e99eb4d98c0460771fdce_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0007952975773935819
+  },
+  "00256926_1c0f3eab2a7c951e43efc577_step_003": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0005851773872048132
+  },
+  "00266468_fe3404af55d9e27b491d3a02_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0007545767120345795
+  },
+  "00273535_7182205e0d848bffa1853256_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.96112,
+   "fscore_half": 0.9801745941094885,
+   "chamfer": 0.0013949163357565503
+  },
+  "00299355_002db1b41bdedfa31128c1e2_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0007192396334860418
+  },
+  "00305871_e62e071fef231dc7475cc0ed_step_004": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0014489649702601574
+  },
+  "00312587_f8c6c0107579f44a03cee7c3_step_001": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0007987720615286926
+  },
+  "00317970_978820cff49bf7ec00da570f_step_005": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.000677816968055352
+  },
+  "00354176_32dffe026b23004e82670fb7_step_002": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0016371494789919503
+  },
+  "00365747_58451ba8376a4d109925d2a8_step_001": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.988005,
+   "fscore_half": 0.9939663129619896,
+   "chamfer": 0.0008802505499471812
+  },
+  "00382121_8cd0bb5b4e2d54e7239cfb11_step_001": {
+   "status": "valid",
+   "within_half": 0.96382,
+   "within_1pct": 0.968745,
+   "cad_within_half": 0.915435,
+   "fscore_half": 0.9390046180002181,
+   "chamfer": 0.0031430031874666456
+  },
+  "00492401_0645a3b965579de6bfa80267_step_000": {
+   "status": "valid",
+   "within_half": 0.96299,
+   "within_1pct": 0.99622,
+   "cad_within_half": 0.940365,
+   "fscore_half": 0.9515430293875814,
+   "chamfer": 0.0018939881331827605
+  },
+  "00528181_ca079362860c563fb8b05377_step_000": {
+   "status": "valid",
+   "within_half": 0.95121,
+   "within_1pct": 0.993635,
+   "cad_within_half": 0.728265,
+   "fscore_half": 0.8249398778189614,
+   "chamfer": 0.0070011800995372405
+  },
+  "00562677_0f955758ce24893c8aa0cb99_step_002": {
+   "status": "valid",
+   "within_half": 0.89906,
+   "within_1pct": 0.95668,
+   "cad_within_half": 0.7416,
+   "fscore_half": 0.8127740007070325,
+   "chamfer": 0.006013722921436936
+  },
+  "00589302_08220b2f3dc9641b23f012b8_step_001": {
+   "status": "valid",
+   "within_half": 0.956205,
+   "within_1pct": 0.98016,
+   "cad_within_half": 0.925605,
+   "fscore_half": 0.9406562076139462,
+   "chamfer": 0.0024538070729327316
+  },
+  "00630878_06994d5b0030f8d7d981349b_step_000": {
+   "status": "valid",
+   "within_half": 0.989995,
+   "within_1pct": 0.990665,
+   "cad_within_half": 0.96782,
+   "fscore_half": 0.9787819185163051,
+   "chamfer": 0.002173141724048816
+  },
+  "00634093_a327ce01f8344eaecf589eb6_step_000": {
+   "status": "valid",
+   "within_half": 0.938735,
+   "within_1pct": 0.959435,
+   "cad_within_half": 0.54006,
+   "fscore_half": 0.6856572061712408,
+   "chamfer": 0.018163203423550513
+  },
+  "00642725_384f51542e8a1ea67d2847ef_step_003": {
+   "status": "valid",
+   "within_half": 0.991965,
+   "within_1pct": 0.994965,
+   "cad_within_half": 0.921305,
+   "fscore_half": 0.9553302088309543,
+   "chamfer": 0.0025888235420641016
+  },
+  "00657371_8bb4e08000f183834c3c6de5_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0010351169762134959
+  },
+  "00678171_4879ae47b65cfac763782412_step_000": {
+   "status": "valid",
+   "within_half": 0.99829,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.96975,
+   "fscore_half": 0.9838130602020284,
+   "chamfer": 0.002408704148883347
+  },
+  "00700032_492e0ac476d95f6170717f46_step_000": {
+   "status": "valid",
+   "within_half": 0.99998,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.945165,
+   "fscore_half": 0.9718001451819787,
+   "chamfer": 0.00195132493471271
+  },
+  "00709520_bb7e5d82d6f0783bdd2b6e94_step_009": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.99289,
+   "fscore_half": 0.9964323168865317,
+   "chamfer": 0.0015781071075884811
+  },
+  "00729452_9d771b9c563f325632902567_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.00037731671000234624
+  },
+  "00730725_58fba91f2f389a1130828e8a_step_007": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0001455067590825609
+  },
+  "00771160_156dee5ab444b3f0c110a762_step_000": {
+   "status": "valid",
+   "within_half": 0.982625,
+   "within_1pct": 0.993275,
+   "cad_within_half": 0.95477,
+   "fscore_half": 0.9684972566255203,
+   "chamfer": 0.001997743121908586
+  },
+  "00771600_d04fd68f81426574544a9b96_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0005650781376466118
+  },
+  "00780711_d331d416c22f5f24f124c861_step_000": {
+   "status": "valid",
+   "within_half": 0.99675,
+   "within_1pct": 0.99887,
+   "cad_within_half": 0.83786,
+   "fscore_half": 0.9104245098413287,
+   "chamfer": 0.006054697336657904
+  },
+  "00791454_8c58e086bb0f4cc5f4e258ec_step_004": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0009328276459405502
+  },
+  "00795057_b7338c3a773739b1b8830d8c_step_015": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0005985293238102453
+  },
+  "00814797_852bd45b7e6bee4a72c959a4_step_002": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0007015054510365491
+  },
+  "00834538_fe2e27a617dfbf8ef543260d_step_003": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.9658,
+   "fscore_half": 0.9826025027978431,
+   "chamfer": 0.001422844367410997
+  },
+  "00846352_4f29d4f2b8a8d78a463e69bb_step_001": {
+   "status": "valid",
+   "within_half": 0.928165,
+   "within_1pct": 0.943765,
+   "cad_within_half": 0.883085,
+   "fscore_half": 0.9050640044444445,
+   "chamfer": 0.006106276400855279
+  },
+  "00862084_6c1777bbaabee941fe4215fc_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0004152282597149653
+  },
+  "00862085_6c1777bbaabee941fe4215fc_step_001": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0003965832773964695
+  },
+  "00862953_821592027d6e6743aa249206_step_000": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0006879129383078408
+  },
+  "00883892_580f65badecb1e9fa11c79a3_step_000": {
+   "status": "valid",
+   "within_half": 0.903345,
+   "within_1pct": 0.919905,
+   "cad_within_half": 0.825035,
+   "fscore_half": 0.8624159525972297,
+   "chamfer": 0.009330623133127689
+  },
+  "00892314_591b2b21b3273ecae630b210_step_000": {
+   "status": "valid",
+   "within_half": 0.994595,
+   "within_1pct": 0.99758,
+   "cad_within_half": 0.99443,
+   "fscore_half": 0.9945124931561946,
+   "chamfer": 0.001263662319422406
+  },
+  "00904252_c83200b9faa4c406a3337666_step_020": {
+   "status": "valid",
+   "within_half": 0.95449,
+   "within_1pct": 0.96373,
+   "cad_within_half": 0.885365,
+   "fscore_half": 0.9186289559231569,
+   "chamfer": 0.005062148683468475
+  },
+  "00941601_071d956501ffc009e947b4d3_step_000": {
+   "status": "valid",
+   "within_half": 0.924595,
+   "within_1pct": 0.943595,
+   "cad_within_half": 0.878255,
+   "fscore_half": 0.9008294441855951,
+   "chamfer": 0.006048232908210726
+  },
+  "00953658_06f20e34a1e8e27016ff3bb1_step_000": {
+   "status": "valid",
+   "within_half": 0.94452,
+   "within_1pct": 0.972885,
+   "cad_within_half": 0.99991,
+   "fscore_half": 0.9714260664564937,
+   "chamfer": 0.001382128744421886
+  },
+  "00966049_820834e0f6797f5657423325_step_004": {
+   "status": "valid",
+   "within_half": 0.992635,
+   "within_1pct": 0.99693,
+   "cad_within_half": 0.99467,
+   "fscore_half": 0.993651458080164,
+   "chamfer": 0.0008394793286830871
+  },
+  "00966713_0fb1e0c765632bf26044e6b8_step_003": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.0009682275873044109
+  },
+  "00983172_a0cba3025923ce7ef52f7de0_step_001": {
+   "status": "valid",
+   "within_half": 0.965695,
+   "within_1pct": 1.0,
+   "cad_within_half": 0.931735,
+   "fscore_half": 0.9484110937689402,
+   "chamfer": 0.0018675810512374124
+  },
+  "00992810_a1fc2335bb27aa520c2761e4_step_005": {
+   "status": "valid",
+   "within_half": 1.0,
+   "within_1pct": 1.0,
+   "cad_within_half": 1.0,
+   "fscore_half": 1.0,
+   "chamfer": 0.00039399804441555056
+  }
+ }
+}
