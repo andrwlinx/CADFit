@@ -77,11 +77,15 @@ def main():
         pi = pipe[p]['iou'] if pipe[p] else 0.0
         pc = pipe[p].get('iou_cad', pi) if pipe[p] else 0.0
         s = sec[p]['iou']
-        res[p] = {'pipeline': pi, 'pipeline_cad': pc, 'sections': s, 'section_kind': sec[p]['kind'],
-                  'best_of': max(pi, s), 'best_of_cad': s if s > pi else pc}
+        pg = pipe[p].get('iou_cad_gated', 0.0) if pipe[p] else 0.0
+        # Section extrusions assert OCC validity in their program, so a scored one is a
+        # valid delivery. best_of_gated: the better valid delivery by executed score.
+        res[p] = {'pipeline': pi, 'pipeline_cad': pc, 'pipeline_gated': pg, 'sections': s,
+                  'section_kind': sec[p]['kind'], 'best_of': max(pi, s), 'best_of_cad': s if s > pi else pc,
+                  'best_of_gated': max(pg, s)}
     json.dump(res, open(a.out, 'w'), indent=1)
     n = len(parts)
-    for k in ('pipeline', 'pipeline_cad', 'sections', 'best_of', 'best_of_cad'):
+    for k in ('pipeline', 'pipeline_cad', 'pipeline_gated', 'sections', 'best_of', 'best_of_cad', 'best_of_gated'):
         print(f'{k:<14} mean {sum(r[k] for r in res.values()) / n:.4f}  (n={n})')
     print('section chosen over pipeline on', sum(r['sections'] > r['pipeline'] for r in res.values()), 'parts')
 
