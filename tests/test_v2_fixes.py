@@ -46,6 +46,21 @@ def test_answer_metadata_describes_delivered_program(tmp_path, monkeypatch):
     assert ws.answer_steps() is ws.best_exec[1]
 
 
+def test_executed_score_is_the_judge_and_sections_show_the_program(tmp_path, monkeypatch):
+    # The kept answer is ranked by bench/score.py's judge, and model sections draw
+    # the executed program (the geometry evaluate() reports), not the step meshes.
+    sys.path.insert(0, os.path.join(ROOT, 'bench'))
+    import score
+    monkeypatch.setattr(cad_tools, 'EXEC', True)
+    gt = os.path.join(MESHES, 'plate_hole.stl')
+    ws = cad_tools.CadWorkspace(gt, str(tmp_path / 'w'))
+    ws.add_code("result = cq.Workplane('XY').box(2.0, 1.2, 0.3)\n")
+    r = ws._exec()
+    assert r['iou'] == pytest.approx(score.robust_iou(gt, r['_stl'])['iou'], abs=1e-9)
+    sec = ws.section('z', 0.0)
+    assert sec['model_source'] == 'executed program' and sec['model']
+
+
 # ---------- exec_verify selection (finding 2) ----------
 def test_choose_prefers_any_valid_program():
     recs = {'original': {'built': True, 'valid': False, 'iou_exec': 0.99},

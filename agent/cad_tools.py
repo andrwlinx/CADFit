@@ -288,13 +288,15 @@ class CadWorkspace:
             rec['error'] = 'program crashed the CAD kernel'
         rec['_m'], rec['_stl'] = None, stl
         if rec['built'] and os.path.exists(stl):
+            # The answer is chosen by the same judge that scores it (bench/score.py):
+            # _cached_manifold may repair or alpha-wrap a tessellation, which is not the
+            # geometry the judge sees. The manifold is kept only to draw model sections.
+            sys.path.insert(0, os.path.join(ROOT, 'bench'))
+            import score
+            rec['iou'] = float(score.robust_iou(self.gt_stl, stl)['iou'])
             m = iou._cached_manifold(stl, False)
             if m is not None and m.volume() > 1e-12:
-                rec['iou'], rec['_m'] = self._score(m), m
-            else:  # tessellation not a clean volume: winding-number Monte Carlo judge
-                sys.path.insert(0, os.path.join(ROOT, 'bench'))
-                import score
-                rec['iou'] = float(score.robust_iou(self.gt_stl, stl)['iou'])
+                rec['_m'] = m
         self._exec_cache[key] = rec
         return rec
 
@@ -489,9 +491,14 @@ class CadWorkspace:
             out.sort(key=lambda d: -d['area'])
             return out[:8]
 
-        m = self._model()
+        m, source = self._model(), 'mesh composition of the steps'
+        if EXEC:  # tools v2: show what the program builds, the geometry evaluate() reports
+            r = self._exec()
+            if r is not None and r.get('_m') is not None:
+                m, source = r['_m'], 'executed program'
         return {'plane': f'{axis}={value}', 'coords': f'({others[0]}, {others[1]})',
-                'target': polys(self.gt_mesh), 'model': polys(_mesh_of(m) if m is not None else None)}
+                'target': polys(self.gt_mesh), 'model': polys(_mesh_of(m) if m is not None else None),
+                'model_source': source}
 
     # ---------- output ----------
     def answer_steps(self):
