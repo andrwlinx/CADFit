@@ -19,6 +19,7 @@
 #     *package* (feedback, executed answer, deadline, nudges), not tools alone;
 #   code v2 and codesec v2: the toolset attribution under the corrected tools.
 # Scripted policy (agent economy): tools v1 and v2, same deadline rule as agents.
+# Gemma-4-31B at 65k context needs an H200 (an H100 leaves 8.6 GB of KV cache, below the 18 GB one sequence needs).
 set -eu
 COMMIT=${COMMIT:?set COMMIT to the evaluated commit}
 TAG=${TAG:-h2}
@@ -54,10 +55,10 @@ sbatch -J ${TAG}arms --array=0-3 bench/arms_job.sh $STLS $TAG 4 "$ARMS"
 
 for model in gemma4-31b qwen36-35b-a3b; do
   for rep in 0 1 2; do
-    sbatch -J ag_${model}_v1_r$rep --gres=gpu:h100:1 --export=ALL,CADFIT_SRC=$SRC bench/agentsk_job.sh $model \
+    sbatch -J ag_${model}_v1_r$rep --gres=gpu:h200:1 --export=ALL,CADFIT_SRC=$SRC bench/agentsk_job.sh $model \
       --stl-dir $STLS --toolsets skills --tag ${TAG}ag_v1_r$rep
     for ts in skills code codesec; do
-      sbatch -J ag_${model}_v2${ts}_r$rep --gres=gpu:h100:1 --export=ALL,CADFIT_SRC=$SRC,CADFIT_AGENT_EXEC=1 \
+      sbatch -J ag_${model}_v2${ts}_r$rep --gres=gpu:h200:1 --export=ALL,CADFIT_SRC=$SRC,CADFIT_AGENT_EXEC=1 \
         bench/agentsk_job.sh $model --stl-dir $STLS --toolsets $ts --tag ${TAG}ag_v2_r$rep
     done
   done
