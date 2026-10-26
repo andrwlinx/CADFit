@@ -294,3 +294,22 @@ def test_early_fallback_delivers_executed_section(tmp_path):
     assert ev['chosen'] == 'original' or ev['chosen'].startswith('section_')
     assert ev['chosen_valid'] and rec['final_iou'] > 0.95
     assert (out / 'best_greedy_parallel.py').exists() and (out / 'best_greedy_parallel.stl').exists()
+
+
+def test_silhouette_trim_removes_material_outside_the_target(tmp_path):
+    # Target: a 2 x 1 x 0.5 block. Program: the block plus a lump sticking out of its
+    # top face. The trimmed variant cuts the lump off, stays valid and wins.
+    import trimesh
+    tgt = str(tmp_path / 'block.stl')
+    trimesh.creation.box((2.0, 1.0, 0.5)).export(tgt)
+    prog = tmp_path / 'prog.py'
+    prog.write_text("import cadquery as cq\n"
+                    "result = cq.Workplane('XY').box(2.0, 1.0, 0.5).union(\n"
+                    "    cq.Workplane('XY').box(0.4, 0.4, 0.4).translate((0, 0, 0.4)))\n")
+    rec = exec_verify.verify(str(prog), tgt, str(tmp_path / 'ev'), trim=True)
+    trimmed = [k for k in rec['variants'] if k.endswith('_trim')]
+    assert trimmed, rec['variants'].keys()
+    t = rec['variants'][trimmed[0]]
+    assert t['built'] and t['valid']
+    assert t['iou_exec'] > 0.99 > rec['variants']['original']['iou_exec']
+    assert rec['chosen'] == trimmed[0]

@@ -125,6 +125,71 @@ final_result = result
 '''
 
 
+# Silhouette trim (2026-10-26): the delivered CAD often carries material outside
+# the target (on the dev cohort up to ~12% of its volume), and on some parts most
+# of it lies outside the target's X/Y/Z silhouettes. The target lies inside the
+# prism over each of its silhouettes, so intersecting with the three prisms can
+# only remove material the target does not have (up to SIL_BUFFER). Judged as one
+# more variant of the best valid program: kept only if it builds, is valid and
+# scores higher.
+SIL_BUFFER = 0.002   # silhouettes grown by this much (normalized frame) ...
+SIL_SIMPLIFY = 0.001  # ... before simplifying by less, so they still contain the target
+
+
+def silhouettes(target):
+    """Per axis, the target's projected outline as shapely (Multi)Polygon."""
+    import numpy as np
+    import trimesh
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    sys.path.insert(0, HERE)
+    import iou
+    m = iou.normalize_mesh(trimesh.load(target, force='mesh'))
+    out = []
+    for k in range(3):
+        keep = [i for i in range(3) if i != k]
+        tri = m.vertices[m.faces][:, :, keep]
+        area = np.abs(np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])) / 2
+        polys = [Polygon(t) for t in tri[area > 1e-12]]
+        out.append(unary_union(polys).buffer(SIL_BUFFER).simplify(SIL_SIMPLIFY))
+    return out
+
+
+def trim_code(sils, lo=-1.2, hi=1.2):
+    """CadQuery source that intersects `result` with the prisms over `sils`."""
+    def wire(coords, k):
+        pts = []
+        for x, y in list(coords)[:-1]:
+            q = [0.0, 0.0, 0.0]
+            keep = [i for i in range(3) if i != k]
+            q[keep[0]], q[keep[1]], q[k] = x, y, lo
+            pts.append('(%.5f, %.5f, %.5f)' % tuple(q))
+        return 'cq.Wire.makePolygon([cq.Vector(*q) for q in [%s]], close=True)' % ', '.join(pts)
+    lines = ['', '', '_SIL = []']
+    for k, sil in enumerate(sils):
+        geoms = list(getattr(sil, 'geoms', [sil]))
+        d = [0.0, 0.0, 0.0]
+        d[k] = hi - lo
+        lines.append('_p = []')
+        for g in geoms:
+            holes = ', '.join(wire(h.coords, k) for h in g.interiors)
+            lines.append(f'_p.append(cq.Solid.extrudeLinear(cq.Face.makeFromWires({wire(g.exterior.coords, k)}, '
+                         f'[{holes}]), cq.Vector({d[0]}, {d[1]}, {d[2]})))')
+        lines.append('_SIL.append(_p[0] if len(_p) == 1 else cq.Compound.makeCompound(_p))')
+    lines += ['', '',
+              'def _trim(res):',
+              '    shape = res.val() if isinstance(res, cq.Workplane) else res',
+              '    if isinstance(res, cq.Workplane) and len(res.vals()) > 1:',
+              '        shape = cq.Compound.makeCompound([v for v in res.vals() if isinstance(v, cq.Shape)])',
+              '    for p in _SIL:',
+              '        shape = shape.intersect(p).clean()',
+              '    return cq.Workplane("XY").newObject([shape])',
+              '', '',
+              "result = _trim(final_result if 'final_result' in globals() else result)",
+              'final_result = result', '']
+    return '\n'.join(lines)
+
+
 def fuse_program(src):
     """Rewrite a generated program so solids are fused/cut, not compounded."""
     out, n = [], 0
@@ -180,9 +245,13 @@ def choose(recs):
     return max(pool, key=lambda k: pool[k]['iou_exec'])
 
 
-def verify(program, target, out_dir, alternatives=()):
+def verify(program, target, out_dir, alternatives=(), trim=None):
     """alternatives: [(name, program_path)] fallbacks executed the same way
-    (e.g. the pre-refinement search program and the best single candidate)."""
+    (e.g. the pre-refinement search program and the best single candidate).
+    trim: also judge the best valid program cut to the target's silhouettes
+    (default: CADFIT_SIL_TRIM=1)."""
+    if trim is None:
+        trim = os.environ.get('CADFIT_SIL_TRIM') == '1'
     os.makedirs(out_dir, exist_ok=True)
     src = _strip_exports(open(program).read())
     fused, n_ops = fuse_program(src)
@@ -219,6 +288,21 @@ def verify(program, target, out_dir, alternatives=()):
             open(py, 'w').write(uniq[name] + REPAIR)
             rep[name + '_repair'] = ex.submit(execute, py, os.path.join(out_dir, f'exec_{name}_repair.stl'), target)
         recs.update({k: f.result() for k, f in rep.items()})
+        srcs = dict(uniq)
+        srcs.update({k + '_repair': uniq[k] + REPAIR for k in uniq if k + '_repair' in recs})
+        # Third pass: the best valid program, trimmed to the target's silhouettes.
+        valid = [k for k, r in recs.items() if r.get('valid')]
+        if trim and valid:
+            best = max(valid, key=lambda k: recs[k]['iou_exec'])
+            try:
+                code = srcs[best] + trim_code(silhouettes(target))
+                py = os.path.join(out_dir, f'exec_{best}_trim.py')
+                open(py, 'w').write(code)
+                recs[best + '_trim'] = ex.submit(execute, py, os.path.join(out_dir, f'exec_{best}_trim.stl'),
+                                                 target).result()
+            except Exception as e:  # noqa: BLE001
+                recs[best + '_trim'] = {'built': False, 'valid': False, 'iou_exec': 0.0,
+                                        'error': f'trim not built: {type(e).__name__}: {e}'}
     pick = choose(recs)
     for name, same in alias.items():
         recs[name] = {'same_program_as': same}
