@@ -1079,6 +1079,9 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
                                 filter_norm_path=filter_norm_path,
                                 greedy_args=greedy_args, alpha=alpha, analysis_args=analysis_args):
         print(f"✗ Failed to complete analysis steps for {stl_name}")
+        if ANALYSIS_OPTS.get('exec_verify'):
+            _early_fallback(stl_id, original_stl_path, reference_gt_path, output_folder, total_start_time,
+                            'analysis failed')
         return
     
     # Get the reconstructed mesh path
@@ -1086,6 +1089,9 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
     
     if not os.path.exists(reconstructed_path):
         print(f"✗ Reconstructed mesh not found: {reconstructed_path}")
+        if ANALYSIS_OPTS.get('exec_verify'):
+            _early_fallback(stl_id, original_stl_path, reference_gt_path, output_folder, total_start_time,
+                            'no search output')
         return
     
     current_reconstruction = reconstructed_path
@@ -1417,6 +1423,48 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
         print(f"   Final IoU: {final_iou:.6f}")
 
     return
+
+
+def _early_fallback(stl_id, original_stl_path, reference_gt_path, output_folder, start_time, reason):
+    """With --exec-verify, a part whose analysis stops before the search still
+    gets an executed, checked answer: the three whole-part section extrusions
+    (section_extrude.py), judged like any exec-verify variant. Without this the
+    part leaves no model and scores 0 whatever the search would have found."""
+    import exec_verify
+    import section_extrude
+    print(f"\n🛟 EARLY FALLBACK ({reason}): executing whole-part section extrusions")
+    record = {'chosen': None}
+    try:
+        mesh = section_extrude.normalize_mesh(trimesh.load(reference_gt_path, force='mesh'))
+        cands = section_extrude.propose(mesh)
+        fb = os.path.join(output_folder, 'early_fallback')
+        os.makedirs(fb, exist_ok=True)
+        progs = []
+        for c in cands:
+            path = os.path.join(fb, f"{c['kind']}.py")
+            with open(path, 'w') as f:
+                f.write('import cadquery as cq\n' + c['code'].replace('{N}', '0') + '\nresult = solid_gen_0\n')
+            progs.append((c['kind'], path))
+        if progs:
+            record = exec_verify.verify(os.path.abspath(progs[0][1]), os.path.abspath(reference_gt_path),
+                                        os.path.abspath(os.path.join(fb, 'exec_verify')), progs[1:])
+    except Exception as e:  # noqa: BLE001
+        record = {'chosen': None, 'error': f'{type(e).__name__}: {e}'}
+    final_iou = 0.0
+    if record.get('chosen'):
+        import shutil
+        shutil.copy2(record['program'], f"{output_folder}/best_greedy_parallel.py")  # exec_verify strips exports
+        shutil.copy2(record['stl'], f"{output_folder}/best_greedy_parallel.stl")
+        final_iou = record['variants'][record['chosen']]['iou_exec']
+        print(f"   ✓ delivered '{record['chosen']}' (valid={record.get('chosen_valid')}, iou_exec={final_iou:.6f})")
+    else:
+        print(f"   ✗ no fallback builds: {record.get('error', '')}")
+    record['early_fallback'] = reason
+    log_event("exec_verify", stl=original_stl_path, record=record)
+    with open(f"{output_folder}/final_iou.json", 'w') as f:
+        json.dump({"final_iou": final_iou, "stl_id": stl_id, "ground_truth": original_stl_path,
+                   "reconstruction": f"{output_folder}/best_greedy_parallel.stl", "num_iterations": 0,
+                   "duration": time.time() - start_time, "exec_verify": record}, f, indent=2)
 
 
 def _cleanup_output_folder(output_folder, *keep_paths):

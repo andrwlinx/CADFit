@@ -24,6 +24,10 @@ COMMIT=${COMMIT:?set COMMIT to the evaluated commit}
 TAG=${TAG:-h2}
 STLS=${STLS:-bench/cadbench/fresh2}
 D0=${D0:-e260397}
+# d0 gets the common infrastructure fixes every arm has (decimation memory bound,
+# CadQuery worker retry; 516d08a), no method change: the dev5 d0 arm ran the same.
+D0_PATCH=${D0_PATCH:-bench/d0_infra.patch}
+ARMS=${ARMS:-"d0 dx v2"}
 mkdir -p bench/runs/arms_logs bench/runs/agentsk_logs
 
 freeze() {  # <commit> <dir>: full tree of <commit>, made once
@@ -37,12 +41,16 @@ freeze() {  # <commit> <dir>: full tree of <commit>, made once
   echo "froze $1 -> $2"
 }
 freeze "$D0" bench/runs/${TAG}_d0_code
+if [ -n "$D0_PATCH" ] && ! grep -q infra bench/runs/${TAG}_d0_code/SOURCE.txt; then
+  git apply --directory=bench/runs/${TAG}_d0_code "$D0_PATCH"
+  echo "+ $D0_PATCH (infrastructure only: decimation memory, worker retry)" >> bench/runs/${TAG}_d0_code/SOURCE.txt
+fi
 for d in ${TAG}_dx_code ${TAG}_v2_code ${TAG}_src; do freeze "$COMMIT" bench/runs/$d; done
 SRC=$PWD/bench/runs/${TAG}_src
 N=$(ls $STLS/*.stl | wc -l)
 echo "cohort $STLS: $N parts"
 
-sbatch -J ${TAG}arms --array=0-3 bench/arms_job.sh $STLS $TAG 4 "d0 dx v2"
+sbatch -J ${TAG}arms --array=0-3 bench/arms_job.sh $STLS $TAG 4 "$ARMS"
 
 for model in gemma4-31b qwen36-35b-a3b; do
   for rep in 0 1 2; do

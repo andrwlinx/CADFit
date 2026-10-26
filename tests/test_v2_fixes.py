@@ -260,3 +260,22 @@ def test_surface_agreement_recall_precision(tmp_path):
     assert sw['recall'] > 0.95
     assert sw['precision'] < 0.85
     assert abs(sw['fscore'] - 2 * sw['recall'] * sw['precision'] / (sw['recall'] + sw['precision'])) < 1e-12
+
+
+def test_early_fallback_delivers_executed_section(tmp_path):
+    # A part whose analysis stops before the search still gets a checked answer.
+    import json
+    import trimesh
+    import run_pipeline
+    ring = trimesh.creation.annulus(r_min=0.3, r_max=1.0, height=0.4, sections=64)
+    stl = str(tmp_path / 'ring.stl')
+    ring.export(stl)
+    out = tmp_path / 'out'
+    out.mkdir()
+    run_pipeline._early_fallback('ring', stl, stl, str(out), time.time(), 'analysis failed')
+    rec = json.load(open(out / 'final_iou.json'))
+    ev = rec['exec_verify']
+    assert ev['early_fallback'] == 'analysis failed'
+    assert ev['chosen'] == 'original' or ev['chosen'].startswith('section_')
+    assert ev['chosen_valid'] and rec['final_iou'] > 0.95
+    assert (out / 'best_greedy_parallel.py').exists() and (out / 'best_greedy_parallel.stl').exists()
