@@ -17,6 +17,7 @@ from scipy import ndimage
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, ROOT)
 import iou  # noqa: E402
+from gwn_repair import _gwn_fast as _gwn  # noqa: E402  (winding-number inside test, tree-accelerated)
 
 
 RES = 1024
@@ -53,9 +54,8 @@ def main(run, stl_dir, parts):
         rng = np.random.default_rng(0)
         lo, hi = rc.bounds
         pts = rng.uniform(lo, hi, size=(60_000, 3))
-        in_rc = rc.contains(pts) if rc.is_watertight else trimesh.proximity.signed_distance(rc, pts) > 0
-        pts = pts[in_rc]
-        in_gt = gt.contains(pts)
+        pts = pts[_gwn(rc, pts) > 0.5]
+        in_gt = _gwn(gt, pts) > 0.5
         extra = pts[~in_gt]
         outside_any = np.zeros(len(extra), bool)
         for ax in range(3):
