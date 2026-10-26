@@ -39,6 +39,8 @@ flags_for() {
     d0)      echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --section-extrude" ;;
     dx)      echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --section-extrude --exec-verify" ;;
     v2)      echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --section-extrude --exec-verify --section-original --score-original --shared-fixes" ;;
+    # v3 = v2 + extrusion ends from the part's cap planes, swept on a finer grid (2026-10-26).
+    v3)      echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --section-extrude --exec-verify --section-original --score-original --shared-fixes --precise-extents" ;;
     basegwn) echo "--gwn-repair" ;;
     beamgwn) echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --gwn-repair" ;;
     *) return 1 ;;
