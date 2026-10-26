@@ -241,3 +241,22 @@ def test_precise_extents_match_plate_thickness(monkeypatch, th):
     stock = alt.process_single_sketch(args)['intervals'].get('merged_intervals', [])
     if th < 0.02:
         assert stock == []
+
+
+def test_surface_agreement_recall_precision(tmp_path):
+    # CAD = target plus a slab of extra material: recall stays 1, precision drops.
+    import trimesh
+    sys.path.insert(0, os.path.join(ROOT, 'bench'))
+    import detail_scores
+    gt = trimesh.creation.box((2.0, 1.0, 0.5))
+    extra = trimesh.creation.box((2.0, 1.0, 0.5))
+    extra.apply_translation((0, 0, 0.25 + 0.25))  # stacked on top: doubles the height
+    cad = trimesh.util.concatenate([gt, extra])
+    gp, cp = str(tmp_path / 'gt.stl'), str(tmp_path / 'cad.stl')
+    gt.export(gp)
+    cad.export(cp)  # the gt is centered with largest extent 2, so its normalized frame is the identity
+    d = detail_scores.detail(gp, cp, n_cad=400_000)
+    sw = d['sweep']['0.01']
+    assert sw['recall'] > 0.95
+    assert sw['precision'] < 0.85
+    assert abs(sw['fscore'] - 2 * sw['recall'] * sw['precision'] / (sw['recall'] + sw['precision'])) < 1e-12

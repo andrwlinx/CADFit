@@ -129,9 +129,15 @@ def create_extrusion_from_translation(entry: Dict, translation_data: Dict, sketc
         intervals = sorted(intervals, key=lambda iv: iv['t_end'] - iv['t_start'], reverse=True)[:5]
     
     import copy
+    spans = []
     for iv_idx, interval in enumerate(intervals):
-        t_min = interval['t_start']
-        t_max = interval['t_end']
+        spans.append((iv_idx, interval, interval['t_start'], interval['t_end'], ''))
+        # Precise extents snap interval ends to cap planes; the grid version is a
+        # second candidate so a wrong snap cannot cost the stock extrusion.
+        if 't_start_grid' in interval and (abs(interval['t_start_grid'] - interval['t_start']) > 1e-6
+                                           or abs(interval['t_end_grid'] - interval['t_end']) > 1e-6):
+            spans.append((iv_idx, interval, interval['t_start_grid'], interval['t_end_grid'], '_grid'))
+    for iv_idx, interval, t_min, t_max, tag in spans:
         
         # Move origin by t_min * normal
         new_origin = origin + t_min * normal
@@ -153,7 +159,7 @@ def create_extrusion_from_translation(entry: Dict, translation_data: Dict, sketc
                 'origin': new_origin.tolist(),
                 'normal': normal.tolist(),
                 'xdir': entry.get('xdir', [1, 0, 0]),
-                'source': f'interval_{iv_idx}',
+                'source': f'interval_{iv_idx}{tag}',
                 't_min': t_min,
                 't_max': t_max,
                 # Ranker-only metadata; stripped before serialization/evaluation.

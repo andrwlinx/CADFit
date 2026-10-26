@@ -635,6 +635,8 @@ def _snap_intervals(intervals_data, planes_t, max_shift):
         for iv in intervals_data.get(key) or []:
             a, b = snap(iv['t_start']), snap(iv['t_end'])
             if b > a:
+                # The grid ends stay available: the search keeps whichever extrusion scores better.
+                iv['t_start_grid'], iv['t_end_grid'] = iv['t_start'], iv['t_end']
                 iv['t_start'], iv['t_end'] = a, b
     for lp in intervals_data.get('loop_intervals') or []:
         for iv in lp.get('intervals', []):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-How much surface detail the delivered CAD recovers, per part.
+Surface agreement between the delivered CAD and the input mesh, per part.
 
   python bench/detail_scores.py --runs dev3_d0 dev4_v2 --scores bench/runs/dev34_scores.json \
       --stl-dir bench/cadbench/fresh --jobs 16 --out bench/runs/detail_dev34.json
@@ -13,6 +13,9 @@ with the input mesh in the normalized frame (largest extent spans [-1, 1], so
   cad_within_half             share of the CAD surface within 0.01 of the input (no extra material)
   fscore_half                 harmonic mean of within_half and cad_within_half
   chamfer                     mean of the two one-sided mean distances
+  sweep                       {tau: {recall, precision, fscore}} for tau in TAUS
+                              (recall = input surface within tau of the CAD,
+                               precision = CAD surface within tau of the input)
 
 Distances are nearest-neighbour distances to dense surface samples (spacing
 ~0.001). A part whose CAD does not build, or is not OCC-valid in the scores
@@ -35,40 +38,50 @@ sys.path.insert(0, ROOT)
 import iou  # noqa: E402
 
 HALF, ONE = 0.01, 0.02
+TAUS = (0.005, 0.01, 0.02, 0.04)  # 0.25%, 0.5%, 1%, 2% of the part size
 N_GT, N_CAD = 200_000, 3_000_000
 RECON = ('best_greedy_parallel_iterative', 'best_greedy_parallel')  # score.py RUN_RECON order
 
 
-def detail(gt_path, cad_path, seed=0):
+def detail(gt_path, cad_path, seed=0, n_cad=None):
+    n_cad = n_cad or N_CAD
     np.random.seed(seed)
     gt = iou.normalize_mesh(trimesh.load(gt_path, force='mesh'))
     cad = trimesh.load(cad_path, force='mesh')
-    g, c = gt.sample(N_GT), cad.sample(N_CAD)
+    g, c = gt.sample(N_GT), cad.sample(n_cad)
     d_gc = cKDTree(c).query(g, workers=1)[0]
-    d_cg = cKDTree(gt.sample(N_CAD)).query(cad.sample(N_GT), workers=1)[0]
+    d_cg = cKDTree(gt.sample(n_cad)).query(cad.sample(N_GT), workers=1)[0]
     wh, ch = float((d_gc <= HALF).mean()), float((d_cg <= HALF).mean())
+    sweep = {}
+    for tau in TAUS:
+        r, p = float((d_gc <= tau).mean()), float((d_cg <= tau).mean())
+        sweep[str(tau)] = {'recall': r, 'precision': p, 'fscore': 2 * r * p / (r + p) if r + p else 0.0}
     return {'within_half': wh, 'within_1pct': float((d_gc <= ONE).mean()), 'cad_within_half': ch,
             'fscore_half': 2 * wh * ch / (wh + ch) if wh + ch else 0.0,
-            'chamfer': float((d_gc.mean() + d_cg.mean()) / 2)}
+            'chamfer': float((d_gc.mean() + d_cg.mean()) / 2), 'sweep': sweep}
+
+
+def _zero(status, **extra):
+    z = {'recall': 0.0, 'precision': 0.0, 'fscore': 0.0}
+    return {'status': status, 'within_half': 0.0, 'within_1pct': 0.0, 'cad_within_half': 0.0, 'fscore_half': 0.0,
+            'sweep': {str(t): dict(z) for t in TAUS}, **extra}
 
 
 def one(job):
-    run, part, gt, valid = job
+    run, part, gt, valid, n_cad = job
     os.environ['OMP_NUM_THREADS'] = '1'
     stem = next((os.path.join(run, part, r) for r in RECON if os.path.exists(os.path.join(run, part, r + '.stl'))),
                 None)
     cad = stem + '_cad.stl' if stem else None
     if not cad or not os.path.exists(cad):
-        return run, part, {'status': 'no_cad', 'within_half': 0.0, 'within_1pct': 0.0, 'fscore_half': 0.0}
+        return run, part, _zero('no_cad')
     try:
-        d = detail(gt, cad)
+        d = detail(gt, cad, n_cad=n_cad)
     except Exception as e:  # noqa: BLE001
-        return run, part, {'status': f'error: {type(e).__name__}: {e}', 'within_half': 0.0, 'within_1pct': 0.0,
-                           'fscore_half': 0.0}
+        return run, part, _zero(f'error: {type(e).__name__}: {e}')
     if valid:
         return run, part, {'status': 'valid', **d}
-    return run, part, {'status': 'invalid', 'within_half': 0.0, 'within_1pct': 0.0, 'fscore_half': 0.0,
-                       'ungated': d}
+    return run, part, _zero('invalid', ungated=d)
 
 
 def main():
@@ -78,11 +91,15 @@ def main():
     ap.add_argument('--stl-dir', required=True)
     ap.add_argument('--jobs', type=int, default=8)
     ap.add_argument('--out', required=True)
+    ap.add_argument('--n-cad', type=int, default=N_CAD, help='CAD surface samples (convergence check)')
+    ap.add_argument('--parts', nargs='*', help='only these part-name prefixes')
     a = ap.parse_args()
     scores = json.load(open(a.scores))
     parts = sorted(os.path.splitext(os.path.basename(p))[0] for p in glob.glob(os.path.join(a.stl_dir, '*.stl')))
+    if a.parts:
+        parts = [p for p in parts if any(p.startswith(q) for q in a.parts)]
     jobs = [(os.path.join(ROOT, 'bench', 'runs', r), p, os.path.join(a.stl_dir, p + '.stl'),
-             bool(scores[r].get(p, {}).get('cad_valid'))) for r in a.runs for p in parts]
+             bool(scores[r].get(p, {}).get('cad_valid')), a.n_cad) for r in a.runs for p in parts]
     out = {r: {} for r in a.runs}
     with ProcessPoolExecutor(a.jobs) as ex:
         for run, part, rec in ex.map(one, jobs):
