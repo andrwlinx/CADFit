@@ -28,7 +28,7 @@ def silhouette(mesh, axis):
     dilated one cell so the mask contains the true silhouette."""
     keep = [i for i in range(3) if i != axis]
     np.random.seed(1)
-    pts = mesh.sample(3_000_000)[:, keep]
+    pts = mesh.sample(1_000_000)[:, keep]
     ij = np.clip(((pts - LO) / (HI - LO) * RES).astype(int), 0, RES - 1)
     m = np.zeros((RES, RES), bool)
     m[ij[:, 0], ij[:, 1]] = True
