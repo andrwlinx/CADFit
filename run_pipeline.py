@@ -1573,6 +1573,10 @@ def main():
                              'even-odd loop nesting, loops down to 1e-4 area (stock drops < 1e-3), revolve '
                              'profiles densified at the split. (The revolve-axis origin fix is default-on: '
                              'CADFIT_FIX_REVOLVE_ORIGIN=0 restores stock.)')
+    parser.add_argument('--precise-extents', action=argparse.BooleanOptionalAction, default=False,
+                        help='CADFit++: sweep each sketch only over the part extent along its normal, on a '
+                             'finer grid for thin directions, and snap extrusion ends to the target\'s cap '
+                             'planes (stock: [-2, 2] by 0.01, ends widened by one step).')
     parser.add_argument('--seed', type=int, default=None,
                         help='Seed for all analysis-stage sampling (default: unseeded, as stock).')
     args = parser.parse_args()
@@ -1597,6 +1601,7 @@ def main():
         os.environ['CADFIT_MIN_LOOP_AREA'] = '1e-4'
         os.environ['CADFIT_DENSIFY_REVOLVE_SPLIT'] = '1'
         os.environ['CADFIT_ARC_LINE_FALLBACK'] = '1'
+    os.environ['CADFIT_PRECISE_EXTENTS'] = '1' if args.precise_extents else '0'
     os.environ['CADFIT_SECTION_EXTRUDE'] = '1' if args.section_extrude else '0'
     os.environ['CADFIT_SWEEP_LOFT'] = '1' if args.sweep_loft else '0'
     os.environ['CADFIT_CUT_PHASE'] = '1' if args.cut_phase else '0'

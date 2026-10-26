@@ -216,3 +216,28 @@ def test_judge_does_not_alpha_wrap_open_ground_truth(tmp_path):
     plate.export(str(tmp_path / 'rc.stl'))
     j = score.robust_iou(str(tmp_path / 'gt.stl'), str(tmp_path / 'rc.stl'))
     assert j['method'] == 'gwn-mc' and j['iou'] > 0.97, j
+
+
+@pytest.mark.parametrize('th', [0.0063, 0.012, 0.037, 0.4137])
+def test_precise_extents_match_plate_thickness(monkeypatch, th):
+    # Stock sweeps [-2, 2] by 0.01 and widens interval ends by one step: a 0.037
+    # plate comes out 0.04 thick and plates under ~0.02 are not proposed at all.
+    import trimesh
+    import analyze_loop_translation as alt
+    monkeypatch.setenv('CADFIT_FAST_CD', '1')
+    box = trimesh.creation.box((2.0, 1.4, th))
+    np.random.seed(0)
+    pts = box.sample(100000)
+    t = np.linspace(0, 1, 200, endpoint=False)
+    sq = np.concatenate([np.c_[-1 + 2 * t, -0.7 + 0 * t], np.c_[1 + 0 * t, -0.7 + 1.4 * t],
+                         np.c_[1 - 2 * t, 0.7 + 0 * t], np.c_[-1 + 0 * t, 0.7 - 1.4 * t]])
+    entry = {'loops_3d': [np.c_[sq, np.full(len(sq), -th / 2)].tolist()], 'normal': [0, 0, 1]}
+    args = (0, entry, pts, {'vertices': box.vertices, 'faces': box.faces}, '/tmp', (-2.0, 2.0), 0.01, False)
+    monkeypatch.setenv('CADFIT_PRECISE_EXTENTS', '1')
+    iv = alt.process_single_sketch(args)['intervals']['merged_intervals']
+    assert len(iv) == 1
+    assert iv[0]['t_start'] == pytest.approx(0.0, abs=1e-6) and iv[0]['t_end'] == pytest.approx(th, abs=1e-6)
+    monkeypatch.setenv('CADFIT_PRECISE_EXTENTS', '0')
+    stock = alt.process_single_sketch(args)['intervals'].get('merged_intervals', [])
+    if th < 0.02:
+        assert stock == []

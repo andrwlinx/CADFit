@@ -388,9 +388,11 @@ def plot_cd_vs_translation_all_loops(loops_data, sketch_idx, output_folder, save
         # Merge overlapping intervals for mean curve
         merged_mean_intervals = merge_overlapping_intervals(intervals_data['mean_intervals'])
         
-        # Remove intervals smaller than 0.02 after merging
+        # Remove intervals smaller than 0.02 after merging (two stock steps; with
+        # precise extents, two steps of the finer per-sketch grid)
+        min_width = 2 * (translation_factors[1] - translation_factors[0]) if _precise_extents() else 0.02
         intervals_data['mean_intervals'] = [interval for interval in merged_mean_intervals 
-                                            if (interval['t_end'] - interval['t_start']) >= 0.02]
+                                            if (interval['t_end'] - interval['t_start']) >= min_width]
         
         # Mark minimum on mean curve
         mean_min_idx = np.argmin(mean_cd)
@@ -590,6 +592,62 @@ def plot_loop_on_mesh_3d(loops_3d, normal, mesh, surface_points, sketch_idx, out
     print(f"  Saved 3D visualization: {output_path}")
 
 
+def _precise_extents() -> bool:
+    return os.environ.get('CADFIT_PRECISE_EXTENTS') == '1'
+
+
+def _cap_offsets(vertices, faces, normal, min_area=1e-5):
+    """Offsets along `normal` of the target's flat faces perpendicular to it
+    (the planes an extrusion along `normal` can start or end on)."""
+    tri = np.asarray(vertices)[np.asarray(faces)]
+    cross = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+    area = np.linalg.norm(cross, axis=1) / 2
+    ok = area > 0
+    cos = np.abs(cross[ok] @ normal) / (2 * area[ok])
+    sel = cos > 0.9995
+    if not sel.any():
+        return np.empty(0)
+    off = tri[ok][sel].mean(axis=1) @ normal
+    a = area[ok][sel]
+    order = np.argsort(off)
+    off, a = off[order], a[order]
+    planes, start = [], 0
+    for i in range(1, len(off) + 1):
+        if i == len(off) or off[i] - off[i - 1] > 1e-4:
+            w = a[start:i]
+            if w.sum() >= min_area:
+                planes.append(float((off[start:i] * w).sum() / w.sum()))
+            start = i
+    return np.array(planes)
+
+
+def _snap_intervals(intervals_data, planes_t, max_shift):
+    """Move interval ends onto the nearest cap plane within `max_shift`: the
+    sweep places them on its grid and widens them by one step."""
+    if intervals_data is None or not len(planes_t):
+        return intervals_data
+
+    def snap(t):
+        j = int(np.argmin(np.abs(planes_t - t)))
+        return float(planes_t[j]) if abs(planes_t[j] - t) <= max_shift else float(t)
+
+    for key in ('merged_intervals', 'mean_intervals'):
+        for iv in intervals_data.get(key) or []:
+            a, b = snap(iv['t_start']), snap(iv['t_end'])
+            if b > a:
+                iv['t_start'], iv['t_end'] = a, b
+    for lp in intervals_data.get('loop_intervals') or []:
+        for iv in lp.get('intervals', []):
+            a, b = snap(iv['t_start']), snap(iv['t_end'])
+            if b > a:
+                iv['t_start'], iv['t_end'] = a, b
+    merged = intervals_data.get('merged_intervals') or []
+    if merged:
+        intervals_data['all_intervals_min'] = float(min(iv['t_start'] for iv in merged))
+        intervals_data['all_intervals_max'] = float(max(iv['t_end'] for iv in merged))
+    return intervals_data
+
+
 def process_single_sketch(args):
     """
     Worker function to process a single sketch.
@@ -626,6 +684,21 @@ def process_single_sketch(args):
 
     # One surface tree per sketch (stock rebuilds it per loop).
     tree = build_surface_tree(surface_points) if _fast_cd_enabled() else None
+
+    planes_t = np.empty(0)
+    if _precise_extents():
+        # Sweep only the part's extent along the normal (stock sweeps [-2, 2], twice
+        # the normalized part), on a grid fine enough for thin directions, and
+        # snap interval ends to the target's cap planes afterwards.
+        n = np.asarray(normal, dtype=float)
+        n = n / np.linalg.norm(n)
+        o0 = float(np.mean(np.asarray(loops_3d[0]) @ n))
+        proj = np.asarray(mesh_data['vertices']) @ n - o0
+        lo, hi = float(proj.min()), float(proj.max())
+        fine = min(step, max((hi - lo) / 40, 0.001))
+        translation_range = (max(translation_range[0], lo - 3 * fine), min(translation_range[1], hi + 3 * fine))
+        step = fine
+        planes_t = _cap_offsets(mesh_data['vertices'], mesh_data['faces'], n) - o0
     
     # Collect CD data for all loops in this sketch
     loops_cd_data = []
@@ -671,6 +744,8 @@ def process_single_sketch(args):
     intervals_data = None
     if loops_cd_data:
         intervals_data = plot_cd_vs_translation_all_loops(loops_cd_data, sketch_idx, output_folder, save_plots)
+        if _precise_extents():
+            intervals_data = _snap_intervals(intervals_data, planes_t, max_shift=1.5 * step)
     
     # Clean up memory
     del mesh
