@@ -32,7 +32,8 @@ def one(job):
         return part, {'status': 'no_program'}
     out = os.path.join(run, part, 'trim_posthoc')
     try:
-        rec = exec_verify.verify(prog, target, out, trim=True)
+        # Absolute paths: exec_verify runs each program from its own folder.
+        rec = exec_verify.verify(os.path.abspath(prog), os.path.abspath(target), os.path.abspath(out), trim=True)
     except Exception as e:  # noqa: BLE001
         return part, {'status': f'error: {type(e).__name__}: {e}'}
     v = rec['variants']
