@@ -262,5 +262,5 @@ Paired (split-stratified bootstrap 95% CI; sign test Holm over the 4 pairs):
 - v2 − dx +0.0171 [−0.0004, +0.045], 8/3, p_holm 0.45.
 - v3 − v2 +0.0023 [−0.0001, +0.0053], 7/5; thin parts 00140273 0.894→0.942, 00966049 0.957→0.972.
 - trim (same delivered programs, with vs without the trimmed variant): +0.0037 [+0.0020, +0.0056], 12 better / 0 worse; chosen on 27/60; post-hoc no-trim reproduces the scored v3 exactly.
-- Run-to-run: dev5_v2 0.9564 vs dev6_v2 0.9523 (same flags; dev6 code adds the early fallback, which no dev part triggered) — an unseeded-search spread of ~0.004 on the mean.
+- Run-to-run: dev5_v2 0.9564 vs dev6_v2 0.9523 (same flags; dev6 code adds the early fallback, which fired once — dev6_v2 00730725, search left no output — and delivered a valid 0.9491, the score every other run got on that part, so it does not move the mean) — an unseeded-search spread of ~0.004 on the mean.
 - Reading: execution verification is the large, robust effect; geometry fixes, precise extents and the trim are small (+0.002 to +0.017) and need the held-out cohort (and repeats) to be established.
