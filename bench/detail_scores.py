@@ -14,6 +14,8 @@ with the input mesh in the normalized frame (largest extent spans [-1, 1], so
   fscore_half                 harmonic mean of within_half and cad_within_half
   chamfer                     mean of the two one-sided mean distances
   sweep                       {tau: {recall, precision, fscore}} for tau in TAUS
+                              (precision samples the CAD's outer boundary only:
+                               faces buried in a compound's union are not surface)
                               (recall = input surface within tau of the CAD,
                                precision = CAD surface within tau of the input)
 
@@ -43,6 +45,21 @@ N_GT, N_CAD = 200_000, 3_000_000
 RECON = ('best_greedy_parallel_iterative', 'best_greedy_parallel')  # score.py RUN_RECON order
 
 
+def boundary_samples(cad, n, eps=1e-3):
+    """Surface samples of the CAD's outer boundary. A CAD of several overlapping
+    solids (a compound the judge unions) has faces buried inside the union; they
+    are not surface of the delivered shape and would count as extra material.
+    A sample is kept when the point just off it on one side is outside the CAD
+    (generalized winding number < 0.5)."""
+    if cad.body_count <= 1:
+        return cad.sample(n)
+    from gwn_repair import _gwn_fast
+    pts, fi = trimesh.sample.sample_surface(cad, int(n * 1.5))
+    nrm = cad.face_normals[fi]
+    out = np.minimum(_gwn_fast(cad, pts + eps * nrm), _gwn_fast(cad, pts - eps * nrm)) < 0.5
+    return pts[out][:n]
+
+
 def detail(gt_path, cad_path, seed=0, n_cad=None):
     n_cad = n_cad or N_CAD
     np.random.seed(seed)
@@ -50,7 +67,7 @@ def detail(gt_path, cad_path, seed=0, n_cad=None):
     cad = trimesh.load(cad_path, force='mesh')
     g, c = gt.sample(N_GT), cad.sample(n_cad)
     d_gc = cKDTree(c).query(g, workers=1)[0]
-    d_cg = cKDTree(gt.sample(n_cad)).query(cad.sample(N_GT), workers=1)[0]
+    d_cg = cKDTree(gt.sample(n_cad)).query(boundary_samples(cad, N_GT), workers=1)[0]
     wh, ch = float((d_gc <= HALF).mean()), float((d_cg <= HALF).mean())
     sweep = {}
     for tau in TAUS:

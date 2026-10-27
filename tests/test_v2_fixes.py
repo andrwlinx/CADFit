@@ -313,3 +313,21 @@ def test_silhouette_trim_removes_material_outside_the_target(tmp_path):
     assert t['built'] and t['valid']
     assert t['iou_exec'] > 0.99 > rec['variants']['original']['iou_exec']
     assert rec['chosen'] == trimmed[0]
+
+
+def test_surface_precision_ignores_faces_buried_in_a_compound(tmp_path):
+    # Two overlapping boxes whose union is exactly the target: the faces buried in
+    # the union are not extra surface, so precision stays ~1.
+    import trimesh
+    sys.path.insert(0, os.path.join(ROOT, 'bench'))
+    import detail_scores
+    gt = trimesh.creation.box((2.0, 1.0, 0.5))
+    a = trimesh.creation.box((1.2, 1.0, 0.5))
+    a.apply_translation((-0.4, 0, 0))
+    b = trimesh.creation.box((1.2, 1.0, 0.5))
+    b.apply_translation((0.4, 0, 0))
+    gp, cp = str(tmp_path / 'gt.stl'), str(tmp_path / 'cad.stl')
+    gt.export(gp)
+    trimesh.util.concatenate([a, b]).export(cp)
+    d = detail_scores.detail(gp, cp, n_cad=400_000)
+    assert d['sweep']['0.01']['precision'] > 0.97 and d['sweep']['0.01']['recall'] > 0.97
