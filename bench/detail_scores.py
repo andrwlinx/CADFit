@@ -19,8 +19,9 @@ with the input mesh in the normalized frame (largest extent spans [-1, 1], so
                               (recall = input surface within tau of the CAD,
                                precision = CAD surface within tau of the input)
 
-Distances are nearest-neighbour distances to dense surface samples (spacing
-~0.001). A part whose CAD does not build, or is not OCC-valid in the scores
+Distances are exact point-to-surface distances from 100k samples of one surface
+to the other mesh (exact=False: nearest-neighbour distances to dense samples,
+which under-count recall at small tau on large-area parts). A part whose CAD does not build, or is not OCC-valid in the scores
 file, gets 0 for every share (as the validity-gated IoU does) and its raw
 numbers under "ungated".
 """
@@ -42,6 +43,7 @@ import iou  # noqa: E402
 HALF, ONE = 0.01, 0.02
 TAUS = (0.005, 0.01, 0.02, 0.04)  # 0.25%, 0.5%, 1%, 2% of the part size
 N_GT, N_CAD = 200_000, 3_000_000
+N_EXACT = 100_000  # samples per side with exact distances (share error ~0.0016 at p=0.5)
 RECON = ('best_greedy_parallel_iterative', 'best_greedy_parallel')  # score.py RUN_RECON order
 
 
@@ -60,14 +62,21 @@ def boundary_samples(cad, n, eps=1e-3):
     return pts[out][:n]
 
 
-def detail(gt_path, cad_path, seed=0, n_cad=None):
+def detail(gt_path, cad_path, seed=0, n_cad=None, exact=True):
     n_cad = n_cad or N_CAD
     np.random.seed(seed)
     gt = iou.normalize_mesh(trimesh.load(gt_path, force='mesh'))
     cad = trimesh.load(cad_path, force='mesh')
-    g, c = gt.sample(N_GT), cad.sample(n_cad)
-    d_gc = cKDTree(c).query(g, workers=1)[0]
-    d_cg = cKDTree(gt.sample(n_cad)).query(boundary_samples(cad, N_GT), workers=1)[0]
+    if exact:
+        # Exact point-to-surface distances: no dependence on how densely the other
+        # surface is sampled (KD distances to samples did not converge at tau 0.005
+        # on large-area parts: 00883892 recall 0.42 / 0.75 / 0.89 at 1M / 3M / 6M).
+        d_gc = trimesh.proximity.closest_point(cad, gt.sample(N_EXACT))[1]
+        d_cg = trimesh.proximity.closest_point(gt, boundary_samples(cad, N_EXACT))[1]
+    else:
+        g, c = gt.sample(N_GT), cad.sample(n_cad)
+        d_gc = cKDTree(c).query(g, workers=1)[0]
+        d_cg = cKDTree(gt.sample(n_cad)).query(boundary_samples(cad, N_GT), workers=1)[0]
     wh, ch = float((d_gc <= HALF).mean()), float((d_cg <= HALF).mean())
     sweep = {}
     for tau in TAUS:
@@ -85,7 +94,7 @@ def _zero(status, **extra):
 
 
 def one(job):
-    run, part, gt, valid, n_cad = job
+    run, part, gt, valid, n_cad, seed = job
     os.environ['OMP_NUM_THREADS'] = '1'
     stem = next((os.path.join(run, part, r) for r in RECON if os.path.exists(os.path.join(run, part, r + '.stl'))),
                 None)
@@ -93,7 +102,7 @@ def one(job):
     if not cad or not os.path.exists(cad):
         return run, part, _zero('no_cad')
     try:
-        d = detail(gt, cad, n_cad=n_cad)
+        d = detail(gt, cad, seed=seed, n_cad=n_cad)
     except Exception as e:  # noqa: BLE001
         return run, part, _zero(f'error: {type(e).__name__}: {e}')
     if valid:
@@ -110,13 +119,14 @@ def main():
     ap.add_argument('--out', required=True)
     ap.add_argument('--n-cad', type=int, default=N_CAD, help='CAD surface samples (convergence check)')
     ap.add_argument('--parts', nargs='*', help='only these part-name prefixes')
+    ap.add_argument('--seed', type=int, default=0, help='surface-sampling seed (repeatability check)')
     a = ap.parse_args()
     scores = json.load(open(a.scores))
     parts = sorted(os.path.splitext(os.path.basename(p))[0] for p in glob.glob(os.path.join(a.stl_dir, '*.stl')))
     if a.parts:
         parts = [p for p in parts if any(p.startswith(q) for q in a.parts)]
     jobs = [(os.path.join(ROOT, 'bench', 'runs', r), p, os.path.join(a.stl_dir, p + '.stl'),
-             bool(scores[r].get(p, {}).get('cad_valid')), a.n_cad) for r in a.runs for p in parts]
+             bool(scores[r].get(p, {}).get('cad_valid')), a.n_cad, a.seed) for r in a.runs for p in parts]
     out = {r: {} for r in a.runs}
     with ProcessPoolExecutor(a.jobs) as ex:
         for run, part, rec in ex.map(one, jobs):
