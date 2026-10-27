@@ -230,3 +230,37 @@ Share of the input surface within 0.01 (0.5% of part size) of the delivered CAD,
 - The 52 parts valid in both: within 0.5% 0.982 vs 0.982, within 1% 0.991 vs 0.990, CAD surface within 0.5% of the input 0.921 vs 0.941, F-score 0.947 vs 0.958, chamfer 0.0032 vs 0.0026; 4 parts better, 4 worse (> 0.005).
 - Reading: v2 recovers the same surface detail on parts both deliver; it adds slightly less extra material; the gated gain is from delivering valid CAD. v2 lowest valid part 0.889 (00046097); 49 of 60 at >= 0.95.
 - Agent loop now records setup / model / tool seconds (2dc2571); agent-study runtimes in results/runtime_raw.json.
+
+## Run run_20261026_b59bde60 — Round 1 (2026-10-26/27)
+
+### Assessment (Summary)
+- Score: 4/10, verdict: not ready (Codex gpt-6-astra xhigh, thread 01a178e8-45a4-7832-8bcd-c78ec9acfe1b). Full response: review-stage/ROUND1_run_20261026_b59bde60.response.md and REVIEWER_MEMORY.md.
+- Key criticisms: dev evidence incomplete (dev5, judge-corrected rescoring); gain mostly validity recovery; v2 vs dx unresolved; novelty vs CADFather/CADSmith; agent controls missing (code+section, matched policy, repeats); agent executed score bypassed the judge; runtime confounded by deployment; "detail" conflates validity with fidelity.
+
+### Actions Taken
+- 51fcd4d / 340d3cd: precise extents (sweep over the part extent, finer grid on thin directions, ends snapped to cap planes; grid-end extrusion kept as a second candidate). Tests: plates 0.0063–0.4137 thick come out exact; stock drops plates under ~0.02.
+- 64ed8a6: early executed fallback (section extrusions through exec-verify when analysis stops before the search); held-out d0 gets bench/d0_infra.patch (infrastructure only), as dev5 d0.
+- 9442d7e: agent tools v2 rank executed programs with bench/score.py's robust_iou; model sections draw the executed program.
+- 340d3cd: surface agreement = recall/precision/F over tau 0.005/0.01/0.02/0.04, gated; convergence option --n-cad.
+- 44dbbe9: section control gets validity-gated fields. 94f9baf: bench/analysis/v2_dev.py (split-stratified paired bootstrap, Holm sign tests, validity decomposition).
+- b3c7a81: silhouette trim (exec-verify variant: best valid program ∩ prisms over the target's X/Y/Z silhouettes, grown 0.002); evidence for it: bench/analysis/extra_material.py on 6 dev4_v2 parts, share of extra volume outside silhouettes 3–85%.
+- Infrastructure: dev5 OOM chunks rerun at JOBS=3 (same retry policy for every arm); my first dev5 score job passed bare run names and scored nothing (fixed); Gemma needs an H200 at 65k context.
+
+### Results (results/dev345_scores.json, results/dev6_scores.json, results/v2_dev.json; corrected judge; all 60 parts, missing = 0)
+| Run | gated IoU(CAD) | benchA | benchE | valid |
+|---|---|---|---|---|
+| dev5_d0 | 0.8438 | 0.8354 | 0.8521 | 54/60 |
+| dev5_dx | 0.9393 | 0.9298 | 0.9488 | 60/60 |
+| dev5_v2 | 0.9564 | 0.9557 | 0.9571 | 60/60 |
+| dev6_v2 (newer code: + early fallback, agent changes) | 0.9523 | 0.9583 | 0.9464 | 60/60 |
+| dev6_v3 (= dev6_v2 + precise extents) | 0.9547 | 0.9583 | 0.9510 | 60/60 |
+| dev6_v3 + silhouette trim (post hoc, results/dev6_v3_trim.json) | 0.9584 | | | 60/60 |
+
+Paired (split-stratified bootstrap 95% CI; sign test Holm over the 4 pairs):
+- dx − d0 +0.0955 [+0.032, +0.174], 7/0, p_holm 0.063; 82% from parts d0 delivered invalid.
+- v2 − d0 +0.1126 [+0.044, +0.193], 12/3, p_holm 0.11; 75% from d0-invalid parts; both-valid +0.032.
+- v2 − dx +0.0171 [−0.0004, +0.045], 8/3, p_holm 0.45.
+- v3 − v2 +0.0023 [−0.0001, +0.0053], 7/5; thin parts 00140273 0.894→0.942, 00966049 0.957→0.972.
+- trim (same delivered programs, with vs without the trimmed variant): +0.0037 [+0.0020, +0.0056], 12 better / 0 worse; chosen on 27/60; post-hoc no-trim reproduces the scored v3 exactly.
+- Run-to-run: dev5_v2 0.9564 vs dev6_v2 0.9523 (same flags; dev6 code adds the early fallback, which no dev part triggered) — an unseeded-search spread of ~0.004 on the mean.
+- Reading: execution verification is the large, robust effect; geometry fixes, precise extents and the trim are small (+0.002 to +0.017) and need the held-out cohort (and repeats) to be established.
