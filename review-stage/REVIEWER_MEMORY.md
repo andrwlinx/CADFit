@@ -657,3 +657,181 @@ An early valid fallback is more directly motivated by the observed failure patte
 - Remaining evidence gaps: complete dev5, corrected rescoring, matched policy, section-only attribution, repeated agent episodes, final-configuration timing, and locally available full reconstruction/trajectory artifacts.
 - fresh2 remains balanced and disjoint. Keep outcomes untouched until the development validation and experiment freeze are complete.
 
+
+---
+
+## Run run_20261026_b59bde60 — Round 2 — Score: 5/10
+
+### Raw Reviewer Response (verbatim)
+
+Score: 5/10
+Verdict: not ready
+
+**The validity-recovery result is now credible development evidence. The surface-fidelity measurement and the claimed precise-extents implementation still have demonstrable defects.** I would reject the current submission, but several earlier concerns have genuinely been addressed.
+
+I independently recalculated the results, reran the paired analysis, inspected the changed code, and ran isolated in-memory probes. The full dev5/dev6 reconstruction folders are absent locally, so this is not a complete replay of those experiments.
+
+From the supplied [pipeline results](/Users/Andrewlin/CADFit/results/dev345_scores.json), [dev6 comparison](/Users/Andrewlin/CADFit/results/dev6_scores.json), and [post-hoc trim results](/Users/Andrewlin/CADFit/results/dev6_v3_trim.json):
+
+| Configuration | Mean validity-gated CAD IoU | Valid deliveries |
+|---|---:|---:|
+| dev5 d0 | 0.84376 | 54/60 |
+| dev5 dx | 0.93929 | 60/60 |
+| dev5 v2 | 0.95636 | 60/60 |
+| dev6 v2 | 0.95235 | 60/60 |
+| dev6 v3, as implemented | 0.95465 | 60/60 |
+| dev6 v3 + post-hoc trim | 0.95837 | 60/60 |
+
+Several fixes are substantive:
+
+- Agent executed-program ranking now calls the corrected `score.robust_iou`.
+- The pipeline now attempts an executed fallback on ordinary analysis failure or missing search output. This is useful failure recovery, though not a persisted incumbent that survives process termination.
+- The submission script applies the common infrastructure patch to d0.
+- Silhouette trimming uses actual projected triangle silhouettes, executes the intersection, checks validity, and retains the incumbent when preferable.
+- The section-only control averages **0.84475**, versus **0.95636** for dev5 v2, with no section-only wins exceeding 0.005. That earlier objection is answered for this cohort.
+- Moving from sampled-neighbour distances to point-to-triangle distances addresses the demonstrated surface-distance convergence problem. Unfortunately, it does not fix which surface is being measured.
+
+**Remaining Weaknesses and Minimum Fixes — ranked**
+
+**1. The surface metric remains representation-dependent and can credit buried faces.**
+
+There are two defects in [detail_scores.py](/Users/Andrewlin/CADFit/bench/detail_scores.py:50):
+
+- Recall queries distances against **all CAD triangles**, including internal faces buried inside the occupied union.
+- Precision bypasses boundary filtering whenever `cad.body_count <= 1`. STL vertex merging can make a multi-solid compound satisfy that condition.
+
+This occurs on repository artifacts. I executed the saved [00232213 repaired program](/Users/Andrewlin/CADFit/bench/figures/v2_2026-10-23/inputs/00232213_repair.py). It produces **139 valid solids**, but its tessellation after an STL roundtrip has `body_count == 1`. Consequently, the filter is skipped. Of 10,000 sampled points, **1,645 fail the evaluator’s own boundary test**. Applying that test changes estimated precision at τ=0.01 from **0.9105 to 0.9271**.
+
+The repository’s [stacked-box regression](/Users/Andrewlin/CADFit/tests/test_v2_fixes.py:261) exposes the recall problem particularly clearly. It explicitly expects recall near one after adding a slab that buries an original exterior face. Using that construction, I obtained:
+
+| Same occupied CAD geometry | Recall | Precision | F-score |
+|---|---:|---:|---:|
+| Stacked boxes retaining internal faces | 1.0000 | 0.6506 | 0.7883 |
+| Equivalent union boundary | 0.7223 | 0.5068 | 0.5957 |
+
+These are 10,000-sample diagnostic estimates; sampling uncertainty cannot explain this difference.
+
+**Minimum fix:** measure both directions against the boundary of the occupied CAD union, preserving cavities. Do not use connected-body count as proof that internal faces are absent. Replace the incorrect stacked-box expectation with a representation-invariance regression, include the saved compound case, and recompute surface results. If that cannot be measured consistently, remove the surface-fidelity claim.
+
+This correction needs **rescoring**, not another pipeline search.
+
+**2. Cap-plane snapping and its unsnapped alternatives never reach the production search.**
+
+[Translation analysis saves the per-sketch JSON](/Users/Andrewlin/CADFit/analyze_loop_translation.py:494) before [snapping the returned intervals](/Users/Andrewlin/CADFit/analyze_loop_translation.py:747). [Candidate generation reloads that earlier per-sketch file](/Users/Andrewlin/CADFit/greedy_search.py:39).
+
+I reproduced the actual producer/consumer path with file IO held in memory:
+
+| Plate thickness | Returned snapped endpoint | Endpoint reloaded by search |
+|---|---:|---:|
+| 0.0063 | 0.0063 | 0.0060 |
+| 0.4137 | 0.4137 | 0.4200 |
+
+The reloaded intervals also lack `t_start_grid` and `t_end_grid`, so the intended grid-end alternatives are unavailable. The new test passes because it examines the returned object, not the data consumed by candidate generation.
+
+Thus **dev6 measures the restricted/finer sweep and associated interval changes, not the advertised snapping mechanism**. Its +0.00231 gain cannot substantiate snapping.
+
+**Minimum fix:** persist the finalized intervals, and test through reload and candidate generation. Repeat the affected development comparison and trim evaluation on the corrected outputs. Historical d0/dx results do not need rerunning merely because this path changes.
+
+**3. The proposed v3/v4 held-out launch is not fully frozen.**
+
+[v2_submit.sh](/Users/Andrewlin/CADFit/bench/v2_submit.sh:49) freezes only d0, dx, v2, and the shared source tree, despite accepting configurable `ARMS`.
+
+If v3/v4 are requested, [run_parallel_arms.sh](/Users/Andrewlin/CADFit/bench/run_parallel_arms.sh:89) creates their missing snapshots by copying only top-level Python files. [exec_verify.py](/Users/Andrewlin/CADFit/exec_verify.py:42) then falls back to the live checkout for replay/judge code.
+
+This recreates the incomplete-freeze problem specifically for the newly proposed arms. The default d0/dx/v2 path has improved; the extension has not inherited that guarantee.
+
+**Minimum fix:** freeze every requested arm’s complete source before submission, including its replay/judge dependencies. Verify the actual v3/v4 launch path on development inputs. No additional framework is needed.
+
+**4. The evidence supports reliability recovery much more strongly than a new reconstruction method or better detail.**
+
+The rerun analysis gives:
+
+- **dx−d0:** +0.09554, nominal paired 95% CI **[+0.03160, +0.17383]**.
+- **v2−d0:** +0.11260, **[+0.04373, +0.19328]**.
+- **v2−dx:** +0.01706, **[−0.00039, +0.04542]**.
+- **Current v3−v2:** +0.00231, **[−0.00012, +0.00530]**.
+
+Approximately **82% of dx’s gain** and **75% of v2’s gain** come from parts where d0 delivered no valid CAD. That is a valuable result. It is a different result from substantially improving already-valid reconstructions.
+
+The existing surface results likewise show no demonstrated advantage on the 54 commonly valid parts: mean F-score at τ=0.01 is approximately **0.9715–0.9732** across configurations. Those numbers need correction under finding 1; even taken at face value, they do not establish equivalence or improved detail.
+
+Trim is promising: its post-hoc no-trim scores exactly reproduce all 60 dev6-v3 scores, and its mean increment is **+0.00371**. However, “no losses” follows from retaining the higher-scoring candidate under the selection judge. It is not independent evidence that geometric accuracy never decreases.
+
+Novelty also remains constrained. Executed proposals, geometric feedback, and protected valid candidates are already central to [CADFather](https://arxiv.org/html/2610.09127v1). Kernel-based validity feedback also appears in [CADSmith](https://arxiv.org/html/2603.26512v1). Neither executing programs nor exposing CAD tools is sufficient novelty by itself.
+
+**Minimum fix:** make reliable finalization and the measured mesh/program discrepancy the central contribution; establish its effect on untouched parts. Complete the CADFather comparison under the common judge before making competitive-performance claims. Report which delivery alternatives supply the gains. A full factorial ablation of every repair is unnecessary.
+
+**5. Agent attribution and time efficiency remain unfinished.**
+
+The pending code/code+section/skills repeats and matched scripted policy are still necessary for the agent claim. Historical six-model results cannot substitute for controls under the corrected harness.
+
+The supplied [runtime file](/Users/Andrewlin/CADFit/results/runtime_raw.json) contains pipeline records for **dev3_d0 and dev4_v2**, not the final dev5/dev6 configurations. It therefore does not establish the cost of the current method, snapping, or trimming.
+
+There is also unresolved run variability. Dev5-v2 versus dev6-v2 changes the mean by −0.00401, including a **−0.2991** change on `00247424`. Different code versions prevent treating this as a clean repeatability experiment. Nevertheless, it makes single-run improvements of a few thousandths unpersuasive. The runner’s `--seed 0` is not end-to-end determinism: revolve analysis still samples without using that seed.
+
+**Minimum fix:** finish the three matched agent conditions and policy repeats; measure the final pipeline configurations on the same comparison parts with recorded resources, concurrency, budgets, and retry costs. Include verification and trimming in end-to-end time. Report quality alongside latency and resource use. If resources differ, describe deployment latency rather than an algorithmic speedup.
+
+Opus/Sonnet are **not required** to resolve these deficiencies.
+
+**Freeze and release decision**
+
+**Not yet for the advertised v3/v4 matrix.** The d0/dx/v2 development question is mature enough; the remaining prelaunch work should be bounded:
+
+1. Fix the snapped-interval persistence and complete-source launch defects.
+2. Run the corrected development comparison, including end-to-end timing and a small integrated trim check.
+3. Establish the repeat protocol on unchanged code, then freeze the method and evaluation choices.
+
+Do not require a significant development p-value before testing a frozen hypothesis. Do not add more optimizations while waiting.
+
+My recommended held-out matrix is:
+
+| Arm | Purpose |
+|---|---|
+| d0 + common infrastructure fixes | Historical method reference |
+| dx | Execution-verified delivery package |
+| v2 | Additional geometry corrections |
+| Corrected v3 | Extent/sweep package |
+| Corrected v3 + trim | Final package and incremental trim comparison |
+| Executed section-only control | Cheap geometric reference |
+
+Trim can be evaluated as a final stage on each saved v3 delivery, preserving the paired comparison, while separately measuring its actual added time.
+
+If you decide **before seeing fresh2 outcomes** to omit v3/trim from the main method, I would release the narrower **d0/dx/v2/section-only** experiment after freezing its settings. Missing agent and CADFather results need not delay an independently frozen pipeline experiment.
+
+The surface evaluator can be corrected while pipeline outputs are being generated, provided its definition is settled before examining held-out surface comparisons.
+
+**Final evaluation protocol**
+
+- Use all **300 paired parts**, report both splits and the balanced aggregate, and count failures in the denominator. Apply the same declared infrastructure retry policy to every arm.
+- Use three independent runs for comparisons supporting the small incremental improvements. Average runs within part; bootstrap parts within split while retaining their repeated measurements together. Do not select each part’s best run.
+- Prespecify dx−d0 as the reliability contrast, with v2−dx, corrected-v3−v2, and trim−v3 as secondary contrasts. Match multiplicity correction to the actual hypothesis: Holm-corrected **sign tests do not correct confidence intervals for mean differences**.
+- Report validity changes, gated IoU, conditional fidelity, and failure types separately. Common-valid subsets are diagnostic, not substitutes for the primary denominator.
+- Validate small Monte Carlo-based gains with independent, higher-precision final evaluation. Keep selection decisions fixed during that check.
+- Keep agent episodes clustered by part. Three episodes on 20 parts remain **20 independent parts**, not 60.
+- Freeze any CADFather held-out comparison subset before looking at pipeline outcomes.
+
+Of the method changes, **finish the snapping integration and retain trim as a modest secondary experiment**. The restricted/finer sweep deserves its paired accuracy/runtime comparison. Defer occupancy-bitset scoring: the present paper does not need another approximate objective.
+
+**Central claim**
+
+The defensible development-stage framing is:
+
+> In the audited CADFit search family, final-program execution, kernel-validity checks, and selection among repaired or fallback programs substantially improve valid delivery and expected validity-gated fidelity. Most of the observed improvement comes from recovering failed or invalid outputs; additional geometric refinements provide smaller, currently uncertain gains.
+
+The agent study should then ask how much additional value a learned controller supplies over the same geometric tools and budgets.
+
+Do not currently claim improved fine-detail recovery, established surface equivalence, superior planning, or general time efficiency. The draft still describes the earlier experiment; its abstract, cohort description, generated results, and conclusions need to be rebuilt around the final frozen study.
+
+## Memory Update
+
+- Reviewed HEAD `80cb5f1`; independently recalculated aggregates and reran paired development analysis. Full dev5/dev6 programs were unavailable locally.
+- Confirmed dev5 gated means: d0 **0.84376**, dx **0.93929**, v2 **0.95636**; valid deliveries **54/60, 60/60, 60/60**. Approximately **75%** of d0→v2 gain comes from newly valid deliveries.
+- Confirmed agent executed-score routing to the corrected judge, ordinary-failure executed fallback, common d0 infrastructure patch, and genuine projected-silhouette trimming.
+- **New confirmed integration defect:** per-sketch intervals are saved before snapping; search reloads unsnapped endpoints without grid-alternative fields. Current dev6 does not test cap-plane snapping.
+- **New confirmed measurement defects:** recall credits internal faces; precision skips filtering for merged single-component STLs. Saved `00232213_repair.py` produces 139 solids but `body_count == 1`; 16.45% of sampled points fail the evaluator’s own boundary test.
+- Repository stacked-box test currently codifies incorrect boundary recall. Equivalent occupied geometry scored approximately **0.788 versus 0.596 F-score** depending on retained internal faces.
+- **New confirmed launch defect:** v3/v4 requested through `ARMS` are not fully archived; they fall back to top-level copies and live replay/judge code.
+- Trim: **+0.00371**, chosen on 27/60; post-hoc no-trim scores reproduce all dev6-v3 scores. Section-only: **0.84475**, with no material wins over v2.
+- Remaining scientific gaps: corrected surface measurement, incremental-method evidence, matched agent controls/policy, final-configuration timing, CADFather comparison, and unchanged-code repeats.
+- Full fresh2 matrix should wait for the bounded integration/freeze fixes and corrected development validation. A deliberately narrowed d0/dx/v2/section-only study can proceed after freezing its protocol.
+

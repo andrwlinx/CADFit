@@ -258,23 +258,29 @@ def test_precise_extents_match_plate_thickness(tmp_path, monkeypatch, th):
         assert stock == []
 
 
-def test_surface_agreement_recall_precision(tmp_path):
-    # CAD = target plus a slab of extra material: recall stays 1, precision drops.
+def test_surface_agreement_is_representation_invariant(tmp_path):
+    # The same occupied volume (a 2 x 1 x 1 block) given as one box and as the target
+    # block plus a slab stacked on it (a buried face between them) scores the same:
+    # the target's top face is inside the CAD in both, so recall drops to ~1 - its share.
     import trimesh
     sys.path.insert(0, os.path.join(ROOT, 'bench'))
     import detail_scores
     gt = trimesh.creation.box((2.0, 1.0, 0.5))
-    extra = trimesh.creation.box((2.0, 1.0, 0.5))
-    extra.apply_translation((0, 0, 0.25 + 0.25))  # stacked on top: doubles the height
-    cad = trimesh.util.concatenate([gt, extra])
-    gp, cp = str(tmp_path / 'gt.stl'), str(tmp_path / 'cad.stl')
+    slab = trimesh.creation.box((2.0, 1.0, 0.5))
+    slab.apply_translation((0, 0, 0.5))
+    single = trimesh.creation.box((2.0, 1.0, 1.0))
+    single.apply_translation((0, 0, 0.25))
+    gp = str(tmp_path / 'gt.stl')
     gt.export(gp)
-    cad.export(cp)  # the gt is centered with largest extent 2, so its normalized frame is the identity
-    d = detail_scores.detail(gp, cp, n_cad=400_000)
-    sw = d['sweep']['0.01']
-    assert sw['recall'] > 0.95
-    assert sw['precision'] < 0.85
-    assert abs(sw['fscore'] - 2 * sw['recall'] * sw['precision'] / (sw['recall'] + sw['precision'])) < 1e-12
+    out = {}
+    for name, cad in (('stacked', trimesh.util.concatenate([gt, slab])), ('single', single)):
+        cp = str(tmp_path / f'{name}.stl')
+        cad.export(cp)
+        out[name] = detail_scores.detail(gp, cp)['sweep']['0.01']
+    for k in ('recall', 'precision', 'fscore'):
+        assert out['stacked'][k] == pytest.approx(out['single'][k], abs=0.01), (k, out)
+    top_share = 2.0 / gt.area  # the target's top face lies inside the CAD
+    assert out['single']['recall'] == pytest.approx(1 - top_share, abs=0.02)
 
 
 def test_early_fallback_delivers_executed_section(tmp_path):
@@ -315,7 +321,7 @@ def test_silhouette_trim_removes_material_outside_the_target(tmp_path):
     assert rec['chosen'] == trimmed[0]
 
 
-def test_surface_precision_ignores_faces_buried_in_a_compound(tmp_path):
+def test_surface_agreement_ignores_faces_buried_in_a_compound(tmp_path):
     # Two overlapping boxes whose union is exactly the target: the faces buried in
     # the union are not extra surface, so precision stays ~1.
     import trimesh
@@ -358,3 +364,31 @@ def test_snapped_extents_reach_candidate_generation(tmp_path, monkeypatch):
     heights = {e['source']: e['height'] for e in gs.create_extrusion_from_translation(entry, data, 0)}
     assert heights['interval_0'] == pytest.approx(th, abs=1e-6)
     assert abs(heights['interval_0_grid'] - th) > 1e-3
+
+
+
+def test_fused_boundary_of_a_merged_compound(tmp_path):
+    # The saved 00232213 repair builds 139 valid solids; after an STL roundtrip the
+    # tessellation is one connected body, so body counts cannot reveal the faces
+    # buried between the solids. union_replay.py fuses the solids: the boundary it
+    # tessellates is closed and well under the compound's tessellated area.
+    import json
+    import subprocess
+    import trimesh
+    import cadquery as cq
+    prog = os.path.join(ROOT, 'bench', 'figures', 'v2_2026-10-23', 'inputs', '00232213_repair.py')
+    ns = {'__name__': '__main__'}
+    src = '\n'.join(l for l in open(prog).read().splitlines() if 'exporters.export' not in l)
+    exec(compile(src, prog, 'exec'), ns)
+    res = ns.get('final_result', ns.get('result'))
+    comp = str(tmp_path / 'compound.stl')
+    cq.exporters.export(cq.Compound.makeCompound([v for v in res.vals() if isinstance(v, cq.Shape)]), comp,
+                        tolerance=1e-3, angularTolerance=0.1)
+    assert trimesh.load(comp, force='mesh').body_count == 1  # merged: body count says nothing
+    out = str(tmp_path / 'union.stl')
+    p = subprocess.run([sys.executable, os.path.join(ROOT, 'bench', 'union_replay.py'), prog, out],
+                       capture_output=True, text=True, cwd=str(tmp_path))
+    rec = json.loads(p.stdout.strip().splitlines()[-1])
+    assert rec['built'] and rec['fused'] and rec['n_solids'] == 139
+    u = trimesh.load(out, force='mesh')
+    assert u.is_watertight and u.area < 0.7 * trimesh.load(comp, force='mesh').area

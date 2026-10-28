@@ -15,7 +15,7 @@ JOBS=${JOBS:-7}
 MIN_FREE_GB=${MIN_FREE_GB:-80}
 MAX_RUNS_GB=${MAX_RUNS_GB:-60}
 PY=${PY:-.venv/bin/python}
-COMMON="--max-iterations 1 --seed 0"
+COMMON="--max-iterations 1 --seed ${SEED:-0}"  # SEED: independent repeats (bench/analysis/v2_dev.py averages them per part)
 export CADFIT_MAX_PARALLEL=$JOBS
 # A part killed mid-run (timeout, OOM) otherwise loses its block-buffered log:
 # abc60r beam/00000914 exited after 6 min with an empty log and no outputs.
@@ -92,8 +92,15 @@ for arm in $ARMS; do
   mkdir -p "$OUT" "$IN" "$CODE"
   cp -n "$STLS"/*.stl "$IN"/
   [ -d "$STLS/.gwn" ] && mkdir -p "$IN/.gwn" && cp -n "$STLS"/.gwn/*.stl "$IN/.gwn/" 2>/dev/null
-  [ -f "$CODE/run_pipeline.py" ] || cp ./*.py "$CODE"/
-  git rev-parse HEAD > "$CODE/GIT_HEAD" 2>/dev/null; git diff > "$CODE/GIT_DIFF.patch" 2>/dev/null
+  # A missing snapshot is the full tree of HEAD (bench/ replay and judge code included,
+  # which exec_verify otherwise takes from the live checkout), as bench/v2_submit.sh freezes.
+  if [ ! -f "$CODE/run_pipeline.py" ]; then
+    git diff --quiet HEAD -- . ':!bench/runs' || { echo "uncommitted changes: commit before freezing $CODE"; exit 1; }
+    git archive HEAD | tar -x -C "$CODE"
+    rm -rf "$CODE/bench/runs" "$CODE/bench/cadbench"
+    ln -s "$PWD/bench/runs" "$CODE/bench/runs"; ln -s "$PWD/bench/cadbench" "$CODE/bench/cadbench"
+    echo "git archive $(git rev-parse HEAD)" > "$CODE/SOURCE.txt"
+  fi
   echo "[$(date +%T)] arm=$arm flags: $(flags_for "$arm") jobs=$JOBS"
 done
 

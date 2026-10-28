@@ -19,7 +19,9 @@ metrics.py normalize_mesh: GT to a unit cube, prediction / 200), ours to 2
 Written per part: best_greedy_parallel.py (the program, for reference; it does
 not run in CADFit's environment), best_greedy_parallel.stl and
 best_greedy_parallel_cad.stl (the scaled tessellation), best_greedy_parallel_cad.json
-(the replay record score.py's cad_replay cache reads). A part with no program
+(the replay record score.py's cad_replay cache reads), best_greedy_parallel_union.stl
++ .json (the fused solids for bench/detail_scores.py; union_replay.py must sit next
+to this script). A part with no program
 gets no folder entry beyond an empty directory, which score.py counts as 0.
 """
 import json
@@ -73,6 +75,17 @@ def main(cf_out, run_dir):
         if rec['built']:
             shutil.copy2(cad_stl, os.path.join(d, 'best_greedy_parallel.stl'))
         json.dump(rec, open(os.path.join(d, 'best_greedy_parallel_cad.json'), 'w'))
+        # The fused boundary detail_scores.py reads (the program runs only in this env).
+        if rec['built']:
+            import subprocess
+            p = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                'union_replay.py'), prog, os.path.join(d, 'best_greedy_parallel_union.stl'),
+                                str(SCALE)], capture_output=True, text=True)
+            try:
+                urec = json.loads(p.stdout.strip().splitlines()[-1])
+            except (IndexError, json.JSONDecodeError):
+                urec = {'built': False, 'error': p.stderr[-300:]}
+            json.dump(urec, open(os.path.join(d, 'best_greedy_parallel_union.json'), 'w'))
         print(part[:8], json.dumps(rec), flush=True)
 
 

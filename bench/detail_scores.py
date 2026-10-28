@@ -14,8 +14,10 @@ with the input mesh in the normalized frame (largest extent spans [-1, 1], so
   fscore_half                 harmonic mean of within_half and cad_within_half
   chamfer                     mean of the two one-sided mean distances
   sweep                       {tau: {recall, precision, fscore}} for tau in TAUS
-                              (precision samples the CAD's outer boundary only:
-                               faces buried in a compound's union are not surface)
+                              (both directions use the boundary of the volume the
+                               CAD occupies: the program's solids fused with OCC,
+                               bench/union_replay.py, else union_boundary's
+                               winding-number filter)
                               (recall = input surface within tau of the CAD,
                                precision = CAD surface within tau of the input)
 
@@ -47,22 +49,54 @@ N_EXACT = 100_000  # samples per side with exact distances (share error ~0.0016 
 RECON = ('best_greedy_parallel_iterative', 'best_greedy_parallel')  # score.py RUN_RECON order
 
 
-def boundary_samples(cad, n, eps=1e-3):
-    """Surface samples of the CAD's outer boundary. A CAD of several overlapping
-    solids (a compound the judge unions) has faces buried inside the union; they
-    are not surface of the delivered shape and would count as extra material.
-    A sample is kept when the point just off it on one side is outside the CAD
-    (generalized winding number < 0.5)."""
-    if cad.body_count <= 1:
-        return cad.sample(n)
+def _sides(cad, pts, nrm, eps):
+    """Per point: is the point `eps` along / against the normal inside the CAD."""
     from gwn_repair import _gwn_fast
-    pts, fi = trimesh.sample.sample_surface(cad, int(n * 1.5))
-    nrm = cad.face_normals[fi]
-    out = np.minimum(_gwn_fast(cad, pts + eps * nrm), _gwn_fast(cad, pts - eps * nrm)) < 0.5
-    return pts[out][:n]
+    return _gwn_fast(cad, pts + eps * nrm) > 0.5, _gwn_fast(cad, pts - eps * nrm) > 0.5
 
 
-def detail(gt_path, cad_path, seed=0, n_cad=None, exact=True):
+def union_boundary(cad, max_edge=0.004, eps=2e-4, max_levels=12):
+    """The boundary of the volume the CAD occupies, as a triangle mesh. A CAD of
+    several solids (a compound the judge unions) carries faces buried inside the
+    union, and an STL roundtrip can merge such solids into one connected body, so
+    body counts say nothing about it. A surface point is boundary when exactly one
+    side of it is inside the CAD (generalized winding number of the points `eps`
+    off its two sides): faces between overlapping or touching solids (inside on
+    both sides) go, cavity walls stay. Each triangle is probed at its centroid and
+    near its corners. One whose probes agree is kept or dropped whole; one whose
+    probes disagree straddles another solid and is split in four, recursively,
+    until its edges are under `max_edge`, where its centroid decides. The work
+    follows the curves where solids meet, not the surface area."""
+    tri = cad.triangles
+    nrm = cad.face_normals
+    kept = []
+    for level in range(max_levels + 1):
+        if not len(tri):
+            break
+        c = tri.mean(axis=1)
+        probes = np.concatenate([c] + [c + 0.9 * (tri[:, k] - c) for k in range(3)])
+        nn = np.tile(nrm, (4, 1))
+        a, b = _sides(cad, probes, nn, eps)
+        status = (a != b).reshape(4, -1).T
+        whole, none = status.all(axis=1), ~status.any(axis=1)
+        kept.append(tri[whole])
+        mixed = ~whole & ~none
+        edge = np.linalg.norm(tri[:, [1, 2, 0]] - tri, axis=2).max(axis=1)
+        last = mixed & ((edge <= max_edge) | (level == max_levels))
+        kept.append(tri[last & status[:, 0]])  # small enough: the centroid decides
+        split = mixed & ~last
+        t, n = tri[split], nrm[split]
+        m01, m12, m20 = (t[:, 0] + t[:, 1]) / 2, (t[:, 1] + t[:, 2]) / 2, (t[:, 2] + t[:, 0]) / 2
+        tri = np.concatenate([np.stack([t[:, 0], m01, m20], 1), np.stack([m01, t[:, 1], m12], 1),
+                              np.stack([m20, m12, t[:, 2]], 1), np.stack([m01, m12, m20], 1)])
+        nrm = np.tile(n, (4, 1))
+    tris = np.concatenate(kept) if kept else np.zeros((0, 3, 3))
+    if not len(tris):
+        return None
+    return trimesh.Trimesh(tris.reshape(-1, 3), np.arange(len(tris) * 3).reshape(-1, 3), process=False)
+
+
+def detail(gt_path, cad_path, seed=0, n_cad=None, exact=True, boundary_path=None):
     n_cad = n_cad or N_CAD
     np.random.seed(seed)
     gt = iou.normalize_mesh(trimesh.load(gt_path, force='mesh'))
@@ -71,12 +105,17 @@ def detail(gt_path, cad_path, seed=0, n_cad=None, exact=True):
         # Exact point-to-surface distances: no dependence on how densely the other
         # surface is sampled (KD distances to samples did not converge at tau 0.005
         # on large-area parts: 00883892 recall 0.42 / 0.75 / 0.89 at 1M / 3M / 6M).
-        d_gc = trimesh.proximity.closest_point(cad, gt.sample(N_EXACT))[1]
-        d_cg = trimesh.proximity.closest_point(gt, boundary_samples(cad, N_EXACT))[1]
+        # The occupied volume's boundary: the fused solids when given (union_replay.py),
+        # else the winding-number filter.
+        bnd = trimesh.load(boundary_path, force='mesh') if boundary_path else union_boundary(cad)
+        if bnd is None:
+            raise ValueError('CAD encloses no volume')
+        d_gc = trimesh.proximity.closest_point(bnd, gt.sample(N_EXACT))[1]
+        d_cg = trimesh.proximity.closest_point(gt, bnd.sample(N_EXACT))[1]
     else:
         g, c = gt.sample(N_GT), cad.sample(n_cad)
         d_gc = cKDTree(c).query(g, workers=1)[0]
-        d_cg = cKDTree(gt.sample(n_cad)).query(boundary_samples(cad, N_GT), workers=1)[0]
+        d_cg = cKDTree(gt.sample(n_cad)).query(cad.sample(N_GT), workers=1)[0]
     wh, ch = float((d_gc <= HALF).mean()), float((d_cg <= HALF).mean())
     sweep = {}
     for tau in TAUS:
@@ -93,6 +132,25 @@ def _zero(status, **extra):
             'sweep': {str(t): dict(z) for t in TAUS}, **extra}
 
 
+def fused_boundary(stem, timeout=1800):
+    """<stem>_union.stl: the program's solids fused and tessellated (union_replay.py),
+    made once and cached with its record in <stem>_union.json; None if it fails."""
+    import subprocess
+    out, rec_path = stem + '_union.stl', stem + '_union.json'
+    if not os.path.exists(rec_path):
+        if not os.path.exists(stem + '.py'):
+            return None
+        try:
+            p = subprocess.run([sys.executable, os.path.join(ROOT, 'bench', 'union_replay.py'), stem + '.py', out],
+                               capture_output=True, text=True, timeout=timeout, cwd=os.path.dirname(stem))
+            rec = json.loads(p.stdout.strip().splitlines()[-1])
+        except (subprocess.TimeoutExpired, IndexError, json.JSONDecodeError) as e:
+            rec = {'built': False, 'error': f'{type(e).__name__}'}
+        json.dump(rec, open(rec_path, 'w'))
+    rec = json.load(open(rec_path))
+    return out if rec.get('built') and os.path.exists(out) else None
+
+
 def one(job):
     run, part, gt, valid, n_cad, seed = job
     os.environ['OMP_NUM_THREADS'] = '1'
@@ -102,7 +160,9 @@ def one(job):
     if not cad or not os.path.exists(cad):
         return run, part, _zero('no_cad')
     try:
-        d = detail(gt, cad, seed=seed, n_cad=n_cad)
+        fb = fused_boundary(stem)
+        d = detail(gt, cad, seed=seed, n_cad=n_cad, boundary_path=fb)
+        d['boundary'] = 'fused' if fb else 'winding'
     except Exception as e:  # noqa: BLE001
         return run, part, _zero(f'error: {type(e).__name__}: {e}')
     if valid:

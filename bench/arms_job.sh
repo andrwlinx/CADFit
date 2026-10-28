@@ -27,6 +27,6 @@ done
 echo "[$(date +%T)] chunk $CHUNK/$NCHUNK: $(ls $SUB | wc -l) parts, arms: $ARMS, $(hostname)"
 module load apptainer/1.5.2
 apptainer exec -B /orcd $P/envs/cadfit-sandbox bash -c \
-  "export PATH=$P/envs/cadfit-venv/bin:\$PATH; JOBS=${JOBS:-6} MIN_FREE_GB=50 MAX_RUNS_GB=400 \
+  "export PATH=$P/envs/cadfit-venv/bin:\$PATH; JOBS=${JOBS:-6} SEED=${SEED:-0} MIN_FREE_GB=50 MAX_RUNS_GB=400 \
    PY=$P/envs/cadfit-venv/bin/python bash bench/run_parallel_arms.sh $SUB $TAG $ARMS"
 echo "[$(date +%T)] done"

@@ -46,7 +46,10 @@ if [ -n "$D0_PATCH" ] && ! grep -q infra bench/runs/${TAG}_d0_code/SOURCE.txt; t
   git apply --directory=bench/runs/${TAG}_d0_code "$D0_PATCH"
   echo "+ $D0_PATCH (infrastructure only: decimation memory, worker retry)" >> bench/runs/${TAG}_d0_code/SOURCE.txt
 fi
-for d in ${TAG}_dx_code ${TAG}_v2_code ${TAG}_src; do freeze "$COMMIT" bench/runs/$d; done
+# Every requested arm runs from a full tree (its replay/judge code included):
+# run_parallel_arms.sh would otherwise copy only top-level *.py for a missing one.
+for arm in $ARMS; do [ "$arm" = d0 ] || freeze "$COMMIT" bench/runs/${TAG}_${arm}_code; done
+freeze "$COMMIT" bench/runs/${TAG}_src
 SRC=$PWD/bench/runs/${TAG}_src
 N=$(ls $STLS/*.stl | wc -l)
 echo "cohort $STLS: $N parts"

@@ -295,11 +295,17 @@ def verify(program, target, out_dir, alternatives=(), trim=None):
         if trim and valid:
             best = max(valid, key=lambda k: recs[k]['iou_exec'])
             try:
+                import time as _time
+                t0 = _time.time()
                 code = srcs[best] + trim_code(silhouettes(target))
+                t_sil = _time.time() - t0
                 py = os.path.join(out_dir, f'exec_{best}_trim.py')
                 open(py, 'w').write(code)
                 recs[best + '_trim'] = ex.submit(execute, py, os.path.join(out_dir, f'exec_{best}_trim.stl'),
                                                  target).result()
+                # Its cost: silhouettes + replay + judge (the trim stage's added wall time).
+                recs[best + '_trim']['silhouette_seconds'] = round(t_sil, 1)
+                recs[best + '_trim']['stage_seconds'] = round(_time.time() - t0, 1)
             except Exception as e:  # noqa: BLE001
                 recs[best + '_trim'] = {'built': False, 'valid': False, 'iou_exec': 0.0,
                                         'error': f'trim not built: {type(e).__name__}: {e}'}

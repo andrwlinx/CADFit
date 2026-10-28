@@ -11,8 +11,10 @@ all parts, the benchA / benchE split means and their balanced average, valid
 deliveries. For each pair a-b: mean paired difference with a split-stratified
 paired bootstrap CI (parts resampled within their split, 10,000 resamples,
 seed 0), wins/losses (|d| > 0.005), a two-sided sign test, Holm-adjusted over
-the pairs given, and the share of the difference from parts b did not deliver
-valid CAD.
+the pairs given (the Holm adjustment is for the sign tests, not the intervals),
+and the share of the difference from parts b did not deliver valid CAD.
+Repeats (--avg) are averaged within part before pairing, so parts stay the
+resampling unit.
 """
 import argparse
 import json
@@ -65,6 +67,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('scores', nargs='+')
     ap.add_argument('--pairs', nargs='*', default=[])
+    ap.add_argument('--avg', nargs='*', default=[],
+                    help='name=run1,run2,...: a run whose per-part gated IoU is the mean over repeats '
+                         '(cad_valid when valid in every repeat); pairs then use name')
     ap.add_argument('--out')
     a = ap.parse_args()
     split = cohort()
@@ -72,6 +77,11 @@ def main():
     runs = {}
     for f in a.scores:
         runs.update(json.load(open(f)))
+    for spec in a.avg:
+        name, members = spec.split('=')
+        members = members.split(',')
+        runs[name] = {p: {'iou_cad_gated': sum(gated(runs[m].get(p)) for m in members) / len(members),
+                          'cad_valid': all(valid(runs[m].get(p)) for m in members)} for p in parts}
     out = {'n_parts': len(parts), 'runs': {}, 'pairs': {}}
     for name, res in runs.items():
         v = {p: gated(res.get(p)) for p in parts}
