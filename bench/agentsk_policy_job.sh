@@ -8,7 +8,7 @@
 # No-LLM skills policy (agent/scripted_skills_policy.py) on the 20 study parts, 5 at a time.
 P=/orcd/pool/007/a_lin
 cd $P/cadfit
-module load apptainer/1.5.2
+module load apptainer/1.5.2 2>/dev/null || export PATH=/orcd/software/core/001/pkg/apptainer/1.5.2/bin:$PATH  # some preemptable nodes have no lmod
 # 5 parts at a time on 16 cores: cap numeric-library threads per process (unset, each
 # process started ~46 threads and the node ran at load ~98, starving the 30-min clock).
 export OMP_NUM_THREADS=3 OPENBLAS_NUM_THREADS=3 MKL_NUM_THREADS=3 NUMEXPR_NUM_THREADS=3

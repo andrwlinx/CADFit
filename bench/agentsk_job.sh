@@ -39,7 +39,7 @@ for i in $(seq 1 180); do  # up to 30 min for download + load
 done
 echo "[$(date +%T)] server ready"
 
-module load apptainer/1.5.2
+module load apptainer/1.5.2 2>/dev/null || export PATH=/orcd/software/core/001/pkg/apptainer/1.5.2/bin:$PATH  # some preemptable nodes have no lmod
 # A cold `import cadquery` from pool storage takes ~90 s (warm: ~1 s); skills and
 # add_code start fresh interpreters with 60-90 s limits. Warm the page cache once.
 apptainer exec -B /orcd $P/envs/cadfit-sandbox $P/envs/cadfit-venv/bin/python -c \
