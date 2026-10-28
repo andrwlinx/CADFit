@@ -1,0 +1,1419 @@
+diff --git a/agent/cad_tools.py b/agent/cad_tools.py
+index e641fe5..8774e14 100644
+--- a/agent/cad_tools.py
++++ b/agent/cad_tools.py
+@@ -288,13 +288,15 @@ class CadWorkspace:
+             rec['error'] = 'program crashed the CAD kernel'
+         rec['_m'], rec['_stl'] = None, stl
+         if rec['built'] and os.path.exists(stl):
++            # The answer is chosen by the same judge that scores it (bench/score.py):
++            # _cached_manifold may repair or alpha-wrap a tessellation, which is not the
++            # geometry the judge sees. The manifold is kept only to draw model sections.
++            sys.path.insert(0, os.path.join(ROOT, 'bench'))
++            import score
++            rec['iou'] = float(score.robust_iou(self.gt_stl, stl)['iou'])
+             m = iou._cached_manifold(stl, False)
+             if m is not None and m.volume() > 1e-12:
+-                rec['iou'], rec['_m'] = self._score(m), m
+-            else:  # tessellation not a clean volume: winding-number Monte Carlo judge
+-                sys.path.insert(0, os.path.join(ROOT, 'bench'))
+-                import score
+-                rec['iou'] = float(score.robust_iou(self.gt_stl, stl)['iou'])
++                rec['_m'] = m
+         self._exec_cache[key] = rec
+         return rec
+ 
+@@ -489,9 +491,14 @@ class CadWorkspace:
+             out.sort(key=lambda d: -d['area'])
+             return out[:8]
+ 
+-        m = self._model()
++        m, source = self._model(), 'mesh composition of the steps'
++        if EXEC:  # tools v2: show what the program builds, the geometry evaluate() reports
++            r = self._exec()
++            if r is not None and r.get('_m') is not None:
++                m, source = r['_m'], 'executed program'
+         return {'plane': f'{axis}={value}', 'coords': f'({others[0]}, {others[1]})',
+-                'target': polys(self.gt_mesh), 'model': polys(_mesh_of(m) if m is not None else None)}
++                'target': polys(self.gt_mesh), 'model': polys(_mesh_of(m) if m is not None else None),
++                'model_source': source}
+ 
+     # ---------- output ----------
+     def answer_steps(self):
+diff --git a/analyze_loop_translation.py b/analyze_loop_translation.py
+index 69806ac..00d8a87 100644
+--- a/analyze_loop_translation.py
++++ b/analyze_loop_translation.py
+@@ -388,9 +388,11 @@ def plot_cd_vs_translation_all_loops(loops_data, sketch_idx, output_folder, save
+         # Merge overlapping intervals for mean curve
+         merged_mean_intervals = merge_overlapping_intervals(intervals_data['mean_intervals'])
+         
+-        # Remove intervals smaller than 0.02 after merging
++        # Remove intervals smaller than 0.02 after merging (two stock steps; with
++        # precise extents, two steps of the finer per-sketch grid)
++        min_width = 2 * (translation_factors[1] - translation_factors[0]) if _precise_extents() else 0.02
+         intervals_data['mean_intervals'] = [interval for interval in merged_mean_intervals 
+-                                            if (interval['t_end'] - interval['t_start']) >= 0.02]
++                                            if (interval['t_end'] - interval['t_start']) >= min_width]
+         
+         # Mark minimum on mean curve
+         mean_min_idx = np.argmin(mean_cd)
+@@ -590,6 +592,64 @@ def plot_loop_on_mesh_3d(loops_3d, normal, mesh, surface_points, sketch_idx, out
+     print(f"  Saved 3D visualization: {output_path}")
+ 
+ 
++def _precise_extents() -> bool:
++    return os.environ.get('CADFIT_PRECISE_EXTENTS') == '1'
++
++
++def _cap_offsets(vertices, faces, normal, min_area=1e-5):
++    """Offsets along `normal` of the target's flat faces perpendicular to it
++    (the planes an extrusion along `normal` can start or end on)."""
++    tri = np.asarray(vertices)[np.asarray(faces)]
++    cross = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
++    area = np.linalg.norm(cross, axis=1) / 2
++    ok = area > 0
++    cos = np.abs(cross[ok] @ normal) / (2 * area[ok])
++    sel = cos > 0.9995
++    if not sel.any():
++        return np.empty(0)
++    off = tri[ok][sel].mean(axis=1) @ normal
++    a = area[ok][sel]
++    order = np.argsort(off)
++    off, a = off[order], a[order]
++    planes, start = [], 0
++    for i in range(1, len(off) + 1):
++        if i == len(off) or off[i] - off[i - 1] > 1e-4:
++            w = a[start:i]
++            if w.sum() >= min_area:
++                planes.append(float((off[start:i] * w).sum() / w.sum()))
++            start = i
++    return np.array(planes)
++
++
++def _snap_intervals(intervals_data, planes_t, max_shift):
++    """Move interval ends onto the nearest cap plane within `max_shift`: the
++    sweep places them on its grid and widens them by one step."""
++    if intervals_data is None or not len(planes_t):
++        return intervals_data
++
++    def snap(t):
++        j = int(np.argmin(np.abs(planes_t - t)))
++        return float(planes_t[j]) if abs(planes_t[j] - t) <= max_shift else float(t)
++
++    for key in ('merged_intervals', 'mean_intervals'):
++        for iv in intervals_data.get(key) or []:
++            a, b = snap(iv['t_start']), snap(iv['t_end'])
++            if b > a:
++                # The grid ends stay available: the search keeps whichever extrusion scores better.
++                iv['t_start_grid'], iv['t_end_grid'] = iv['t_start'], iv['t_end']
++                iv['t_start'], iv['t_end'] = a, b
++    for lp in intervals_data.get('loop_intervals') or []:
++        for iv in lp.get('intervals', []):
++            a, b = snap(iv['t_start']), snap(iv['t_end'])
++            if b > a:
++                iv['t_start'], iv['t_end'] = a, b
++    merged = intervals_data.get('merged_intervals') or []
++    if merged:
++        intervals_data['all_intervals_min'] = float(min(iv['t_start'] for iv in merged))
++        intervals_data['all_intervals_max'] = float(max(iv['t_end'] for iv in merged))
++    return intervals_data
++
++
+ def process_single_sketch(args):
+     """
+     Worker function to process a single sketch.
+@@ -626,6 +686,21 @@ def process_single_sketch(args):
+ 
+     # One surface tree per sketch (stock rebuilds it per loop).
+     tree = build_surface_tree(surface_points) if _fast_cd_enabled() else None
++
++    planes_t = np.empty(0)
++    if _precise_extents():
++        # Sweep only the part's extent along the normal (stock sweeps [-2, 2], twice
++        # the normalized part), on a grid fine enough for thin directions, and
++        # snap interval ends to the target's cap planes afterwards.
++        n = np.asarray(normal, dtype=float)
++        n = n / np.linalg.norm(n)
++        o0 = float(np.mean(np.asarray(loops_3d[0]) @ n))
++        proj = np.asarray(mesh_data['vertices']) @ n - o0
++        lo, hi = float(proj.min()), float(proj.max())
++        fine = min(step, max((hi - lo) / 40, 0.001))
++        translation_range = (max(translation_range[0], lo - 3 * fine), min(translation_range[1], hi + 3 * fine))
++        step = fine
++        planes_t = _cap_offsets(mesh_data['vertices'], mesh_data['faces'], n) - o0
+     
+     # Collect CD data for all loops in this sketch
+     loops_cd_data = []
+@@ -671,6 +746,8 @@ def process_single_sketch(args):
+     intervals_data = None
+     if loops_cd_data:
+         intervals_data = plot_cd_vs_translation_all_loops(loops_cd_data, sketch_idx, output_folder, save_plots)
++        if _precise_extents():
++            intervals_data = _snap_intervals(intervals_data, planes_t, max_shift=1.5 * step)
+     
+     # Clean up memory
+     del mesh
+diff --git a/bench/analysis/extra_material.py b/bench/analysis/extra_material.py
+new file mode 100644
+index 0000000..27ac703
+--- /dev/null
++++ b/bench/analysis/extra_material.py
+@@ -0,0 +1,69 @@
++#!/usr/bin/env python3
++"""Where is the delivered CAD's extra material? For each part: the share of the
++CAD volume outside the target, and how much of that lies outside the target's
++X/Y/Z silhouettes (what a silhouette trim could remove) vs inside all three
++(filled pockets/holes a trim cannot see).
++
++  python bench/analysis/extra_material.py <run_dir> <stl_dir> <part> [...]
++"""
++import glob
++import os
++import sys
++
++import numpy as np
++import trimesh
++from scipy import ndimage
++
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
++sys.path.insert(0, ROOT)
++import iou  # noqa: E402
++from gwn_repair import _gwn_fast as _gwn  # noqa: E402  (winding-number inside test, tree-accelerated)
++
++
++RES = 1024
++LO, HI = -1.05, 1.05  # normalized frame
++
++
++def silhouette(mesh, axis):
++    """Raster silhouette along `axis`: cells hit by dense surface samples, closed
++    dilated one cell so the mask contains the true silhouette."""
++    keep = [i for i in range(3) if i != axis]
++    np.random.seed(1)
++    pts = mesh.sample(1_000_000)[:, keep]
++    ij = np.clip(((pts - LO) / (HI - LO) * RES).astype(int), 0, RES - 1)
++    m = np.zeros((RES, RES), bool)
++    m[ij[:, 0], ij[:, 1]] = True
++    m = ndimage.binary_closing(m, iterations=2)
++    return ndimage.binary_dilation(m, iterations=1)
++
++
++def in_mask(mask, xy):
++    ij = np.clip(((xy - LO) / (HI - LO) * RES).astype(int), 0, RES - 1)
++    return mask[ij[:, 0], ij[:, 1]]
++
++
++def main(run, stl_dir, parts):
++    for p in parts:
++        stl = glob.glob(os.path.join(stl_dir, p + '*.stl'))[0]
++        name = os.path.basename(stl)[:-4]
++        cad = os.path.join(run, name, 'best_greedy_parallel_iterative_cad.stl')
++        if not os.path.exists(cad):
++            cad = os.path.join(run, name, 'best_greedy_parallel_cad.stl')
++        gt = iou.normalize_mesh(trimesh.load(stl, force='mesh'))
++        rc = trimesh.load(cad, force='mesh')
++        rng = np.random.default_rng(0)
++        lo, hi = rc.bounds
++        pts = rng.uniform(lo, hi, size=(60_000, 3))
++        pts = pts[_gwn(rc, pts) > 0.5]
++        in_gt = _gwn(gt, pts) > 0.5
++        extra = pts[~in_gt]
++        outside_any = np.zeros(len(extra), bool)
++        for ax in range(3):
++            keep = [i for i in range(3) if i != ax]
++            outside_any |= ~in_mask(silhouette(gt, ax), extra[:, keep])
++        print(f'{p} cad_vol_pts {len(pts)} extra_frac {len(extra) / max(len(pts), 1):.3f} '
++              f'extra_outside_silhouettes {outside_any.mean() if len(extra) else 0:.3f}', flush=True)
++
++
++if __name__ == '__main__':
++    main(sys.argv[1], sys.argv[2], sys.argv[3:])
+diff --git a/bench/analysis/trim_posthoc.py b/bench/analysis/trim_posthoc.py
+new file mode 100644
+index 0000000..4791612
+--- /dev/null
++++ b/bench/analysis/trim_posthoc.py
+@@ -0,0 +1,75 @@
++#!/usr/bin/env python3
++"""
++Silhouette trim applied after the fact to a run's delivered programs.
++
++  python bench/analysis/trim_posthoc.py bench/runs/dev6_v3 bench/cadbench/fresh --jobs 16 \
++      --out bench/runs/dev6_v3_trim.json
++
++The trim is the last stage of exec-verify (exec_verify.verify(trim=True)), after
++the search, so running it on the program a run delivered gives exactly what that
++run would have delivered with the trim on: the delivered program and its
++silhouette-trimmed copy are both executed and judged, and the better valid one is
++kept. Per part: the delivered program's executed record, the trim's, and the
++choice, in the format of exec_verify.
++"""
++import argparse
++import glob
++import json
++import os
++import sys
++from concurrent.futures import ProcessPoolExecutor
++
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
++sys.path.insert(0, ROOT)
++RECON = ('best_greedy_parallel_iterative.py', 'best_greedy_parallel.py')
++
++
++def one(job):
++    run, part, target = job
++    import exec_verify
++    prog = next((os.path.join(run, part, r) for r in RECON if os.path.exists(os.path.join(run, part, r))), None)
++    if prog is None:
++        return part, {'status': 'no_program'}
++    out = os.path.join(run, part, 'trim_posthoc')
++    try:
++        # Absolute paths: exec_verify runs each program from its own folder.
++        rec = exec_verify.verify(os.path.abspath(prog), os.path.abspath(target), os.path.abspath(out), trim=True)
++    except Exception as e:  # noqa: BLE001
++        return part, {'status': f'error: {type(e).__name__}: {e}'}
++    v = rec['variants']
++    trim = next((k for k in v if k.endswith('_trim')), None)
++    # The same choice without the trimmed variant: the difference is the trim alone.
++    base = {k: r for k, r in v.items() if k != trim and 'same_program_as' not in r}
++    k0 = exec_verify.choose(base)
++    gated0 = base[k0]['iou_exec'] if k0 and base[k0].get('valid') else 0.0
++    return part, {'status': 'ok', 'chosen': rec['chosen'], 'chosen_valid': rec['chosen_valid'],
++                  'gated': rec['validity_gated_iou'], 'gated_no_trim': gated0, 'trim': trim,
++                  'trim_record': v.get(trim), 'original': v.get('original')}
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument('run')
++    ap.add_argument('stl_dir')
++    ap.add_argument('--jobs', type=int, default=8)
++    ap.add_argument('--out', required=True)
++    a = ap.parse_args()
++    parts = sorted(os.path.basename(p)[:-4] for p in glob.glob(os.path.join(a.stl_dir, '*.stl')))
++    jobs = [(a.run, p, os.path.join(a.stl_dir, p + '.stl')) for p in parts]
++    res = {}
++    with ProcessPoolExecutor(a.jobs) as ex:
++        for part, r in ex.map(one, jobs):
++            res[part] = r
++            t = r.get('trim_record') or {}
++            print(part[:8], r['status'], r.get('chosen'), round(r.get('gated', 0), 4),
++                  'trim', t.get('valid'), round(t.get('iou_exec', 0) or 0, 4), flush=True)
++    json.dump(res, open(a.out, 'w'), indent=1)
++    ok = [r for r in res.values() if r['status'] == 'ok']
++    print('trim chosen on', sum(bool(r['chosen'] and r['chosen'].endswith('_trim')) for r in ok), 'of', len(ok))
++    n = len(parts)
++    print(f"mean gated over {n} parts: no trim {sum(r.get('gated_no_trim', 0) for r in res.values()) / n:.4f}, "
++          f"with trim {sum(r.get('gated', 0) for r in res.values()) / n:.4f}")
++
++
++if __name__ == '__main__':
++    main()
+diff --git a/bench/analysis/v2_dev.py b/bench/analysis/v2_dev.py
+new file mode 100644
+index 0000000..928acf3
+--- /dev/null
++++ b/bench/analysis/v2_dev.py
+@@ -0,0 +1,118 @@
++#!/usr/bin/env python3
++"""
++Dev-cohort analysis of the CADFit++ v2 arms (60 parts, bench/cadbench/fresh).
++
++  python3 bench/analysis/v2_dev.py results/dev345_scores.json [results/dev6_scores.json ...] \
++      --pairs dev5_dx:dev5_d0 dev5_v2:dev5_d0 dev5_v2:dev5_dx dev6_v3:dev6_v2 --out results/v2_dev.json
++
++Every cohort part counts: a part a run did not score (no model, never ran) is 0.
++Primary metric: validity-gated CAD IoU (iou_cad_gated). For each run: mean over
++all parts, the benchA / benchE split means and their balanced average, valid
++deliveries. For each pair a-b: mean paired difference with a split-stratified
++paired bootstrap CI (parts resampled within their split, 10,000 resamples,
++seed 0), wins/losses (|d| > 0.005), a two-sided sign test, Holm-adjusted over
++the pairs given, and the share of the difference from parts b did not deliver
++valid CAD.
++"""
++import argparse
++import json
++import math
++import os
++import random
++
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
++
++
++def cohort():
++    man = json.load(open(os.path.join(ROOT, 'bench', 'cadbench', 'fresh', 'manifest.json')))
++    return {m['file_id']: m['split'] for m in man}
++
++
++def gated(rec):
++    return float((rec or {}).get('iou_cad_gated') or 0.0)
++
++
++def valid(rec):
++    return bool((rec or {}).get('cad_valid'))
++
++
++def sign_p(w, l):
++    n = w + l
++    if n == 0:
++        return 1.0
++    k = min(w, l)
++    return min(1.0, 2 * sum(math.comb(n, i) for i in range(k + 1)) / 2 ** n)
++
++
++def boot(d, split, n=10000, seed=0, alpha=0.05):
++    groups = {}
++    for p, x in d.items():
++        groups.setdefault(split[p], []).append(x)
++    r = random.Random(seed)
++    stats = []
++    for _ in range(n):
++        tot = cnt = 0
++        for g in groups.values():
++            s = [g[r.randrange(len(g))] for _ in g]
++            tot += sum(s)
++            cnt += len(s)
++        stats.append(tot / cnt)
++    stats.sort()
++    return stats[int(alpha / 2 * n)], stats[int((1 - alpha / 2) * n) - 1]
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument('scores', nargs='+')
++    ap.add_argument('--pairs', nargs='*', default=[])
++    ap.add_argument('--out')
++    a = ap.parse_args()
++    split = cohort()
++    parts = sorted(split)
++    runs = {}
++    for f in a.scores:
++        runs.update(json.load(open(f)))
++    out = {'n_parts': len(parts), 'runs': {}, 'pairs': {}}
++    for name, res in runs.items():
++        v = {p: gated(res.get(p)) for p in parts}
++        by = {s: [v[p] for p in parts if split[p] == s] for s in ('benchA', 'benchE')}
++        missing = [p for p in parts if res.get(p) is None or res[p].get('status') in ('no_model', 'not_run')]
++        out['runs'][name] = {
++            'mean_gated': sum(v.values()) / len(parts),
++            'benchA': sum(by['benchA']) / len(by['benchA']), 'benchE': sum(by['benchE']) / len(by['benchE']),
++            'balanced': (sum(by['benchA']) / len(by['benchA']) + sum(by['benchE']) / len(by['benchE'])) / 2,
++            'valid': sum(valid(res.get(p)) for p in parts), 'missing': missing}
++    raw = []
++    for pr in a.pairs:
++        x, y = pr.split(':')
++        d = {p: gated(runs[x].get(p)) - gated(runs[y].get(p)) for p in parts}
++        lo, hi = boot(d, split)
++        w = sum(v > 0.005 for v in d.values())
++        l = sum(v < -0.005 for v in d.values())
++        tot = sum(d.values())
++        from_invalid = sum(d[p] for p in parts if not valid(runs[y].get(p)))
++        rec = {'diff': tot / len(parts), 'ci95': [lo, hi], 'wins': w, 'losses': l, 'sign_p': sign_p(w, l),
++               'share_from_b_invalid': from_invalid / tot if tot else None,
++               'both_valid_diff': (lambda q: sum(d[p] for p in q) / len(q) if q else None)(
++                   [p for p in parts if valid(runs[x].get(p)) and valid(runs[y].get(p))])}
++        out['pairs'][pr] = rec
++        raw.append((pr, rec['sign_p']))
++    # Holm over the pairs given (the prespecified family).
++    m = len(raw)
++    running = 0.0
++    for i, (pr, p) in enumerate(sorted(raw, key=lambda t: t[1])):
++        running = max(running, min(1.0, (m - i) * p))
++        out['pairs'][pr]['sign_p_holm'] = running
++    for name, r in out['runs'].items():
++        print(f"{name:<12} gated {r['mean_gated']:.4f}  A {r['benchA']:.4f}  E {r['benchE']:.4f}  "
++              f"valid {r['valid']}/{len(parts)}  missing {len(r['missing'])}")
++    for pr, r in out['pairs'].items():
++        print(f"{pr:<22} {r['diff']:+.4f} [{r['ci95'][0]:+.4f}, {r['ci95'][1]:+.4f}]  {r['wins']}/{r['losses']}  "
++              f"p_holm {r['sign_p_holm']:.4f}  from-invalid {r['share_from_b_invalid']}  "
++              f"both-valid {r['both_valid_diff']}")
++    if a.out:
++        json.dump(out, open(a.out, 'w'), indent=1)
++
++
++if __name__ == '__main__':
++    main()
+diff --git a/bench/cadfather_adapt.py b/bench/cadfather_adapt.py
+new file mode 100644
+index 0000000..533ef69
+--- /dev/null
++++ b/bench/cadfather_adapt.py
+@@ -0,0 +1,80 @@
++#!/usr/bin/env python3
++"""
++CADFather outputs (agent/run_folder.sh --out <dir>: <part>.py per part) as a
++CADFit run folder that bench/score.py --cad judges like any arm.
++
++Runs in CADFather's own environment (its programs import its `cadgen`
++library), e.g. inside its sandbox from the CADFather repo root:
++
++  python /path/to/cadfit/bench/cadfather_adapt.py <cadfather_out> <cadfit>/bench/runs/<tag>
++
++For each part the program is executed, the shape is checked exactly as
++bench/cad_replay.py checks ours (OCC isValid of the shape and of every solid),
++scaled from CADFather's frame into ours, and tessellated with the same
++tolerances. Frames: both centre the target's bounding box at the origin;
++CADFather scales its largest extent to 200 (agent/cad_agent/capabilities/
++metrics.py normalize_mesh: GT to a unit cube, prediction / 200), ours to 2
++(iou.normalize_mesh), so ours = CADFather's / 100.
++
++Written per part: best_greedy_parallel.py (the program, for reference; it does
++not run in CADFit's environment), best_greedy_parallel.stl and
++best_greedy_parallel_cad.stl (the scaled tessellation), best_greedy_parallel_cad.json
++(the replay record score.py's cad_replay cache reads). A part with no program
++gets no folder entry beyond an empty directory, which score.py counts as 0.
++"""
++import json
++import os
++import shutil
++import sys
++import time
++
++SCALE = 0.01
++
++
++def replay(prog, out_stl):
++    rec = {'built': False, 'valid': False, 'n_solids': 0, 'n_invalid_solids': None,
++           'source': 'cadfather', 'scale': SCALE}
++    t0 = time.time()
++    try:
++        import cadquery as cq
++        ns = {'__name__': '__main__'}
++        exec(compile(open(prog).read(), prog, 'exec'), ns)
++        res = ns.get('r', ns.get('result'))
++        if res is None:
++            raise RuntimeError('program defines neither r nor result')
++        shape = res.val() if isinstance(res, cq.Workplane) else res
++        if isinstance(res, cq.Workplane) and len(res.vals()) > 1:
++            shape = cq.Compound.makeCompound([v for v in res.vals() if isinstance(v, cq.Shape)])
++        shape = shape.scale(SCALE)
++        solids = shape.Solids()
++        rec['n_solids'] = len(solids)
++        rec['n_invalid_solids'] = sum(not s.isValid() for s in solids)
++        rec['valid'] = bool(shape.isValid() and solids and rec['n_invalid_solids'] == 0)
++        cq.exporters.export(shape, out_stl, tolerance=1e-3, angularTolerance=0.1)
++        rec['built'] = True
++    except Exception as e:  # noqa: BLE001
++        rec['error'] = f'{type(e).__name__}: {str(e)[:300]}'
++    rec['seconds'] = round(time.time() - t0, 1)
++    return rec
++
++
++def main(cf_out, run_dir):
++    os.makedirs(run_dir, exist_ok=True)
++    for f in sorted(os.listdir(cf_out)):
++        if not f.endswith('.py') or f.startswith('config'):
++            continue
++        part = f[:-3]
++        d = os.path.join(run_dir, part)
++        os.makedirs(d, exist_ok=True)
++        prog = os.path.join(d, 'best_greedy_parallel.py')
++        shutil.copy2(os.path.join(cf_out, f), prog)
++        cad_stl = os.path.join(d, 'best_greedy_parallel_cad.stl')
++        rec = replay(prog, cad_stl)
++        if rec['built']:
++            shutil.copy2(cad_stl, os.path.join(d, 'best_greedy_parallel.stl'))
++        json.dump(rec, open(os.path.join(d, 'best_greedy_parallel_cad.json'), 'w'))
++        print(part[:8], json.dumps(rec), flush=True)
++
++
++if __name__ == '__main__':
++    main(sys.argv[1], sys.argv[2])
+diff --git a/bench/d0_infra.patch b/bench/d0_infra.patch
+new file mode 100644
+index 0000000..eb90f61
+--- /dev/null
++++ b/bench/d0_infra.patch
+@@ -0,0 +1,85 @@
++diff --git a/cq_worker.py b/cq_worker.py
++index e8dcec5..5b5421f 100644
++--- a/cq_worker.py
+++++ b/cq_worker.py
++@@ -130,7 +130,14 @@ _client = _Client()
++ 
++ 
++ def run_script(script, path=None, timeout=60.0):
++-    return _client.run(script, path, timeout)
+++    ok, err = _client.run(script, path, timeout)
+++    if not ok and err == 'cq_worker died':
+++        # One retry in a fresh child. A death is usually not the script's doing:
+++        # on dev3/dev4 the node's OOM killer took the workers of parts running next
+++        # to 00247424, every later candidate of those parts failed the same way,
+++        # and the parts ended with "no valid operations".
+++        ok, err = _client.run(script, path, timeout)
+++    return ok, err
++ 
++ 
++ if __name__ == '__main__':
++diff --git a/run_pipeline.py b/run_pipeline.py
++index 2170084..4fa255b 100644
++--- a/run_pipeline.py
+++++ b/run_pipeline.py
++@@ -896,8 +896,34 @@ def _winding_repair_if_open(stl_path: str) -> str:
++         return stl_path
++ 
++ 
+++def _voxel_remesh(mesh, pitch, max_points=5_000_000):
+++    """Filled voxel grid of `mesh` at `pitch`, meshed by marching cubes.
+++
+++    Occupancy comes from area-uniform surface samples, not trimesh's
+++    voxelized(), which subdivides every face until its edges are shorter than
+++    the pitch: on long sliver triangles that is 4^k faces per triangle, and on
+++    00247424 it grew past 100 GB until the node's OOM killer also took the
+++    CadQuery workers of the parts running next to it."""
+++    from trimesh.voxel import VoxelGrid
+++    from trimesh.voxel.ops import sparse_to_matrix
+++    n = int(np.clip(32.0 * mesh.area / pitch ** 2, 100_000, max_points))  # 8/pitch^2 left holes that fill() leaked through
+++    pts, _ = trimesh.sample.sample_surface(mesh, n, seed=0)
+++    pts = np.vstack([pts, mesh.vertices])
+++    origin = pts.min(axis=0)
+++    index = np.round((pts - origin) / pitch).astype(np.int64)
+++    # Indices start at 0: origin is the minimum of the samples.
+++    filled = VoxelGrid(sparse_to_matrix(index)).fill()
+++    # VoxelGrid.marching_cubes returns index coordinates and ignores the grid
+++    # transform (trimesh 4.x): the old m.voxelized(...).fill().marching_cubes
+++    # fallback handed the pipeline a mesh scaled by 1/pitch.
+++    rm = filled.marching_cubes.copy()
+++    rm.apply_scale(pitch)
+++    rm.apply_translation(origin)
+++    return rm
+++
+++
++ def _decimate_input_if_needed(stl_path: str, output_folder: str,
++-                               target_faces: int = 30_000) -> str:
+++                               target_faces: int = 30_000, stall_keep_faces: int = 300_000) -> str:
++     """If the input STL has more than `target_faces`, write a decimated copy
++     into `output_folder/decimated_input.stl` and return that path. Otherwise
++     return the original path unchanged. All downstream sketch-extraction
++@@ -936,6 +962,15 @@ def _decimate_input_if_needed(stl_path: str, output_folder: str,
++             trimesh.Trimesh(vertices=v, faces=f, process=False).export(out_path)
++             print(f"📉 Decimated input {n_in:,} → {len(f):,} faces (fast_simplification) → {out_path}")
++             return out_path
+++        # A mesh that stalls at a moderate size is kept as it is. This is what every
+++        # stalled dev part already got: the voxel tier below needs scikit-image, which
+++        # the ORCD env lacks, so it failed into "using original" -- but only after
+++        # trimesh's voxelizer, which on 00247424 (a 0.006-thick plate of slivers)
+++        # exhausted the node's memory. A pitch coarser than that plate would also
+++        # thicken it 3x.
+++        if len(f) <= stall_keep_faces:
+++            print(f"   fast_simplification stalled at {len(f):,} faces; keeping the {n_in:,}-face input")
+++            return stl_path
++         # else fall through to voxel remesh — topology blocked the collapse.
++         print(f"   fast_simplification stalled at {len(f):,} faces; voxel-remeshing")
++     except Exception as e:
++@@ -948,7 +983,7 @@ def _decimate_input_if_needed(stl_path: str, output_folder: str,
++         diag = float(np.linalg.norm(m.extents))
++         for res in (128, 96, 72):
++             pitch = diag / res
++-            rm = m.voxelized(pitch=pitch).fill().marching_cubes
+++            rm = _voxel_remesh(m, pitch)
++             if len(rm.faces) <= target_faces * 1.5:
++                 rm.export(out_path)
++                 print(f"📉 Voxel-remeshed input {n_in:,} → {len(rm.faces):,} faces (res={res}) → {out_path}")
+diff --git a/bench/detail_scores.py b/bench/detail_scores.py
+index 8120a11..635d71f 100644
+--- a/bench/detail_scores.py
++++ b/bench/detail_scores.py
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env python3
+ """
+-How much surface detail the delivered CAD recovers, per part.
++Surface agreement between the delivered CAD and the input mesh, per part.
+ 
+   python bench/detail_scores.py --runs dev3_d0 dev4_v2 --scores bench/runs/dev34_scores.json \
+       --stl-dir bench/cadbench/fresh --jobs 16 --out bench/runs/detail_dev34.json
+@@ -13,9 +13,15 @@ with the input mesh in the normalized frame (largest extent spans [-1, 1], so
+   cad_within_half             share of the CAD surface within 0.01 of the input (no extra material)
+   fscore_half                 harmonic mean of within_half and cad_within_half
+   chamfer                     mean of the two one-sided mean distances
++  sweep                       {tau: {recall, precision, fscore}} for tau in TAUS
++                              (precision samples the CAD's outer boundary only:
++                               faces buried in a compound's union are not surface)
++                              (recall = input surface within tau of the CAD,
++                               precision = CAD surface within tau of the input)
+ 
+-Distances are nearest-neighbour distances to dense surface samples (spacing
+-~0.001). A part whose CAD does not build, or is not OCC-valid in the scores
++Distances are exact point-to-surface distances from 100k samples of one surface
++to the other mesh (exact=False: nearest-neighbour distances to dense samples,
++which under-count recall at small tau on large-area parts). A part whose CAD does not build, or is not OCC-valid in the scores
+ file, gets 0 for every share (as the validity-gated IoU does) and its raw
+ numbers under "ungated".
+ """
+@@ -35,40 +41,73 @@ sys.path.insert(0, ROOT)
+ import iou  # noqa: E402
+ 
+ HALF, ONE = 0.01, 0.02
++TAUS = (0.005, 0.01, 0.02, 0.04)  # 0.25%, 0.5%, 1%, 2% of the part size
+ N_GT, N_CAD = 200_000, 3_000_000
++N_EXACT = 100_000  # samples per side with exact distances (share error ~0.0016 at p=0.5)
+ RECON = ('best_greedy_parallel_iterative', 'best_greedy_parallel')  # score.py RUN_RECON order
+ 
+ 
+-def detail(gt_path, cad_path, seed=0):
++def boundary_samples(cad, n, eps=1e-3):
++    """Surface samples of the CAD's outer boundary. A CAD of several overlapping
++    solids (a compound the judge unions) has faces buried inside the union; they
++    are not surface of the delivered shape and would count as extra material.
++    A sample is kept when the point just off it on one side is outside the CAD
++    (generalized winding number < 0.5)."""
++    if cad.body_count <= 1:
++        return cad.sample(n)
++    from gwn_repair import _gwn_fast
++    pts, fi = trimesh.sample.sample_surface(cad, int(n * 1.5))
++    nrm = cad.face_normals[fi]
++    out = np.minimum(_gwn_fast(cad, pts + eps * nrm), _gwn_fast(cad, pts - eps * nrm)) < 0.5
++    return pts[out][:n]
++
++
++def detail(gt_path, cad_path, seed=0, n_cad=None, exact=True):
++    n_cad = n_cad or N_CAD
+     np.random.seed(seed)
+     gt = iou.normalize_mesh(trimesh.load(gt_path, force='mesh'))
+     cad = trimesh.load(cad_path, force='mesh')
+-    g, c = gt.sample(N_GT), cad.sample(N_CAD)
+-    d_gc = cKDTree(c).query(g, workers=1)[0]
+-    d_cg = cKDTree(gt.sample(N_CAD)).query(cad.sample(N_GT), workers=1)[0]
++    if exact:
++        # Exact point-to-surface distances: no dependence on how densely the other
++        # surface is sampled (KD distances to samples did not converge at tau 0.005
++        # on large-area parts: 00883892 recall 0.42 / 0.75 / 0.89 at 1M / 3M / 6M).
++        d_gc = trimesh.proximity.closest_point(cad, gt.sample(N_EXACT))[1]
++        d_cg = trimesh.proximity.closest_point(gt, boundary_samples(cad, N_EXACT))[1]
++    else:
++        g, c = gt.sample(N_GT), cad.sample(n_cad)
++        d_gc = cKDTree(c).query(g, workers=1)[0]
++        d_cg = cKDTree(gt.sample(n_cad)).query(boundary_samples(cad, N_GT), workers=1)[0]
+     wh, ch = float((d_gc <= HALF).mean()), float((d_cg <= HALF).mean())
++    sweep = {}
++    for tau in TAUS:
++        r, p = float((d_gc <= tau).mean()), float((d_cg <= tau).mean())
++        sweep[str(tau)] = {'recall': r, 'precision': p, 'fscore': 2 * r * p / (r + p) if r + p else 0.0}
+     return {'within_half': wh, 'within_1pct': float((d_gc <= ONE).mean()), 'cad_within_half': ch,
+             'fscore_half': 2 * wh * ch / (wh + ch) if wh + ch else 0.0,
+-            'chamfer': float((d_gc.mean() + d_cg.mean()) / 2)}
++            'chamfer': float((d_gc.mean() + d_cg.mean()) / 2), 'sweep': sweep}
++
++
++def _zero(status, **extra):
++    z = {'recall': 0.0, 'precision': 0.0, 'fscore': 0.0}
++    return {'status': status, 'within_half': 0.0, 'within_1pct': 0.0, 'cad_within_half': 0.0, 'fscore_half': 0.0,
++            'sweep': {str(t): dict(z) for t in TAUS}, **extra}
+ 
+ 
+ def one(job):
+-    run, part, gt, valid = job
++    run, part, gt, valid, n_cad, seed = job
+     os.environ['OMP_NUM_THREADS'] = '1'
+     stem = next((os.path.join(run, part, r) for r in RECON if os.path.exists(os.path.join(run, part, r + '.stl'))),
+                 None)
+     cad = stem + '_cad.stl' if stem else None
+     if not cad or not os.path.exists(cad):
+-        return run, part, {'status': 'no_cad', 'within_half': 0.0, 'within_1pct': 0.0, 'fscore_half': 0.0}
++        return run, part, _zero('no_cad')
+     try:
+-        d = detail(gt, cad)
++        d = detail(gt, cad, seed=seed, n_cad=n_cad)
+     except Exception as e:  # noqa: BLE001
+-        return run, part, {'status': f'error: {type(e).__name__}: {e}', 'within_half': 0.0, 'within_1pct': 0.0,
+-                           'fscore_half': 0.0}
++        return run, part, _zero(f'error: {type(e).__name__}: {e}')
+     if valid:
+         return run, part, {'status': 'valid', **d}
+-    return run, part, {'status': 'invalid', 'within_half': 0.0, 'within_1pct': 0.0, 'fscore_half': 0.0,
+-                       'ungated': d}
++    return run, part, _zero('invalid', ungated=d)
+ 
+ 
+ def main():
+@@ -78,11 +117,16 @@ def main():
+     ap.add_argument('--stl-dir', required=True)
+     ap.add_argument('--jobs', type=int, default=8)
+     ap.add_argument('--out', required=True)
++    ap.add_argument('--n-cad', type=int, default=N_CAD, help='CAD surface samples (convergence check)')
++    ap.add_argument('--parts', nargs='*', help='only these part-name prefixes')
++    ap.add_argument('--seed', type=int, default=0, help='surface-sampling seed (repeatability check)')
+     a = ap.parse_args()
+     scores = json.load(open(a.scores))
+     parts = sorted(os.path.splitext(os.path.basename(p))[0] for p in glob.glob(os.path.join(a.stl_dir, '*.stl')))
++    if a.parts:
++        parts = [p for p in parts if any(p.startswith(q) for q in a.parts)]
+     jobs = [(os.path.join(ROOT, 'bench', 'runs', r), p, os.path.join(a.stl_dir, p + '.stl'),
+-             bool(scores[r].get(p, {}).get('cad_valid'))) for r in a.runs for p in parts]
++             bool(scores[r].get(p, {}).get('cad_valid')), a.n_cad, a.seed) for r in a.runs for p in parts]
+     out = {r: {} for r in a.runs}
+     with ProcessPoolExecutor(a.jobs) as ex:
+         for run, part, rec in ex.map(one, jobs):
+diff --git a/bench/run_parallel_arms.sh b/bench/run_parallel_arms.sh
+index 9ea42dd..7768ea1 100755
+--- a/bench/run_parallel_arms.sh
++++ b/bench/run_parallel_arms.sh
+@@ -39,6 +39,10 @@ flags_for() {
+     d0)      echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --section-extrude" ;;
+     dx)      echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --section-extrude --exec-verify" ;;
+     v2)      echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --section-extrude --exec-verify --section-original --score-original --shared-fixes" ;;
++    # v3 = v2 + extrusion ends from the part's cap planes, swept on a finer grid (2026-10-26).
++    v3)      echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --section-extrude --exec-verify --section-original --score-original --shared-fixes --precise-extents" ;;
++    # v4 = v3 + silhouette trim of the delivered program (2026-10-26).
++    v4)      echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --section-extrude --exec-verify --section-original --score-original --shared-fixes --precise-extents --silhouette-trim" ;;
+     basegwn) echo "--gwn-repair" ;;
+     beamgwn) echo "--persistent-cq --exact-union --cut-phase --event-slices --detect-directions --translation-max-points 400 --beam 4 --gwn-repair" ;;
+     *) return 1 ;;
+diff --git a/bench/section_control.py b/bench/section_control.py
+index 610fcda..0aa9c17 100644
+--- a/bench/section_control.py
++++ b/bench/section_control.py
+@@ -77,11 +77,15 @@ def main():
+         pi = pipe[p]['iou'] if pipe[p] else 0.0
+         pc = pipe[p].get('iou_cad', pi) if pipe[p] else 0.0
+         s = sec[p]['iou']
+-        res[p] = {'pipeline': pi, 'pipeline_cad': pc, 'sections': s, 'section_kind': sec[p]['kind'],
+-                  'best_of': max(pi, s), 'best_of_cad': s if s > pi else pc}
++        pg = pipe[p].get('iou_cad_gated', 0.0) if pipe[p] else 0.0
++        # Section extrusions assert OCC validity in their program, so a scored one is a
++        # valid delivery. best_of_gated: the better valid delivery by executed score.
++        res[p] = {'pipeline': pi, 'pipeline_cad': pc, 'pipeline_gated': pg, 'sections': s,
++                  'section_kind': sec[p]['kind'], 'best_of': max(pi, s), 'best_of_cad': s if s > pi else pc,
++                  'best_of_gated': max(pg, s)}
+     json.dump(res, open(a.out, 'w'), indent=1)
+     n = len(parts)
+-    for k in ('pipeline', 'pipeline_cad', 'sections', 'best_of', 'best_of_cad'):
++    for k in ('pipeline', 'pipeline_cad', 'pipeline_gated', 'sections', 'best_of', 'best_of_cad', 'best_of_gated'):
+         print(f'{k:<14} mean {sum(r[k] for r in res.values()) / n:.4f}  (n={n})')
+     print('section chosen over pipeline on', sum(r['sections'] > r['pipeline'] for r in res.values()), 'parts')
+ 
+diff --git a/bench/v2_submit.sh b/bench/v2_submit.sh
+index 54aabb4..f6445c4 100644
+--- a/bench/v2_submit.sh
++++ b/bench/v2_submit.sh
+@@ -19,11 +19,16 @@
+ #     *package* (feedback, executed answer, deadline, nudges), not tools alone;
+ #   code v2 and codesec v2: the toolset attribution under the corrected tools.
+ # Scripted policy (agent economy): tools v1 and v2, same deadline rule as agents.
++# Gemma-4-31B at 65k context needs an H200 (an H100 leaves 8.6 GB of KV cache, below the 18 GB one sequence needs).
+ set -eu
+ COMMIT=${COMMIT:?set COMMIT to the evaluated commit}
+ TAG=${TAG:-h2}
+ STLS=${STLS:-bench/cadbench/fresh2}
+ D0=${D0:-e260397}
++# d0 gets the common infrastructure fixes every arm has (decimation memory bound,
++# CadQuery worker retry; 516d08a), no method change: the dev5 d0 arm ran the same.
++D0_PATCH=${D0_PATCH:-bench/d0_infra.patch}
++ARMS=${ARMS:-"d0 dx v2"}
+ mkdir -p bench/runs/arms_logs bench/runs/agentsk_logs
+ 
+ freeze() {  # <commit> <dir>: full tree of <commit>, made once
+@@ -37,19 +42,23 @@ freeze() {  # <commit> <dir>: full tree of <commit>, made once
+   echo "froze $1 -> $2"
+ }
+ freeze "$D0" bench/runs/${TAG}_d0_code
++if [ -n "$D0_PATCH" ] && ! grep -q infra bench/runs/${TAG}_d0_code/SOURCE.txt; then
++  git apply --directory=bench/runs/${TAG}_d0_code "$D0_PATCH"
++  echo "+ $D0_PATCH (infrastructure only: decimation memory, worker retry)" >> bench/runs/${TAG}_d0_code/SOURCE.txt
++fi
+ for d in ${TAG}_dx_code ${TAG}_v2_code ${TAG}_src; do freeze "$COMMIT" bench/runs/$d; done
+ SRC=$PWD/bench/runs/${TAG}_src
+ N=$(ls $STLS/*.stl | wc -l)
+ echo "cohort $STLS: $N parts"
+ 
+-sbatch -J ${TAG}arms --array=0-3 bench/arms_job.sh $STLS $TAG 4 "d0 dx v2"
++sbatch -J ${TAG}arms --array=0-3 bench/arms_job.sh $STLS $TAG 4 "$ARMS"
+ 
+ for model in gemma4-31b qwen36-35b-a3b; do
+   for rep in 0 1 2; do
+-    sbatch -J ag_${model}_v1_r$rep --gres=gpu:h100:1 --export=ALL,CADFIT_SRC=$SRC bench/agentsk_job.sh $model \
++    sbatch -J ag_${model}_v1_r$rep --gres=gpu:h200:1 --export=ALL,CADFIT_SRC=$SRC bench/agentsk_job.sh $model \
+       --stl-dir $STLS --toolsets skills --tag ${TAG}ag_v1_r$rep
+     for ts in skills code codesec; do
+-      sbatch -J ag_${model}_v2${ts}_r$rep --gres=gpu:h100:1 --export=ALL,CADFIT_SRC=$SRC,CADFIT_AGENT_EXEC=1 \
++      sbatch -J ag_${model}_v2${ts}_r$rep --gres=gpu:h200:1 --export=ALL,CADFIT_SRC=$SRC,CADFIT_AGENT_EXEC=1 \
+         bench/agentsk_job.sh $model --stl-dir $STLS --toolsets $ts --tag ${TAG}ag_v2_r$rep
+     done
+   done
+diff --git a/exec_verify.py b/exec_verify.py
+index 74bf589..11c194b 100644
+--- a/exec_verify.py
++++ b/exec_verify.py
+@@ -125,6 +125,71 @@ final_result = result
+ '''
+ 
+ 
++# Silhouette trim (2026-10-26): the delivered CAD often carries material outside
++# the target (on the dev cohort up to ~12% of its volume), and on some parts most
++# of it lies outside the target's X/Y/Z silhouettes. The target lies inside the
++# prism over each of its silhouettes, so intersecting with the three prisms can
++# only remove material the target does not have (up to SIL_BUFFER). Judged as one
++# more variant of the best valid program: kept only if it builds, is valid and
++# scores higher.
++SIL_BUFFER = 0.002   # silhouettes grown by this much (normalized frame) ...
++SIL_SIMPLIFY = 0.001  # ... before simplifying by less, so they still contain the target
++
++
++def silhouettes(target):
++    """Per axis, the target's projected outline as shapely (Multi)Polygon."""
++    import numpy as np
++    import trimesh
++    from shapely.geometry import Polygon
++    from shapely.ops import unary_union
++    sys.path.insert(0, HERE)
++    import iou
++    m = iou.normalize_mesh(trimesh.load(target, force='mesh'))
++    out = []
++    for k in range(3):
++        keep = [i for i in range(3) if i != k]
++        tri = m.vertices[m.faces][:, :, keep]
++        area = np.abs(np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])) / 2
++        polys = [Polygon(t) for t in tri[area > 1e-12]]
++        out.append(unary_union(polys).buffer(SIL_BUFFER).simplify(SIL_SIMPLIFY))
++    return out
++
++
++def trim_code(sils, lo=-1.2, hi=1.2):
++    """CadQuery source that intersects `result` with the prisms over `sils`."""
++    def wire(coords, k):
++        pts = []
++        for x, y in list(coords)[:-1]:
++            q = [0.0, 0.0, 0.0]
++            keep = [i for i in range(3) if i != k]
++            q[keep[0]], q[keep[1]], q[k] = x, y, lo
++            pts.append('(%.5f, %.5f, %.5f)' % tuple(q))
++        return 'cq.Wire.makePolygon([cq.Vector(*q) for q in [%s]], close=True)' % ', '.join(pts)
++    lines = ['', '', '_SIL = []']
++    for k, sil in enumerate(sils):
++        geoms = list(getattr(sil, 'geoms', [sil]))
++        d = [0.0, 0.0, 0.0]
++        d[k] = hi - lo
++        lines.append('_p = []')
++        for g in geoms:
++            holes = ', '.join(wire(h.coords, k) for h in g.interiors)
++            lines.append(f'_p.append(cq.Solid.extrudeLinear(cq.Face.makeFromWires({wire(g.exterior.coords, k)}, '
++                         f'[{holes}]), cq.Vector({d[0]}, {d[1]}, {d[2]})))')
++        lines.append('_SIL.append(_p[0] if len(_p) == 1 else cq.Compound.makeCompound(_p))')
++    lines += ['', '',
++              'def _trim(res):',
++              '    shape = res.val() if isinstance(res, cq.Workplane) else res',
++              '    if isinstance(res, cq.Workplane) and len(res.vals()) > 1:',
++              '        shape = cq.Compound.makeCompound([v for v in res.vals() if isinstance(v, cq.Shape)])',
++              '    for p in _SIL:',
++              '        shape = shape.intersect(p).clean()',
++              '    return cq.Workplane("XY").newObject([shape])',
++              '', '',
++              "result = _trim(final_result if 'final_result' in globals() else result)",
++              'final_result = result', '']
++    return '\n'.join(lines)
++
++
+ def fuse_program(src):
+     """Rewrite a generated program so solids are fused/cut, not compounded."""
+     out, n = [], 0
+@@ -180,9 +245,13 @@ def choose(recs):
+     return max(pool, key=lambda k: pool[k]['iou_exec'])
+ 
+ 
+-def verify(program, target, out_dir, alternatives=()):
++def verify(program, target, out_dir, alternatives=(), trim=None):
+     """alternatives: [(name, program_path)] fallbacks executed the same way
+-    (e.g. the pre-refinement search program and the best single candidate)."""
++    (e.g. the pre-refinement search program and the best single candidate).
++    trim: also judge the best valid program cut to the target's silhouettes
++    (default: CADFIT_SIL_TRIM=1)."""
++    if trim is None:
++        trim = os.environ.get('CADFIT_SIL_TRIM') == '1'
+     os.makedirs(out_dir, exist_ok=True)
+     src = _strip_exports(open(program).read())
+     fused, n_ops = fuse_program(src)
+@@ -219,6 +288,21 @@ def verify(program, target, out_dir, alternatives=()):
+             open(py, 'w').write(uniq[name] + REPAIR)
+             rep[name + '_repair'] = ex.submit(execute, py, os.path.join(out_dir, f'exec_{name}_repair.stl'), target)
+         recs.update({k: f.result() for k, f in rep.items()})
++        srcs = dict(uniq)
++        srcs.update({k + '_repair': uniq[k] + REPAIR for k in uniq if k + '_repair' in recs})
++        # Third pass: the best valid program, trimmed to the target's silhouettes.
++        valid = [k for k, r in recs.items() if r.get('valid')]
++        if trim and valid:
++            best = max(valid, key=lambda k: recs[k]['iou_exec'])
++            try:
++                code = srcs[best] + trim_code(silhouettes(target))
++                py = os.path.join(out_dir, f'exec_{best}_trim.py')
++                open(py, 'w').write(code)
++                recs[best + '_trim'] = ex.submit(execute, py, os.path.join(out_dir, f'exec_{best}_trim.stl'),
++                                                 target).result()
++            except Exception as e:  # noqa: BLE001
++                recs[best + '_trim'] = {'built': False, 'valid': False, 'iou_exec': 0.0,
++                                        'error': f'trim not built: {type(e).__name__}: {e}'}
+     pick = choose(recs)
+     for name, same in alias.items():
+         recs[name] = {'same_program_as': same}
+diff --git a/greedy_search.py b/greedy_search.py
+index 8ac6572..aadf824 100644
+--- a/greedy_search.py
++++ b/greedy_search.py
+@@ -129,9 +129,15 @@ def create_extrusion_from_translation(entry: Dict, translation_data: Dict, sketc
+         intervals = sorted(intervals, key=lambda iv: iv['t_end'] - iv['t_start'], reverse=True)[:5]
+     
+     import copy
++    spans = []
+     for iv_idx, interval in enumerate(intervals):
+-        t_min = interval['t_start']
+-        t_max = interval['t_end']
++        spans.append((iv_idx, interval, interval['t_start'], interval['t_end'], ''))
++        # Precise extents snap interval ends to cap planes; the grid version is a
++        # second candidate so a wrong snap cannot cost the stock extrusion.
++        if 't_start_grid' in interval and (abs(interval['t_start_grid'] - interval['t_start']) > 1e-6
++                                           or abs(interval['t_end_grid'] - interval['t_end']) > 1e-6):
++            spans.append((iv_idx, interval, interval['t_start_grid'], interval['t_end_grid'], '_grid'))
++    for iv_idx, interval, t_min, t_max, tag in spans:
+         
+         # Move origin by t_min * normal
+         new_origin = origin + t_min * normal
+@@ -153,7 +159,7 @@ def create_extrusion_from_translation(entry: Dict, translation_data: Dict, sketc
+                 'origin': new_origin.tolist(),
+                 'normal': normal.tolist(),
+                 'xdir': entry.get('xdir', [1, 0, 0]),
+-                'source': f'interval_{iv_idx}',
++                'source': f'interval_{iv_idx}{tag}',
+                 't_min': t_min,
+                 't_max': t_max,
+                 # Ranker-only metadata; stripped before serialization/evaluation.
+diff --git a/review-stage/AUTO_REVIEW.md b/review-stage/AUTO_REVIEW.md
+index b24f0c5..1c1a7ca 100644
+--- a/review-stage/AUTO_REVIEW.md
++++ b/review-stage/AUTO_REVIEW.md
+@@ -230,3 +230,45 @@ Share of the input surface within 0.01 (0.5% of part size) of the delivered CAD,
+ - The 52 parts valid in both: within 0.5% 0.982 vs 0.982, within 1% 0.991 vs 0.990, CAD surface within 0.5% of the input 0.921 vs 0.941, F-score 0.947 vs 0.958, chamfer 0.0032 vs 0.0026; 4 parts better, 4 worse (> 0.005).
+ - Reading: v2 recovers the same surface detail on parts both deliver; it adds slightly less extra material; the gated gain is from delivering valid CAD. v2 lowest valid part 0.889 (00046097); 49 of 60 at >= 0.95.
+ - Agent loop now records setup / model / tool seconds (2dc2571); agent-study runtimes in results/runtime_raw.json.
++
++## Run run_20261026_b59bde60 — Round 1 (2026-10-26/27)
++
++### Assessment (Summary)
++- Score: 4/10, verdict: not ready (Codex gpt-6-astra xhigh, thread 01a178e8-45a4-7832-8bcd-c78ec9acfe1b). Full response: review-stage/ROUND1_run_20261026_b59bde60.response.md and REVIEWER_MEMORY.md.
++- Key criticisms: dev evidence incomplete (dev5, judge-corrected rescoring); gain mostly validity recovery; v2 vs dx unresolved; novelty vs CADFather/CADSmith; agent controls missing (code+section, matched policy, repeats); agent executed score bypassed the judge; runtime confounded by deployment; "detail" conflates validity with fidelity.
++
++### Actions Taken
++- 51fcd4d / 340d3cd: precise extents (sweep over the part extent, finer grid on thin directions, ends snapped to cap planes; grid-end extrusion kept as a second candidate). Tests: plates 0.0063–0.4137 thick come out exact; stock drops plates under ~0.02.
++- 64ed8a6: early executed fallback (section extrusions through exec-verify when analysis stops before the search); held-out d0 gets bench/d0_infra.patch (infrastructure only), as dev5 d0.
++- 9442d7e: agent tools v2 rank executed programs with bench/score.py's robust_iou; model sections draw the executed program.
++- 340d3cd: surface agreement = recall/precision/F over tau 0.005/0.01/0.02/0.04, gated; convergence option --n-cad.
++- 44dbbe9: section control gets validity-gated fields. 94f9baf: bench/analysis/v2_dev.py (split-stratified paired bootstrap, Holm sign tests, validity decomposition).
++- b3c7a81: silhouette trim (exec-verify variant: best valid program ∩ prisms over the target's X/Y/Z silhouettes, grown 0.002); evidence for it: bench/analysis/extra_material.py on 6 dev4_v2 parts, share of extra volume outside silhouettes 3–85%.
++- Infrastructure: dev5 OOM chunks rerun at JOBS=3 (same retry policy for every arm); my first dev5 score job passed bare run names and scored nothing (fixed); Gemma needs an H200 at 65k context.
++
++### Results (results/dev345_scores.json, results/dev6_scores.json, results/v2_dev.json; corrected judge; all 60 parts, missing = 0)
++| Run | gated IoU(CAD) | benchA | benchE | valid |
++|---|---|---|---|---|
++| dev5_d0 | 0.8438 | 0.8354 | 0.8521 | 54/60 |
++| dev5_dx | 0.9393 | 0.9298 | 0.9488 | 60/60 |
++| dev5_v2 | 0.9564 | 0.9557 | 0.9571 | 60/60 |
++| dev6_v2 (newer code: + early fallback, agent changes) | 0.9523 | 0.9583 | 0.9464 | 60/60 |
++| dev6_v3 (= dev6_v2 + precise extents) | 0.9547 | 0.9583 | 0.9510 | 60/60 |
++| dev6_v3 + silhouette trim (post hoc, results/dev6_v3_trim.json) | 0.9584 | | | 60/60 |
++
++Paired (split-stratified bootstrap 95% CI; sign test Holm over the 4 pairs):
++- dx − d0 +0.0955 [+0.032, +0.174], 7/0, p_holm 0.063; 82% from parts d0 delivered invalid.
++- v2 − d0 +0.1126 [+0.044, +0.193], 12/3, p_holm 0.11; 75% from d0-invalid parts; both-valid +0.032.
++- v2 − dx +0.0171 [−0.0004, +0.045], 8/3, p_holm 0.45.
++- v3 − v2 +0.0023 [−0.0001, +0.0053], 7/5; thin parts 00140273 0.894→0.942, 00966049 0.957→0.972.
++- trim (same delivered programs, with vs without the trimmed variant): +0.0037 [+0.0020, +0.0056], 12 better / 0 worse; chosen on 27/60; post-hoc no-trim reproduces the scored v3 exactly.
++- Run-to-run: dev5_v2 0.9564 vs dev6_v2 0.9523 (same flags; dev6 code adds the early fallback, which fired once — dev6_v2 00730725, search left no output — and delivered a valid 0.9491, the score every other run got on that part, so it does not move the mean) — an unseeded-search spread of ~0.004 on the mean.
++- Reading: execution verification is the large, robust effect; geometry fixes, precise extents and the trim are small (+0.002 to +0.017) and need the held-out cohort (and repeats) to be established.
++
++### Round 1 actions, continued (2026-10-27/28)
++- Surface agreement (bench/detail_scores.py, results/detail_dev56.json). Two measurement defects found and fixed before use: (1) faces buried inside a compound's union were sampled as CAD surface (00492401: same IoU 0.99 in two runs, F 0.95 vs 0.76; 127ec19 samples the outer boundary only); (2) KD distances to surface samples did not converge at tau 0.005 on large-area parts (00883892 recall 0.42/0.75/0.89 at 1M/3M/6M samples; 71fddad uses exact point-to-surface distances, 100k samples per side; two seeds differ by at most 0.0056 over 10 parts x 4 taus x R/P, results/detail_seed_{0,1}.json).
++- Results (all 60, gated; R/P/F at tau = 0.5% of part size): d0 0.883/0.870/0.876, dx 0.979/0.967/0.972, v2 0.977/0.967/0.971, dev6_v2 0.965/0.967/0.957, dev6_v3 0.960/0.968/0.956. F v2−d0 +0.095 [+0.029, +0.174]; v3−v2 −0.001 [−0.007, +0.007].
++- On the 54 parts valid in all five runs, F at tau 0.25% / 0.5% is 0.951–0.953 / 0.972–0.973 for every run (v2−d0 at 0.25%: −0.002 [−0.014, +0.008]). Surface fidelity does not differ between versions; the gated gains are validity recovery. Precise extents raises IoU on thin parts (00140273, 00966049) without changing surface agreement.
++- Section control (results/dev5_v2_section_control.json): best whole-part section extrusion alone 0.845 gated vs v2 0.956; it beats v2 on 0 parts (v2's exec-verify already holds it as a fallback).
++- CADFather (2610.09127, commit 2ca0891) installed on ORCD; its programs run in its own env (wrapped DSL), bench/cadfather_adapt.py replays them with our validity check and maps its frame to ours (/100). Smoke on 2 dev parts: valid, and our judge reproduces its own IoU exactly (0.4974, 0.7478); v2 on the same parts 0.873, 0.938. Deviation: 2 x H200 (one assistant replica) instead of its 4 x H100 (ORCD per-user GPU cap), so its wall time is not comparable to the paper's. 60-part dev run queued.
++- Agent controls: Gemma-4-31B repeat 1 complete (code/codesec/skills, 20 parts each), repeats 0 and 2 queued (H200); matched scripted policy done; scoring in progress.
+diff --git a/review-stage/REVIEW_STATE.json b/review-stage/REVIEW_STATE.json
+index f17eb91..d76a6ea 100644
+--- a/review-stage/REVIEW_STATE.json
++++ b/review-stage/REVIEW_STATE.json
+@@ -1 +1 @@
+-{"run_id": "run_20261019_e1c2d949", "round": 1, "threadId": "01a15522-2119-7033-b0b4-d4a27983fd3f", "reviewer_backend": "codex", "reviewer_model": "gpt-6-astra", "executor_model": "claude-opus-5-5", "requires_external_acquittal": false, "status": "in_progress", "difficulty": "medium", "last_score": 4, "last_verdict": "not ready", "pending_experiments": ["orcd:26375744 dev3 d0/dx/v2 on fresh (a299bef)", "dev4 dx/v2 on fresh (e72cc73) not yet submitted"], "timestamp": "2026-10-19T15:05:00", "review_unavailable": "codex usage limit until 2026-10-24T17:05; round 2 not reviewed"}
+\ No newline at end of file
++{"run_id": "run_20261026_b59bde60", "round": 1, "threadId": "01a178e8-45a4-7832-8bcd-c78ec9acfe1b", "reviewer_backend": "codex", "reviewer_model": "gpt-6-astra", "executor_model": "claude-opus-5-5", "requires_external_acquittal": false, "status": "in_progress", "difficulty": "medium", "last_score": 4, "last_verdict": "not ready", "pending_experiments": ["orcd:26928205 dev5 d0/dx/v2 rescoring (fixed judge) -> bench/runs/dev345_scores.json", "orcd:26940667 dev6 v2/v3 scoring -> bench/runs/dev6_scores.json", "orcd:26958529 post-hoc silhouette trim on dev6_v3 -> bench/runs/dev6_v3_trim.json", "orcd:26931416-18 devag Gemma code/codesec/skills x3 (H200)", "orcd:26930710 devag scripted policy v2", "orcd:26957037 CADFather 2-part smoke"], "timestamp": "2026-10-26T16:30:00"}
+diff --git a/review-stage/REVIEW_STATE.run_20261019_e1c2d949.stale.json b/review-stage/REVIEW_STATE.run_20261019_e1c2d949.stale.json
+new file mode 100644
+index 0000000..f17eb91
+--- /dev/null
++++ b/review-stage/REVIEW_STATE.run_20261019_e1c2d949.stale.json
+@@ -0,0 +1 @@
++{"run_id": "run_20261019_e1c2d949", "round": 1, "threadId": "01a15522-2119-7033-b0b4-d4a27983fd3f", "reviewer_backend": "codex", "reviewer_model": "gpt-6-astra", "executor_model": "claude-opus-5-5", "requires_external_acquittal": false, "status": "in_progress", "difficulty": "medium", "last_score": 4, "last_verdict": "not ready", "pending_experiments": ["orcd:26375744 dev3 d0/dx/v2 on fresh (a299bef)", "dev4 dx/v2 on fresh (e72cc73) not yet submitted"], "timestamp": "2026-10-19T15:05:00", "review_unavailable": "codex usage limit until 2026-10-24T17:05; round 2 not reviewed"}
+\ No newline at end of file
+diff --git a/review-stage/ROUND1_run_20261026_b59bde60.response.md b/review-stage/ROUND1_run_20261026_b59bde60.response.md
+new file mode 100644
+index 0000000..1f1b7de
+--- /dev/null
++++ b/review-stage/ROUND1_run_20261026_b59bde60.response.md
+@@ -0,0 +1,143 @@
++Score: 4/10
++Verdict: not ready
++
++**There is genuine engineering progress, but the current artifacts do not establish the paper’s three intended claims: improved validity-gated CAD fidelity, improved surface detail, and better time efficiency. Keep fresh2 held out for now.**
++
++I recalculated the supplied results, inspected the current implementation, and ran in-memory geometry probes. The dev3/dev4 reconstruction folders and agent transcripts are absent locally, so I could verify their score arithmetic but not replay those entire studies. Full pytest was blocked by the read-only environment’s cache restrictions; isolated probes did run.
++
++Several previous concerns were genuinely addressed:
++
++- Execution caching now uses program text, eliminating the demonstrated object-ID aliasing. Answer composition metadata uses the delivered answer.
++- `exec_verify.choose()` now always prefers a valid program. My valid-versus-invalid selection probe passed.
++- The new deadline exception survives ordinary `except Exception` handlers; the isolated interruption probe passed. Candidate execution now cleans up its process group on interruption.
++- The stored oversized-circle revolve failure is now rejected.
++- **The repair result is real:** executing the saved `00232213` programs changed an invalid shape containing two invalid solids into a valid shape with no invalid solids and essentially unchanged volume.
++- The unsupported “tools rather than planning explain the gains” inference has been removed.
++- fresh2 has 300 distinct parts, balanced 150/150, with no overlap against the other local manifests—including by source-part prefix.
++
++Those are substantive fixes, not cosmetic responses.
++
++1. **The latest effectiveness numbers still cannot support a clean causal claim.**
++
++   Recomputed directly from [dev34_scores.json](/Users/Andrewlin/CADFit/results/dev34_scores.json):
++
++   | Run | Mean validity-gated CAD IoU | Valid deliveries |
++   |---|---:|---:|
++   | dev3_d0 | 0.80798 | 52/60 |
++   | dev4_dx | 0.91998 | 58/60 |
++   | dev4_v2 | 0.94892 | 59/60 |
++
++   These are **old-judge development results**, spanning code revisions and unstable execution outcomes. Approximately **79% of the d0→v2 gated improvement comes from parts where d0 did not deliver valid CAD**. Validity recovery is valuable; this decomposition does not invalidate it. It does prevent presenting the gain as primarily better geometric reconstruction.
++
++   The additional v2−dx improvement is **0.02894**, with an exploratory paired bootstrap interval approximately **[−0.0013, 0.0744]**. The current evidence therefore does not establish that the geometry-fix package improves the mean beyond execution verification, rewriting, repair, and fallback selection.
++
++   The paper also remains centered on the older A–D experiment. Its original held-out status can be described historically, but this same cohort is now development data for v2. Moreover, [numbers.tex](/Users/Andrewlin/CADFit/paper/numbers.tex:400) still contains pending controls and repeats that the prose describes as completed.
++
++   **Minimum fix:** finish the complete, controlled dev5 matrix under common infrastructure and the corrected judge; rescore historical outputs; retain programs, replay records, and execution logs. Rewrite the manuscript around the resulting evidence and distinguish historical evaluation from subsequent development. Do not retrospectively exclude OOM failures: use a consistent retry/resource policy across arms and retain unresolved failures as zeros.
++
++   Before final analysis, explicitly check manifest completeness. [score_runs()](/Users/Andrewlin/CADFit/bench/score.py:288) now correctly counts never-started parts within a recognized run, but still omits actively running parts and summarizes the common subset. That output is useful for monitoring, not automatically a completed experiment.
++
++2. **The top-venue contribution remains insufficiently differentiated.**
++
++   Executing proposals, using geometric feedback, and protecting a valid incumbent are already central to [CADFather](https://arxiv.org/html/2610.09127v1). Kernel-level validity feedback is also present in [CADSmith](https://arxiv.org/html/2603.26512v1). Neither “execute the program” nor “give an LLM CAD tools” is independently a convincing methodological novelty claim.
++
++   The potentially valuable contribution is narrower: **a controlled demonstration of how mesh-based optimization misrepresents delivered CAD, which interventions repair that discrepancy, and what an LLM contributes beyond inexpensive geometric policies.** The decisive controls for that story remain unfinished.
++
++   **Minimum fix:** choose that focused scientific question and complete its controls. Separate the execution/repair package from additional geometry changes, and include the cheap section-only/best-of control. If claiming competitive reconstruction performance, add a contemporary external method such as CADFather under your evaluator. If keeping this strictly an audit of one optimizer family, narrow the claims accordingly; that is presently a more plausible workshop/tooling paper than a strong NeurIPS/ICML submission.
++
++3. **The agent study does not yet identify the benefit of the full tools or of LLM decisions.**
++
++   The historical skills-versus-code result is substantial. However:
++
++   - Code+section-only attribution remains pending.
++   - The corrected shared-interface scripted-policy result remains pending.
++   - Repeated episodes remain pending in the manuscript.
++   - The six-model results concern the earlier tool/harness configuration.
++   - Qwen3.8’s large sensitivity to its token allowance shows that harness configuration materially affects the comparison.
++
++   The revised narrative correctly treats the nonsignificant agent–policy comparison as inconclusive. Preserve that restraint: it establishes neither equivalence nor absence of a planning contribution.
++
++   **Minimum fix:** on the corrected common harness, compare **code, code+section, full skills, and the shared-interface deterministic policy**. Start with the strongest relevant open model before multiplying model configurations. Use repeated episodes and report validity-gated scores. Opus/Sonnet should extend this controlled comparison after development calibration; their presence alone will not repair the missing attribution.
++
++4. **Execution feedback and recovery are still only partially aligned with the advertised objective.**
++
++   In [CadWorkspace._exec()](/Users/Andrewlin/CADFit/agent/cad_tools.py:290), a successful manifold conversion is scored with `self._score(m)`. The corrected `score.robust_iou()` is reached only when that conversion fails. Since `_cached_manifold()` can repair or alpha-wrap geometry, this is not generally the same objective as the independent judge. Consequently, the executor log’s assertion that the judge correction also fixes agent feedback is too broad.
++
++   I am **not** claiming the previous 0.13 discrepancy necessarily persists in agents. On `00966049`, I verified that the agent’s target conversion successfully repairs the cracks and agrees essentially exactly with the normalized STEP tessellation. The confirmed issue is the inconsistent scoring path, not an established new aggregate regression.
++
++   Two earlier limitations also remain:
++
++   - Agent `section()` still displays the mesh composition, whereas `evaluate()` can describe executed geometry.
++   - Pipeline verification remains a final-stage shortlist operation. [Early analysis failure returns before verification](/Users/Andrewlin/CADFit/run_pipeline.py:1075), so adding late alternatives does not implement an incumbent that survives search failure. Refinement residuals also still originate from the decimated input.
++
++   **Minimum fix:** use the declared executed-CAD criterion for authoritative answer selection, or explicitly label the internal score as a surrogate and avoid external-score guarantees. Make model-section feedback describe the same geometry. Either retain an executed fallback before expensive search, or accurately describe the method as final-stage verification with possible no-output failures. The latter is scientifically acceptable when failures remain in the denominator.
++
++5. **The runtime evidence supports trade-offs, not a general efficiency advantage.**
++
++   From [runtime_raw.json](/Users/Andrewlin/CADFit/results/runtime_raw.json), mean minutes on the same 20 parts are:
++
++   | Configuration | Basic tools | CADFit tools |
++   |---|---:|---:|
++   | Gemma-4-31B | 27.69 | 19.41 |
++   | Qwen3.6-35B | 5.62 | 5.58 |
++   | gpt-oss-20b | 4.92 | 5.53 |
++   | Qwen3.8-27B | 18.92 | 24.11 |
++
++   The dev4_v2 pipeline averages **8.70 minutes** on those parts. Thus tools sometimes reduce elapsed time and sometimes increase it; the pipeline is not universally faster than agents.
++
++   More importantly, [the agent runner defaults to eight simultaneous episodes sharing one model server](/Users/Andrewlin/CADFit/bench/agentsk_run.py). Episode latency therefore includes contention. Pipeline runs use another concurrency/resource configuration. These measurements are valid observations of those deployments, but not hardware-neutral algorithmic speed comparisons.
++
++   The new setup/model/tool instrumentation is useful, but those fields are absent from the supplied historical timing records. One historical Gemma code episode also lasted **34.16 minutes**, so “30-minute cap” requires qualification.
++
++   **Minimum fix:** measure the final configurations with declared hardware and concurrency. Report latency separately from throughput; include setup, geometry tools, execution verification, and answer delivery. Pair quality with time, report medians and tails, and count failed-attempt time. Use quality-versus-time curves or time to a prespecified quality target for an efficiency claim. Report API cost separately for closed models.
++
++6. **“Detail recovered” currently conflates valid delivery with finer geometric fidelity.**
++
++   The detail results are informative, but their strongest interpretation is narrower than the label.
++
++   On the **52 parts valid in both runs**, I obtain:
++
++   | Surface metric | d0 | v2 |
++   |---|---:|---:|
++   | Target surface within 0.5% of part size | 0.98225 | 0.98153 |
++   | CAD surface within that tolerance of target | 0.92064 | 0.94079 |
++   | F-score | 0.94671 | 0.95812 |
++
++   The all-part gated recall rises **0.85128→0.96421**, but essentially all that increase comes from newly valid deliveries. Conditional recall does not improve. There is a legitimate smaller improvement in surface precision and F-score.
++
++   A one-sided proximity threshold also does not establish that particular pockets, ribs, or shallow features were reconstructed. The actual v2 result for `00046097` illustrates why both directions matter: recall is **0.889**, but precision is only **0.492**.
++
++   **Minimum fix:** call this *surface agreement at a stated tolerance*, and report recall, precision, and F-score together. Keep all-part gated results primary and common-valid comparisons explicitly diagnostic. Add a small prespecified tolerance sweep and sampling/tessellation convergence check. Stronger claims about recovering fine features need feature-sensitive evidence; otherwise narrow the wording.
++
++**Of the planned method changes:**
++
++| Change | Recommendation for this paper |
++|---|---|
++| Snap extrusion extents to detected planes | **Highest priority.** It directly addresses dimensions poorly resolved by the current translation grid. Use original-input planes and retain the unsnapped alternative until executed scoring selects between them. |
++| Restrict translation search to the part extent and refine coarse-to-fine | **Worth doing.** A plausible accuracy/runtime improvement. Compare candidate quality, final gated score, and time against the existing sweep. |
++| Silhouette trimming | **A development experiment, not yet a required ingredient.** Use actual projected silhouettes; extruding a middle cross-section can remove legitimate off-section material. Execute and validate the trimmed candidate, retaining the incumbent. |
++| Occupancy-bitset IoU | **Defer unless profiling identifies composition scoring as a major bottleneck.** It changes the search approximation. Any speed claim needs resolution/seed convergence and independent final CAD scoring, particularly on thin parts. |
++
++An early valid fallback is more directly motivated by the observed failure pattern than adding another approximate search objective.
++
++**The final evaluation protocol should be:**
++
++- **Development first:** complete dev5, settle judge/feedback semantics, finish the essential controls, and select any method changes using the existing 60 parts. No fresh2 outcome inspection during this process.
++- **Freeze the actual experiment:** source, arm definitions, model identifiers/settings, budgets, resources, and retry rules. Ensure the d0 source includes the intended common infrastructure fixes; the current submission script still defaults to the older d0 revision.
++- **Pipeline:** run the paired 300-part cohort, reporting the two splits separately and the balanced aggregate. Include d0, dx, v2, and a cheap executed section/best-of reference. First repeat development stress cases under several fixed seeds/runs. If material run variability remains, repeat the final comparisons; one seed cannot support claims of run robustness.
++- **Agents:** prespecify a stratified subset and use at least three independent episodes per stochastic condition. Twenty parts can detect the large historical tools effect but may poorly resolve agent-versus-policy differences. Choose additional parts from a power/precision calculation on development data; more episodes do not substitute for more independent parts.
++- **Statistics:** make mean validity-gated CAD IoU primary, with every attempted part represented. Use paired, split-stratified intervals, keeping all episodes of a part together. Report paired validity changes and prespecify the primary comparison family. Treat superiority and equivalence as different hypotheses.
++- **Measurement:** retain judge method, union-sample count, and uncertainty. Check small claimed differences with higher-precision evaluation and independent sampling. State the occupancy convention for open targets—the current development cohort contains five, despite the draft’s watertight-input description.
++- **Timing and detail:** evaluate the same final programs and configurations used for the quality claims. Publish the programs and replayable records underlying the tables.
++
++**No go for fresh2 yet.** The release condition is a complete, interpretable development experiment with the final measurement protocol—not implementation of every proposed enhancement.
++
++## Memory Update
++
++- Confirmed fixed: object-ID execution-cache aliasing, invalid-preference selection, delivered-answer composition metadata, ordinary-handler swallowing of session deadlines, candidate-process cleanup path, and rejection of the stored oversized-circle revolve failure.
++- Independently replayed `00232213`: original invalid with two invalid solids; repaired valid with essentially unchanged volume.
++- Recomputed old-judge gated means: d0 **0.80798**, dx **0.91998**, v2 **0.94892**. Approximately **79%** of d0→v2 improvement comes from newly valid deliveries; v2−dx remains inconclusive.
++- Surface recall is unchanged on common-valid parts; surface precision and F-score improve modestly. Gated recall improvement primarily measures validity recovery.
++- Remaining implementation limitations: agent execution scoring bypasses the corrected judge on its normal path; model sections can show different geometry from execution feedback; pipeline fallback verification remains late.
++- Remaining evidence gaps: complete dev5, corrected rescoring, matched policy, section-only attribution, repeated agent episodes, final-configuration timing, and locally available full reconstruction/trajectory artifacts.
++- fresh2 remains balanced and disjoint. Keep outcomes untouched until the development validation and experiment freeze are complete.
+diff --git a/run_pipeline.py b/run_pipeline.py
+index 4fa255b..7ba3bd7 100644
+--- a/run_pipeline.py
++++ b/run_pipeline.py
+@@ -1079,6 +1079,9 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
+                                 filter_norm_path=filter_norm_path,
+                                 greedy_args=greedy_args, alpha=alpha, analysis_args=analysis_args):
+         print(f"✗ Failed to complete analysis steps for {stl_name}")
++        if ANALYSIS_OPTS.get('exec_verify'):
++            _early_fallback(stl_id, original_stl_path, reference_gt_path, output_folder, total_start_time,
++                            'analysis failed')
+         return
+     
+     # Get the reconstructed mesh path
+@@ -1086,6 +1089,9 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
+     
+     if not os.path.exists(reconstructed_path):
+         print(f"✗ Reconstructed mesh not found: {reconstructed_path}")
++        if ANALYSIS_OPTS.get('exec_verify'):
++            _early_fallback(stl_id, original_stl_path, reference_gt_path, output_folder, total_start_time,
++                            'no search output')
+         return
+     
+     current_reconstruction = reconstructed_path
+@@ -1419,6 +1425,48 @@ def process_single_stl(stl_path, alpha=0.01, folder_name="search_greedy_parallel
+     return
+ 
+ 
++def _early_fallback(stl_id, original_stl_path, reference_gt_path, output_folder, start_time, reason):
++    """With --exec-verify, a part whose analysis stops before the search still
++    gets an executed, checked answer: the three whole-part section extrusions
++    (section_extrude.py), judged like any exec-verify variant. Without this the
++    part leaves no model and scores 0 whatever the search would have found."""
++    import exec_verify
++    import section_extrude
++    print(f"\n🛟 EARLY FALLBACK ({reason}): executing whole-part section extrusions")
++    record = {'chosen': None}
++    try:
++        mesh = section_extrude.normalize_mesh(trimesh.load(reference_gt_path, force='mesh'))
++        cands = section_extrude.propose(mesh)
++        fb = os.path.join(output_folder, 'early_fallback')
++        os.makedirs(fb, exist_ok=True)
++        progs = []
++        for c in cands:
++            path = os.path.join(fb, f"{c['kind']}.py")
++            with open(path, 'w') as f:
++                f.write('import cadquery as cq\n' + c['code'].replace('{N}', '0') + '\nresult = solid_gen_0\n')
++            progs.append((c['kind'], path))
++        if progs:
++            record = exec_verify.verify(os.path.abspath(progs[0][1]), os.path.abspath(reference_gt_path),
++                                        os.path.abspath(os.path.join(fb, 'exec_verify')), progs[1:])
++    except Exception as e:  # noqa: BLE001
++        record = {'chosen': None, 'error': f'{type(e).__name__}: {e}'}
++    final_iou = 0.0
++    if record.get('chosen'):
++        import shutil
++        shutil.copy2(record['program'], f"{output_folder}/best_greedy_parallel.py")  # exec_verify strips exports
++        shutil.copy2(record['stl'], f"{output_folder}/best_greedy_parallel.stl")
++        final_iou = record['variants'][record['chosen']]['iou_exec']
++        print(f"   ✓ delivered '{record['chosen']}' (valid={record.get('chosen_valid')}, iou_exec={final_iou:.6f})")
++    else:
++        print(f"   ✗ no fallback builds: {record.get('error', '')}")
++    record['early_fallback'] = reason
++    log_event("exec_verify", stl=original_stl_path, record=record)
++    with open(f"{output_folder}/final_iou.json", 'w') as f:
++        json.dump({"final_iou": final_iou, "stl_id": stl_id, "ground_truth": original_stl_path,
++                   "reconstruction": f"{output_folder}/best_greedy_parallel.stl", "num_iterations": 0,
++                   "duration": time.time() - start_time, "exec_verify": record}, f, indent=2)
++
++
+ def _cleanup_output_folder(output_folder, *keep_paths):
+     """Delete every file in `output_folder` (recursively) except the named
+     artifacts. Removes JSONs, intermediate STLs/scripts, analysis caches —
+@@ -1573,6 +1621,13 @@ def main():
+                              'even-odd loop nesting, loops down to 1e-4 area (stock drops < 1e-3), revolve '
+                              'profiles densified at the split. (The revolve-axis origin fix is default-on: '
+                              'CADFIT_FIX_REVOLVE_ORIGIN=0 restores stock.)')
++    parser.add_argument('--precise-extents', action=argparse.BooleanOptionalAction, default=False,
++                        help='CADFit++: sweep each sketch only over the part extent along its normal, on a '
++                             'finer grid for thin directions, and snap extrusion ends to the target\'s cap '
++                             'planes (stock: [-2, 2] by 0.01, ends widened by one step).')
++    parser.add_argument('--silhouette-trim', action=argparse.BooleanOptionalAction, default=False,
++                        help='CADFit++: exec-verify also judges the best valid program intersected with the '
++                             'prisms over the target\'s X/Y/Z silhouettes (removes material outside them).')
+     parser.add_argument('--seed', type=int, default=None,
+                         help='Seed for all analysis-stage sampling (default: unseeded, as stock).')
+     args = parser.parse_args()
+@@ -1597,6 +1652,8 @@ def main():
+         os.environ['CADFIT_MIN_LOOP_AREA'] = '1e-4'
+         os.environ['CADFIT_DENSIFY_REVOLVE_SPLIT'] = '1'
+         os.environ['CADFIT_ARC_LINE_FALLBACK'] = '1'
++    os.environ['CADFIT_PRECISE_EXTENTS'] = '1' if args.precise_extents else '0'
++    os.environ['CADFIT_SIL_TRIM'] = '1' if args.silhouette_trim else '0'
+     os.environ['CADFIT_SECTION_EXTRUDE'] = '1' if args.section_extrude else '0'
+     os.environ['CADFIT_SWEEP_LOFT'] = '1' if args.sweep_loft else '0'
+     os.environ['CADFIT_CUT_PHASE'] = '1' if args.cut_phase else '0'
+diff --git a/tests/test_v2_fixes.py b/tests/test_v2_fixes.py
+index e342009..281a6cc 100644
+--- a/tests/test_v2_fixes.py
++++ b/tests/test_v2_fixes.py
+@@ -46,6 +46,21 @@ def test_answer_metadata_describes_delivered_program(tmp_path, monkeypatch):
+     assert ws.answer_steps() is ws.best_exec[1]
+ 
+ 
++def test_executed_score_is_the_judge_and_sections_show_the_program(tmp_path, monkeypatch):
++    # The kept answer is ranked by bench/score.py's judge, and model sections draw
++    # the executed program (the geometry evaluate() reports), not the step meshes.
++    sys.path.insert(0, os.path.join(ROOT, 'bench'))
++    import score
++    monkeypatch.setattr(cad_tools, 'EXEC', True)
++    gt = os.path.join(MESHES, 'plate_hole.stl')
++    ws = cad_tools.CadWorkspace(gt, str(tmp_path / 'w'))
++    ws.add_code("result = cq.Workplane('XY').box(2.0, 1.2, 0.3)\n")
++    r = ws._exec()
++    assert r['iou'] == pytest.approx(score.robust_iou(gt, r['_stl'])['iou'], abs=1e-9)
++    sec = ws.section('z', 0.0)
++    assert sec['model_source'] == 'executed program' and sec['model']
++
++
+ # ---------- exec_verify selection (finding 2) ----------
+ def test_choose_prefers_any_valid_program():
+     recs = {'original': {'built': True, 'valid': False, 'iou_exec': 0.99},
+@@ -216,3 +231,103 @@ def test_judge_does_not_alpha_wrap_open_ground_truth(tmp_path):
+     plate.export(str(tmp_path / 'rc.stl'))
+     j = score.robust_iou(str(tmp_path / 'gt.stl'), str(tmp_path / 'rc.stl'))
+     assert j['method'] == 'gwn-mc' and j['iou'] > 0.97, j
++
++
++@pytest.mark.parametrize('th', [0.0063, 0.012, 0.037, 0.4137])
++def test_precise_extents_match_plate_thickness(monkeypatch, th):
++    # Stock sweeps [-2, 2] by 0.01 and widens interval ends by one step: a 0.037
++    # plate comes out 0.04 thick and plates under ~0.02 are not proposed at all.
++    import trimesh
++    import analyze_loop_translation as alt
++    monkeypatch.setenv('CADFIT_FAST_CD', '1')
++    box = trimesh.creation.box((2.0, 1.4, th))
++    np.random.seed(0)
++    pts = box.sample(100000)
++    t = np.linspace(0, 1, 200, endpoint=False)
++    sq = np.concatenate([np.c_[-1 + 2 * t, -0.7 + 0 * t], np.c_[1 + 0 * t, -0.7 + 1.4 * t],
++                         np.c_[1 - 2 * t, 0.7 + 0 * t], np.c_[-1 + 0 * t, 0.7 - 1.4 * t]])
++    entry = {'loops_3d': [np.c_[sq, np.full(len(sq), -th / 2)].tolist()], 'normal': [0, 0, 1]}
++    args = (0, entry, pts, {'vertices': box.vertices, 'faces': box.faces}, '/tmp', (-2.0, 2.0), 0.01, False)
++    monkeypatch.setenv('CADFIT_PRECISE_EXTENTS', '1')
++    iv = alt.process_single_sketch(args)['intervals']['merged_intervals']
++    assert len(iv) == 1
++    assert iv[0]['t_start'] == pytest.approx(0.0, abs=1e-6) and iv[0]['t_end'] == pytest.approx(th, abs=1e-6)
++    monkeypatch.setenv('CADFIT_PRECISE_EXTENTS', '0')
++    stock = alt.process_single_sketch(args)['intervals'].get('merged_intervals', [])
++    if th < 0.02:
++        assert stock == []
++
++
++def test_surface_agreement_recall_precision(tmp_path):
++    # CAD = target plus a slab of extra material: recall stays 1, precision drops.
++    import trimesh
++    sys.path.insert(0, os.path.join(ROOT, 'bench'))
++    import detail_scores
++    gt = trimesh.creation.box((2.0, 1.0, 0.5))
++    extra = trimesh.creation.box((2.0, 1.0, 0.5))
++    extra.apply_translation((0, 0, 0.25 + 0.25))  # stacked on top: doubles the height
++    cad = trimesh.util.concatenate([gt, extra])
++    gp, cp = str(tmp_path / 'gt.stl'), str(tmp_path / 'cad.stl')
++    gt.export(gp)
++    cad.export(cp)  # the gt is centered with largest extent 2, so its normalized frame is the identity
++    d = detail_scores.detail(gp, cp, n_cad=400_000)
++    sw = d['sweep']['0.01']
++    assert sw['recall'] > 0.95
++    assert sw['precision'] < 0.85
++    assert abs(sw['fscore'] - 2 * sw['recall'] * sw['precision'] / (sw['recall'] + sw['precision'])) < 1e-12
++
++
++def test_early_fallback_delivers_executed_section(tmp_path):
++    # A part whose analysis stops before the search still gets a checked answer.
++    import json
++    import trimesh
++    import run_pipeline
++    ring = trimesh.creation.annulus(r_min=0.3, r_max=1.0, height=0.4, sections=64)
++    stl = str(tmp_path / 'ring.stl')
++    ring.export(stl)
++    out = tmp_path / 'out'
++    out.mkdir()
++    run_pipeline._early_fallback('ring', stl, stl, str(out), time.time(), 'analysis failed')
++    rec = json.load(open(out / 'final_iou.json'))
++    ev = rec['exec_verify']
++    assert ev['early_fallback'] == 'analysis failed'
++    assert ev['chosen'] == 'original' or ev['chosen'].startswith('section_')
++    assert ev['chosen_valid'] and rec['final_iou'] > 0.95
++    assert (out / 'best_greedy_parallel.py').exists() and (out / 'best_greedy_parallel.stl').exists()
++
++
++def test_silhouette_trim_removes_material_outside_the_target(tmp_path):
++    # Target: a 2 x 1 x 0.5 block. Program: the block plus a lump sticking out of its
++    # top face. The trimmed variant cuts the lump off, stays valid and wins.
++    import trimesh
++    tgt = str(tmp_path / 'block.stl')
++    trimesh.creation.box((2.0, 1.0, 0.5)).export(tgt)
++    prog = tmp_path / 'prog.py'
++    prog.write_text("import cadquery as cq\n"
++                    "result = cq.Workplane('XY').box(2.0, 1.0, 0.5).union(\n"
++                    "    cq.Workplane('XY').box(0.4, 0.4, 0.4).translate((0, 0, 0.4)))\n")
++    rec = exec_verify.verify(str(prog), tgt, str(tmp_path / 'ev'), trim=True)
++    trimmed = [k for k in rec['variants'] if k.endswith('_trim')]
++    assert trimmed, rec['variants'].keys()
++    t = rec['variants'][trimmed[0]]
++    assert t['built'] and t['valid']
++    assert t['iou_exec'] > 0.99 > rec['variants']['original']['iou_exec']
++    assert rec['chosen'] == trimmed[0]
++
++
++def test_surface_precision_ignores_faces_buried_in_a_compound(tmp_path):
++    # Two overlapping boxes whose union is exactly the target: the faces buried in
++    # the union are not extra surface, so precision stays ~1.
++    import trimesh
++    sys.path.insert(0, os.path.join(ROOT, 'bench'))
++    import detail_scores
++    gt = trimesh.creation.box((2.0, 1.0, 0.5))
++    a = trimesh.creation.box((1.2, 1.0, 0.5))
++    a.apply_translation((-0.4, 0, 0))
++    b = trimesh.creation.box((1.2, 1.0, 0.5))
++    b.apply_translation((0.4, 0, 0))
++    gp, cp = str(tmp_path / 'gt.stl'), str(tmp_path / 'cad.stl')
++    gt.export(gp)
++    trimesh.util.concatenate([a, b]).export(cp)
++    d = detail_scores.detail(gp, cp, n_cad=400_000)
++    assert d['sweep']['0.01']['precision'] > 0.97 and d['sweep']['0.01']['recall'] > 0.97
