@@ -748,6 +748,9 @@ def process_single_sketch(args):
         intervals_data = plot_cd_vs_translation_all_loops(loops_cd_data, sketch_idx, output_folder, save_plots)
         if _precise_extents():
             intervals_data = _snap_intervals(intervals_data, planes_t, max_shift=1.5 * step)
+            # The search reads the per-sketch file, written before snapping: rewrite it.
+            with open(f'{output_folder}/sketch_{sketch_idx}_intervals.json', 'w') as f:
+                json.dump(intervals_data, f, indent=2)
     
     # Clean up memory
     del mesh
