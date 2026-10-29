@@ -159,12 +159,22 @@ def one(job):
     cad = stem + '_cad.stl' if stem else None
     if not cad or not os.path.exists(cad):
         return run, part, _zero('no_cad')
-    try:
-        fb = fused_boundary(stem)
-        d = detail(gt, cad, seed=seed, n_cad=n_cad, boundary_path=fb)
-        d['boundary'] = 'fused' if fb else 'winding'
-    except Exception as e:  # noqa: BLE001
-        return run, part, _zero(f'error: {type(e).__name__}: {e}')
+    # Per-part cache, so a preempted job resumes instead of starting over.
+    cache = f'{stem}_detail_s{seed}_n{n_cad}.json'
+    if os.path.exists(cache) and os.path.getmtime(cache) >= os.path.getmtime(cad):
+        d = json.load(open(cache))
+    else:
+        try:
+            fb = fused_boundary(stem)
+            if fb is None and not valid:
+                # Gated to 0 either way; the winding fallback on a large compound that
+                # does not fuse can take half an hour for a diagnostic-only number.
+                return run, part, _zero('invalid', ungated=None)
+            d = detail(gt, cad, seed=seed, n_cad=n_cad, boundary_path=fb)
+            d['boundary'] = 'fused' if fb else 'winding'
+        except Exception as e:  # noqa: BLE001
+            return run, part, _zero(f'error: {type(e).__name__}: {e}')
+        json.dump(d, open(cache, 'w'))
     if valid:
         return run, part, {'status': 'valid', **d}
     return run, part, _zero('invalid', ungated=d)
