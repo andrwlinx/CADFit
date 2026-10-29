@@ -272,3 +272,28 @@ Paired (split-stratified bootstrap 95% CI; sign test Holm over the 4 pairs):
 - Section control (results/dev5_v2_section_control.json): best whole-part section extrusion alone 0.845 gated vs v2 0.956; it beats v2 on 0 parts (v2's exec-verify already holds it as a fallback).
 - CADFather (2610.09127, commit 2ca0891) installed on ORCD; its programs run in its own env (wrapped DSL), bench/cadfather_adapt.py replays them with our validity check and maps its frame to ours (/100). Smoke on 2 dev parts: valid, and our judge reproduces its own IoU exactly (0.4974, 0.7478); v2 on the same parts 0.873, 0.938. Deviation: 2 x H200 (one assistant replica) instead of its 4 x H100 (ORCD per-user GPU cap), so its wall time is not comparable to the paper's. 60-part dev run queued.
 - Agent controls: Gemma-4-31B repeat 1 complete (code/codesec/skills, 20 parts each), repeats 0 and 2 queued (H200); matched scripted policy done; scoring in progress.
+
+## Run run_20261026_b59bde60 — Round 2 (2026-10-28/29)
+
+### Assessment (Summary)
+- Score: 5/10, verdict: not ready (full response: review-stage/ROUND2_run_20261026_b59bde60.response.md).
+- Confirmed: validity-recovery result credible; agent judge routing, ordinary-failure fallback, d0 infra patch, projected-silhouette trim, section control.
+- New defects found by the reviewer: (1) surface metric credits buried faces in recall and skips the boundary filter when an STL roundtrip merges solids (00232213 repair: 139 solids, body_count 1); (2) snapped intervals never reached the search (per-sketch JSON written before snapping); (3) v3/v4 held-out arms not fully frozen. Plus: no unchanged-code repeats; revolve sampling ignored --seed; runtime file covered old configurations only.
+
+### Actions Taken
+- 834e868: per-sketch intervals rewritten after snapping; test goes through reload and candidate generation (snapped 0.4137 and grid 0.42 both reach the candidates).
+- 88564a5: surface agreement against the fused occupied boundary — bench/union_replay.py replays the program and fuses its solids with OCC (00232213 repair: 139 solids fused in 8 s, watertight, 59% of the compound's tessellated area); winding-number filter only as fallback (it kept 69.5% there, i.e. still some buried faces, and took 31 min). Representation-invariance test (stacked boxes = single box); stacked-box expectation replaced. Full-tree freeze for every requested arm (v2_submit.sh and run_parallel_arms.sh); SEED for repeats; revolve sampling seeded; trim stage timing; v2_dev.py --avg (repeats averaged within part).
+- 72fef54: job scripts find apptainer by path; preemptable nodes 17xx/18xx have no /orcd/software (excluded).
+- dev7: v2 and corrected v3 (precise extents with snapping reaching the search), SEED 0/1/2, all from one frozen tree (git archive 88564a5), 60 dev parts each. Retry policy as before: OOM-killed chunks rerun at JOBS=2 (chunk 3 on all seeds), preempted chunks resubmitted; every part finished in every run.
+
+### Results (results/dev7s{0,1,2}_scores.json, results/dev7_analysis.json, results/dev7_durations.json, results/dev7s{0,2}_v3_trim.json)
+| Run | gated IoU(CAD) | valid |
+|---|---|---|
+| v2 seed 0 / 1 / 2 | 0.9536 / 0.9531 / 0.9485 | 60/60 each |
+| v3 seed 0 / 1 / 2 | 0.9615 / 0.9603 / 0.9595 | 60/60 each |
+| v2, mean of 3 seeds per part | 0.9517 | |
+| v3, mean of 3 seeds per part | 0.9605 | |
+- v3 − v2 per seed: +0.0079 [+0.002, +0.017], +0.0072 [−0.001, +0.019], +0.0111 [+0.003, +0.023]; averaged over seeds within part: +0.0087 [+0.0019, +0.0197], 12 better / 4 worse (sign test, Holm over 6 pairs, 0.23). Same direction on every seed.
+- v2 (3-seed mean) − dx: +0.0124 [−0.0023, +0.0379]; − d0: +0.108 [+0.042, +0.188], 73% from d0-invalid parts.
+- Trim (post hoc on the same v3 deliveries): seed 0 0.9615 → 0.9662 (+0.0047, chosen 25/60), seed 2 0.9595 → 0.9645 (+0.0050, 26/60); no part lower under the selection judge (by construction). Seed 1 pending.
+- Time per part (wall, 48-core node shared by 3 parts at a time (2 on OOM reruns), one run per arm): v2 mean 7.7–9.0 min (median 5.8–6.3), v3 mean 9.2–10.3 min (median 6.1–6.7): precise extents costs ~15% more time. Trim stage: median 17–29 s, mean ~195 s, max 1824 s (silhouette + replay + judge).
