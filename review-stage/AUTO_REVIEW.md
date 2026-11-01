@@ -300,3 +300,22 @@ Paired (split-stratified bootstrap 95% CI; sign test Holm over the 4 pairs):
 - Trim, all three seeds (results/dev7s{0,1,2}_v3_trim.json): +0.0047 / +0.0055 / +0.0050; three-seed mean per part +0.0050 [+0.0026, +0.0079]; 15 parts > +0.005.
 - Surface agreement, fused occupied boundary (results/detail_dev56.json; boundary source: fused on every valid part except 1 dx part, winding fallback). All 60 gated F at tau 0.5%: d0 0.836, dx 0.960, v2 0.948, dev6_v2 0.934, dev6_v3 0.931. v2 − d0 +0.112 [+0.031, +0.200]. On the 54 common-valid parts: F 0.929 (d0), 0.959 (dx), 0.946 (v2), 0.947 (dev6_v2), 0.944 (dev6_v3); v2 − d0 +0.017 [−0.032, +0.072], dev6 v3 − v2 −0.003 [−0.040, +0.026]. With the buried faces no longer credited, recall is lower than in the earlier (defective) numbers; no version differs detectably in surface agreement on commonly valid parts. dev7 surface agreement running (job 27578611; per-part cache).
 - Held-out protocol proposed: review-stage/HELDOUT_PROTOCOL.md; submission bench/h2_submit.sh; independent re-judge bench/rejudge.py (41cad6b).
+
+## Run run_20261026_b59bde60 — Round 3 (2026-11-01)
+
+### Assessment (Summary)
+- Score: 5/10, verdict: not ready for submission; **conditional go for the frozen held-out pipeline study** after bounded amendments (full response: review-stage/ROUND3_run_20261026_b59bde60.response.md). No further method development requested; reviewer recalculated v2 0.95172, v3 0.96045, v3+trim 0.96549 (3-run means), v3−v2 +0.00873 [0.00188, 0.01971], trim +0.00504 [0.00266, 0.00784]; noted ~54% of the dev v3 gain comes from 00247424 alone.
+- Required before launch: (1) rejudge/surface on the selected trim artifacts and a fresh2-manifest analysis with completeness checks; (2) runner from the frozen tree, d0 seeding control; (3) explicit secondary family. Clarifications: reserve GPU-study subsets, consistent node exclusions, written post-processing procedure, timing keyed by part with retries.
+- Agent attribution (Gemma repeat 1): code+section−code +0.224 [+0.117, +0.339]; skills−code+section +0.0006 [−0.020, +0.022]; skills−policy +0.009 [−0.022, +0.041] — section extrusion explains nearly all the tools gain so far.
+
+### Actions Taken (f7455d3)
+- trim_posthoc records the selected program/STL; bench/rejudge.py judges the delivered artifact (score runs: replayed program; trim: selected variant), independent seed and 4x samples, never reselects, refuses incomplete runs; bench/detail_scores.py --trim scores the selected variant with its own fused boundary.
+- bench/analysis/v2_dev.py: --manifest (fresh2), --trim, --section; refuses runs lacking a record for any manifest part.
+- bench/arms_job.sh runs ${RUNNER_SRC}/bench/run_parallel_arms.sh (held-out: the frozen bench/runs/h2_src); bench/d0_seed.patch (revolve sampling seeded) applied to d0 with the infra patch.
+- HELDOUT_PROTOCOL.md amended: primary dx−d0 alone; secondary family exactly v2−dx, v3−v2, trim−v3, trim−section-only (Holm over these four sign tests); d0/dx single-run references; per-run and every-repeat validity; node exclusion list = h2_submit.sh EXCL; post-processing order bench/h2_post.sh; timing via bench/analysis/timing_export.py (per run/part, attempts, concurrency, trim seconds).
+- Reserved GPU-study subset: bench/cadbench/fresh2_subset.json (20+20, random.Random(20261101), manifest only).
+- Dev dry run of the secondary family: v2x3−dx +0.0124 [−0.0023, +0.0379]; v3x3−v2x3 +0.0087 [+0.0019, +0.0197]; trim−v3 +0.0050 [+0.0027, +0.0078]; trim−section +0.1207 [+0.0798, +0.1653].
+- Smoke test on dev outputs (scratch/smoke_rejudge.json): 00046097 (trim selected) re-judged on exec_original_trim.stl, 0.93758 → 0.93806 (MC, 40,391 union samples); 00090768 (original retained) re-judged on exec_original.stl, exact, 0.99376 unchanged; surface for 00046097 used the trimmed program's fused boundary.
+
+### Launch
+- 2026-11-01 17:14 EST: `COMMIT=f7455d3 bash bench/h2_submit.sh` on ORCD. Frozen: h2s0_d0_code (git archive e260397 + d0_infra.patch + d0_seed.patch), h2s0_dx_code, h2s{0,1,2}_{v2,v3}_code, h2_src (git archive f7455d3). Jobs 27589626 (h2s0: d0 dx v2 v3), 27589627 (h2s1: v2 v3), 27589629 (h2s2: v2 v3), 12 chunks each. No fresh2 outcome had been produced or inspected before this point.
