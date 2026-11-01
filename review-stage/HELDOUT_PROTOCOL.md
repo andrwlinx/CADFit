@@ -47,7 +47,10 @@ validity rates and "valid in every repeat" are reported.
   inner workers ~nproc/3); partitions mit_normal + mit_preemptable with requeue (parts are resumable:
   a part with final_iou.json is skipped; a requeued part restarts from scratch); preemptable nodes
   node1700–1705, 1708–1709, 1800–1805 excluded (node1701 and node1801 observed without /orcd/software; the
-  list is exactly bench/h2_submit.sh's EXCL).
+  list is exactly bench/h2_submit.sh's EXCL). Infrastructure amendment after launch (2026-11-01 17:30): the
+  failing nodes are those tagged `ubuntu24` (node2801 also), so jobs require `--constraint=rocky8`; two
+  h2s1 chunks (4, 5) had exited at start on node2801 without running any part and were resubmitted with the
+  constraint (job 27590010). No part had started; no method or analysis change.
 - A chunk that is OOM-killed is rerun once with JOBS=2; a part still without a model after that scores 0.
   The same rule applies to every arm. Number of reruns and of parts affected is reported per arm.
 - Timing (bench/analysis/timing_export.py, keyed by run and part): successful-attempt wall time

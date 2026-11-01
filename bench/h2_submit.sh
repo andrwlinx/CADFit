@@ -43,7 +43,9 @@ for s in 0 1 2; do for a in v2 v3; do freeze "$COMMIT" bench/runs/h2s${s}_${a}_c
 freeze "$COMMIT" bench/runs/h2_src  # scoring / trim / section control / surface agreement
 
 echo "cohort $STLS: $(ls $STLS/*.stl | wc -l) parts"
-A="-p mit_normal,mit_preemptable --requeue --exclude=$EXCL -t 12:00:00 --array=0-$((NCHUNK - 1))"
+# Nodes tagged ubuntu24 (node1701, 1801, 2801 seen) have no /orcd/software, hence no apptainer:
+# require rocky8 (amendment 2026-11-01, after two h2s1 chunks exited at start on node2801).
+A="-p mit_normal,mit_preemptable --requeue --exclude=$EXCL --constraint=rocky8 -t 12:00:00 --array=0-$((NCHUNK - 1))"
 # The runner (arm flags, environment) also comes from the frozen tree, not the checkout.
 export RUNNER_SRC=bench/runs/h2_src
 SEED=0 JOBS=3 sbatch -J h2s0 $A bench/arms_job.sh $STLS h2s0 $NCHUNK "d0 dx v2 v3"
