@@ -151,12 +151,23 @@ def fused_boundary(stem, timeout=1800):
     return out if rec.get('built') and os.path.exists(out) else None
 
 
-def one(job):
-    run, part, gt, valid, n_cad, seed = job
-    os.environ['OMP_NUM_THREADS'] = '1'
+def run_artifact(run, part):
+    """(stem, executed STL) of a pipeline run's delivered program."""
     stem = next((os.path.join(run, part, r) for r in RECON if os.path.exists(os.path.join(run, part, r + '.stl'))),
                 None)
-    cad = stem + '_cad.stl' if stem else None
+    return (stem, stem + '_cad.stl') if stem else (None, None)
+
+
+def trim_artifact(run, part, rec):
+    """(stem, executed STL) of the variant trim_posthoc.py selected (trimmed or retained original)."""
+    stl = rec.get('stl') or (os.path.join(run, part, 'trim_posthoc', f"exec_{rec['chosen']}.stl")
+                             if rec.get('chosen') else None)
+    return (stl[:-4], stl) if stl else (None, None)
+
+
+def one(job):
+    run, part, gt, valid, n_cad, seed, stem, cad = job
+    os.environ['OMP_NUM_THREADS'] = '1'
     if not cad or not os.path.exists(cad):
         return run, part, _zero('no_cad')
     # Per-part cache, so a preempted job resumes instead of starting over.
@@ -182,8 +193,10 @@ def one(job):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--runs', nargs='+', required=True, help='run names under bench/runs')
-    ap.add_argument('--scores', required=True, help='score.py --cad output (for cad_valid)')
+    ap.add_argument('--runs', nargs='*', default=[], help='run names under bench/runs')
+    ap.add_argument('--scores', help='score.py --cad output (for cad_valid) of --runs')
+    ap.add_argument('--trim', nargs='*', default=[],
+                    help='name=<run>_trim.json (trim_posthoc.py): score the selected variant of each part')
     ap.add_argument('--stl-dir', required=True)
     ap.add_argument('--jobs', type=int, default=8)
     ap.add_argument('--out', required=True)
@@ -191,19 +204,33 @@ def main():
     ap.add_argument('--parts', nargs='*', help='only these part-name prefixes')
     ap.add_argument('--seed', type=int, default=0, help='surface-sampling seed (repeatability check)')
     a = ap.parse_args()
-    scores = json.load(open(a.scores))
+    scores = json.load(open(a.scores)) if a.runs else {}
     parts = sorted(os.path.splitext(os.path.basename(p))[0] for p in glob.glob(os.path.join(a.stl_dir, '*.stl')))
     if a.parts:
         parts = [p for p in parts if any(p.startswith(q) for q in a.parts)]
-    jobs = [(os.path.join(ROOT, 'bench', 'runs', r), p, os.path.join(a.stl_dir, p + '.stl'),
-             bool(scores[r].get(p, {}).get('cad_valid')), a.n_cad, a.seed) for r in a.runs for p in parts]
-    out = {r: {} for r in a.runs}
-    with ProcessPoolExecutor(a.jobs) as ex:
-        for run, part, rec in ex.map(one, jobs):
-            out[os.path.basename(run)][part] = rec
-            print(os.path.basename(run), part, rec['status'], round(rec['within_half'], 4), flush=True)
-    json.dump(out, open(a.out, 'w'), indent=1)
+    runs_dir = os.path.join(ROOT, 'bench', 'runs')
+    jobs = []
     for r in a.runs:
+        for p in parts:
+            jobs.append((r, p, os.path.join(a.stl_dir, p + '.stl'), bool((scores[r].get(p) or {}).get('cad_valid')),
+                         a.n_cad, a.seed, *run_artifact(os.path.join(runs_dir, r), p)))
+    names = list(a.runs)
+    for spec in a.trim:
+        name, path = spec.split('=')
+        names.append(name)
+        res, run = json.load(open(path)), os.path.join(runs_dir, os.path.basename(path)[:-len('_trim.json')])
+        for p in parts:
+            rec = res.get(p) or {}
+            ok = rec.get('status') == 'ok' and bool(rec.get('chosen_valid'))
+            jobs.append((name, p, os.path.join(a.stl_dir, p + '.stl'), ok, a.n_cad, a.seed,
+                         *(trim_artifact(run, p, rec) if ok else (None, None))))
+    out = {r: {} for r in names}
+    with ProcessPoolExecutor(a.jobs) as ex:
+        for name, part, rec in ex.map(one, jobs):
+            out[name][part] = rec
+            print(name, part, rec['status'], round(rec['within_half'], 4), flush=True)
+    json.dump(out, open(a.out, 'w'), indent=1)
+    for r in names:
         v = list(out[r].values())
         print(r, {k: round(float(np.mean([x[k] for x in v])), 4) for k in ('within_half', 'within_1pct', 'fscore_half')})
 

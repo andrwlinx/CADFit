@@ -43,6 +43,7 @@ def one(job):
     k0 = exec_verify.choose(base)
     gated0 = base[k0]['iou_exec'] if k0 and base[k0].get('valid') else 0.0
     return part, {'status': 'ok', 'chosen': rec['chosen'], 'chosen_valid': rec['chosen_valid'],
+                  'program': rec.get('program'), 'stl': rec.get('stl'),  # the delivered (selected) artifact
                   'gated': rec['validity_gated_iou'], 'gated_no_trim': gated0, 'trim': trim,
                   'trim_record': v.get(trim), 'original': v.get('original')}
 

@@ -21,13 +21,13 @@ import json
 import math
 import os
 import random
+import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
-def cohort():
-    man = json.load(open(os.path.join(ROOT, 'bench', 'cadbench', 'fresh', 'manifest.json')))
-    return {m['file_id']: m['split'] for m in man}
+def cohort(manifest):
+    return {m['file_id']: m['split'] for m in json.load(open(manifest))}
 
 
 def gated(rec):
@@ -35,7 +35,8 @@ def gated(rec):
 
 
 def valid(rec):
-    return bool((rec or {}).get('cad_valid'))
+    rec = rec or {}
+    return bool(rec.get('cad_valid', rec.get('valid')))  # score.py --cad / rejudge.py records
 
 
 def sign_p(w, l):
@@ -65,18 +66,41 @@ def boot(d, split, n=10000, seed=0, alpha=0.05):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('scores', nargs='+')
+    ap.add_argument('scores', nargs='+', help='score.py --cad or rejudge.py outputs ({run: {part: record}})')
+    ap.add_argument('--manifest', default=os.path.join(ROOT, 'bench', 'cadbench', 'fresh', 'manifest.json'),
+                    help='cohort manifest; every part must have a record in every analysed run')
+    ap.add_argument('--section', help='name=section_control.py output: the executed section-only reference '
+                    '(its extrusions assert OCC validity, so a scored one is a valid delivery)')
+    ap.add_argument('--trim', nargs='*', default=[],
+                    help='name=trim_posthoc.py output: an arm whose record per part is the selected variant')
     ap.add_argument('--pairs', nargs='*', default=[])
     ap.add_argument('--avg', nargs='*', default=[],
                     help='name=run1,run2,...: a run whose per-part gated IoU is the mean over repeats '
                          '(cad_valid when valid in every repeat); pairs then use name')
     ap.add_argument('--out')
     a = ap.parse_args()
-    split = cohort()
+    split = cohort(a.manifest)
     parts = sorted(split)
     runs = {}
     for f in a.scores:
-        runs.update(json.load(open(f)))
+        runs.update({k: v for k, v in json.load(open(f)).items() if k != 'incomplete'})
+    for spec in a.trim:
+        name, path = spec.split('=')
+        runs[name] = {p: {'iou_cad_gated': r.get('gated', 0.0) if r.get('chosen_valid') else 0.0,
+                          'cad_valid': bool(r.get('chosen_valid'))} for p, r in json.load(open(path)).items()}
+    if a.section:
+        name, path = a.section.split('=')
+        runs[name] = {p: {'iou_cad_gated': r.get('sections', 0.0), 'cad_valid': r.get('sections', 0.0) > 0}
+                      for p, r in json.load(open(path)).items()}
+    # A part with no record at all means an incomplete run, not a zero: refuse to analyse it.
+    averaged = {spec.split('=')[0] for spec in a.avg}
+    used = (set(n for pr in a.pairs for n in pr.split(':')) - averaged) | set(
+        m for spec in a.avg for m in spec.split('=')[1].split(','))
+    holes = {n: [p for p in parts if p not in runs.get(n, {})] for n in used}
+    holes = {n: v for n, v in holes.items() if v}
+    if holes:
+        sys.exit('incomplete runs (manifest parts without a record): '
+                 + '; '.join(f'{n}: {len(v)}' for n, v in holes.items()))
     for spec in a.avg:
         name, members = spec.split('=')
         members = members.split(',')

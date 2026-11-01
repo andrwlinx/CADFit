@@ -14,36 +14,46 @@ watertightness check in round 2 (26 of 300 GTs are open) has been looked at.
 - One commit C (the commit that adds this file and bench/h2_submit.sh). Every arm runs from a full
   `git archive` of its source (bench/ replay and judge code included), created before submission:
   - d0: `git archive e260397` + bench/d0_infra.patch (infrastructure only: decimation memory bound, CadQuery
-    worker retry; same as dev5 d0).
+    worker retry; same as dev5 d0) + bench/d0_seed.patch (common experimental control: revolve-axis surface
+    sampling seeded by CADFIT_SEED, as in every other arm; e260397's sampler ignored the seed). No method change.
   - dx, v2, v3: `git archive C`.
-- Scoring (bench/score.py --cad, robust judge as of f708bb2), trim (bench/analysis/trim_posthoc.py =
-  exec_verify trim stage), section control (bench/section_control.py), surface agreement
-  (bench/detail_scores.py, fused-boundary definition of 88564a5 + 2539f16) all run from `git archive C`.
+- The runner (bench/run_parallel_arms.sh: arm flags, environment) runs from the frozen tree too
+  (RUNNER_SRC=bench/runs/h2_src, set by bench/h2_submit.sh); job scripts are copied by sbatch at submission.
+- Every post-processing step runs from the frozen tree `bench/runs/h2_src` = `git archive C`, by
+  bench/h2_post.sh, in this order: score (bench/score.py --cad, robust judge as of f708bb2) → trim on each
+  v3 run (bench/analysis/trim_posthoc.py = exec_verify trim stage; records the selected program/STL) →
+  section (bench/section_control.py) → rejudge (bench/rejudge.py, on the delivered artifacts including the
+  selected trim variants) → surface (bench/detail_scores.py, fused-boundary definition, selected trim
+  artifacts via --trim) → timing (bench/analysis/timing_export.py) → stats (bench/analysis/v2_dev.py with
+  --manifest fresh2: refuses to analyse a run lacking a record for any of the 300 parts).
 
 ## Arms (bench/run_parallel_arms.sh flags at C)
 | Arm | Definition | Runs |
 |---|---|---|
-| d0 | pre-v2 beamsec pipeline (+ infra patch) | SEED 0 |
+| d0 | pre-v2 beamsec pipeline (+ infra and seeding-control patches) | SEED 0 |
 | dx | d0 flags + execution-verified delivery (exec-verify) | SEED 0 |
 | v2 | dx + original-mesh sections/scoring + shared geometry fixes | SEED 0, 1, 2 |
 | v3 | v2 + precise extents (part-extent sweep, finer grid on thin directions, ends snapped to cap planes, grid-end alternative kept) | SEED 0, 1, 2 |
 | v3+trim | each v3 run's delivered program + silhouette-trim variant (exec_verify trim stage, post hoc on the saved deliveries; its added time measured) | derived from each v3 run |
 | section-only | best whole-part section extrusion, executed and validity-checked (bench/section_control.py) | deterministic |
 
-Rationale for repeats: dx−d0 and v2−d0 are large (dev: +0.10/+0.11); v2−dx, v3−v2 and trim are small
-(dev: +0.012, +0.009, +0.005) and need repeats; d0/dx single runs (dev run-to-run spread of v2 across 4 runs:
-0.9485–0.9564 on the mean).
+Rationale for repeats: dx−d0 and v2−d0 are large (dev: +0.10/+0.11); v3−v2 and trim are small (dev:
++0.009, +0.005) and need repeats. d0 and dx are single-run references: v2−dx compares a 3-run part mean with
+one dx run, which is unbiased but is not a matched-seed replicated contrast. For repeated arms both per-run
+validity rates and "valid in every repeat" are reported.
 
 ## Resources and retry policy (identical for every arm)
 - Slurm job: 48 CPUs, 180 GB, 12 chunks of 25 parts per run (bench/h2_submit.sh), JOBS=3 parts at a time per job (CADFIT_MAX_PARALLEL=3,
   inner workers ~nproc/3); partitions mit_normal + mit_preemptable with requeue (parts are resumable:
-  a part with final_iou.json is skipped; a requeued part restarts from scratch); nodes 1700–1709, 1800–1805
-  excluded (no /orcd/software).
+  a part with final_iou.json is skipped; a requeued part restarts from scratch); preemptable nodes
+  node1700–1705, 1708–1709, 1800–1805 excluded (node1701 and node1801 observed without /orcd/software; the
+  list is exactly bench/h2_submit.sh's EXCL).
 - A chunk that is OOM-killed is rerun once with JOBS=2; a part still without a model after that scores 0.
   The same rule applies to every arm. Number of reruns and of parts affected is reported per arm.
-- Per-part wall time is recorded (final_iou.json duration; CADFIT_PROFILE stage events). Concurrency (3 or 2
-  parts per 48-core node) is recorded per part from the job logs. Time is reported as deployment latency
-  under this configuration, not as an algorithmic speed comparison.
+- Timing (bench/analysis/timing_export.py, keyed by run and part): successful-attempt wall time
+  (final_iou.json duration), number of attempts (job logs; retried attempts' time is not in it), the
+  concurrency of the delivering job, and the trim stage's seconds. Reported as successful-attempt deployment
+  latency under this configuration, not total compute and not an algorithmic speed comparison.
 
 ## Metrics
 - Primary: validity-gated CAD IoU (score.py --cad: program replayed in a fresh process, OCC validity of the
@@ -57,16 +67,23 @@ Rationale for repeats: dx−d0 and v2−d0 are large (dev: +0.10/+0.11); v2−dx
   samples (exact-judged parts have no sampling error); selection decisions fixed.
 
 ## Contrasts and statistics (prespecified)
-- Primary contrast: dx − d0 (reliability of execution-verified delivery).
-- Secondary: v2 − dx, v3 − v2, (v3+trim) − v3, and each arm vs section-only.
+- Primary contrast: dx − d0 (reliability of execution-verified delivery), analysed alone.
+- Secondary confirmatory family (exactly these four): v2 − dx, v3 − v2, (v3+trim) − v3, (v3+trim) −
+  section-only. Other comparisons with section-only are descriptive.
 - Repeats are averaged within part before comparison (v2, v3, v3+trim: mean of 3 runs per part). Parts are the
   resampling unit; bootstrap within split (10,000 resamples, seed 0), reporting the balanced-split mean
-  difference and its 95% percentile interval. Two-sided paired sign tests with Holm correction over the 4
-  secondary contrasts; the Holm correction applies to the sign tests, not to the intervals.
+  difference and its 95% percentile interval (nominal). Two-sided paired sign tests with Holm correction over
+  the 4 secondary contrasts; the Holm correction applies to the sign tests, not to the intervals.
 - Validity changes reported as paired counts (valid in a / valid in b).
 - No part-level selection of best runs. No exclusion after the fact.
 
-## Not part of this freeze
-- LLM agent study on fresh2 (subset, models, episodes) — separate decision, prespecified before its launch.
-- CADFather comparison on fresh2 — subset fixed before any pipeline fresh2 outcome is inspected (if run).
-- Opus/Sonnet — deferred by the user.
+## Reserved before any fresh2 outcome (GPU studies, run later)
+- bench/cadbench/fresh2_subset.json (bench/fresh2_subset.py): 20 benchA + 20 benchE parts drawn from the
+  manifest alone with random.Random(20261101). The LLM agent study on fresh2 (corrected harness: code,
+  code+section, skills, matched scripted policy; Gemma-4-31B; 3 episodes per condition, clustered by part)
+  and the CADFather comparison (common judge, bench/cadfather_adapt.py) use exactly these 40 parts.
+- Opus/Sonnet — deferred by the user; if added, on the same 40 parts.
+
+## Measurement notes
+- Surface agreement uses the OCC-fused boundary; a part whose solids do not fuse uses the winding-number
+  approximation and is flagged (`boundary: winding`) in the output and reported as such.

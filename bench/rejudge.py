@@ -1,67 +1,111 @@
 #!/usr/bin/env python3
 """
-Independent higher-precision re-judge of score.py --cad results.
+Independent higher-precision re-judge of the delivered CAD, selection fixed.
 
-  python bench/rejudge.py --scores bench/runs/h2_scores.json --stl-dir bench/cadbench/fresh2 \
-      --runs h2s0_v2 h2s0_v3 --jobs 16 --out bench/runs/h2_rejudge.json
+  python bench/rejudge.py --stl-dir bench/cadbench/fresh2 --manifest bench/cadbench/fresh2/manifest.json \
+      --scores bench/runs/h2_scores.json --runs h2s0_v2 h2s0_v3 \
+      --trim h2s0_v3trim=bench/runs/h2s0_v3_trim.json --jobs 16 --out bench/runs/h2_rejudge.json
 
-Selection decisions stay fixed: the same executed STL (<recon>_cad.stl, written by
-score.py's replay) is judged again. Parts the scores file judged exactly are copied
-(the exact boolean has no sampling error); parts judged by the winding-number Monte
-Carlo estimate are re-judged with an independent seed (1) and 4x the union samples
-(min_union 40,000, up to 20 batches). Validity gating is unchanged.
+What is judged is what the arm delivered, never reselected:
+  --runs  (score.py --cad records): the run's replayed program, <recon>_cad.stl;
+  --trim  name=trim.json (bench/analysis/trim_posthoc.py): the selected variant's
+          executed tessellation (its 'stl', else <run>/<part>/trim_posthoc/exec_<chosen>.stl),
+          whether that is the trimmed program or the retained original.
+Every validly delivered part is judged again by score.robust_iou with an independent
+seed (1) and 4x the union samples (min_union 40,000, up to 20 batches); the exact
+boolean path, where it applies, gives the same value as before (no sampling error).
+Invalid or missing deliveries stay 0. Every part of --manifest must have a record,
+or the run is reported incomplete instead of being scored.
 """
 import argparse
-import glob
 import json
 import os
 import sys
 from concurrent.futures import ProcessPoolExecutor
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
-sys.path.insert(0, os.path.dirname(HERE))
+sys.path.insert(0, ROOT)
+RUNS = os.path.join(ROOT, 'bench', 'runs')
 RECON = ('best_greedy_parallel_iterative', 'best_greedy_parallel')
 
 
+def run_stl(run, part):
+    stem = next((os.path.join(RUNS, run, part, r) for r in RECON
+                 if os.path.exists(os.path.join(RUNS, run, part, r + '.stl'))), None)
+    return stem + '_cad.stl' if stem else None
+
+
+def trim_stl(run, part, rec):
+    if rec.get('stl'):
+        return rec['stl']
+    return os.path.join(RUNS, run, part, 'trim_posthoc', f"exec_{rec['chosen']}.stl") if rec.get('chosen') else None
+
+
 def one(job):
-    run, part, gt, rec = job
-    import score
-    out = {'iou_cad_gated': rec.get('iou_cad_gated', 0.0), 'cad_valid': rec.get('cad_valid'),
-           'method': (rec.get('cad_judge') or {}).get('method')}
-    if not rec.get('cad_valid') or out['method'] == 'exact':
-        return run, part, out
-    stem = next((os.path.join(run, part, r) for r in RECON if os.path.exists(os.path.join(run, part, r + '.stl'))),
-                None)
-    stl = stem + '_cad.stl' if stem else None
+    name, part, gt, valid, first, stl = job
+    out = {'valid': valid, 'first_estimate': first, 'iou_cad_gated': 0.0}
+    if not valid:
+        return name, part, out
     if not stl or not os.path.exists(stl):
-        return run, part, {**out, 'error': 'executed STL missing'}
+        return name, part, {**out, 'error': f'delivered STL missing: {stl}'}
+    import score
     j = score.robust_iou(gt, stl, seed=1, min_union=40000, max_batches=20)
-    return run, part, {**out, 'iou_cad_gated': float(j['iou']), 'first_estimate': rec.get('iou_cad_gated'),
-                       'rejudged': True, 'se': j.get('se'), 'union_samples': j.get('union_samples')}
+    return name, part, {**out, 'iou_cad_gated': float(j['iou']), 'method': j.get('method'), 'se': j.get('se'),
+                        'union_samples': j.get('union_samples'), 'stl': stl}
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--scores', required=True)
     ap.add_argument('--stl-dir', required=True)
-    ap.add_argument('--runs', nargs='+', required=True)
+    ap.add_argument('--manifest', required=True, help='cohort manifest (every part must have a record)')
+    ap.add_argument('--scores', help='score.py --cad output holding the --runs')
+    ap.add_argument('--runs', nargs='*', default=[])
+    ap.add_argument('--trim', nargs='*', default=[], help='name=trim_posthoc output; the run is the json stem')
     ap.add_argument('--jobs', type=int, default=8)
     ap.add_argument('--out', required=True)
     a = ap.parse_args()
-    scores = json.load(open(a.scores))
-    root = os.path.join(os.path.dirname(HERE), 'bench', 'runs')
-    jobs = [(os.path.join(root, r), p, os.path.join(a.stl_dir, p + '.stl'), scores[r][p] or {})
-            for r in a.runs for p in sorted(scores[r])]
-    out = {r: {} for r in a.runs}
-    with ProcessPoolExecutor(a.jobs) as ex:
-        for run, part, rec in ex.map(one, jobs):
-            out[os.path.basename(run)][part] = rec
-    json.dump(out, open(a.out, 'w'), indent=1)
+    parts = sorted(m['file_id'] for m in json.load(open(a.manifest)))
+    jobs, incomplete = [], {}
+    scores = json.load(open(a.scores)) if a.runs else {}
     for r in a.runs:
-        v = out[r].values()
-        print(r, 'mean gated', round(sum(x['iou_cad_gated'] for x in v) / len(out[r]), 4),
-              're-judged', sum(bool(x.get('rejudged')) for x in v))
+        res = scores.get(r, {})
+        miss = [p for p in parts if p not in res]
+        if miss:
+            incomplete[r] = miss
+            continue
+        for p in parts:
+            rec = res[p] or {}
+            jobs.append((r, p, os.path.join(a.stl_dir, p + '.stl'), bool(rec.get('cad_valid')),
+                         rec.get('iou_cad_gated', 0.0), run_stl(r, p)))
+    for spec in a.trim:
+        name, path = spec.split('=')
+        res = json.load(open(path))
+        run = os.path.basename(path)[:-len('_trim.json')]
+        miss = [p for p in parts if p not in res]
+        if miss:
+            incomplete[name] = miss
+            continue
+        for p in parts:
+            rec = res[p]
+            ok = rec.get('status') == 'ok' and bool(rec.get('chosen_valid'))
+            jobs.append((name, p, os.path.join(a.stl_dir, p + '.stl'), ok, rec.get('gated', 0.0),
+                         trim_stl(run, p, rec) if ok else None))
+    out = {'incomplete': incomplete}
+    with ProcessPoolExecutor(a.jobs) as ex:
+        for name, part, rec in ex.map(one, jobs):
+            out.setdefault(name, {})[part] = rec
+    json.dump(out, open(a.out, 'w'), indent=1)
+    for name, res in out.items():
+        if name == 'incomplete':
+            continue
+        v = list(res.values())
+        print(f"{name:<16} first {sum(x['first_estimate'] or 0 for x in v) / len(v):.4f}  "
+              f"rejudged {sum(x['iou_cad_gated'] for x in v) / len(v):.4f}  n={len(v)}  "
+              f"errors {sum('error' in x for x in v)}")
+    for name, miss in incomplete.items():
+        print(f'INCOMPLETE {name}: {len(miss)} manifest parts without a record')
 
 
 if __name__ == '__main__':

@@ -1,0 +1,14 @@
+--- a/analyze_revolve_axis.py	2026-11-01 15:54:14
++++ b/analyze_revolve_axis.py	2026-11-01 15:54:14
+@@ -68,7 +68,10 @@
+     Returns:
+         Nx3 array of surface points
+     """
+-    points, _ = trimesh.sample.sample_surface(mesh, num_samples)
++    # Seeded when CADFIT_SEED is set (run_pipeline.py --seed), as the other analysis
++    # stages; stock is unseeded.
++    seed = int(os.environ['CADFIT_SEED']) if os.environ.get('CADFIT_SEED') else None
++    points, _ = trimesh.sample.sample_surface(mesh, num_samples, seed=seed)
+     return points
+ 
+ 

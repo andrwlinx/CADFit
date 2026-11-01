@@ -1,0 +1,49 @@
+{
+ "rule": "The fresh2 parts reserved for the GPU studies (LLM agents, CADFather), drawn from the\nmanifest alone before any fresh2 outcome exists: 20 benchA + 20 benchE parts,\nrandom.Random(20261101).sample over each split's file_ids in sorted order.\n\n  python3 bench/fresh2_subset.py   # -> bench/cadbench/fresh2_subset.json",
+ "parts": {
+  "benchA": [
+   "00004302_00e12f076c9f44728924a007_step_014",
+   "00053475_6da2925085034f7da42dfeb6_step_000",
+   "00067285_6d8f6cc2289143a98142169d_step_002",
+   "00067884_346c607059004b94bda4ac3d_step_000",
+   "00078985_03913f7badd80f7271fa1b43_step_001",
+   "00120625_56fd0e19e4b07b5f4ed018c2_step_001",
+   "00125538_7833b3d42626d5500f146c1d_step_000",
+   "00134078_1d234a68cc4d071e39440057_step_000",
+   "00165191_37a3be1d3de7a79c5b94f6a2_step_000",
+   "00167988_2fe231e517344bfc6ec186da_step_001",
+   "00171848_575855d1e4b06a2590ec9c23_step_000",
+   "00288479_3b42a5217dc6cc1e73aad1cb_step_000",
+   "00360608_fbf00600e0e4132e5c238e76_step_011",
+   "00438820_a3bf310c6c66b93633622223_step_002",
+   "00490348_e586e0aa12ac0b63fc521157_step_000",
+   "00560247_2ceaea8168d8e1d8b9eecd01_step_000",
+   "00562295_b9d8011b361bd768233b5126_step_000",
+   "00710155_3641b9cf981205286d42d072_step_001",
+   "00794841_1301afb237bb122b2fc5a166_step_010",
+   "00928992_62a68b373ac06a238508bce4_step_000"
+  ],
+  "benchE": [
+   "00013771_b025a0d3b3c44fa1975bc9c6_step_001",
+   "00041105_6168cfabdf0946b393dfc666_step_000",
+   "00077854_4516b6617d04375fa1183804_step_000",
+   "00086573_375de0662ed8a78cf0ad4095_step_000",
+   "00188456_7024b113c4b919dc0de33c71_step_001",
+   "00263390_a770f0adcd6fafc5e435cd92_step_000",
+   "00297151_d40fc96866cd51a51c9e78d8_step_003",
+   "00300195_184cfe98a683b513b423281c_step_000",
+   "00415094_ef232b7c91c715e5afbf45d9_step_000",
+   "00421629_cc5afb7318db8edb1ba12d2d_step_000",
+   "00529996_acc4b3c0ff918c68003eef7a_step_005",
+   "00555973_228e826928336f530534dd1c_step_000",
+   "00585079_cd28267708f5534ab157a08e_step_071",
+   "00586964_73ef370d5bd87fbc5c62578a_step_000",
+   "00621425_7b06ea4adb0ff52eff1114da_step_000",
+   "00762137_02216c8ffa137b472f92f048_step_000",
+   "00767348_fa92ba2c4e07cce3a988200c_step_001",
+   "00829121_04d0e5217a8acfba681fbe55_step_000",
+   "00867782_41aed573b420b13fae115377_step_004",
+   "00914699_832190ea6bacfdfd9c3eec5c_step_000"
+  ]
+ }
+}
