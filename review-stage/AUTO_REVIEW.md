@@ -319,3 +319,6 @@ Paired (split-stratified bootstrap 95% CI; sign test Holm over the 4 pairs):
 
 ### Launch
 - 2026-11-01 17:14 EST: `COMMIT=f7455d3 bash bench/h2_submit.sh` on ORCD. Frozen: h2s0_d0_code (git archive e260397 + d0_infra.patch + d0_seed.patch), h2s0_dx_code, h2s{0,1,2}_{v2,v3}_code, h2_src (git archive f7455d3). Jobs 27589626 (h2s0: d0 dx v2 v3), 27589627 (h2s1: v2 v3), 27589629 (h2s2: v2 v3), 12 chunks each. No fresh2 outcome had been produced or inspected before this point.
+- dev7 surface agreement (results/detail_dev7.json, fused boundary; winding fallback on 1/1/2 v3 parts across seeds, flagged): F at tau 0.5%, 3-seed mean per part: v2 0.930, v3 0.956, v3−v2 +0.026 [−0.006, +0.062]; recall 0.926 → 0.954, precision 0.969 → 0.969. Diagnostic only; interval includes 0.
+- Smoke test complete: 00090768's retained original did not fuse → surface via the flagged winding fallback (F 0.986); 00046097 trimmed variant fused (F 0.842).
+- Held-out generation (2026-11-02): most chunks report OUT_OF_MEMORY (oom_kill events of worker processes inside parts) or TIMEOUT (chunk 6, part 00979463, in h2s0/h2s1/h2s2), but parts completed: h2s0 d0 296, dx/v2/v3 299; h2s1 v2/v3 299; h2s2 v2 298, v3 300. Per protocol, the chunks holding the 11 missing part-runs were rerun once at JOBS=2 (27671703–05).
