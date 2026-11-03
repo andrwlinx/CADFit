@@ -19,7 +19,9 @@ set -eu
 STEP=$1; shift || true
 P=/orcd/pool/007/a_lin
 module load apptainer/1.5.2 2>/dev/null || export PATH=/orcd/software/core/001/pkg/apptainer/1.5.2/bin:$PATH
-cd $P/cadfit/bench/runs/h2_src
+# POST_SRC: the frozen tree to run from (default h2_src = git archive of the launch commit;
+# h2_src_c = the same plus score.py's per-part result cache, an I/O-only amendment).
+cd $P/cadfit/bench/runs/${POST_SRC:-h2_src}
 PY="apptainer exec -B /orcd $P/envs/cadfit-sandbox $P/envs/cadfit-venv/bin/python"
 STLS=bench/cadbench/fresh2
 MAN=$STLS/manifest.json
