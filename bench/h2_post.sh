@@ -8,7 +8,7 @@
 # frozen tree bench/runs/h2_src (its bench/runs and bench/cadbench link to the shared ones).
 # Submit from the checkout root, in this order (each step after the previous one finished):
 #
-#   sbatch -J score   bench/h2_post.sh score
+#   sbatch -J score   bench/h2_post.sh score          (or: per run `score1 <run>`, then `merge`)
 #   for s in 0 1 2; do sbatch -J trim$s bench/h2_post.sh trim h2s${s}_v3; done
 #   sbatch -J section bench/h2_post.sh section
 #   sbatch -J rejudge bench/h2_post.sh rejudge
@@ -30,6 +30,17 @@ case $STEP in
   score)    # primary metric for every arm-run: replay, OCC validity, robust judge
     $PY bench/score.py --runs $(for r in $RUNS; do echo -n "$R/$r "; done) --stl-dir $STLS --cad --jobs 8 \
       --out $R/h2_scores.json ;;
+  score1)   # the same scoring for one run (one job per run fits the 12 h limit; then `merge`)
+    $PY bench/score.py --runs $R/$1 --stl-dir $STLS --cad --jobs 12 --out $R/h2_scores_$1.json ;;
+  merge)    # h2_scores.json from the per-run files, refusing any run that is missing
+    $PY -c "
+import json, sys
+out = {}
+for r in '$RUNS'.split():
+    out.update(json.load(open('$R/h2_scores_' + r + '.json')))
+missing = [r for r in '$RUNS'.split() if r not in out]
+sys.exit('missing runs: ' + ' '.join(missing)) if missing else json.dump(out, open('$R/h2_scores.json', 'w'))
+print('merged', len(out), 'runs')" ;;
   trim)     # final method: v3 delivery + silhouette-trim variant, selected by exec-verify
     $PY bench/analysis/trim_posthoc.py $R/$1 $STLS --jobs 8 --out $R/$1_trim.json ;;
   section)  # executed section-only reference (deterministic)
