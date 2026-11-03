@@ -236,6 +236,18 @@ def _score_one(job):
     name, part, gt, recon, judge_name, cad = job
     global JUDGE
     JUDGE = judge_name  # a spawned worker does not inherit main()'s setting
+    # Per-part result cache (I/O only, values unchanged): a run killed at its time
+    # limit or preempted resumes instead of judging every part again. Valid while
+    # the reconstruction is not newer than the cache.
+    cache = f'{os.path.splitext(recon)[0]}_score_{judge_name}{"_cad" if cad else ""}.json'
+    if os.path.exists(cache) and os.path.getmtime(cache) >= os.path.getmtime(recon):
+        return name, part, json.load(open(cache))
+    r = _score_part(gt, recon, cad)
+    json.dump(r, open(cache, 'w'))
+    return name, part, r
+
+
+def _score_part(gt, recon, cad):
     r = judge(gt, recon)
     r['cd'] = chamfer(gt, recon)
     r['valid'] = True
@@ -254,7 +266,7 @@ def _score_one(job):
             r['iou_cad'] = 0.0
         # Primary metric (ledger A-050): executed CAD IoU, 0 unless built and OCC-valid.
         r['iou_cad_gated'] = r['iou_cad'] if rec['valid'] else 0.0
-    return name, part, r
+    return r
 
 
 def _init_worker():

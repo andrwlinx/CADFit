@@ -392,3 +392,18 @@ def test_fused_boundary_of_a_merged_compound(tmp_path):
     assert rec['built'] and rec['fused'] and rec['n_solids'] == 139
     u = trimesh.load(out, force='mesh')
     assert u.is_watertight and u.area < 0.7 * trimesh.load(comp, force='mesh').area
+
+
+def test_score_result_cache_returns_the_same_record(tmp_path):
+    # score.py caches each part's record next to the reconstruction; a second call
+    # (a resumed run) must return exactly what the first computed.
+    import trimesh
+    sys.path.insert(0, os.path.join(ROOT, 'bench'))
+    import score
+    gt, recon = str(tmp_path / 'gt.stl'), str(tmp_path / 'best_greedy_parallel.stl')
+    trimesh.creation.box((2.0, 1.0, 0.5)).export(gt)
+    trimesh.creation.box((1.9, 1.0, 0.5)).export(recon)
+    first = score._score_one(('run', 'part', gt, recon, 'robust', False))
+    assert os.path.exists(str(tmp_path / 'best_greedy_parallel_score_robust.json'))
+    second = score._score_one(('run', 'part', gt, recon, 'robust', False))
+    assert first == second and 0.9 < first[2]['iou'] < 1.0
