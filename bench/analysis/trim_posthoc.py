@@ -26,23 +26,35 @@ RECON = ('best_greedy_parallel_iterative.py', 'best_greedy_parallel.py')
 
 def one(job):
     run, part, target = job
-    import exec_verify
     prog = next((os.path.join(run, part, r) for r in RECON if os.path.exists(os.path.join(run, part, r))), None)
     if prog is None:
         return part, {'status': 'no_program'}
     out = os.path.join(run, part, 'trim_posthoc')
+    # Per-part record cache (I/O only): a time-limited or preempted job resumes.
+    cache = os.path.join(out, 'trim_record.json')
+    if os.path.exists(cache) and os.path.getmtime(cache) >= os.path.getmtime(prog):
+        return part, json.load(open(cache))
+    rec = _trim_part(prog, target, out)
+    if rec['status'] == 'ok':  # an error is retried on resume, not cached
+        json.dump(rec, open(cache, 'w'))
+    return part, rec
+
+
+def _trim_part(prog, target, out):
+    """exec_verify with the trim stage on the delivered program; the record for one part."""
+    import exec_verify
     try:
         # Absolute paths: exec_verify runs each program from its own folder.
         rec = exec_verify.verify(os.path.abspath(prog), os.path.abspath(target), os.path.abspath(out), trim=True)
     except Exception as e:  # noqa: BLE001
-        return part, {'status': f'error: {type(e).__name__}: {e}'}
+        return {'status': f'error: {type(e).__name__}: {e}'}
     v = rec['variants']
     trim = next((k for k in v if k.endswith('_trim')), None)
     # The same choice without the trimmed variant: the difference is the trim alone.
     base = {k: r for k, r in v.items() if k != trim and 'same_program_as' not in r}
     k0 = exec_verify.choose(base)
     gated0 = base[k0]['iou_exec'] if k0 and base[k0].get('valid') else 0.0
-    return part, {'status': 'ok', 'chosen': rec['chosen'], 'chosen_valid': rec['chosen_valid'],
+    return {'status': 'ok', 'chosen': rec['chosen'], 'chosen_valid': rec['chosen_valid'],
                   'program': rec.get('program'), 'stl': rec.get('stl'),  # the delivered (selected) artifact
                   'gated': rec['validity_gated_iou'], 'gated_no_trim': gated0, 'trim': trim,
                   'trim_record': v.get(trim), 'original': v.get('original')}
