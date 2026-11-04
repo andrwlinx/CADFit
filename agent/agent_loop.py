@@ -334,7 +334,10 @@ def main():
     a = ap.parse_args()
     scripted = Scripted(a.model.split(':', 1)[1]) if a.model.startswith('scripted:') else None
     key = os.environ.get('AGENT_API_KEY') or os.environ.get('OPENROUTER_API_KEY')
-    if not key and not scripted:
+    native_claude = a.model.startswith('claude-')  # Anthropic Messages API (agent/anthropic_chat.py)
+    if native_claude and not os.environ.get('ANTHROPIC_API_KEY'):
+        sys.exit('set ANTHROPIC_API_KEY for claude-* models')
+    if not key and not scripted and not native_claude:
         sys.exit('set OPENROUTER_API_KEY (or AGENT_API_KEY for another endpoint)')
     if a.toolset != 'pool' and (a.cands or a.init):
         sys.exit('--cands/--init belong to --toolset pool; skills and code start from an empty model')
@@ -358,6 +361,11 @@ def main():
     for m in messages:
         log.write(json.dumps(m) + '\n')
 
+    if native_claude:
+        from anthropic_chat import AnthropicChat
+        chat_fn = AnthropicChat(a.model)
+    else:
+        chat_fn = chat
     calls = nudges = 0
     keep = a.keep_tool_results
     usage = {'prompt_tokens': 0, 'completion_tokens': 0}
@@ -367,7 +375,7 @@ def main():
     while calls < a.max_calls and time.time() < deadline:
         t_model = time.time()
         try:
-            resp = (scripted or chat)(a.base_url, key, a.model, compact(messages, keep), tools,
+            resp = (scripted or chat_fn)(a.base_url, key, a.model, compact(messages, keep), tools,
                                       a.temperature, a.max_tokens, extra=a.extra_body, deadline=deadline)
         except TimeoutError:
             stop = 'time'

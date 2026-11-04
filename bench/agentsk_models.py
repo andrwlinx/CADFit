@@ -1,4 +1,4 @@
-"""Open-weight models for the agent-skills study (ledger A-004, A-009).
+"""Models for the agent-skills study (ledger A-004, A-009): open-weight via vLLM, Claude via its API.
 
 Each entry: Hugging Face id, the GPU it needs, vLLM serve flags (tool-call and
 reasoning parsers from the model cards), and the request extras (model-card
@@ -31,6 +31,10 @@ MODELS = {
     'devstral2-24b': {'hf': 'mistralai/Devstral-Small-2-24B-Instruct-2512', 'gpu': 'h100', 'temperature': 0.15,
                       'body': {}, 'serve': ['--tool-call-parser', 'mistral', '--tokenizer-mode', 'mistral',
                                             '--config-format', 'mistral', '--load-format', 'mistral']},
+    # Closed models through the Anthropic Messages API (agent/anthropic_chat.py; ANTHROPIC_API_KEY),
+    # no GPU or server. Adaptive thinking at effort high; these models take no sampling parameters.
+    'sonnet55': {'hf': 'claude-sonnet-5-5', 'gpu': 'none', 'temperature': 1.0, 'body': {'effort': 'high'}, 'serve': []},
+    'opus55': {'hf': 'claude-opus-5-5', 'gpu': 'none', 'temperature': 1.0, 'body': {'effort': 'high'}, 'serve': []},
 }
 
 if __name__ == '__main__':
