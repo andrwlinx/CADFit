@@ -20,5 +20,12 @@ export CADFIT_AGENT_EXEC=${CADFIT_AGENT_EXEC:-1}
 module load apptainer/1.5.2 2>/dev/null || export PATH=/orcd/software/core/001/pkg/apptainer/1.5.2/bin:$PATH
 PY="apptainer exec -B /orcd $P/envs/cadfit-sandbox $P/envs/cadfit-venv/bin/python"
 $PY -c "import cadquery, manifold3d, trimesh, scipy, shapely, anthropic" && echo "[$(date +%T)] $KEY on $(hostname), imports warm"
+# Preflight: a fresh interpreter building one box must finish well inside the 60-90 s
+# tool limits; on a node where it does not (node4002, 2026-11-04: every add_code timed
+# out), stop before any API spend.
+T0=$(date +%s)
+timeout 60 $PY -c "import cadquery as cq; cq.Workplane('XY').box(1, 1, 1).val().Volume()" \
+  || { echo "preflight: CadQuery box failed or took >60 s on $(hostname)"; exit 1; }
+echo "[$(date +%T)] preflight box in $(( $(date +%s) - T0 )) s"
 $PY bench/agentsk_run.py --model-key "$KEY" "$@"
 echo "[$(date +%T)] done"
