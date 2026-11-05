@@ -96,8 +96,12 @@ def main():
     ap.add_argument('--models', nargs='+', default=None, help='default: every MODELS key (the declared panel)')
     ap.add_argument('--policy-dir', default=os.path.join(RUNS, 'agentsk_policy'),
                     help="'' to leave the policy out; references are always added")
+    ap.add_argument('--parts-file', default=None,
+                    help="JSON whose 'parts' maps split -> part list (e.g. bench/cadbench/fresh2_subset.json); "
+                         'default: the 20-part study sample of --stl-dir')
     a = ap.parse_args()
-    parts = study_parts(a.stl_dir)
+    parts = (sorted(p for v in json.load(open(a.parts_file))['parts'].values() for p in v)
+             if a.parts_file else study_parts(a.stl_dir))
     conds, meta, jobs = {}, {}, []
     # The declared panel (ledger A-004 x A-003), whether or not a run produced anything:
     # a model whose server never came up scores 0 on every part instead of vanishing.
@@ -118,7 +122,9 @@ def main():
             meta[(cond, p)] = {'tool_calls': r.get('tool_calls'), 'stop': r.get('stop', 'missing'),
                                'seconds': r.get('seconds'), 'agent_iou': r.get('best_iou'),
                                'tokens': sum((r.get('usage') or {}).values()) or None,
-                               'sources': r.get('sources'), 'trial_evaluations': r.get('trial_evaluations')}
+                               'sources': r.get('sources'), 'trial_evaluations': r.get('trial_evaluations'),
+                               # whether the episode itself finished an executed check of its answer
+                               'verified_in_episode': r.get('best_exec_valid'), 'cost_usd': r.get('cost_usd')}
             stl = os.path.join(ep, 'agent_model.stl')
             if os.path.exists(stl):
                 jobs.append((cond, p, os.path.join(a.stl_dir, p + '.stl'), stl))
@@ -131,8 +137,8 @@ def main():
     res = {c: {p: {**scored.get((c, p), ZERO), **meta[(c, p)]} for p in parts} for c in conds}
     # Pipeline references (frozen runs, same judge): arms and the best-of section control.
     # A part a reference run has no record for scores as missing (0), never silently dropped.
-    ref = json.load(open(a.ref_scores))
-    for arm in a.ref_arms:
+    ref = json.load(open(a.ref_scores)) if a.ref_scores else {}
+    for arm in a.ref_arms if a.ref_scores else []:
         name = arm.split('_', 1)[1] if '_' in arm else arm
         res[f'pipeline/{name}'] = {p: ref[arm].get(p, ZERO) for p in parts}
     if a.section_control:

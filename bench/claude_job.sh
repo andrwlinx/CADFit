@@ -20,12 +20,16 @@ export CADFIT_AGENT_EXEC=${CADFIT_AGENT_EXEC:-1}
 module load apptainer/1.5.2 2>/dev/null || export PATH=/orcd/software/core/001/pkg/apptainer/1.5.2/bin:$PATH
 PY="apptainer exec -B /orcd $P/envs/cadfit-sandbox $P/envs/cadfit-venv/bin/python"
 $PY -c "import cadquery, manifold3d, trimesh, scipy, shapely, anthropic" && echo "[$(date +%T)] $KEY on $(hostname), imports warm"
-# Preflight: a fresh interpreter building one box must finish well inside the 60-90 s
-# tool limits; on a node where it does not (node4002, 2026-11-04: every add_code timed
-# out), stop before any API spend.
+# Preflight: replay one box program through the same sandboxed replay the tools and
+# the scorer use (score.cad_replay -> cad_tools._sandboxed -> cad_replay.py) and require
+# a valid solid within 60 s; on a node where it is not (node4002, 2026-11-04: every
+# executed add_code timed out), stop before any API spend.
+PF=$(mktemp -d -p ${TMPDIR:-/tmp} preflight.XXXX)
+printf 'import cadquery as cq\nresult = cq.Workplane("XY").box(1, 1, 1)\n' > $PF/box.py
 T0=$(date +%s)
-timeout 60 $PY -c "import cadquery as cq; cq.Workplane('XY').box(1, 1, 1).val().Volume()" \
-  || { echo "preflight: CadQuery box failed or took >60 s on $(hostname)"; exit 1; }
-echo "[$(date +%T)] preflight box in $(( $(date +%s) - T0 )) s"
+timeout 60 $PY -c "import sys; sys.path.insert(0, 'bench'); import score, json
+rec, _ = score.cad_replay('$PF/box.stl', timeout=55); print(json.dumps(rec)); sys.exit(0 if rec.get('valid') else 1)" \
+  || { echo "preflight: sandboxed replay of a box failed or took >60 s on $(hostname)"; exit 1; }
+echo "[$(date +%T)] preflight replay in $(( $(date +%s) - T0 )) s"
 $PY bench/agentsk_run.py --model-key "$KEY" "$@"
 echo "[$(date +%T)] done"

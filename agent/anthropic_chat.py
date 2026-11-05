@@ -16,7 +16,9 @@ Settings: adaptive thinking (always on for these models), effort from
 prefix, streaming (long thinking turns), no server-side refusal fallback (a
 fallback would answer with another model inside a per-model comparison; a
 refusal ends the episode instead). Temperature is not sent (these models reject
-sampling parameters).
+sampling parameters). max_tokens per turn is 32,000 for both Claude models
+(agent_loop's --max-tokens is not used here) and the full native history is
+kept (no compaction); both differ from the open-model harness settings.
 """
 import json
 import time

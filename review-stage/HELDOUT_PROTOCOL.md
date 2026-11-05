@@ -92,15 +92,26 @@ validity rates and "valid in every repeat" are reported.
   approximation and is flagged (`boundary: winding`) in the output and reported as such.
 
 ## Amendments after outcomes existed (2026-11-05)
-- **Machine-failure rescoring.** The per-part score cache (h2_src_c) stored replay failures caused by the
-  machine as if they were outcomes: h2s0_dx 299/300 parts "ns_sandbox: could not make read-only" (sandbox
-  setup on one node), h2s2_v2 222 "timeout 900s" (sibling seeds 0/1 had none; node contention), h2s0_d0
-  7 rc -9 kills + 3 timeouts. Rule, applied to every run alike: a replay failure that is a sandbox-setup
-  error, an rc -9 kill, or the 900 s timeout (`score.env_failure`) is not cached; bench/h2_env_clear.py
-  clears those parts' replay record and score in all 8 runs, and `score1` re-judges them with the same
-  judge and timeout at lower concurrency (JOBS=4) from h2_src_c3 (= h2_src_c2 + this rule). A part that
-  times out again is scored 0 as before. Program outputs and the judge are unchanged. The list of
-  cleared parts is kept in bench/runs/h2_env_cleared.json.
+- **Replay-failure recovery (post-outcome measurement amendment to frozen generation; dated 2026-11-05,
+  decided after the affected score files existed, so not preregistered).** The per-part score cache
+  (h2_src_c) stored replay failures that were never a usable evaluation: h2s0_dx 299/300 "ns_sandbox:
+  could not make read-only" (sandbox setup on one node), h2s2_v2 222 "timeout 900s" (seeds 0/1 of v2 had
+  none), h2s0_d0 7 rc -9 kills + 3 timeouts. Classes (`score.env_failure`): *setup* = the sandbox could
+  not be set up (no evaluation took place); *resource* = rc -9 kill or the 900 s timeout, which may be
+  the machine or the program and is called a resource-limit failure, not a proven machine fault.
+  Rule, identical for all 8 runs: the eligible list is frozen from the original score files
+  (kept as h2_scores_<run>.pre_recovery.json; list in bench/runs/h2_env_cleared.json); each listed part
+  gets **one** recovery scoring pass from h2_src_c3 (= h2_src_c2 + this rule) with the same judge, the
+  same 900 s limit and the scorer's existing single retry of a silent replay death, at fixed
+  concurrency JOBS=4 on mit_preemptable rocky8 nodes; the recovery result is cached and terminal
+  (h2_env_clear.py refuses a second pass). A recovery that fails again scores 0 in the gated metric,
+  and its cause is reported separately from geometric invalidity. Programs are not regenerated and no
+  search or selection is redone. Both the original and the recovered analyses are reported, whatever
+  their significance.
+- **Trim records not recovered.** The trim run's own replay failures stay as frozen (e.g. seed 0
+  00403399: valid v3 delivery 0.9307, trim record "timeout 600s", scored 0). The final-package-vs-v3
+  contrast is reported as preregistered, with a diagnostic split into the second fuse/repair pass
+  (`gated_no_trim`) and the trim proper, and the full added wall time.
 - **Closed models.** Claude Opus 5.5 and Sonnet 5.5 ran on the 40 reserved parts (one episode each,
   code and skills toolsets, effort high, same budget); exploratory, compared per part with the pipeline
   in bench/analysis/closed_vs_pipeline.py. A first Opus run on node4002 (every executed call timed out

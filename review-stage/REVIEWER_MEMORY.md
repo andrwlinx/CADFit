@@ -1005,3 +1005,157 @@ The agent contribution should be framed as an attribution study: substantial gai
 - Trim runtime has substantial tails: seed means **193/338/197 seconds**, maximum **3,188 seconds**. Duration exports lack part identifiers.
 - Conditional approval for held-out pipeline generation after the bounded launch/analysis amendments. No further method-development round is needed; pending GPU studies need not block CPU generation once their subsets are reserved.
 
+
+
+## run_20261105_105505a5 Round 1 — Score: 5/10
+
+### Raw Reviewer Response (verbatim)
+
+Score: 5/10
+Verdict: not ready
+
+**The rescoring is defensible in principle, but the amendment needs tightening. The closed-model study is worth reporting as exploratory evidence, but its current endpoint does not consistently measure the delivered program. I also found a consequential trim failure outside the three flagged score files.**
+
+I read the supplied diff, implementation, manuscript sections, all eight 300-part score files, both trim files, and all **195 episode records**, including the discarded Opus run. I independently checked aggregates and ran isolated code-path probes. The bundle contains no delivered agent programs, transcripts, or scheduler logs, so it cannot establish actual program validity or independently prove the attributed machine failures.
+
+Remaining weaknesses, ranked by severity:
+
+**1. The rescoring amendment conflates infrastructure failure with computational difficulty and does not enforce its stopping rule.**
+
+The raw files confirm the stated counts:
+
+| Run | Replay errors eligible under the amendment |
+|---|---:|
+| h2s0_dx | 299 sandbox setup failures |
+| h2s2_v2 | 222 timeouts |
+| h2s0_d0 | 7 SIGKILL exits and 3 timeouts |
+
+Correcting the sandbox failures is legitimate: those programs never received a usable evaluation. But **SIGKILL does not establish external machine failure, and a timeout does not establish contention**. A program can exhaust memory or require excessive execution time. Successful sibling seeds are suggestive, not conclusive, because they can produce different programs.
+
+The implementation is broader than the prose. [env_failure()](/Users/Andrewlin/CADFit/bench/score.py:195) accepts any error beginning with `timeout`, not specifically the documented 900-second case. More importantly, neither replay failures nor their scores are cached. My isolated probe called the actual scoring function three times with a repeated timeout: it recomputed three times and stored no terminal result. Thus **“a part that times out again is scored 0” is not enforced across subsequent resumptions**.
+
+Applying a rule identically to all eight runs is necessary, but does not make a decision taken after outcomes existed prospectively preregistered.
+
+**Minimum fix:**
+
+- Describe this as a **post-outcome measurement amendment to frozen generation**, preserving its date and rationale.
+- Separate confirmed setup/preemption failures from ambiguous timeout/SIGKILL failures. Without diagnostic logs, call the latter *resource-limit failures eligible for one recovery evaluation*, not proven machine faults.
+- Freeze the eligible list from the original files and allow **one recovery scoring pass** under fixed resources, concurrency and the existing 900-second limit. Record the scorer’s existing internal retries too.
+- Make the recovery outcome terminal. Another timeout, kill or setup failure remains zero in the declared operational metric, with its cause reported separately from geometric invalidity.
+- Preserve original and recovery records and report how the primary and secondary estimates change. Do not choose between analyses according to significance.
+- Do not regenerate programs or redo search/selection under this measurement amendment.
+
+This preserves a credible held-out experiment. It does **not** justify describing the eventual analysis as an unchanged preregistration. A new cohort is not automatically necessary.
+
+**2. The agent endpoint confuses “no completed verification” with “invalid delivered CAD.”**
+
+The agent does use the corrected `robust_iou` inside its harness. That earlier concern is resolved. The remaining problem is when verification never returns.
+
+[The execution path](/Users/Andrewlin/CADFit/agent/cad_tools.py:261) completes replay and scoring before updating `best_exec`. [Export](/Users/Andrewlin/CADFit/agent/cad_tools.py:504) falls back to the mesh-selected program when no executed incumbent exists. Consequently, `best_exec_valid = false` can describe **missing verification**, while a nonempty program is nevertheless delivered.
+
+For **00560247 and 00928992**, all four retained agent conditions have:
+
+- `best_exec_iou = -1`;
+- a delivered STL path and one-step answer;
+- approximately 1,801 seconds elapsed;
+- almost all time spent in tools.
+
+These records do not prove OCC-invalid geometry. They establish failure to obtain a verified answer within the episode. Several are labelled `stop: budget` despite using far fewer than 40 calls, because the loop also exits on elapsed time without changing the default stop label.
+
+This distinction materially affects the comparison: those two zeros contribute **−0.04699** to Opus-code minus v3, whereas its overall difference is only **−0.02112**.
+
+**Minimum fix:** independently replay and score **every retained delivered program**, under the same final evaluation settings as pipeline programs. Freeze the delivered answers; allow no further agent decisions. Report separately:
+
+1. Final delivered-program validity and gated IoU.
+2. Whether the agent completed verification within its episode budget.
+3. No output, execution timeout, invalid geometry, and judge failure.
+
+Keep both parts in every denominator. Missing programs remain zero. Successful offline evaluation is measurement of an already-delivered answer, not permission to continue the episode.
+
+There are two concrete traps in the proposed rescoring route:
+
+- [agentsk_score.py](/Users/Andrewlin/CADFit/bench/agentsk_score.py:100) still samples 20 parts using seed 1. On fresh2, **only two overlap the reserved 40**; it would omit 38 intended parts.
+- Positional `score.py target.stl agent_model.stl --cad` **does not replay CAD**: [that CLI branch](/Users/Andrewlin/CADFit/bench/score.py:417) calls only the mesh judge. I verified the routing with a mocked judge.
+
+Use the existing CAD scoring functions, but wire them explicitly to the reserved 40-part manifest and all four conditions. Merely adding `--cad` to the positional command is insufficient.
+
+**3. The trim experiment contains a replay failure and an additional repair intervention.**
+
+Two raw records contradict a clean “same delivery, plus silhouette trim” interpretation.
+
+- **Seed 0, 00403399:** the pipeline score records valid CAD at **0.930698**. [The trim record](/Users/Andrewlin/CADFit/results/review_bundle_2026-11-05/h2s0_v3_trim.json:4714) records `timeout 600s`, no selected program, and zero. Its top-level status is nevertheless `ok`, so [trim_posthoc.py](/Users/Andrewlin/CADFit/bench/analysis/trim_posthoc.py:33) caches it.
+- **Seed 2, 00057691:** the pipeline delivery is invalid and scores zero. [The trim record](/Users/Andrewlin/CADFit/results/review_bundle_2026-11-05/h2s2_v3_trim.json:589) reaches **0.883024 before trimming**, then **0.906910 after trimming**. Most of that part’s improvement comes from another fusion/repair pass.
+
+Across 300 parts, seed 2’s final-package increment is **+0.01258**, while its within-pass trim increment is **+0.00964**. These are different quantities.
+
+The code explains why: [verify()](/Users/Andrewlin/CADFit/exec_verify.py:248) reruns original/fused candidates and repairs invalid outputs before constructing the trimmed candidate. Its trim timer starts only afterward, so it excludes this additional work.
+
+**Minimum fix:** retain the preregistered final-package-versus-v3 contrast, but describe the implemented package accurately. Add a diagnostic decomposition using `gated_no_trim`, and retain the corresponding artifacts for independent checking. Report the complete added wall time if claiming the cost of this postprocessing package.
+
+For 00403399, retain the frozen failure unless a documented amendment justifies recovery. **Do not silently use the scoring amendment to rerun candidate selection.** Retaining the previously verified original is the appropriate delivery fix, but introducing that behavior now is a disclosed post-outcome method correction.
+
+**4. The closed-model results support a useful descriptive study, not a robust ranking or equivalence claim.**
+
+The cohort selection is correct: I reproduced the seeded 20+20 draw, and every retained condition covers exactly those 40 parts. The exported aggregate arithmetic also matches the raw records.
+
+Current **harness-based**, validity-gated results are:
+
+| Condition | Mean IoU | Verified answers |
+|---|---:|---:|
+| Sonnet code | 0.89965 | 38/40 |
+| Sonnet skills | 0.88431 | 37/40 |
+| Opus code | 0.93012 | 38/40 |
+| Opus skills | 0.88517 | 36/40 |
+| Pipeline v3, three-run average | 0.95124 | — |
+
+My paired, split-stratified bootstrap gives nominal 95% intervals:
+
+- Sonnet skills − code: **−0.01534 [−0.07117, +0.01819]**.
+- Opus skills − code: **−0.04495 [−0.12003, +0.00999]**.
+- Opus code − v3: **−0.02112 [−0.09877, +0.03642]**.
+
+Neither tools comparison establishes a mean improvement or deterioration. Opus versus v3 establishes neither superiority nor equivalence.
+
+Moreover, Opus skills’ two additional failed deliveries, **00300195 and 00867782**, contribute **−0.04851** to its mean difference from code—more than the entire observed deficit. The remaining parts contribute **+0.00356**. Sonnet shows the same qualitative pattern with one additional failure. That makes this an interesting **tool-cost and delivery-reliability finding**, not evidence that stronger models generally reason worse with CAD tools.
+
+**Minimum fix depends on the claim:**
+
+- **Exploratory paper subsection:** one episode per cell is reportable after common final scoring, with paired intervals, failure decomposition and explicit limits.
+- **Central model/tool comparison:** add two independent episodes per condition on the same 40 parts, giving three total. Average within part and bootstrap parts within split. Three is a practical minimum for assessing repeatability, not a guarantee of adequate precision.
+- **Planning or tool-attribution claim:** complete the already-planned code+section and matched-policy controls. A code-versus-skills package comparison cannot isolate planning.
+
+Do not treat the contaminated d0/dx/v2 rows as comparative evidence. The two-seed trim result is also provisional, not the planned three-seed endpoint.
+
+**5. The discarded run and figure need auditable reporting.**
+
+The discarded Opus directory contains **17 code and 18 skills episodes**, all without a verified answer. That strongly suggests a systematic problem, but `result.json` does not substantiate the claimed per-call 90-second failure mechanism. The discarded records contain **$8.9535 in estimated API cost**, excluded from the displayed retained-run costs.
+
+Setting aside a demonstrably broken machine run is reasonable. **Minimum fix:** supply its tool-error transcripts/job diagnosis, disclose the whole discarded block and its cost, and state the replacement rule. The new [preflight](/Users/Andrewlin/CADFit/bench/claude_job.sh:27) should exercise the actual sandboxed replay/tessellation path; an unsandboxed box-volume calculation does not test the failure path that affected scoring.
+
+Two smaller, confirmed reporting defects:
+
+- [make_closed.py](/Users/Andrewlin/CADFit/bench/figures/v2_2026-10-23/make_closed.py:25) hard-codes **mesh `best_iou` gated by executed validity**, whereas the analysis uses `best_exec_iou`. The discrepancy is small here, but it is the wrong metric for this paper. Generate the figure from final scoring records and include uncertainty.
+- [AnthropicChat](/Users/Andrewlin/CADFit/agent/anthropic_chat.py:31) uses **32,000 tokens per turn**, ignoring the caller’s `max_tokens`, and preserves full native history. Report those actual settings. They are consistent across the two closed models, but differ from the open-model harness settings.
+
+**6. The manuscript still describes the superseded experiment, and the decisive evidence is unfinished.**
+
+[The setting section](/Users/Andrewlin/CADFit/paper/sections/3_setting.tex:21) still describes 60 fresh parts and single-run arms; the agent section describes the historical 20-part study; [numbers.tex](/Users/Andrewlin/CADFit/paper/numbers.tex:460) still contains `PENDING`. The old “never inspected during development” framing cannot describe a cohort subsequently used throughout these repairs.
+
+The launch-related fixes are visible and appropriate: frozen runner routing, d0’s seeding patch, explicit secondary contrasts, and selected trim artifact routing. I would not reopen those resolved objections.
+
+**Minimum fix:** finish the corrected held-out scores, third trim run, section control, independent rejudging, surface diagnostics, timing and declared statistics. Rebuild the manuscript around those results, identifying the older cohorts as development/history. Complete the planned common-judge CADFather and corrected agent controls if retaining competitive or planning claims; otherwise narrow those claims.
+
+For a top venue, the strongest prospective contribution remains **a reproducible diagnosis and repair of executable-delivery failures, with controlled evidence about geometric tools**. The supplied artifacts do not yet establish that contribution at submission standard.
+
+## Memory update
+
+- Reviewed HEAD `3eab8d19`; inspected the full supplied diff, eight 300-part score files, two trim files and 195 episode records. Programs, transcripts and scheduler evidence remain unavailable locally.
+- Confirmed 531 replay records match the amendment’s eligibility rule. Recovery is defensible, but timeout/SIGKILL attribution is unproven and terminal retry handling is absent.
+- Agent `best_exec_iou = -1` means no completed executed incumbent, not proven invalid delivered geometry. Independently score all delivered programs; retain online verification success separately.
+- New scoring integration defects: `agentsk_score.py` selects the wrong 20 parts—only two overlap the reserved 40—and positional `score.py --cad` ignores CAD replay.
+- New trim findings: seed-0 `00403399` loses valid 0.930698 to a cached 600-second replay timeout; seed-2 `00057691` gains 0.883024 through repeat fusion/repair before trimming.
+- Closed-model means verified; paired tools-versus-code and Opus-code-versus-v3 intervals include zero. Extra failed deliveries explain the skills mean deficits.
+- Next review needs terminal recovery records, common final agent scores, complete three-seed trim/statistics, failure evidence and a manuscript reflecting the actual study.
+
+
+---

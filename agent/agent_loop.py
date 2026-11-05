@@ -468,6 +468,8 @@ def main():
                 break
         if done:
             break
+    if stop == 'budget' and calls < a.max_calls:  # the loop ended on the clock, not on calls
+        stop = 'time'
 
     stl = ws.export(a.out)
     result = {'model': a.model, 'toolset': a.toolset, 'gt': a.gt, 'init': a.init, 'init_iou': init_iou,
