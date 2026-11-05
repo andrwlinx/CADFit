@@ -57,10 +57,10 @@ def main():
     axs[1].text(0.02, 0.97, 'hatched = waiting on the model\nsolid = running tools (78-92%)',
                 transform=axs[1].transAxes, va='top', fontsize=10, color=MUTED)
     bars(axs[2], lambda d: d[3] / 40, lambda v: f'${v:.2f}', 'API cost per part', (0, 0.32))
-    axs[0].legend(frameon=False, loc='upper left', fontsize=10.5)
-    fig.text(0.5, 0.01, '40 held-out parts (20 benchA + 20 benchE), one episode each, '
+    fig.legend(*axs[0].get_legend_handles_labels(), frameon=False, loc='lower center', ncol=2, fontsize=11, bbox_to_anchor=(0.5, 0.035))
+    fig.text(0.5, 0.005, '40 held-out parts (20 benchA + 20 benchE), one episode each, '
              'same budget (40 calls, 30 min)', ha='center', fontsize=10, color=MUTED)
-    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    fig.tight_layout(rect=(0, 0.1, 1, 1))
     fig.savefig(os.path.join(HERE, 'simple_closed_models.png'), dpi=220)
     plt.close(fig)
 
