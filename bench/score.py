@@ -192,6 +192,14 @@ def chamfer(gt_path, recon_path, n=20000, seed=0):
     return float(0.5 * (cKDTree(b).query(a)[0].mean() + cKDTree(a).query(b)[0].mean()))
 
 
+def env_failure(error):
+    """A replay failure caused by the machine, not the program: the sandbox could not be
+    set up, the process was killed (rc -9, out of memory), or it ran out of wall time.
+    Such outcomes are not cached, so a rerun on another node judges the program again."""
+    e = str(error or '')
+    return e.startswith('timeout') or 'ns_sandbox' in e or '(rc -9,' in e
+
+
 def cad_replay(recon, timeout=900):
     """Run the CadQuery program saved next to `recon` (same name, .py) in a fresh
     process (bench/cad_replay.py) and return its record; the rebuilt STL is
@@ -228,7 +236,8 @@ def cad_replay(recon, timeout=900):
                    'error': f'replay crashed (rc {p.returncode}, attempt {attempt + 1}): {p.stderr.strip()[-300:]}'}
             if lines:
                 break  # it printed something else: a real failure, not a silent death
-    json.dump(rec, open(rec_path, 'w'))
+    if not env_failure(rec.get('error')):
+        json.dump(rec, open(rec_path, 'w'))
     return rec, out_stl
 
 
@@ -243,7 +252,8 @@ def _score_one(job):
     if os.path.exists(cache) and os.path.getmtime(cache) >= os.path.getmtime(recon):
         return name, part, json.load(open(cache))
     r = _score_part(gt, recon, cad)
-    json.dump(r, open(cache, 'w'))
+    if not env_failure(r.get('cad_error')):
+        json.dump(r, open(cache, 'w'))
     return name, part, r
 
 

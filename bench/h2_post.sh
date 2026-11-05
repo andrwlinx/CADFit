@@ -21,6 +21,8 @@ P=/orcd/pool/007/a_lin
 module load apptainer/1.5.2 2>/dev/null || export PATH=/orcd/software/core/001/pkg/apptainer/1.5.2/bin:$PATH
 # POST_SRC: the frozen tree to run from (default h2_src = git archive of the launch commit;
 # h2_src_c = the same plus score.py's per-part result cache, an I/O-only amendment).
+# h2_src_c3 = h2_src_c2 plus score.env_failure: machine failures (sandbox setup, rc -9,
+# timeout) are not cached; bench/h2_env_clear.py clears those parts in every run alike.
 cd $P/cadfit/bench/runs/${POST_SRC:-h2_src}
 PY="apptainer exec -B /orcd $P/envs/cadfit-sandbox $P/envs/cadfit-venv/bin/python"
 STLS=bench/cadbench/fresh2
@@ -33,7 +35,7 @@ case $STEP in
     $PY bench/score.py --runs $(for r in $RUNS; do echo -n "$R/$r "; done) --stl-dir $STLS --cad --jobs 8 \
       --out $R/h2_scores.json ;;
   score1)   # the same scoring for one run (one job per run fits the 12 h limit; then `merge`)
-    $PY bench/score.py --runs $R/$1 --stl-dir $STLS --cad --jobs 12 --out $R/h2_scores_$1.json ;;
+    $PY bench/score.py --runs $R/$1 --stl-dir $STLS --cad --jobs ${JOBS:-12} --out $R/h2_scores_$1.json ;;
   merge)    # h2_scores.json from the per-run files, refusing any run that is missing
     $PY -c "
 import json, sys

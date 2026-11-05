@@ -90,3 +90,19 @@ validity rates and "valid in every repeat" are reported.
 ## Measurement notes
 - Surface agreement uses the OCC-fused boundary; a part whose solids do not fuse uses the winding-number
   approximation and is flagged (`boundary: winding`) in the output and reported as such.
+
+## Amendments after outcomes existed (2026-11-05)
+- **Machine-failure rescoring.** The per-part score cache (h2_src_c) stored replay failures caused by the
+  machine as if they were outcomes: h2s0_dx 299/300 parts "ns_sandbox: could not make read-only" (sandbox
+  setup on one node), h2s2_v2 222 "timeout 900s" (sibling seeds 0/1 had none; node contention), h2s0_d0
+  7 rc -9 kills + 3 timeouts. Rule, applied to every run alike: a replay failure that is a sandbox-setup
+  error, an rc -9 kill, or the 900 s timeout (`score.env_failure`) is not cached; bench/h2_env_clear.py
+  clears those parts' replay record and score in all 8 runs, and `score1` re-judges them with the same
+  judge and timeout at lower concurrency (JOBS=4) from h2_src_c3 (= h2_src_c2 + this rule). A part that
+  times out again is scored 0 as before. Program outputs and the judge are unchanged. The list of
+  cleared parts is kept in bench/runs/h2_env_cleared.json.
+- **Closed models.** Claude Opus 5.5 and Sonnet 5.5 ran on the 40 reserved parts (one episode each,
+  code and skills toolsets, effort high, same budget); exploratory, compared per part with the pipeline
+  in bench/analysis/closed_vs_pipeline.py. A first Opus run on node4002 (every executed call timed out
+  at 90 s) was set aside as agentsk_f2/opus55_node4002_failed and rerun; bench/claude_job.sh now builds
+  one CadQuery box before any API call.
