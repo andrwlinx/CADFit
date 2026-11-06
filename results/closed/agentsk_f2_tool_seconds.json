@@ -1,0 +1,212 @@
+{
+ "opus55/code/describe_target": {
+  "n": 120,
+  "total_s": 1631.3,
+  "max_s": 257.67
+ },
+ "opus55/code/section": {
+  "n": 1255,
+  "total_s": 155.5,
+  "max_s": 39.67
+ },
+ "opus55/code/add_code": {
+  "n": 506,
+  "total_s": 33814.2,
+  "max_s": 1707.42
+ },
+ "opus55/code/evaluate": {
+  "n": 270,
+  "total_s": 462.4,
+  "max_s": 114.01
+ },
+ "opus55/code/finish": {
+  "n": 95,
+  "total_s": 0.0,
+  "max_s": 0.0
+ },
+ "opus55/code/remove_step": {
+  "n": 262,
+  "total_s": 4108.9,
+  "max_s": 673.68
+ },
+ "opus55/code/list_steps": {
+  "n": 16,
+  "total_s": 1.5,
+  "max_s": 0.5
+ },
+ "opus55/skills/describe_target": {
+  "n": 120,
+  "total_s": 1724.9,
+  "max_s": 253.13
+ },
+ "opus55/skills/extract_sketch": {
+  "n": 144,
+  "total_s": 20629.1,
+  "max_s": 1773.76
+ },
+ "opus55/skills/fit_extrude": {
+  "n": 158,
+  "total_s": 12034.7,
+  "max_s": 822.89
+ },
+ "opus55/skills/add_candidate": {
+  "n": 146,
+  "total_s": 10479.9,
+  "max_s": 1712.94
+ },
+ "opus55/skills/evaluate": {
+  "n": 160,
+  "total_s": 186.6,
+  "max_s": 77.82
+ },
+ "opus55/skills/show_candidate": {
+  "n": 62,
+  "total_s": 0.3,
+  "max_s": 0.18
+ },
+ "opus55/skills/add_code": {
+  "n": 272,
+  "total_s": 14435.6,
+  "max_s": 1625.0
+ },
+ "opus55/skills/remove_step": {
+  "n": 115,
+  "total_s": 1494.5,
+  "max_s": 235.87
+ },
+ "opus55/skills/finish": {
+  "n": 100,
+  "total_s": 0.0,
+  "max_s": 0.0
+ },
+ "opus55/skills/section": {
+  "n": 504,
+  "total_s": 30.0,
+  "max_s": 3.74
+ },
+ "opus55/skills/section_extrude": {
+  "n": 49,
+  "total_s": 290.1,
+  "max_s": 82.1
+ },
+ "opus55/skills/list_steps": {
+  "n": 5,
+  "total_s": 0.4,
+  "max_s": 0.27
+ },
+ "sonnet55/skills/describe_target": {
+  "n": 120,
+  "total_s": 1243.0,
+  "max_s": 162.68
+ },
+ "sonnet55/skills/detect_directions": {
+  "n": 120,
+  "total_s": 1337.6,
+  "max_s": 173.9
+ },
+ "sonnet55/skills/section_extrude": {
+  "n": 32,
+  "total_s": 172.0,
+  "max_s": 85.84
+ },
+ "sonnet55/skills/add_candidate": {
+  "n": 85,
+  "total_s": 5259.6,
+  "max_s": 1607.49
+ },
+ "sonnet55/skills/section": {
+  "n": 558,
+  "total_s": 25.6,
+  "max_s": 2.1
+ },
+ "sonnet55/skills/evaluate": {
+  "n": 153,
+  "total_s": 36.4,
+  "max_s": 8.75
+ },
+ "sonnet55/skills/add_code": {
+  "n": 252,
+  "total_s": 9842.9,
+  "max_s": 1772.21
+ },
+ "sonnet55/skills/remove_step": {
+  "n": 106,
+  "total_s": 1096.3,
+  "max_s": 157.13
+ },
+ "sonnet55/skills/finish": {
+  "n": 108,
+  "total_s": 0.0,
+  "max_s": 0.0
+ },
+ "sonnet55/skills/extract_sketch": {
+  "n": 52,
+  "total_s": 8553.7,
+  "max_s": 1775.61
+ },
+ "sonnet55/skills/fit_extrude": {
+  "n": 61,
+  "total_s": 1681.4,
+  "max_s": 193.39
+ },
+ "sonnet55/skills/show_candidate": {
+  "n": 17,
+  "total_s": 0.0,
+  "max_s": 0.0
+ },
+ "sonnet55/skills/list_candidates": {
+  "n": 3,
+  "total_s": 0.0,
+  "max_s": 0.0
+ },
+ "sonnet55/skills/list_steps": {
+  "n": 11,
+  "total_s": 0.6,
+  "max_s": 0.11
+ },
+ "sonnet55/code/describe_target": {
+  "n": 120,
+  "total_s": 1224.6,
+  "max_s": 163.35
+ },
+ "sonnet55/code/section": {
+  "n": 1055,
+  "total_s": 181.8,
+  "max_s": 37.48
+ },
+ "sonnet55/code/add_code": {
+  "n": 465,
+  "total_s": 25496.4,
+  "max_s": 1775.96
+ },
+ "sonnet55/code/evaluate": {
+  "n": 306,
+  "total_s": 241.8,
+  "max_s": 56.38
+ },
+ "sonnet55/code/remove_step": {
+  "n": 203,
+  "total_s": 1397.4,
+  "max_s": 185.0
+ },
+ "sonnet55/code/finish": {
+  "n": 105,
+  "total_s": 0.0,
+  "max_s": 0.0
+ },
+ "sonnet55/code/list_steps": {
+  "n": 34,
+  "total_s": 2.4,
+  "max_s": 0.92
+ },
+ "opus55/skills/detect_directions": {
+  "n": 1,
+  "total_s": 0.4,
+  "max_s": 0.38
+ },
+ "opus55/skills/fit_revolve": {
+  "n": 1,
+  "total_s": 0.0,
+  "max_s": 0.04
+ }
+}
