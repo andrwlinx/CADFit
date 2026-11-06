@@ -1,0 +1,4 @@
+Held-out per-run score files as they stood before the 2026-11-05 replay-failure recovery
+(downloaded from ORCD 2026-11-05 15:53; file times Nov 3-4). Authoritative pre-recovery
+records: the ORCD copy bench/runs/h2_scores_h2s0_d0.pre_recovery.json was made after the d0
+recovery had already rewritten the file, so it is NOT the original; use these.
