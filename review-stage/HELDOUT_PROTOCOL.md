@@ -112,8 +112,9 @@ validity rates and "valid in every repeat" are reported.
   00403399: valid v3 delivery 0.9307, trim record "timeout 600s", scored 0). The final-package-vs-v3
   contrast is reported as preregistered, with a diagnostic split into the second fuse/repair pass
   (`gated_no_trim`) and the trim proper, and the full added wall time.
-- **Closed models.** Claude Opus 5.5 and Sonnet 5.5 ran on the 40 reserved parts (one episode each,
-  code and skills toolsets, effort high, same budget); exploratory, compared per part with the pipeline
+- **Closed models.** Claude Opus 5.5 and Sonnet 5.5 ran on the 40 reserved parts (three independent
+  episodes per part, code and skills toolsets, effort high, same budget; every delivered program re-judged
+  by score.py's CAD replay, repeats averaged within part); exploratory, compared per part with the pipeline
   in bench/analysis/closed_vs_pipeline.py. A first Opus run on node4002 (every executed call timed out
   at 90 s) was set aside as agentsk_f2/opus55_node4002_failed and rerun; bench/claude_job.sh now builds
   one CadQuery box before any API call.

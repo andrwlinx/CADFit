@@ -1,0 +1,17 @@
+{
+  "skill": "auto-review-loop",
+  "run_id": "2026-11-06_run01",
+  "started_at": "2026-11-06T08:05:11Z",
+  "executor": "claude-code",
+  "executor_model": null,
+  "executor_model_source": "unavailable",
+  "executor_family": "unknown",
+  "reviewer_model_source": "requested",
+  "reviewer_family": "openai",
+  "reviewer_backend": null,
+  "native_evidence_id": null,
+  "native_evidence_path": null,
+  "family_relation": "unknown",
+  "independence_verified": "unverified",
+  "project_dir": "/Users/Andrewlin/CADFit"
+}

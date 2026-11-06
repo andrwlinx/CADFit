@@ -4,13 +4,15 @@ not part of HELDOUT_PROTOCOL.md's preregistered contrasts).
 Agents (primary endpoint): every delivered program re-judged like the pipeline's
 (bench/agentsk_score.py -> <tag>_scores.json, score.py CAD replay, iou_cad_gated); one file
 per episode repeat, averaged within part. Also reported: whether the episode itself finished an
-executed check of its answer (verified_in_episode) and the harness's own gated value.
+executed check of its answer (verified_in_episode) and, with --episodes, the episode's own
+executed check of its best executed program (best_exec_iou if best_exec_valid, else 0).
 Pipeline: h2_scores_<run>.json iou_cad_gated; v2 and v3 averaged over seeds 0-2 within part;
 trim from the trim_posthoc records present. Uncertainty: paired bootstrap over parts,
 resampled within split (20 benchA + 20 benchE).
 
   .venv/bin/python bench/analysis/closed_vs_pipeline.py --agents results/closed/agentsk_f2_scores.json \
       results/closed/agentsk_f2_r1_scores.json results/closed/agentsk_f2_r2_scores.json \
+      --episodes results/review_bundle_2026-11-05/agentsk_f2{,_r1,_r2} \
       --pipeline results/review_bundle_2026-11-05 --out results/closed/closed_vs_pipeline.json
 """
 import argparse
@@ -50,6 +52,8 @@ def main():
     ap.add_argument('--pipeline', required=True, help='folder with h2_scores_<run>.json and h2s*_v3_trim.json')
     ap.add_argument('--pipeline-runs', nargs='*', default=None,
                     help='arm=run,run,... (default: v3x3 and trim only, the runs without replay failures)')
+    ap.add_argument('--episodes', nargs='*', default=[],
+                    help='run folders <tag> holding <model>/<toolset>/<part>/result.json, same order as --agents')
     ap.add_argument('--out')
     a = ap.parse_args()
     sub = json.load(open(os.path.join(ROOT, 'bench', 'cadbench', 'fresh2_subset.json')))['parts']
@@ -62,8 +66,14 @@ def main():
     for c in conds:
         per = {p: [r[c][p] for r in reps] for p in parts}
         arms[c] = {p: st.mean(x.get('iou_cad_gated', 0.0) for x in per[p]) for p in parts}
-        arms[c + ' [harness]'] = {p: st.mean((x.get('agent_iou') or 0.0) if x.get('verified_in_episode') else 0.0
-                                             for x in per[p]) for p in parts}
+        if a.episodes:  # the episode's own executed check of its best executed program (not the mesh best)
+            ex = {p: [] for p in parts}
+            for tag in a.episodes:
+                for p in parts:
+                    f = os.path.join(tag, c, p, 'result.json')
+                    r = json.load(open(f)) if os.path.exists(f) else {}
+                    ex[p].append(r.get('best_exec_iou', 0.0) if r.get('best_exec_valid') else 0.0)
+            arms[c + ' [in-episode check]'] = {p: st.mean(ex[p]) for p in parts}
         eps = [x for p in parts for x in per[p]]
         causes = {}
         for x in eps:
