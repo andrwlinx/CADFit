@@ -14,6 +14,7 @@ Usage:
 """
 import argparse
 import glob
+import functools
 import json
 import os
 import re
@@ -103,6 +104,16 @@ def soup_iou(gt_path, recon_path, n=100000, seed=0, min_union=10000, max_chunks=
             'se': float(np.sqrt(j * (1 - j) / union)) if union else None}
 
 
+@functools.lru_cache(maxsize=2)
+def _gt_solid(gt_path, mtime):
+    """The normalized target mesh and its manifold (None if not watertight), loaded once
+    per process: an agent episode judges every executed program against the same
+    target, and reloading a large target took minutes a call. Neither object is
+    modified by the judge, so the values are those of a fresh load."""
+    gt = iou.normalize_mesh(trimesh.load(gt_path, force='mesh'))
+    return gt, (iou._to_manifold(gt) if gt.is_watertight else None)
+
+
 def robust_iou(gt_path, recon_path, n=40000, seed=0, min_union=10000, max_batches=5):
     """Judge that does not depend on how clean the reconstruction's STL is.
 
@@ -113,7 +124,7 @@ def robust_iou(gt_path, recon_path, n=40000, seed=0, min_union=10000, max_batche
     reconstruction's inside test is the generalized winding number. (Alpha-wrap
     turns such meshes into hollow shells: 0.078 against a true ~0.91.)"""
     import numpy as np
-    gt = iou.normalize_mesh(trimesh.load(gt_path, force='mesh'))
+    gt, ma = _gt_solid(os.path.abspath(gt_path), os.path.getmtime(gt_path))
     rc = trimesh.load(recon_path, force='mesh')
     # A GT that is not watertight gets no exact path. Its alpha wrap is a different,
     # fatter solid: on 00966049 (a 0.104-thick plate) the wrap has 1.21x the volume,
@@ -121,7 +132,6 @@ def robust_iou(gt_path, recon_path, n=40000, seed=0, min_union=10000, max_batche
     # solid gives 0.958 (exact boolean of the tessellations) and the winding-number
     # estimate below 0.950. The same program, exported with a crack, had been judged
     # by that estimate, so the exact-vs-MC split decided a 0.13 "regression".
-    ma = iou._to_manifold(gt) if gt.is_watertight else None
     closed = rc.is_watertight and rc.is_winding_consistent and rc.volume > 0
     mb = None
     if closed:

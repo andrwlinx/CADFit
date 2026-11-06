@@ -312,20 +312,15 @@ def rotate_points_around_axis(points, axis_start, axis_direction, angle_degrees)
     cos_theta = np.cos(theta)
     sin_theta = np.sin(theta)
     
-    # For each point
-    rotated = []
-    for p in translated:
-        # where k is the unit axis direction
-        k_dot_p = np.dot(axis_direction, p)
-        k_cross_p = np.cross(axis_direction, p)
-        
-        p_rot = (p * cos_theta + 
-                 k_cross_p * sin_theta + 
-                 axis_direction * k_dot_p * (1 - cos_theta))
-        rotated.append(p_rot)
-    
-    rotated = np.array(rotated)
-    
+    # Every point at once; the same per-component arithmetic as np.dot/np.cross on
+    # each point, so the result is bit-identical to the former per-point loop.
+    k = axis_direction
+    k_dot_p = k[0] * translated[:, 0] + k[1] * translated[:, 1] + k[2] * translated[:, 2]
+    k_cross_p = np.stack([k[1] * translated[:, 2] - k[2] * translated[:, 1],
+                          k[2] * translated[:, 0] - k[0] * translated[:, 2],
+                          k[0] * translated[:, 1] - k[1] * translated[:, 0]], axis=1)
+    rotated = translated * cos_theta + k_cross_p * sin_theta + k * k_dot_p[:, None] * (1 - cos_theta)
+
     # Translate back
     rotated = rotated + axis_start
     

@@ -41,6 +41,9 @@ _R = 3  # decimals in everything shown to the model
 # and its build/validity status and executed IoU are returned with the reply;
 # the answer is the best executed valid program, not the best mesh model.
 EXEC = os.environ.get('CADFIT_AGENT_EXEC') == '1'
+# Tools v3: one executed check (replay + judge) of a model change gets at most this many
+# seconds (tools v2: replay up to 180 s, judge unbounded; single calls reached 30 min).
+CHECK_CAP = float(os.environ.get('CADFIT_CHECK_CAP', '120'))
 from exec_verify import HELPERS as _HELPERS  # noqa: E402
 
 
@@ -70,6 +73,40 @@ def run_until(deadline, fn, *args, **kwargs):
     finally:
         signal.setitimer(signal.ITIMER_REAL, 0)
         signal.signal(signal.SIGALRM, old)
+
+
+class CheckTimeout(Exception):
+    pass
+
+
+def check_until(cap, fn, *args, **kwargs):
+    """fn(*args, **kwargs) limited to `cap` seconds, nested inside run_until: the
+    session alarm, if armed, is restored afterwards with its remaining time (and
+    fires at once if that ran out). Returns (value, None) or (None, error)."""
+    import signal
+    t0 = time.time()
+    outer_left = signal.getitimer(signal.ITIMER_REAL)[0]  # 0.0 when no session alarm is armed
+    outer = signal.getsignal(signal.SIGALRM)
+    limit = cap if not outer_left else min(cap, outer_left)
+    hit = []
+
+    def _alarm(*_):
+        hit.append(1)
+        raise CheckTimeout()
+    signal.signal(signal.SIGALRM, _alarm)
+    signal.setitimer(signal.ITIMER_REAL, max(limit, 1e-3))
+    try:
+        return fn(*args, **kwargs), None
+    except CheckTimeout:
+        return None, f'check did not finish in {limit:.0f}s'
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, outer)
+        if outer_left:
+            rest = outer_left - (time.time() - t0)
+            if rest <= 0 and callable(outer):
+                outer(signal.SIGALRM, None)  # the session deadline passed during the check
+            signal.setitimer(signal.ITIMER_REAL, max(rest, 1e-3))
 
 
 def _r(x, n=_R):
@@ -222,7 +259,7 @@ class CadWorkspace:
             self.best = (s, list(self.steps))
         if EXEC:
             r = self._exec()
-            if r is not None and r.get('built'):
+            if r is not None and r.get('built') and r.get('checked', True):
                 cur = self.best_exec
                 better = ((r['valid'], r['iou']) > (cur[2], cur[0]))
                 if better:
@@ -272,9 +309,10 @@ class CadWorkspace:
         tag = f'exec{self.n_exec}'
         py, stl = (os.path.join(self.workdir, f'{tag}.py'), os.path.join(self.workdir, f'{tag}.stl'))
         open(py, 'w').write(key)
-        rec = {'built': False, 'valid': False, 'iou': 0.0}
+        rec = {'built': False, 'valid': False, 'iou': 0.0, 'checked': True}
         argv = [PY, os.path.join(ROOT, 'bench', 'cad_replay.py'), py, stl]
-        t = self._time_left(180)
+        t0 = time.time()
+        t = self._time_left(CHECK_CAP)
         try:
             p = subprocess.run(_sandboxed(self.workdir, argv), capture_output=True, text=True, timeout=t,
                                cwd=self.workdir)
@@ -293,10 +331,19 @@ class CadWorkspace:
             # geometry the judge sees. The manifold is kept only to draw model sections.
             sys.path.insert(0, os.path.join(ROOT, 'bench'))
             import score
-            rec['iou'] = float(score.robust_iou(self.gt_stl, stl)['iou'])
-            m = iou._cached_manifold(stl, False)
-            if m is not None and m.volume() > 1e-12:
-                rec['_m'] = m
+
+            def judge():
+                return float(score.robust_iou(self.gt_stl, stl)['iou']), iou._cached_manifold(stl, False)
+            # One check (replay + judge) gets CHECK_CAP seconds. A check cut short leaves the
+            # step in place but unchecked: it never becomes the delivered answer (the best
+            # checked valid program does), and its program is not checked again.
+            out, err = check_until(max(5.0, CHECK_CAP - (time.time() - t0)), judge)
+            if err:
+                rec.update(checked=False, error=err)
+            else:
+                rec['iou'], m = out
+                if m is not None and m.volume() > 1e-12:
+                    rec['_m'] = m
         self._exec_cache[key] = rec
         return rec
 
@@ -307,10 +354,14 @@ class CadWorkspace:
         r = self._exec()
         if r is None:
             return {}
-        out = {'program_builds': r['built'], 'program_valid': r['valid'], 'program_iou': round(r['iou'], 4)}
+        out = {'program_builds': r['built'], 'program_valid': r['valid'],
+               'program_iou': round(r['iou'], 4) if r.get('checked', True) else None}
         if r.get('error'):
             out['program_error'] = r['error']
-        if r['built'] and not r['valid']:
+        if r['built'] and not r.get('checked', True):
+            out['note'] = ('the program builds, but its check did not finish in time; it stays in the model '
+                           'unchecked and is not the delivered answer unless no checked valid program exists')
+        elif r['built'] and not r['valid']:
             out['note'] = ('the CadQuery program builds an OCC-invalid solid; the answer kept is the best valid '
                            'program so far')
         elif not r['built']:

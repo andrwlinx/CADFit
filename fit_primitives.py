@@ -213,33 +213,32 @@ def try_circle_arc(pts: np.ndarray, rms_tol: float, min_pts: int = 7):
 def remove_duplicate_points_2d(pts: np.ndarray, tolerance: float = 1e-6) -> np.ndarray:
     """
     Remove duplicate/overlapping points from 2D point array.
-    
+
+    Keeps a point unless it lies within `tolerance` of a point kept before it (in
+    order). Same result as checking every earlier kept point, but only the KD-tree
+    neighbours within the tolerance are checked (the all-pairs loop took most of a
+    fit_extrude call on dense loops).
+
     Args:
         pts: Nx2 numpy array of 2D points
         tolerance: Minimum distance between points to consider them distinct
-    
+
     Returns:
         Filtered numpy array with distinct points
     """
     if pts.shape[0] <= 1:
         return pts
-    
-    distinct_points = []
-    
-    for i, point in enumerate(pts):
-        # Check if this point is close to any already selected point
-        is_duplicate = False
-        
-        if distinct_points:
-            existing_points = np.array(distinct_points)
-            distances = np.linalg.norm(existing_points - point, axis=1)
-            if np.min(distances) <= tolerance:
-                is_duplicate = True
-        
-        if not is_duplicate:
-            distinct_points.append(point)
-    
-    return np.array(distinct_points, dtype=float) if distinct_points else pts[:0]  # Return empty array of same type
+    from scipy.spatial import cKDTree
+    pts = np.asarray(pts)
+    # Candidate pairs from a slightly wider radius, then the exact test below decides.
+    near = [[] for _ in range(len(pts))]
+    for i, j in cKDTree(pts).query_pairs(tolerance * 1.01 + 1e-15):
+        near[max(i, j)].append(min(i, j))
+    kept = np.zeros(len(pts), dtype=bool)
+    for i in range(len(pts)):
+        kept[i] = not any(kept[j] and np.linalg.norm(pts[j] - pts[i]) <= tolerance for j in near[i])
+    out = pts[kept]
+    return np.array(out, dtype=float) if len(out) else pts[:0]  # Return empty array of same type
 
 
 def segment_greedy_fit(pts2: np.ndarray, scale: float, line_tol: float, circ_tol: float):
@@ -258,6 +257,26 @@ def segment_greedy_fit(pts2: np.ndarray, scale: float, line_tol: float, circ_tol
     if n < 2:
         return []  # Not enough distinct points to create any primitives
     
+    # Running sums for the line error of any run pts2[i:j+1] in O(1) (the greedy
+    # extension used to refit the whole run with an SVD at every j). Only the error
+    # decides anything for a line (its output is the run's end points); where the
+    # fast value is near a decision threshold the exact SVD fit decides instead.
+    cx_, cy_ = np.concatenate([[0.0], np.cumsum(pts2[:, 0])]), np.concatenate([[0.0], np.cumsum(pts2[:, 1])])
+    cxx, cyy = np.concatenate([[0.0], np.cumsum(pts2[:, 0] ** 2)]), np.concatenate([[0.0], np.cumsum(pts2[:, 1] ** 2)])
+    cxy = np.concatenate([[0.0], np.cumsum(pts2[:, 0] * pts2[:, 1])])
+
+    def line_rms_fast(a, b):
+        m = b - a + 1
+        sx, sy = cx_[b + 1] - cx_[a], cy_[b + 1] - cy_[a]
+        vxx = (cxx[b + 1] - cxx[a]) - sx * sx / m
+        vyy = (cyy[b + 1] - cyy[a]) - sy * sy / m
+        vxy = (cxy[b + 1] - cxy[a]) - sx * sy / m
+        lam = 0.5 * (vxx + vyy) - math.sqrt(max(0.25 * (vxx - vyy) ** 2 + vxy * vxy, 0.0))
+        return math.sqrt(max(lam, 0.0) / m)
+
+    def near(u, v):
+        return abs(u - v) <= 1e-6 * max(abs(u), abs(v)) + 1e-12
+
     i = 0
     primitives = []
     min_line_pts = 2
@@ -270,10 +289,13 @@ def segment_greedy_fit(pts2: np.ndarray, scale: float, line_tol: float, circ_tol
         # try to extend j from i+1 up to n-1
         for j in range(i + min_line_pts - 1, n):
             seg = pts2[i:j + 1]
-            # line fit
-            dir_vec, pt_on, line_rms = fit_line_2d(seg)
             # circle/arc fit
             circ = try_circle_arc(seg, rms_tol=circ_tol*scale, min_pts=min_circle_pts)
+            # line fit: the fast error unless it is near a value it is compared with
+            line_rms = line_rms_fast(i, j)
+            dir_vec = pt_on = None
+            if near(line_rms, line_tol * scale) or (circ is not None and near(line_rms, circ[2])):
+                dir_vec, pt_on, line_rms = fit_line_2d(seg)
             # evaluate
 
             if circ is not None and circ[2] < line_rms and circ[1][2] < 1000:
