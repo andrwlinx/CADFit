@@ -46,6 +46,11 @@ SETS = [
     # frozen evaluation.
     ('fresh2', 'benchA', 'hard', 150),
     ('fresh2', 'benchE', 'hard', 150),
+    # Tools-v3 cohort (2026-11-06, review-stage/TOOLS_V3_PROTOCOL.md): drawn after the
+    # protocol and the v3 code were committed (92ab47a); excludes every source model on
+    # disk in any earlier set; not inspected before the v2/v3 agent runs finish.
+    ('fresh3', 'benchA', 'hard', 20),
+    ('fresh3', 'benchE', 'hard', 20),
 ]
 
 
