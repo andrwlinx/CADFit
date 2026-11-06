@@ -117,3 +117,10 @@ validity rates and "valid in every repeat" are reported.
   in bench/analysis/closed_vs_pipeline.py. A first Opus run on node4002 (every executed call timed out
   at 90 s) was set aside as agentsk_f2/opus55_node4002_failed and rerun; bench/claude_job.sh now builds
   one CadQuery box before any API call.
+- **Execution log of the recovery pass (2026-11-05).** h2s0_d0 (job 28015490) completed its pass at 17:19
+  from the pre-rule c3 code; its 10 eligible parts failed again (13 OOM kills in the job) and stay 0 —
+  terminal. Its ORCD ".pre_recovery" copy was made after that rewrite and is renamed
+  `.recovered_copy.json`; the originals are in results/heldout_pre_recovery/. h2s0_dx's first recovery
+  job (28015491) was scheduled on node4002, the node whose replays timed out in the discarded Opus run;
+  it was cancelled before writing its score file (completed evaluations it cached stand; failures were
+  not cached by that code) and resubmitted excluding node4002 (28032524). Same single pass.

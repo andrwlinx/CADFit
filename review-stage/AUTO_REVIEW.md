@@ -328,3 +328,26 @@ Paired (split-stratified bootstrap 95% CI; sign test Holm over the 4 pairs):
 - Post-processing amendment (I/O only, 2026-11-03): bench/score.py gains a per-part result cache (6d358f0; diff vs f7455d3 limited to score.py, +13/−1; test: cached record identical). Frozen as bench/runs/h2_src_c (git archive 5a0db4d); h2_post.sh POST_SRC selects it. Reason: h2s0_v3 scoring was preempted at 297/300 and restarted from zero; scoring writes its file only at the end, and three parts (00509562, 00728737, 00979463 — the last a 299 MB GT) take hours to judge. h2s0_v3 and h2s2_v2 scoring rerun from h2_src_c on mit_preemptable (2-day limit, requeue); the other six runs continue from h2_src.
 - 2026-11-03 ~08:50: the six original scoring jobs (h2_src, no cache) were still on the large parts after 6 h of 12; cached duplicates submitted from h2_src_c on mit_preemptable (2-day limit) for h2s0_d0/dx/v2, h2s1_v2/v3, h2s2_v3. Same scorer and settings; the first to finish writes h2_scores_<run>.json.
 - 2026-11-03 13:50: trim_posthoc gains the same per-part record cache (276dfa5, I/O only; error records not cached). Frozen as bench/runs/h2_src_c2 (git archive 276dfa5); analysis-code diff vs f7455d3 is limited to bench/score.py (+13/−1) and bench/analysis/trim_posthoc.py (+15/−3), both caches. trim0 (165/300 after 6.4 h on mit_normal, uncached, at risk of the 12 h limit) was cancelled; all three trims rerun from h2_src_c2 on mit_preemptable (2-day limit, requeue): jobs 27800702–04.
+
+## run_20261105_105505a5 — Round 1 (2026-11-05)
+
+### Assessment (Summary)
+- Score: 5/10 — Verdict: not ready (reviewer backend: codex gpt-6-astra xhigh, thread 01a1ad83-dd2c-7fa0-bc06-9d2a41847f44)
+- Key criticisms: recovery amendment must be a single terminal pass with setup vs resource-limit classes; agent zeros are "no verification within budget", so score delivered programs with the common CAD judge; trim package includes a second fuse/repair pass and one seed-0 trim timeout; closed-model study is exploratory at one episode per cell; discarded run and figure need auditable reporting; manuscript is stale.
+
+### Reviewer Raw Response
+Verbatim in review-stage/ROUND1_run_20261105_105505a5.response.md and REVIEWER_MEMORY.md.
+
+### Actions Taken
+- score.env_failure classes (setup / resource, exact 900 s); every outcome cached (terminal); h2_env_clear.py keeps pre-recovery files and refuses a second pass; originals committed to results/heldout_pre_recovery/.
+- Protocol amendment rewritten as a post-outcome measurement amendment; trim failures kept frozen, decomposition promised.
+- agentsk_score.py --parts-file (the reserved 40) + verified_in_episode; job agscore re-judges every delivered agent program with score.py's CAD replay.
+- score.py positional --cad now replays the program.
+- agent_loop: an episode ending on the clock is labelled "time".
+- claude_job.sh preflight replays a box through the sandboxed replay path.
+- Discarded node4002 Opus run diagnosed: 44 episodes, 43 with 90 s executed-call timeouts, 578 in total (diagnosis.json); $8.95.
+- Closed-model zeros traced: 00560247/00928992 (all arms) and Opus-skills 00300195/00867782 end with "session time limit reached during the tool call" (slow executed checks or skills tools).
+- Launched repeats r1, r2 for Opus/Sonnet × code/skills on the 40 parts.
+
+### Status
+- Waiting on: recovery jobs (dx 28032524, s2_v2 28015492), merge→section/rejudge/surface→stats, trim1, agscore, repeats. Continuing to round 2 when they finish.
