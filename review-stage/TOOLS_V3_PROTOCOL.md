@@ -61,3 +61,13 @@ One run of every cell; no additional episodes after outcomes are seen. 960 episo
 (2 models x 2 tool versions x 2 toolsets x 40 parts x 3); expected API cost about $165
 (chosen by the user 2026-11-06, beyond the remaining Ultra credit). Launch is stopped if
 the study's spend passes $200.
+
+## Execution log
+- 2026-11-06 13:20 launch (12 jobs, 8 episodes at once each). Stopped when the API credit ran out:
+  706 episodes completed normally ($104.64); 239 ended on an API error (146 "credit balance too
+  low" HTTP 400, 6 the same error mid-stream, 87 HTTP 429 rate limit after the client's retries)
+  and 15 had not started. The jobs were cancelled and the 239 API-error episodes moved, not
+  deleted, to bench/runs/tv_api_failed/ (they are infrastructure failures, not outcomes: no
+  model decision ended them). The losses were uneven (Opus v2 41-51 a run, Opus v3 4-32), so
+  every missing episode is rerun before any analysis. The resume runs the same frozen trees
+  with 3 episodes at once per job instead of 8 (throughput only).

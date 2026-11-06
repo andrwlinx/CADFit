@@ -5,6 +5,7 @@
 # Run from the checkout root:   bash bench/v3tools_submit.sh
 set -eu
 V2=f4435df V3=92ab47a
+JOBS=${JOBS:-8}  # episodes at once per job; 12 jobs x 8 hit the API rate limit (2026-11-06), resume used 3
 mkdir -p bench/runs/agentsk_logs
 freeze() {  # <commit> <dir>
   [ -f "$2/SOURCE.txt" ] && { echo "frozen: $2 ($(cat "$2/SOURCE.txt"))"; return; }
@@ -25,7 +26,7 @@ for rep in r0 r1 r2; do
     for v in v2 v3; do
       sbatch -J tv_${m}_${v}_$rep -p mit_preemptable,mit_normal -c 16 --mem=64G -t 12:00:00 --exclude=node4002 \
         --export=ALL,CADFIT_SRC=$PWD/bench/runs/tv_${v}_src bench/runs/tv_${v}_src/bench/claude_job.sh $m \
-        --toolsets code skills --stl-dir bench/cadbench/fresh3 --parts $PARTS --tag tv_${v}_$rep --jobs 8
+        --toolsets code skills --stl-dir bench/cadbench/fresh3 --parts $PARTS --tag tv_${v}_$rep --jobs $JOBS
     done
   done
 done
