@@ -1,0 +1,30 @@
+{
+ "model": "claude-opus-5-5",
+ "toolset": "skills",
+ "gt": "bench/cadbench/fresh2/00867782_41aed573b420b13fae115377_step_004.stl",
+ "init": null,
+ "init_iou": 0.0,
+ "best_iou": 0.0,
+ "n_steps": 0,
+ "sources": [],
+ "modes": [],
+ "tool_calls": 3,
+ "stop": "time",
+ "seconds": 1800.6,
+ "seconds_split": {
+  "setup": 3.7,
+  "model": 18.9,
+  "tools": 1776.0
+ },
+ "tools": "v2",
+ "best_exec_iou": -1.0,
+ "best_exec_valid": false,
+ "n_exec": 0,
+ "usage": {
+  "prompt_tokens": 10712,
+  "completion_tokens": 260
+ },
+ "cost_usd": 0.0098,
+ "stl": null,
+ "iou_trace": []
+}

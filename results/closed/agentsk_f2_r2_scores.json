@@ -1,0 +1,4341 @@
+{
+ "parts": [
+  "00004302_00e12f076c9f44728924a007_step_014",
+  "00013771_b025a0d3b3c44fa1975bc9c6_step_001",
+  "00041105_6168cfabdf0946b393dfc666_step_000",
+  "00053475_6da2925085034f7da42dfeb6_step_000",
+  "00067285_6d8f6cc2289143a98142169d_step_002",
+  "00067884_346c607059004b94bda4ac3d_step_000",
+  "00077854_4516b6617d04375fa1183804_step_000",
+  "00078985_03913f7badd80f7271fa1b43_step_001",
+  "00086573_375de0662ed8a78cf0ad4095_step_000",
+  "00120625_56fd0e19e4b07b5f4ed018c2_step_001",
+  "00125538_7833b3d42626d5500f146c1d_step_000",
+  "00134078_1d234a68cc4d071e39440057_step_000",
+  "00165191_37a3be1d3de7a79c5b94f6a2_step_000",
+  "00167988_2fe231e517344bfc6ec186da_step_001",
+  "00171848_575855d1e4b06a2590ec9c23_step_000",
+  "00188456_7024b113c4b919dc0de33c71_step_001",
+  "00263390_a770f0adcd6fafc5e435cd92_step_000",
+  "00288479_3b42a5217dc6cc1e73aad1cb_step_000",
+  "00297151_d40fc96866cd51a51c9e78d8_step_003",
+  "00300195_184cfe98a683b513b423281c_step_000",
+  "00360608_fbf00600e0e4132e5c238e76_step_011",
+  "00415094_ef232b7c91c715e5afbf45d9_step_000",
+  "00421629_cc5afb7318db8edb1ba12d2d_step_000",
+  "00438820_a3bf310c6c66b93633622223_step_002",
+  "00490348_e586e0aa12ac0b63fc521157_step_000",
+  "00529996_acc4b3c0ff918c68003eef7a_step_005",
+  "00555973_228e826928336f530534dd1c_step_000",
+  "00560247_2ceaea8168d8e1d8b9eecd01_step_000",
+  "00562295_b9d8011b361bd768233b5126_step_000",
+  "00585079_cd28267708f5534ab157a08e_step_071",
+  "00586964_73ef370d5bd87fbc5c62578a_step_000",
+  "00621425_7b06ea4adb0ff52eff1114da_step_000",
+  "00710155_3641b9cf981205286d42d072_step_001",
+  "00762137_02216c8ffa137b472f92f048_step_000",
+  "00767348_fa92ba2c4e07cce3a988200c_step_001",
+  "00794841_1301afb237bb122b2fc5a166_step_010",
+  "00829121_04d0e5217a8acfba681fbe55_step_000",
+  "00867782_41aed573b420b13fae115377_step_004",
+  "00914699_832190ea6bacfdfd9c3eec5c_step_000",
+  "00928992_62a68b373ac06a238508bce4_step_000"
+ ],
+ "conditions": {
+  "opus55/code": {
+   "00004302_00e12f076c9f44728924a007_step_014": {
+    "iou": 0.993670385315294,
+    "method": "gwn-mc",
+    "union_samples": 12639,
+    "se": 0.0007054292331136696,
+    "cd": 0.012521698493096135,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.993670385315294,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 12639,
+     "se": 0.0007054292331136696
+    },
+    "iou_cad_gated": 0.993670385315294,
+    "tool_calls": 18,
+    "stop": "finish",
+    "seconds": 1092.1,
+    "agent_iou": 0.994002024294644,
+    "tokens": 103090,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1863
+   },
+   "00013771_b025a0d3b3c44fa1975bc9c6_step_001": {
+    "iou": 0.9910430253349202,
+    "method": "exact",
+    "cd": 0.0075503042302205794,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9910430253349202,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9910430253349202,
+    "tool_calls": 31,
+    "stop": "finish",
+    "seconds": 283.2,
+    "agent_iou": 0.9909995599457293,
+    "tokens": 321741,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.4254
+   },
+   "00041105_6168cfabdf0946b393dfc666_step_000": {
+    "iou": 0.9765250209371351,
+    "method": "exact",
+    "cd": 0.0036475279007461194,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9765250209371351,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9765250209371351,
+    "tool_calls": 37,
+    "stop": "finish",
+    "seconds": 639.0,
+    "agent_iou": 0.9765250209371351,
+    "tokens": 369043,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.3507
+   },
+   "00053475_6da2925085034f7da42dfeb6_step_000": {
+    "iou": 0.9772985242299321,
+    "method": "exact",
+    "cd": 0.010501874813777273,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9772985242299321,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9772985242299321,
+    "tool_calls": 17,
+    "stop": "finish",
+    "seconds": 61.3,
+    "agent_iou": 0.9772985242299329,
+    "tokens": 75600,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1172
+   },
+   "00067285_6d8f6cc2289143a98142169d_step_002": {
+    "iou": 0.9945853220441587,
+    "method": "exact",
+    "cd": 0.009218353926965399,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9945853220441587,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9945853220441587,
+    "tool_calls": 20,
+    "stop": "finish",
+    "seconds": 113.7,
+    "agent_iou": 0.9945868341114791,
+    "tokens": 133442,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1918
+   },
+   "00067884_346c607059004b94bda4ac3d_step_000": {
+    "iou": 0.9999481072105031,
+    "method": "gwn-mc",
+    "union_samples": 38541,
+    "se": 3.6692791265245986e-05,
+    "cd": 0.01749645361848834,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9999481072105031,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 38541,
+     "se": 3.6692791265245986e-05
+    },
+    "iou_cad_gated": 0.9999481072105031,
+    "tool_calls": 12,
+    "stop": "finish",
+    "seconds": 473.7,
+    "agent_iou": 0.9998696599594584,
+    "tokens": 37199,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1189
+   },
+   "00077854_4516b6617d04375fa1183804_step_000": {
+    "iou": 0.9704152532120424,
+    "method": "exact",
+    "cd": 0.013591096340253458,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9704152532120424,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9704152532120424,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 366.2,
+    "agent_iou": 0.9704239577595294,
+    "tokens": 762630,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.6777
+   },
+   "00078985_03913f7badd80f7271fa1b43_step_001": {
+    "iou": 0.9595767965008332,
+    "method": "exact",
+    "cd": 0.009442239827337422,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9595767965008332,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9595767965008332,
+    "tool_calls": 33,
+    "stop": "finish",
+    "seconds": 259.4,
+    "agent_iou": 0.959457586880102,
+    "tokens": 495248,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.4583
+   },
+   "00086573_375de0662ed8a78cf0ad4095_step_000": {
+    "iou": 0.9969444867774383,
+    "method": "exact",
+    "cd": 0.009966263398699361,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9969444867774383,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9969444867774383,
+    "tool_calls": 17,
+    "stop": "finish",
+    "seconds": 246.6,
+    "agent_iou": 0.9968864252317696,
+    "tokens": 157865,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2724
+   },
+   "00120625_56fd0e19e4b07b5f4ed018c2_step_001": {
+    "iou": 0.9960786721064678,
+    "method": "exact",
+    "cd": 0.009510813838104835,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9960786721064678,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9960786721064678,
+    "tool_calls": 27,
+    "stop": "finish",
+    "seconds": 217.8,
+    "agent_iou": 0.9960159332824131,
+    "tokens": 221069,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2569
+   },
+   "00125538_7833b3d42626d5500f146c1d_step_000": {
+    "iou": 0.9484465100266805,
+    "method": "gwn-mc",
+    "union_samples": 11619,
+    "se": 0.002051403446822303,
+    "cd": 0.008142042870256612,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9484465100266805,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 11619,
+     "se": 0.002051403446822303
+    },
+    "iou_cad_gated": 0.9484465100266805,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 1800.2,
+    "agent_iou": 0.9538764450846721,
+    "tokens": 399612,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.7719
+   },
+   "00134078_1d234a68cc4d071e39440057_step_000": {
+    "iou": 0.9960460643886844,
+    "method": "exact",
+    "cd": 0.01128386998685272,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9960460643886844,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9960460643886844,
+    "tool_calls": 7,
+    "stop": "finish",
+    "seconds": 31.6,
+    "agent_iou": 0.9960460643886844,
+    "tokens": 26153,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0479
+   },
+   "00165191_37a3be1d3de7a79c5b94f6a2_step_000": {
+    "iou": 0.9899365246539077,
+    "method": "exact",
+    "cd": 0.006152021780357033,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9899365246539077,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9899365246539077,
+    "tool_calls": 15,
+    "stop": "finish",
+    "seconds": 271.4,
+    "agent_iou": 0.9899678790720438,
+    "tokens": 129427,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.3107
+   },
+   "00167988_2fe231e517344bfc6ec186da_step_001": {
+    "iou": 0.9892672370077028,
+    "method": "exact",
+    "cd": 0.011230626219696874,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9892672370077028,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9892672370077028,
+    "tool_calls": 9,
+    "stop": "finish",
+    "seconds": 44.5,
+    "agent_iou": 0.9892690308535729,
+    "tokens": 31093,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0787
+   },
+   "00171848_575855d1e4b06a2590ec9c23_step_000": {
+    "iou": 0.9710307354142804,
+    "method": "exact",
+    "cd": 0.009847044465443712,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9710307354142804,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9710307354142804,
+    "tool_calls": 26,
+    "stop": "finish",
+    "seconds": 280.0,
+    "agent_iou": 0.9707368045861016,
+    "tokens": 281150,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.278
+   },
+   "00188456_7024b113c4b919dc0de33c71_step_001": {
+    "iou": 0.9917642892661087,
+    "method": "exact",
+    "cd": 0.006685668011646809,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9917642892661087,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9917642892661087,
+    "tool_calls": 7,
+    "stop": "finish",
+    "seconds": 68.5,
+    "agent_iou": 0.9917907785615196,
+    "tokens": 42225,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1082
+   },
+   "00263390_a770f0adcd6fafc5e435cd92_step_000": {
+    "iou": 0.8995182305652556,
+    "method": "exact",
+    "cd": 0.004926426156667867,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8995182305652556,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.8995182305652556,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 263.4,
+    "agent_iou": 0.8995182305652556,
+    "tokens": 262561,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.4499
+   },
+   "00288479_3b42a5217dc6cc1e73aad1cb_step_000": {
+    "iou": 0.9975311115032659,
+    "method": "exact",
+    "cd": 0.00969560237889111,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9975311115032659,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9975311115032659,
+    "tool_calls": 11,
+    "stop": "finish",
+    "seconds": 106.2,
+    "agent_iou": 0.9974738263736533,
+    "tokens": 77133,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1507
+   },
+   "00297151_d40fc96866cd51a51c9e78d8_step_003": {
+    "iou": 0.996018489685346,
+    "method": "exact",
+    "cd": 0.010331320187444641,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.996018489685346,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.996018489685346,
+    "tool_calls": 16,
+    "stop": "finish",
+    "seconds": 115.8,
+    "agent_iou": 0.9960184879741291,
+    "tokens": 206516,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.3347
+   },
+   "00300195_184cfe98a683b513b423281c_step_000": {
+    "iou": 0.9731691852249486,
+    "method": "exact",
+    "cd": 0.005360970274059776,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9731691852249486,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9731691852249486,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 925.0,
+    "agent_iou": 0.973099619415936,
+    "tokens": 781473,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.7394
+   },
+   "00360608_fbf00600e0e4132e5c238e76_step_011": {
+    "iou": 0.9879946911196911,
+    "method": "gwn-mc",
+    "union_samples": 16576,
+    "se": 0.0008459098959481804,
+    "cd": 0.005909276597493604,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9879946911196911,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 16576,
+     "se": 0.0008459098959481804
+    },
+    "iou_cad_gated": 0.9879946911196911,
+    "tool_calls": 23,
+    "stop": "finish",
+    "seconds": 500.0,
+    "agent_iou": 0.9858220405047013,
+    "tokens": 237343,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.3673
+   },
+   "00415094_ef232b7c91c715e5afbf45d9_step_000": {
+    "iou": 0.9796758009325516,
+    "method": "exact",
+    "cd": 0.012044511928717899,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9796758009325516,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9796758009325516,
+    "tool_calls": 19,
+    "stop": "finish",
+    "seconds": 99.6,
+    "agent_iou": 0.9796758009325508,
+    "tokens": 183443,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2308
+   },
+   "00421629_cc5afb7318db8edb1ba12d2d_step_000": {
+    "iou": 0.9929350429305188,
+    "method": "exact",
+    "cd": 0.014310020719055225,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9929350429305188,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9929350429305188,
+    "tool_calls": 10,
+    "stop": "finish",
+    "seconds": 60.8,
+    "agent_iou": 0.992133073296068,
+    "tokens": 44124,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0707
+   },
+   "00438820_a3bf310c6c66b93633622223_step_002": {
+    "iou": 0.9849348072179898,
+    "method": "exact",
+    "cd": 0.007322895392851147,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9849348072179898,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9849348072179898,
+    "tool_calls": 17,
+    "stop": "finish",
+    "seconds": 120.3,
+    "agent_iou": 0.9853845980043553,
+    "tokens": 128597,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1881
+   },
+   "00490348_e586e0aa12ac0b63fc521157_step_000": {
+    "iou": 0.9904506896860666,
+    "method": "exact",
+    "cd": 0.00962961279128887,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9904506896860666,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9904506896860666,
+    "tool_calls": 21,
+    "stop": "finish",
+    "seconds": 632.2,
+    "agent_iou": 0.9904760556891925,
+    "tokens": 274062,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.3838
+   },
+   "00529996_acc4b3c0ff918c68003eef7a_step_005": {
+    "iou": 0.9966005417838155,
+    "method": "exact",
+    "cd": 0.0054279783718136345,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9966005417838155,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9966005417838155,
+    "tool_calls": 15,
+    "stop": "finish",
+    "seconds": 77.7,
+    "agent_iou": 0.9969474721022992,
+    "tokens": 127789,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1678
+   },
+   "00555973_228e826928336f530534dd1c_step_000": {
+    "iou": 0.9787243913457934,
+    "method": "exact",
+    "cd": 0.009543621968431643,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9787243913457934,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9787243913457934,
+    "tool_calls": 7,
+    "stop": "finish",
+    "seconds": 54.7,
+    "agent_iou": 0.9787089408813392,
+    "tokens": 24955,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0755
+   },
+   "00560247_2ceaea8168d8e1d8b9eecd01_step_000": {
+    "iou": 0.8672995931187094,
+    "method": "gwn-mc",
+    "union_samples": 14009,
+    "se": 0.002866270216429211,
+    "cd": 0.007592171123212593,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8666048766576359,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 14026,
+     "se": 0.002870870637693157
+    },
+    "iou_cad_gated": 0.8666048766576359,
+    "tool_calls": 5,
+    "stop": "time",
+    "seconds": 1801.1,
+    "agent_iou": 0.8630774872213703,
+    "tokens": 13665,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": false,
+    "cost_usd": 0.0379
+   },
+   "00562295_b9d8011b361bd768233b5126_step_000": {
+    "iou": 0.9688524381706015,
+    "method": "exact",
+    "cd": 0.004128767229502153,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9688523291025224,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9688523291025224,
+    "tool_calls": 29,
+    "stop": "finish",
+    "seconds": 479.9,
+    "agent_iou": 0.9691168744970894,
+    "tokens": 303759,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2875
+   },
+   "00585079_cd28267708f5534ab157a08e_step_071": {
+    "iou": 0.953361359387633,
+    "method": "exact",
+    "cd": 0.010661578508304442,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.953361359387633,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.953361359387633,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 306.7,
+    "agent_iou": 0.9537208801446143,
+    "tokens": 521474,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.5526
+   },
+   "00586964_73ef370d5bd87fbc5c62578a_step_000": {
+    "iou": 0.983473775122846,
+    "method": "exact",
+    "cd": 0.0037068774116399464,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.983473775122846,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.983473775122846,
+    "tool_calls": 22,
+    "stop": "finish",
+    "seconds": 730.8,
+    "agent_iou": 0.9828328677358186,
+    "tokens": 143696,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2627
+   },
+   "00621425_7b06ea4adb0ff52eff1114da_step_000": {
+    "iou": 0.9967823339896771,
+    "method": "exact",
+    "cd": 0.01072505613602536,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9967823339896771,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9967823339896771,
+    "tool_calls": 31,
+    "stop": "finish",
+    "seconds": 182.3,
+    "agent_iou": 0.9967823339896772,
+    "tokens": 254949,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.3302
+   },
+   "00710155_3641b9cf981205286d42d072_step_001": {
+    "iou": 0.9885966873983595,
+    "method": "exact",
+    "cd": 0.0044120114716061885,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9885966873983595,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9885966873983595,
+    "tool_calls": 34,
+    "stop": "finish",
+    "seconds": 174.8,
+    "agent_iou": 0.9885966873983598,
+    "tokens": 218423,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.303
+   },
+   "00762137_02216c8ffa137b472f92f048_step_000": {
+    "iou": 0.9723304865540403,
+    "method": "exact",
+    "cd": 0.00968017025755119,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9723304865540403,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9723304865540403,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 278.0,
+    "agent_iou": 0.9723304865540404,
+    "tokens": 193223,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.4775
+   },
+   "00767348_fa92ba2c4e07cce3a988200c_step_001": {
+    "iou": 0.9851061869502985,
+    "method": "exact",
+    "cd": 0.01158369216557473,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9851061869502985,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9851061869502985,
+    "tool_calls": 14,
+    "stop": "finish",
+    "seconds": 116.2,
+    "agent_iou": 0.9851094344815348,
+    "tokens": 126848,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1727
+   },
+   "00794841_1301afb237bb122b2fc5a166_step_010": {
+    "iou": 0.9808494501327266,
+    "method": "gwn-mc",
+    "union_samples": 10548,
+    "se": 0.0013344636245509875,
+    "cd": 0.009816520734290677,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9808494501327266,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 10548,
+     "se": 0.0013344636245509875
+    },
+    "iou_cad_gated": 0.9808494501327266,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 1744.4,
+    "agent_iou": 0.9811519037412473,
+    "tokens": 578377,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.5643
+   },
+   "00829121_04d0e5217a8acfba681fbe55_step_000": {
+    "iou": 0.9998747579891529,
+    "method": "exact",
+    "cd": 0.007372993108847315,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9998747579891529,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9998747579891529,
+    "tool_calls": 20,
+    "stop": "finish",
+    "seconds": 280.6,
+    "agent_iou": 0.9914097021986891,
+    "tokens": 184947,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2153
+   },
+   "00867782_41aed573b420b13fae115377_step_004": {
+    "iou": 0.9950474709255703,
+    "method": "exact",
+    "cd": 0.006945370731955378,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9950474709255703,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9950474709255703,
+    "tool_calls": 24,
+    "stop": "finish",
+    "seconds": 1461.7,
+    "agent_iou": 0.9777133757213499,
+    "tokens": 191531,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.4312
+   },
+   "00914699_832190ea6bacfdfd9c3eec5c_step_000": {
+    "iou": 0.9906281089277987,
+    "method": "exact",
+    "cd": 0.011286848817415358,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9906281089277987,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9906281089277987,
+    "tool_calls": 8,
+    "stop": "finish",
+    "seconds": 54.2,
+    "agent_iou": 0.990622666491753,
+    "tokens": 27082,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0498
+   },
+   "00928992_62a68b373ac06a238508bce4_step_000": {
+    "iou": 0.9161715916981714,
+    "method": "gwn-mc",
+    "union_samples": 25922,
+    "se": 0.0017212730437866362,
+    "cd": 0.009553798750884319,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9160944371576267,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 25922,
+     "se": 0.001721992467317603
+    },
+    "iou_cad_gated": 0.9160944371576267,
+    "tool_calls": 20,
+    "stop": "time",
+    "seconds": 1801.3,
+    "agent_iou": 0.9161855868654903,
+    "tokens": 157046,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": false,
+    "cost_usd": 0.3263
+   }
+  },
+  "opus55/skills": {
+   "00004302_00e12f076c9f44728924a007_step_014": {
+    "iou": 0.9867695700110254,
+    "method": "gwn-mc",
+    "union_samples": 12698,
+    "se": 0.001013974871225711,
+    "cd": 0.012835966033315858,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9867695700110254,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 12698,
+     "se": 0.001013974871225711
+    },
+    "iou_cad_gated": 0.9867695700110254,
+    "tool_calls": 11,
+    "stop": "finish",
+    "seconds": 179.0,
+    "agent_iou": 0.9863631644387092,
+    "tokens": 39276,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1038
+   },
+   "00013771_b025a0d3b3c44fa1975bc9c6_step_001": {
+    "iou": 0.986643955619459,
+    "method": "exact",
+    "cd": 0.007092563434066027,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.986643955619459,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.986643955619459,
+    "tool_calls": 8,
+    "stop": "finish",
+    "seconds": 259.2,
+    "agent_iou": 0.9858231370462562,
+    "tokens": 39592,
+    "sources": [
+     "C0",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0471
+   },
+   "00041105_6168cfabdf0946b393dfc666_step_000": {
+    "iou": 0.9997456394820804,
+    "method": "exact",
+    "cd": 0.003635374228861871,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9997456394820804,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9997456394820804,
+    "tool_calls": 27,
+    "stop": "finish",
+    "seconds": 255.2,
+    "agent_iou": 0.9997456278704375,
+    "tokens": 254349,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2444
+   },
+   "00053475_6da2925085034f7da42dfeb6_step_000": {
+    "iou": 0.9776282549178904,
+    "method": "exact",
+    "cd": 0.010506307305976847,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9776282549178904,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9776282549178904,
+    "tool_calls": 15,
+    "stop": "finish",
+    "seconds": 64.8,
+    "agent_iou": 0.977628254917891,
+    "tokens": 78623,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0989
+   },
+   "00067285_6d8f6cc2289143a98142169d_step_002": {
+    "iou": 0.9944802735876466,
+    "method": "exact",
+    "cd": 0.009183668306810857,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9944802735876466,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9944802735876466,
+    "tool_calls": 15,
+    "stop": "finish",
+    "seconds": 152.4,
+    "agent_iou": 0.9944817852845851,
+    "tokens": 88028,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1237
+   },
+   "00067884_346c607059004b94bda4ac3d_step_000": {
+    "iou": 0.9999481072105031,
+    "method": "gwn-mc",
+    "union_samples": 38541,
+    "se": 3.6692791265245986e-05,
+    "cd": 0.017417284115850435,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9999481072105031,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 38541,
+     "se": 3.6692791265245986e-05
+    },
+    "iou_cad_gated": 0.9999481072105031,
+    "tool_calls": 12,
+    "stop": "finish",
+    "seconds": 347.5,
+    "agent_iou": 0.999867881557031,
+    "tokens": 63348,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1973
+   },
+   "00077854_4516b6617d04375fa1183804_step_000": {
+    "iou": 0.969172151021822,
+    "method": "gwn-mc",
+    "union_samples": 11548,
+    "se": 0.001608491191411056,
+    "cd": 0.01383307859495371,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9690855559404226,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 11548,
+     "se": 0.0016106767625862174
+    },
+    "iou_cad_gated": 0.9690855559404226,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 1717.3,
+    "agent_iou": 0.9677964097976101,
+    "tokens": 776644,
+    "sources": [
+     "C0",
+     "C1",
+     "C2",
+     "C3",
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.6129
+   },
+   "00078985_03913f7badd80f7271fa1b43_step_001": {
+    "iou": 0.9851526441639326,
+    "method": "gwn-mc",
+    "union_samples": 17983,
+    "se": 0.0009018727190798533,
+    "cd": 0.00867101587981781,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9851526441639326,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 17983,
+     "se": 0.0009018727190798533
+    },
+    "iou_cad_gated": 0.9851526441639326,
+    "tool_calls": 40,
+    "stop": "finish",
+    "seconds": 1767.8,
+    "agent_iou": 0.9851526396863858,
+    "tokens": 585736,
+    "sources": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "code",
+     "C5",
+     "C6",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.8385
+   },
+   "00086573_375de0662ed8a78cf0ad4095_step_000": {
+    "iou": 0.9994913476795843,
+    "method": "exact",
+    "cd": 0.010021156700644174,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9994913476795843,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9994913476795843,
+    "tool_calls": 7,
+    "stop": "finish",
+    "seconds": 66.8,
+    "agent_iou": 0.9994913474436203,
+    "tokens": 37865,
+    "sources": [
+     "C1"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0405
+   },
+   "00120625_56fd0e19e4b07b5f4ed018c2_step_001": {
+    "iou": 0.9983196941892344,
+    "method": "exact",
+    "cd": 0.0094309359669957,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9983196941892344,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9983196941892344,
+    "tool_calls": 12,
+    "stop": "finish",
+    "seconds": 106.9,
+    "agent_iou": 0.9981864062713521,
+    "tokens": 54727,
+    "sources": [
+     "C0",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0621
+   },
+   "00125538_7833b3d42626d5500f146c1d_step_000": {
+    "iou": 0.9807407407407407,
+    "method": "gwn-mc",
+    "union_samples": 11475,
+    "se": 0.0012829819633420065,
+    "cd": 0.007549558904165275,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9807407407407407,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 11475,
+     "se": 0.0012829819633420065
+    },
+    "iou_cad_gated": 0.9807407407407407,
+    "tool_calls": 21,
+    "stop": "finish",
+    "seconds": 999.0,
+    "agent_iou": 0.9812028141970681,
+    "tokens": 112513,
+    "sources": [
+     "C0",
+     "C2",
+     "code",
+     "C1",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2028
+   },
+   "00134078_1d234a68cc4d071e39440057_step_000": {
+    "iou": 0.9960460643886844,
+    "method": "exact",
+    "cd": 0.011445661673485706,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9960460643886844,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9960460643886844,
+    "tool_calls": 12,
+    "stop": "finish",
+    "seconds": 58.8,
+    "agent_iou": 0.9960460643886844,
+    "tokens": 91226,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0991
+   },
+   "00165191_37a3be1d3de7a79c5b94f6a2_step_000": {
+    "iou": 0.9881853312380531,
+    "method": "exact",
+    "cd": 0.006344747942576189,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9881853312380531,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9881853312380531,
+    "tool_calls": 17,
+    "stop": "finish",
+    "seconds": 173.7,
+    "agent_iou": 0.9880698878945219,
+    "tokens": 103784,
+    "sources": [
+     "C0",
+     "C1",
+     "C2",
+     "C3",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0992
+   },
+   "00167988_2fe231e517344bfc6ec186da_step_001": {
+    "iou": 0.9921857371958837,
+    "method": "exact",
+    "cd": 0.011149094677029629,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9921857371958837,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9921857371958837,
+    "tool_calls": 19,
+    "stop": "finish",
+    "seconds": 236.3,
+    "agent_iou": 0.992187046008042,
+    "tokens": 185492,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.312
+   },
+   "00171848_575855d1e4b06a2590ec9c23_step_000": {
+    "iou": 0.9705367126474418,
+    "method": "exact",
+    "cd": 0.009929520369817417,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9705367126474418,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9705367126474418,
+    "tool_calls": 15,
+    "stop": "finish",
+    "seconds": 122.6,
+    "agent_iou": 0.9697972726630442,
+    "tokens": 157366,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1854
+   },
+   "00188456_7024b113c4b919dc0de33c71_step_001": {
+    "iou": 0.9910405052446011,
+    "method": "exact",
+    "cd": 0.006643733291355385,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9910405052446011,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9910405052446011,
+    "tool_calls": 10,
+    "stop": "finish",
+    "seconds": 122.3,
+    "agent_iou": 0.9909412850839644,
+    "tokens": 83499,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1559
+   },
+   "00263390_a770f0adcd6fafc5e435cd92_step_000": {
+    "iou": 0.9921882096466528,
+    "method": "gwn-mc",
+    "union_samples": 11009,
+    "se": 0.0008390703694110289,
+    "cd": 0.00430063580675746,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9920973748751022,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 11009,
+     "se": 0.0008438959542502179
+    },
+    "iou_cad_gated": 0.9920973748751022,
+    "tool_calls": 16,
+    "stop": "finish",
+    "seconds": 253.5,
+    "agent_iou": 0.991206687541346,
+    "tokens": 154358,
+    "sources": [
+     "code",
+     "C1"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2065
+   },
+   "00288479_3b42a5217dc6cc1e73aad1cb_step_000": {
+    "iou": 0.9988158261354138,
+    "method": "gwn-mc",
+    "union_samples": 14356,
+    "se": 0.0002870342480855259,
+    "cd": 0.009988492390907194,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9988158261354138,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 14356,
+     "se": 0.0002870342480855259
+    },
+    "iou_cad_gated": 0.9988158261354138,
+    "tool_calls": 15,
+    "stop": "finish",
+    "seconds": 965.6,
+    "agent_iou": 0.9988011818825494,
+    "tokens": 51490,
+    "sources": [
+     "C4",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0796
+   },
+   "00297151_d40fc96866cd51a51c9e78d8_step_003": {
+    "iou": 0.9982733855477359,
+    "method": "exact",
+    "cd": 0.01034935392759543,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9982733855477359,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9982733855477359,
+    "tool_calls": 36,
+    "stop": "finish",
+    "seconds": 373.3,
+    "agent_iou": 0.9982595400889576,
+    "tokens": 112366,
+    "sources": [
+     "code",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12",
+     "C13",
+     "C14",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.137
+   },
+   "00300195_184cfe98a683b513b423281c_step_000": {
+    "iou": 0.9215943537853623,
+    "method": "exact",
+    "cd": 0.00540401693148204,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9215943537853623,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9215943537853623,
+    "tool_calls": 8,
+    "stop": "time",
+    "seconds": 1800.1,
+    "agent_iou": 0.9200072923141396,
+    "tokens": 42521,
+    "sources": [
+     "C0",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0565
+   },
+   "00360608_fbf00600e0e4132e5c238e76_step_011": {
+    "iou": 0.9846454933750364,
+    "method": "exact",
+    "cd": 0.006020480511852774,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9846454933750364,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9846454933750364,
+    "tool_calls": 21,
+    "stop": "finish",
+    "seconds": 237.5,
+    "agent_iou": 0.9842125752574122,
+    "tokens": 267447,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.3205
+   },
+   "00415094_ef232b7c91c715e5afbf45d9_step_000": {
+    "iou": 0.985966835043332,
+    "method": "exact",
+    "cd": 0.012063970599889142,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.985966835043332,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.985966835043332,
+    "tool_calls": 27,
+    "stop": "finish",
+    "seconds": 127.8,
+    "agent_iou": 0.9859668350433307,
+    "tokens": 306990,
+    "sources": [
+     "code",
+     "C0",
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2443
+   },
+   "00421629_cc5afb7318db8edb1ba12d2d_step_000": {
+    "iou": 0.994031462058551,
+    "method": "exact",
+    "cd": 0.014239895356089851,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.994031462058551,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.994031462058551,
+    "tool_calls": 11,
+    "stop": "finish",
+    "seconds": 54.3,
+    "agent_iou": 0.9886671260173359,
+    "tokens": 56610,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0765
+   },
+   "00438820_a3bf310c6c66b93633622223_step_002": {
+    "iou": 0.9918604232072821,
+    "method": "exact",
+    "cd": 0.007275132282786444,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9918604232072821,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9918604232072821,
+    "tool_calls": 19,
+    "stop": "finish",
+    "seconds": 166.0,
+    "agent_iou": 0.9931245217770954,
+    "tokens": 181867,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1916
+   },
+   "00490348_e586e0aa12ac0b63fc521157_step_000": {
+    "iou": 0.9923128653960189,
+    "method": "exact",
+    "cd": 0.009616550665162007,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9923128653960189,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9923128653960189,
+    "tool_calls": 23,
+    "stop": "finish",
+    "seconds": 206.4,
+    "agent_iou": 0.9919894666098208,
+    "tokens": 295873,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2729
+   },
+   "00529996_acc4b3c0ff918c68003eef7a_step_005": {
+    "iou": 0.9989537589067035,
+    "method": "exact",
+    "cd": 0.005535962701491656,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9989537589067035,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9989537589067035,
+    "tool_calls": 11,
+    "stop": "finish",
+    "seconds": 420.9,
+    "agent_iou": 0.9973249573583233,
+    "tokens": 60520,
+    "sources": [
+     "C0",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.065
+   },
+   "00555973_228e826928336f530534dd1c_step_000": {
+    "iou": 0.9977194153339357,
+    "method": "exact",
+    "cd": 0.009269629479204764,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9977194153339357,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9977194153339357,
+    "tool_calls": 10,
+    "stop": "finish",
+    "seconds": 187.0,
+    "agent_iou": 0.9977194153327797,
+    "tokens": 48563,
+    "sources": [
+     "C1"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0473
+   },
+   "00560247_2ceaea8168d8e1d8b9eecd01_step_000": {
+    "iou": 0.9709960278797871,
+    "method": "gwn-mc",
+    "union_samples": 13343,
+    "se": 0.0014528163646697944,
+    "cd": 0.006998272528079648,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9709960278797871,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 13343,
+     "se": 0.0014528163646697944
+    },
+    "iou_cad_gated": 0.9709960278797871,
+    "tool_calls": 3,
+    "stop": "time",
+    "seconds": 1801.1,
+    "agent_iou": 0.9707348426092961,
+    "tokens": 10844,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": false,
+    "cost_usd": 0.0074
+   },
+   "00562295_b9d8011b361bd768233b5126_step_000": {
+    "iou": 0.992814032091149,
+    "method": "exact",
+    "cd": 0.003999762624583991,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.992814032091149,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.992814032091149,
+    "tool_calls": 15,
+    "stop": "finish",
+    "seconds": 352.2,
+    "agent_iou": 0.9872252561510466,
+    "tokens": 180256,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2361
+   },
+   "00585079_cd28267708f5534ab157a08e_step_071": {
+    "iou": 0.9689812307829271,
+    "method": "exact",
+    "cd": 0.010590261219725327,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9689812307829271,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9689812307829271,
+    "tool_calls": 16,
+    "stop": "finish",
+    "seconds": 721.3,
+    "agent_iou": 0.9688953731092573,
+    "tokens": 132151,
+    "sources": [
+     "C0",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1637
+   },
+   "00586964_73ef370d5bd87fbc5c62578a_step_000": {
+    "iou": 0.995492503052172,
+    "method": "exact",
+    "cd": 0.0036954484869917365,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.995492503052172,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.995492503052172,
+    "tool_calls": 4,
+    "stop": "finish",
+    "seconds": 20.0,
+    "agent_iou": 0.9954925034469969,
+    "tokens": 19657,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0176
+   },
+   "00621425_7b06ea4adb0ff52eff1114da_step_000": {
+    "iou": 0.9984976866571483,
+    "method": "exact",
+    "cd": 0.010732414599795563,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9984976866571483,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9984976866571483,
+    "tool_calls": 8,
+    "stop": "finish",
+    "seconds": 47.3,
+    "agent_iou": 0.9984847672086542,
+    "tokens": 29459,
+    "sources": [
+     "C0",
+     "C1"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0242
+   },
+   "00710155_3641b9cf981205286d42d072_step_001": {
+    "iou": 0.9973030882030769,
+    "method": "exact",
+    "cd": 0.004356033709026194,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9973030882030769,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9973030882030769,
+    "tool_calls": 29,
+    "stop": "finish",
+    "seconds": 261.0,
+    "agent_iou": 0.9972484392451245,
+    "tokens": 421193,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.4196
+   },
+   "00762137_02216c8ffa137b472f92f048_step_000": {
+    "iou": 0.9976250437511931,
+    "method": "exact",
+    "cd": 0.008732427878620667,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9976250437511931,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9976250437511931,
+    "tool_calls": 7,
+    "stop": "finish",
+    "seconds": 150.1,
+    "agent_iou": 0.9975873488727134,
+    "tokens": 29484,
+    "sources": [
+     "C0",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0247
+   },
+   "00767348_fa92ba2c4e07cce3a988200c_step_001": {
+    "iou": 0.9700231611878889,
+    "method": "exact",
+    "cd": 0.011645172283574392,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9700231611878889,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9700231611878889,
+    "tool_calls": 19,
+    "stop": "finish",
+    "seconds": 557.9,
+    "agent_iou": 0.9700378932451432,
+    "tokens": 180495,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2013
+   },
+   "00794841_1301afb237bb122b2fc5a166_step_010": {
+    "iou": 0.9782772239984954,
+    "method": "gwn-mc",
+    "union_samples": 10634,
+    "se": 0.0014136448170023754,
+    "cd": 0.009842140507195972,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9782772239984954,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 10634,
+     "se": 0.0014136448170023754
+    },
+    "iou_cad_gated": 0.9782772239984954,
+    "tool_calls": 34,
+    "stop": "time",
+    "seconds": 1800.3,
+    "agent_iou": 0.9783953046498349,
+    "tokens": 469648,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.6798
+   },
+   "00829121_04d0e5217a8acfba681fbe55_step_000": {
+    "iou": 0.9998491988167325,
+    "method": "exact",
+    "cd": 0.007365282863425851,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9998491988167325,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9998491988167325,
+    "tool_calls": 13,
+    "stop": "finish",
+    "seconds": 1668.8,
+    "agent_iou": 0.9914047330428118,
+    "tokens": 110736,
+    "sources": [
+     "C0",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1542
+   },
+   "00867782_41aed573b420b13fae115377_step_004": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 3,
+    "stop": "time",
+    "seconds": 1800.6,
+    "agent_iou": 0.0,
+    "tokens": 10972,
+    "sources": [],
+    "trial_evaluations": null,
+    "verified_in_episode": false,
+    "cost_usd": 0.0098
+   },
+   "00914699_832190ea6bacfdfd9c3eec5c_step_000": {
+    "iou": 0.9974614049451405,
+    "method": "exact",
+    "cd": 0.01102400200838726,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9974614049451405,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9974614049451405,
+    "tool_calls": 8,
+    "stop": "finish",
+    "seconds": 38.9,
+    "agent_iou": 0.9972842713149667,
+    "tokens": 37558,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0652
+   },
+   "00928992_62a68b373ac06a238508bce4_step_000": {
+    "iou": 0.7924407885406325,
+    "method": "gwn-mc",
+    "union_samples": 28204,
+    "se": 0.002414899512168036,
+    "cd": 0.01055766860527001,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.7924407885406325,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 28204,
+     "se": 0.002414899512168036
+    },
+    "iou_cad_gated": 0.7924407885406325,
+    "tool_calls": 9,
+    "stop": "time",
+    "seconds": 1801.3,
+    "agent_iou": 0.7877894529583115,
+    "tokens": 38576,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": false,
+    "cost_usd": 0.0554
+   }
+  },
+  "sonnet55/code": {
+   "00004302_00e12f076c9f44728924a007_step_014": {
+    "iou": 0.984987817338678,
+    "method": "gwn-mc",
+    "union_samples": 12723,
+    "se": 0.0010780591399913813,
+    "cd": 0.01287849358842582,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.984987817338678,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 12723,
+     "se": 0.0010780591399913813
+    },
+    "iou_cad_gated": 0.984987817338678,
+    "tool_calls": 27,
+    "stop": "finish",
+    "seconds": 934.0,
+    "agent_iou": 0.9840368500778744,
+    "tokens": 239143,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2001
+   },
+   "00013771_b025a0d3b3c44fa1975bc9c6_step_001": {
+    "iou": 0.9806810089104488,
+    "method": "exact",
+    "cd": 0.007164822429220624,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9806810089104488,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9806810089104488,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 294.6,
+    "agent_iou": 0.9805077525058933,
+    "tokens": 393545,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2508
+   },
+   "00041105_6168cfabdf0946b393dfc666_step_000": {
+    "iou": 0.8909360689007345,
+    "method": "exact",
+    "cd": 0.004284336691751896,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8909360689007345,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.8909360689007345,
+    "tool_calls": 20,
+    "stop": "finish",
+    "seconds": 130.5,
+    "agent_iou": 0.8909360689007344,
+    "tokens": 107856,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0803
+   },
+   "00053475_6da2925085034f7da42dfeb6_step_000": {
+    "iou": 0.9772985242299321,
+    "method": "exact",
+    "cd": 0.010450745420191445,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9772985242299321,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9772985242299321,
+    "tool_calls": 16,
+    "stop": "finish",
+    "seconds": 55.8,
+    "agent_iou": 0.9772985242299324,
+    "tokens": 58842,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0554
+   },
+   "00067285_6d8f6cc2289143a98142169d_step_002": {
+    "iou": 0.9869894945695779,
+    "method": "exact",
+    "cd": 0.0093385768834283,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9869894945695779,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9869894945695779,
+    "tool_calls": 11,
+    "stop": "finish",
+    "seconds": 52.9,
+    "agent_iou": 0.9870269003021422,
+    "tokens": 46073,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0569
+   },
+   "00067884_346c607059004b94bda4ac3d_step_000": {
+    "iou": 0.9936062699804064,
+    "method": "gwn-mc",
+    "union_samples": 38788,
+    "se": 0.00040470224650097995,
+    "cd": 0.01877319285823969,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9936062699804064,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 38788,
+     "se": 0.00040470224650097995
+    },
+    "iou_cad_gated": 0.9936062699804064,
+    "tool_calls": 5,
+    "stop": "finish",
+    "seconds": 150.8,
+    "agent_iou": 0.9931275896490864,
+    "tokens": 11941,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0169
+   },
+   "00077854_4516b6617d04375fa1183804_step_000": {
+    "iou": 0.9387876951814463,
+    "method": "exact",
+    "cd": 0.014465140469861464,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9387876951814463,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9387876951814463,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 352.3,
+    "agent_iou": 0.9387887366573041,
+    "tokens": 756416,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.4583
+   },
+   "00078985_03913f7badd80f7271fa1b43_step_001": {
+    "iou": 0.9176249271501377,
+    "method": "exact",
+    "cd": 0.010014820137794887,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9176249271501377,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9176249271501377,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 272.0,
+    "agent_iou": 0.9176949392592681,
+    "tokens": 561391,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.3763
+   },
+   "00086573_375de0662ed8a78cf0ad4095_step_000": {
+    "iou": 0.9301825650293077,
+    "method": "exact",
+    "cd": 0.013347303367630521,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9301825650293077,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9301825650293077,
+    "tool_calls": 14,
+    "stop": "finish",
+    "seconds": 82.8,
+    "agent_iou": 0.9301316303679583,
+    "tokens": 106118,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1071
+   },
+   "00120625_56fd0e19e4b07b5f4ed018c2_step_001": {
+    "iou": 0.8842753745264862,
+    "method": "exact",
+    "cd": 0.0167416591592787,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8842753745264862,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.8842753745264862,
+    "tool_calls": 8,
+    "stop": "finish",
+    "seconds": 39.2,
+    "agent_iou": 0.8841884925396222,
+    "tokens": 17441,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0212
+   },
+   "00125538_7833b3d42626d5500f146c1d_step_000": {
+    "iou": 0.8828798377556194,
+    "method": "gwn-mc",
+    "union_samples": 11834,
+    "se": 0.0029559756328295253,
+    "cd": 0.009748569574023183,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8827207435572455,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 11835,
+     "se": 0.0029575911431010578
+    },
+    "iou_cad_gated": 0.8827207435572455,
+    "tool_calls": 18,
+    "stop": "finish",
+    "seconds": 878.2,
+    "agent_iou": 0.8818771436752708,
+    "tokens": 263329,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.27
+   },
+   "00134078_1d234a68cc4d071e39440057_step_000": {
+    "iou": 0.9960460643886844,
+    "method": "exact",
+    "cd": 0.011372262291159587,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9960460643886844,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9960460643886844,
+    "tool_calls": 9,
+    "stop": "finish",
+    "seconds": 41.6,
+    "agent_iou": 0.9960460643886844,
+    "tokens": 44168,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0409
+   },
+   "00165191_37a3be1d3de7a79c5b94f6a2_step_000": {
+    "iou": 0.9789880905471093,
+    "method": "exact",
+    "cd": 0.006586343438580049,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9789880905471093,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9789880905471093,
+    "tool_calls": 21,
+    "stop": "finish",
+    "seconds": 316.4,
+    "agent_iou": 0.9789908132462336,
+    "tokens": 260062,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.26
+   },
+   "00167988_2fe231e517344bfc6ec186da_step_001": {
+    "iou": 0.9780829393584103,
+    "method": "exact",
+    "cd": 0.011981252822266867,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9780829393584103,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9780829393584103,
+    "tool_calls": 20,
+    "stop": "finish",
+    "seconds": 141.7,
+    "agent_iou": 0.9780829401125104,
+    "tokens": 98995,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0954
+   },
+   "00171848_575855d1e4b06a2590ec9c23_step_000": {
+    "iou": 0.9608424229594116,
+    "method": "exact",
+    "cd": 0.009896491864002628,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9608424229594116,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9608424229594116,
+    "tool_calls": 14,
+    "stop": "finish",
+    "seconds": 110.8,
+    "agent_iou": 0.9608424229594121,
+    "tokens": 116265,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0923
+   },
+   "00188456_7024b113c4b919dc0de33c71_step_001": {
+    "iou": 0.9696876518672,
+    "method": "exact",
+    "cd": 0.0070596945719604304,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9696876518672,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9696876518672,
+    "tool_calls": 9,
+    "stop": "finish",
+    "seconds": 84.6,
+    "agent_iou": 0.9696876518671997,
+    "tokens": 55940,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.081
+   },
+   "00263390_a770f0adcd6fafc5e435cd92_step_000": {
+    "iou": 0.8270957012791206,
+    "method": "exact",
+    "cd": 0.005029748048976311,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8270957012791206,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.8270957012791206,
+    "tool_calls": 24,
+    "stop": "finish",
+    "seconds": 139.7,
+    "agent_iou": 0.8270956976714289,
+    "tokens": 131565,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1469
+   },
+   "00288479_3b42a5217dc6cc1e73aad1cb_step_000": {
+    "iou": 0.9974597876565101,
+    "method": "exact",
+    "cd": 0.009734518589326285,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9974597876565101,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9974597876565101,
+    "tool_calls": 14,
+    "stop": "finish",
+    "seconds": 117.5,
+    "agent_iou": 0.9973638101518499,
+    "tokens": 147086,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1181
+   },
+   "00297151_d40fc96866cd51a51c9e78d8_step_003": {
+    "iou": 0.9851781335846754,
+    "method": "exact",
+    "cd": 0.010972529097801838,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9851781335846754,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9851781335846754,
+    "tool_calls": 6,
+    "stop": "finish",
+    "seconds": 51.1,
+    "agent_iou": 0.985178131897732,
+    "tokens": 47389,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0829
+   },
+   "00300195_184cfe98a683b513b423281c_step_000": {
+    "iou": 0.8838605118836792,
+    "method": "exact",
+    "cd": 0.005444734734747693,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8838605118836792,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.8838605118836792,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 686.1,
+    "agent_iou": 0.8838605118836792,
+    "tokens": 559822,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.5119
+   },
+   "00360608_fbf00600e0e4132e5c238e76_step_011": {
+    "iou": 0.9475846085749933,
+    "method": "exact",
+    "cd": 0.006507467509138899,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9475846085749933,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9475846085749933,
+    "tool_calls": 20,
+    "stop": "finish",
+    "seconds": 152.3,
+    "agent_iou": 0.9468732198848129,
+    "tokens": 85483,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.103
+   },
+   "00415094_ef232b7c91c715e5afbf45d9_step_000": {
+    "iou": 0.9629150291843487,
+    "method": "exact",
+    "cd": 0.012421304120020155,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9629150291843487,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9629150291843487,
+    "tool_calls": 23,
+    "stop": "finish",
+    "seconds": 132.1,
+    "agent_iou": 0.9629150291843481,
+    "tokens": 187235,
+    "sources": [
+     "code",
+     "code",
+     "code",
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1327
+   },
+   "00421629_cc5afb7318db8edb1ba12d2d_step_000": {
+    "iou": 0.9924467869830681,
+    "method": "exact",
+    "cd": 0.014238703022800048,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9924467869830681,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9924467869830681,
+    "tool_calls": 14,
+    "stop": "finish",
+    "seconds": 57.6,
+    "agent_iou": 0.991722028738948,
+    "tokens": 67368,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0697
+   },
+   "00438820_a3bf310c6c66b93633622223_step_002": {
+    "iou": 0.8841944990205116,
+    "method": "exact",
+    "cd": 0.009405592992950185,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8841944990205116,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.8841944990205116,
+    "tool_calls": 37,
+    "stop": "finish",
+    "seconds": 301.7,
+    "agent_iou": 0.8841677569988935,
+    "tokens": 720022,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.3945
+   },
+   "00490348_e586e0aa12ac0b63fc521157_step_000": {
+    "iou": 0.9897165579463959,
+    "method": "exact",
+    "cd": 0.00959192597091487,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9897165579463959,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9897165579463959,
+    "tool_calls": 27,
+    "stop": "finish",
+    "seconds": 252.9,
+    "agent_iou": 0.9897426440649204,
+    "tokens": 496404,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.3493
+   },
+   "00529996_acc4b3c0ff918c68003eef7a_step_005": {
+    "iou": 0.9758404365277121,
+    "method": "exact",
+    "cd": 0.005497948059976493,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9758404365277121,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9758404365277121,
+    "tool_calls": 27,
+    "stop": "finish",
+    "seconds": 101.2,
+    "agent_iou": 0.9760071398861414,
+    "tokens": 335574,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2103
+   },
+   "00555973_228e826928336f530534dd1c_step_000": {
+    "iou": 0.9750972021177412,
+    "method": "exact",
+    "cd": 0.009723835517851817,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9750972021177412,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9750972021177412,
+    "tool_calls": 5,
+    "stop": "finish",
+    "seconds": 13.5,
+    "agent_iou": 0.9750816435704083,
+    "tokens": 11741,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0147
+   },
+   "00560247_2ceaea8168d8e1d8b9eecd01_step_000": {
+    "iou": 0.9470444263146184,
+    "method": "gwn-mc",
+    "union_samples": 13483,
+    "se": 0.0019286248025707292,
+    "cd": 0.007022780612360929,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9470444263146184,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 13483,
+     "se": 0.0019286248025707292
+    },
+    "iou_cad_gated": 0.9470444263146184,
+    "tool_calls": 3,
+    "stop": "time",
+    "seconds": 1801.3,
+    "agent_iou": 0.9443251481162768,
+    "tokens": 7947,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": false,
+    "cost_usd": 0.0113
+   },
+   "00562295_b9d8011b361bd768233b5126_step_000": {
+    "iou": 0.9028287293407765,
+    "method": "exact",
+    "cd": 0.00500570654224255,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9028287293407765,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9028287293407765,
+    "tool_calls": 35,
+    "stop": "finish",
+    "seconds": 375.2,
+    "agent_iou": 0.9028798283270039,
+    "tokens": 457307,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.3323
+   },
+   "00585079_cd28267708f5534ab157a08e_step_071": {
+    "iou": 0.9282976620656995,
+    "method": "exact",
+    "cd": 0.010709599199756184,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9282976620656995,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9282976620656995,
+    "tool_calls": 25,
+    "stop": "finish",
+    "seconds": 125.1,
+    "agent_iou": 0.9282976620655352,
+    "tokens": 234698,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1874
+   },
+   "00586964_73ef370d5bd87fbc5c62578a_step_000": {
+    "iou": 0.873349513893157,
+    "method": "exact",
+    "cd": 0.003722308791783709,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.873349513893157,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.873349513893157,
+    "tool_calls": 8,
+    "stop": "finish",
+    "seconds": 25.4,
+    "agent_iou": 0.8736001159050889,
+    "tokens": 25051,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0294
+   },
+   "00621425_7b06ea4adb0ff52eff1114da_step_000": {
+    "iou": 0.9429359015609521,
+    "method": "exact",
+    "cd": 0.014515092057646678,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9429359015609521,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9429359015609521,
+    "tool_calls": 7,
+    "stop": "finish",
+    "seconds": 16.9,
+    "agent_iou": 0.9429359015609522,
+    "tokens": 17501,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0245
+   },
+   "00710155_3641b9cf981205286d42d072_step_001": {
+    "iou": 0.9681720049911625,
+    "method": "exact",
+    "cd": 0.0044859934111515735,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9681720049911625,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9681720049911625,
+    "tool_calls": 12,
+    "stop": "finish",
+    "seconds": 61.5,
+    "agent_iou": 0.9681720049911623,
+    "tokens": 49893,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0509
+   },
+   "00762137_02216c8ffa137b472f92f048_step_000": {
+    "iou": 0.9401775484333287,
+    "method": "exact",
+    "cd": 0.012134949682457347,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9401775484333287,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9401775484333287,
+    "tool_calls": 6,
+    "stop": "finish",
+    "seconds": 16.4,
+    "agent_iou": 0.9401775484333286,
+    "tokens": 19614,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0231
+   },
+   "00767348_fa92ba2c4e07cce3a988200c_step_001": {
+    "iou": 0.9799178602940116,
+    "method": "exact",
+    "cd": 0.011634077457671893,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9799178602940116,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9799178602940116,
+    "tool_calls": 7,
+    "stop": "finish",
+    "seconds": 44.6,
+    "agent_iou": 0.9799032100644866,
+    "tokens": 59103,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.068
+   },
+   "00794841_1301afb237bb122b2fc5a166_step_010": {
+    "iou": 0.8448115256433824,
+    "method": "exact",
+    "cd": 0.012166120710462094,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8448115256433824,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.8448115256433824,
+    "tool_calls": 30,
+    "stop": "finish",
+    "seconds": 240.8,
+    "agent_iou": 0.8448885236959298,
+    "tokens": 409900,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2782
+   },
+   "00829121_04d0e5217a8acfba681fbe55_step_000": {
+    "iou": 0.9998747579896334,
+    "method": "exact",
+    "cd": 0.007378755280177708,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9998747579896334,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9998747579896334,
+    "tool_calls": 20,
+    "stop": "finish",
+    "seconds": 174.5,
+    "agent_iou": 0.9914096996611443,
+    "tokens": 217663,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1678
+   },
+   "00867782_41aed573b420b13fae115377_step_004": {
+    "iou": 0.9548498708956809,
+    "method": "exact",
+    "cd": 0.006996127058634648,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9548498708956809,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9548498708956809,
+    "tool_calls": 18,
+    "stop": "time",
+    "seconds": 1801.1,
+    "agent_iou": 0.9655933779385096,
+    "tokens": 167038,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1295
+   },
+   "00914699_832190ea6bacfdfd9c3eec5c_step_000": {
+    "iou": 0.9888271603212138,
+    "method": "exact",
+    "cd": 0.011409314920580883,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9888271603212138,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9888271603212138,
+    "tool_calls": 10,
+    "stop": "finish",
+    "seconds": 35.6,
+    "agent_iou": 0.9888264132364974,
+    "tokens": 33415,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0298
+   },
+   "00928992_62a68b373ac06a238508bce4_step_000": {
+    "iou": 0.9053563929294086,
+    "method": "gwn-mc",
+    "union_samples": 26193,
+    "se": 0.0018086844581048807,
+    "cd": 0.009749662461194096,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9053563929294086,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 26193,
+     "se": 0.0018086844581048807
+    },
+    "iou_cad_gated": 0.9053563929294086,
+    "tool_calls": 8,
+    "stop": "time",
+    "seconds": 1801.6,
+    "agent_iou": 0.9048684213183528,
+    "tokens": 32490,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": false,
+    "cost_usd": 0.0451
+   }
+  },
+  "sonnet55/skills": {
+   "00004302_00e12f076c9f44728924a007_step_014": {
+    "iou": 0.984055568711027,
+    "method": "gwn-mc",
+    "union_samples": 12669,
+    "se": 0.001112866733083781,
+    "cd": 0.012867209626776187,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.984055568711027,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 12669,
+     "se": 0.001112866733083781
+    },
+    "iou_cad_gated": 0.984055568711027,
+    "tool_calls": 21,
+    "stop": "finish",
+    "seconds": 777.9,
+    "agent_iou": 0.9829225040349457,
+    "tokens": 167996,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.145
+   },
+   "00013771_b025a0d3b3c44fa1975bc9c6_step_001": {
+    "iou": 0.9720878016612974,
+    "method": "exact",
+    "cd": 0.007117557218475136,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9720878016612974,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9720878016612974,
+    "tool_calls": 10,
+    "stop": "finish",
+    "seconds": 233.6,
+    "agent_iou": 0.9712732967615709,
+    "tokens": 62159,
+    "sources": [
+     "C0",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0383
+   },
+   "00041105_6168cfabdf0946b393dfc666_step_000": {
+    "iou": 0.9782571013990181,
+    "method": "exact",
+    "cd": 0.003651014882578913,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9782571013990181,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9782571013990181,
+    "tool_calls": 6,
+    "stop": "finish",
+    "seconds": 24.7,
+    "agent_iou": 0.9782571013994957,
+    "tokens": 21177,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0088
+   },
+   "00053475_6da2925085034f7da42dfeb6_step_000": {
+    "iou": 0.9776282549178904,
+    "method": "exact",
+    "cd": 0.010430584018872563,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9776282549178904,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9776282549178904,
+    "tool_calls": 12,
+    "stop": "finish",
+    "seconds": 38.0,
+    "agent_iou": 0.977628254917891,
+    "tokens": 35828,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0353
+   },
+   "00067285_6d8f6cc2289143a98142169d_step_002": {
+    "iou": 0.993356542494509,
+    "method": "exact",
+    "cd": 0.00927868874128572,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.993356542494509,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.993356542494509,
+    "tool_calls": 20,
+    "stop": "finish",
+    "seconds": 136.5,
+    "agent_iou": 0.9933565424304861,
+    "tokens": 150959,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1257
+   },
+   "00067884_346c607059004b94bda4ac3d_step_000": {
+    "iou": 0.9936062699804064,
+    "method": "gwn-mc",
+    "union_samples": 38788,
+    "se": 0.00040470224650097995,
+    "cd": 0.01877319285823969,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9936062699804064,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 38788,
+     "se": 0.00040470224650097995
+    },
+    "iou_cad_gated": 0.9936062699804064,
+    "tool_calls": 5,
+    "stop": "finish",
+    "seconds": 165.9,
+    "agent_iou": 0.9931275896490864,
+    "tokens": 17853,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0187
+   },
+   "00077854_4516b6617d04375fa1183804_step_000": {
+    "iou": 0.8794216581028607,
+    "method": "exact",
+    "cd": 0.01561044453416331,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8794216581028607,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.8794216581028607,
+    "tool_calls": 26,
+    "stop": "finish",
+    "seconds": 206.7,
+    "agent_iou": 0.8794251572605768,
+    "tokens": 331993,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2311
+   },
+   "00078985_03913f7badd80f7271fa1b43_step_001": {
+    "iou": 0.8560240615167638,
+    "method": "exact",
+    "cd": 0.016279836325210302,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8560240615167638,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.8560240615167638,
+    "tool_calls": 40,
+    "stop": "budget",
+    "seconds": 409.6,
+    "agent_iou": 0.8823236187134919,
+    "tokens": 278138,
+    "sources": [
+     "C0",
+     "C1",
+     "C2",
+     "C3",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1614
+   },
+   "00086573_375de0662ed8a78cf0ad4095_step_000": {
+    "iou": 0.9994913476795843,
+    "method": "exact",
+    "cd": 0.010021156700644174,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9994913476795843,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9994913476795843,
+    "tool_calls": 5,
+    "stop": "finish",
+    "seconds": 14.8,
+    "agent_iou": 0.9994913474436203,
+    "tokens": 15911,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0065
+   },
+   "00120625_56fd0e19e4b07b5f4ed018c2_step_001": {
+    "iou": 0.8759122794273865,
+    "method": "exact",
+    "cd": 0.017595039677350176,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8759122794273865,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.8759122794273865,
+    "tool_calls": 9,
+    "stop": "finish",
+    "seconds": 64.5,
+    "agent_iou": 0.8758252501475289,
+    "tokens": 43581,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0277
+   },
+   "00125538_7833b3d42626d5500f146c1d_step_000": {
+    "iou": 0.9750350571416094,
+    "method": "exact",
+    "cd": 0.0077622346463470035,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9750350571416094,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9750350571416094,
+    "tool_calls": 12,
+    "stop": "finish",
+    "seconds": 397.0,
+    "agent_iou": 0.9750350571416099,
+    "tokens": 58399,
+    "sources": [
+     "C1"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0388
+   },
+   "00134078_1d234a68cc4d071e39440057_step_000": {
+    "iou": 0.9842774747805768,
+    "method": "exact",
+    "cd": 0.011380399542766335,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9842774747805768,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9842774747805768,
+    "tool_calls": 10,
+    "stop": "finish",
+    "seconds": 365.2,
+    "agent_iou": 0.9842774629541015,
+    "tokens": 52830,
+    "sources": [
+     "C0",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0415
+   },
+   "00165191_37a3be1d3de7a79c5b94f6a2_step_000": {
+    "iou": 0.9696895022178413,
+    "method": "gwn-mc",
+    "union_samples": 20290,
+    "se": 0.0012035713962137659,
+    "cd": 0.0069586914623707054,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9696895022178413,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 20290,
+     "se": 0.0012035713962137659
+    },
+    "iou_cad_gated": 0.9696895022178413,
+    "tool_calls": 15,
+    "stop": "finish",
+    "seconds": 232.4,
+    "agent_iou": 0.9692418085789132,
+    "tokens": 134865,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1268
+   },
+   "00167988_2fe231e517344bfc6ec186da_step_001": {
+    "iou": 0.9390000820730254,
+    "method": "exact",
+    "cd": 0.01906437727344156,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9390000820730254,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9390000820730254,
+    "tool_calls": 10,
+    "stop": "finish",
+    "seconds": 41.9,
+    "agent_iou": 0.9390025178178912,
+    "tokens": 37782,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0302
+   },
+   "00171848_575855d1e4b06a2590ec9c23_step_000": {
+    "iou": 0.962195934876529,
+    "method": "exact",
+    "cd": 0.009915611405144006,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.962195934876529,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.962195934876529,
+    "tool_calls": 22,
+    "stop": "finish",
+    "seconds": 126.0,
+    "agent_iou": 0.9621959348765289,
+    "tokens": 303727,
+    "sources": [
+     "code",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1768
+   },
+   "00188456_7024b113c4b919dc0de33c71_step_001": {
+    "iou": 0.9882481368535985,
+    "method": "exact",
+    "cd": 0.006695157644842054,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9882481368535985,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9882481368535985,
+    "tool_calls": 10,
+    "stop": "finish",
+    "seconds": 89.0,
+    "agent_iou": 0.9881495468600607,
+    "tokens": 45511,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0385
+   },
+   "00263390_a770f0adcd6fafc5e435cd92_step_000": {
+    "iou": 0.9187263670343182,
+    "method": "exact",
+    "cd": 0.004318970684745495,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9187263670343182,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9187263670343182,
+    "tool_calls": 9,
+    "stop": "finish",
+    "seconds": 67.0,
+    "agent_iou": 0.9175858781525743,
+    "tokens": 42200,
+    "sources": [
+     "C0",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0297
+   },
+   "00288479_3b42a5217dc6cc1e73aad1cb_step_000": {
+    "iou": 0.9737646318219154,
+    "method": "exact",
+    "cd": 0.010067064170051137,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9737646318219154,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9737646318219154,
+    "tool_calls": 9,
+    "stop": "finish",
+    "seconds": 48.8,
+    "agent_iou": 0.9737080085986487,
+    "tokens": 55236,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0578
+   },
+   "00297151_d40fc96866cd51a51c9e78d8_step_003": {
+    "iou": 0.9983727422617097,
+    "method": "exact",
+    "cd": 0.01035358709058604,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9983727422617097,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9983727422617097,
+    "tool_calls": 36,
+    "stop": "finish",
+    "seconds": 290.0,
+    "agent_iou": 0.9983588965787052,
+    "tokens": 97111,
+    "sources": [
+     "code",
+     "C0",
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0897
+   },
+   "00300195_184cfe98a683b513b423281c_step_000": {
+    "iou": 0.8510747144006525,
+    "method": "exact",
+    "cd": 0.005516034852068263,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8510747144006525,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.8510747144006525,
+    "tool_calls": 27,
+    "stop": "finish",
+    "seconds": 189.3,
+    "agent_iou": 0.8510747144006525,
+    "tokens": 320203,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2855
+   },
+   "00360608_fbf00600e0e4132e5c238e76_step_011": {
+    "iou": 0.8370389843862249,
+    "method": "exact",
+    "cd": 0.008255464232754021,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8370389843862249,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.8370389843862249,
+    "tool_calls": 13,
+    "stop": "finish",
+    "seconds": 76.5,
+    "agent_iou": 0.8361605687399484,
+    "tokens": 63068,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0567
+   },
+   "00415094_ef232b7c91c715e5afbf45d9_step_000": {
+    "iou": 0.9817180287876317,
+    "method": "exact",
+    "cd": 0.012107055383457476,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9817180287876317,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9817180287876317,
+    "tool_calls": 19,
+    "stop": "finish",
+    "seconds": 69.3,
+    "agent_iou": 0.9817180287876297,
+    "tokens": 149816,
+    "sources": [
+     "C0",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1032
+   },
+   "00421629_cc5afb7318db8edb1ba12d2d_step_000": {
+    "iou": 0.9929350429305188,
+    "method": "exact",
+    "cd": 0.014310020719055225,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9929350429305188,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9929350429305188,
+    "tool_calls": 10,
+    "stop": "finish",
+    "seconds": 66.9,
+    "agent_iou": 0.992133073296068,
+    "tokens": 39249,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0371
+   },
+   "00438820_a3bf310c6c66b93633622223_step_002": {
+    "iou": 0.9858217880326223,
+    "method": "exact",
+    "cd": 0.007263458612296535,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9858217880326223,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9858217880326223,
+    "tool_calls": 25,
+    "stop": "finish",
+    "seconds": 207.0,
+    "agent_iou": 0.9858217890535612,
+    "tokens": 369133,
+    "sources": [
+     "C0",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2216
+   },
+   "00490348_e586e0aa12ac0b63fc521157_step_000": {
+    "iou": 0.8218447501387661,
+    "method": "exact",
+    "cd": 0.0150668601635187,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8218447501387661,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.8218447501387661,
+    "tool_calls": 17,
+    "stop": "finish",
+    "seconds": 94.9,
+    "agent_iou": 0.8217777526694016,
+    "tokens": 173742,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1403
+   },
+   "00529996_acc4b3c0ff918c68003eef7a_step_005": {
+    "iou": 0.9793934209295274,
+    "method": "exact",
+    "cd": 0.005527070922810535,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9793934209295274,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9793934209295274,
+    "tool_calls": 9,
+    "stop": "finish",
+    "seconds": 412.8,
+    "agent_iou": 0.977796488479483,
+    "tokens": 29993,
+    "sources": [
+     "C0",
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0197
+   },
+   "00555973_228e826928336f530534dd1c_step_000": {
+    "iou": 0.9977194153339357,
+    "method": "exact",
+    "cd": 0.009269629479204764,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9977194153339357,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9977194153339357,
+    "tool_calls": 5,
+    "stop": "finish",
+    "seconds": 14.4,
+    "agent_iou": 0.9977194153327797,
+    "tokens": 16256,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0082
+   },
+   "00560247_2ceaea8168d8e1d8b9eecd01_step_000": {
+    "iou": 0.9709960278797871,
+    "method": "gwn-mc",
+    "union_samples": 13343,
+    "se": 0.0014528163646697944,
+    "cd": 0.006998272528079648,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9709960278797871,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 13343,
+     "se": 0.0014528163646697944
+    },
+    "iou_cad_gated": 0.9709960278797871,
+    "tool_calls": 4,
+    "stop": "time",
+    "seconds": 1801.2,
+    "agent_iou": 0.9707348426092961,
+    "tokens": 11595,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": false,
+    "cost_usd": 0.0064
+   },
+   "00562295_b9d8011b361bd768233b5126_step_000": {
+    "iou": 0.9558455194686273,
+    "method": "exact",
+    "cd": 0.004470441701929419,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9558455194686273,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9558455194686273,
+    "tool_calls": 8,
+    "stop": "finish",
+    "seconds": 194.6,
+    "agent_iou": 0.9558455194695235,
+    "tokens": 25906,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0158
+   },
+   "00585079_cd28267708f5534ab157a08e_step_071": {
+    "iou": 0.9385872992717257,
+    "method": "exact",
+    "cd": 0.010710822031869018,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9385872992717257,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9385872992717257,
+    "tool_calls": 23,
+    "stop": "finish",
+    "seconds": 100.9,
+    "agent_iou": 0.9385872992715889,
+    "tokens": 198287,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.1477
+   },
+   "00586964_73ef370d5bd87fbc5c62578a_step_000": {
+    "iou": 0.982201598825785,
+    "method": "exact",
+    "cd": 0.00370998152003962,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.982201598825785,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.982201598825785,
+    "tool_calls": 13,
+    "stop": "finish",
+    "seconds": 199.6,
+    "agent_iou": 0.9822015991671543,
+    "tokens": 105129,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.109
+   },
+   "00621425_7b06ea4adb0ff52eff1114da_step_000": {
+    "iou": 0.9429359015609521,
+    "method": "exact",
+    "cd": 0.014551548758613371,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9429359015609521,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9429359015609521,
+    "tool_calls": 7,
+    "stop": "finish",
+    "seconds": 17.8,
+    "agent_iou": 0.9429359015609522,
+    "tokens": 26064,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0261
+   },
+   "00710155_3641b9cf981205286d42d072_step_001": {
+    "iou": 0.9957834299218706,
+    "method": "exact",
+    "cd": 0.004353394037305082,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9957834299218706,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9957834299218706,
+    "tool_calls": 5,
+    "stop": "finish",
+    "seconds": 14.3,
+    "agent_iou": 0.9957834299218706,
+    "tokens": 16212,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0063
+   },
+   "00762137_02216c8ffa137b472f92f048_step_000": {
+    "iou": 0.9962511541667448,
+    "method": "exact",
+    "cd": 0.008727156866097346,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9962511541667448,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9962511541667448,
+    "tool_calls": 6,
+    "stop": "finish",
+    "seconds": 12.7,
+    "agent_iou": 0.9962511541418475,
+    "tokens": 18242,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0115
+   },
+   "00767348_fa92ba2c4e07cce3a988200c_step_001": {
+    "iou": 0.9821177704006623,
+    "method": "exact",
+    "cd": 0.011671415250141945,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9821177704006623,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9821177704006623,
+    "tool_calls": 27,
+    "stop": "finish",
+    "seconds": 336.0,
+    "agent_iou": 0.9821033099684358,
+    "tokens": 418711,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.259
+   },
+   "00794841_1301afb237bb122b2fc5a166_step_010": {
+    "iou": 0.972228761378129,
+    "method": "exact",
+    "cd": 0.009987538822176439,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.972228761378129,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.972228761378129,
+    "tool_calls": 31,
+    "stop": "finish",
+    "seconds": 201.2,
+    "agent_iou": 0.9722246144792004,
+    "tokens": 382123,
+    "sources": [
+     "code",
+     "C0",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.2317
+   },
+   "00829121_04d0e5217a8acfba681fbe55_step_000": {
+    "iou": 0.9931412403285055,
+    "method": "exact",
+    "cd": 0.007662207126286169,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9931412403285055,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9931412403285055,
+    "tool_calls": 6,
+    "stop": "finish",
+    "seconds": 42.6,
+    "agent_iou": 0.9931412403285054,
+    "tokens": 26056,
+    "sources": [
+     "C0"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.0238
+   },
+   "00867782_41aed573b420b13fae115377_step_004": {
+    "iou": 0.0,
+    "cd": null,
+    "valid": false,
+    "iou_cad": 0.0,
+    "cad_built": false,
+    "cad_valid": false,
+    "tool_calls": 3,
+    "stop": "time",
+    "seconds": 1801.5,
+    "agent_iou": 0.0,
+    "tokens": 7393,
+    "sources": [],
+    "trial_evaluations": null,
+    "verified_in_episode": false,
+    "cost_usd": 0.0045
+   },
+   "00914699_832190ea6bacfdfd9c3eec5c_step_000": {
+    "iou": 0.9909178336055497,
+    "method": "exact",
+    "cd": 0.01129117120892299,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.9909178336055497,
+    "cad_judge": {
+     "method": "exact"
+    },
+    "iou_cad_gated": 0.9909178336055497,
+    "tool_calls": 12,
+    "stop": "finish",
+    "seconds": 39.2,
+    "agent_iou": 0.9909098131045784,
+    "tokens": 61166,
+    "sources": [
+     "code",
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": true,
+    "cost_usd": 0.044
+   },
+   "00928992_62a68b373ac06a238508bce4_step_000": {
+    "iou": 0.8932328526070158,
+    "method": "gwn-mc",
+    "union_samples": 26141,
+    "se": 0.0019100294567245821,
+    "cd": 0.009810640875768141,
+    "valid": true,
+    "cad_built": true,
+    "cad_valid": true,
+    "cad_error": null,
+    "iou_cad": 0.8932328526070158,
+    "cad_judge": {
+     "method": "gwn-mc",
+     "union_samples": 26141,
+     "se": 0.0019100294567245821
+    },
+    "iou_cad_gated": 0.8932328526070158,
+    "tool_calls": 7,
+    "stop": "time",
+    "seconds": 1801.7,
+    "agent_iou": 0.8923865720474927,
+    "tokens": 27317,
+    "sources": [
+     "code"
+    ],
+    "trial_evaluations": null,
+    "verified_in_episode": false,
+    "cost_usd": 0.0409
+   }
+  }
+ }
+}

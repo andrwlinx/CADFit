@@ -1,0 +1,178 @@
+{
+ "code/00004302_00e12f076c9f44728924a007_step_014": {
+  "tool_calls": 34,
+  "exec_timeouts_90s": 19
+ },
+ "code/00490348_e586e0aa12ac0b63fc521157_step_000": {
+  "tool_calls": 32,
+  "exec_timeouts_90s": 19
+ },
+ "code/00794841_1301afb237bb122b2fc5a166_step_010": {
+  "tool_calls": 28,
+  "exec_timeouts_90s": 17
+ },
+ "code/00288479_3b42a5217dc6cc1e73aad1cb_step_000": {
+  "tool_calls": 33,
+  "exec_timeouts_90s": 18
+ },
+ "code/00562295_b9d8011b361bd768233b5126_step_000": {
+  "tool_calls": 38,
+  "exec_timeouts_90s": 18
+ },
+ "code/00167988_2fe231e517344bfc6ec186da_step_001": {
+  "tool_calls": 30,
+  "exec_timeouts_90s": 18
+ },
+ "code/00710155_3641b9cf981205286d42d072_step_001": {
+  "tool_calls": 28,
+  "exec_timeouts_90s": 19
+ },
+ "code/00134078_1d234a68cc4d071e39440057_step_000": {
+  "tool_calls": 31,
+  "exec_timeouts_90s": 19
+ },
+ "code/00078985_03913f7badd80f7271fa1b43_step_001": {
+  "tool_calls": 35,
+  "exec_timeouts_90s": 18
+ },
+ "code/00928992_62a68b373ac06a238508bce4_step_000": {
+  "tool_calls": 35,
+  "exec_timeouts_90s": 15
+ },
+ "code/00360608_fbf00600e0e4132e5c238e76_step_011": {
+  "tool_calls": 30,
+  "exec_timeouts_90s": 18
+ },
+ "code/00067884_346c607059004b94bda4ac3d_step_000": {
+  "tool_calls": 31,
+  "exec_timeouts_90s": 19
+ },
+ "code/00438820_a3bf310c6c66b93633622223_step_002": {
+  "tool_calls": 29,
+  "exec_timeouts_90s": 18
+ },
+ "code/00165191_37a3be1d3de7a79c5b94f6a2_step_000": {
+  "tool_calls": 29,
+  "exec_timeouts_90s": 19
+ },
+ "code/00013771_b025a0d3b3c44fa1975bc9c6_step_001": {
+  "tool_calls": 15,
+  "exec_timeouts_90s": 9
+ },
+ "code/00067285_6d8f6cc2289143a98142169d_step_002": {
+  "tool_calls": 31,
+  "exec_timeouts_90s": 18
+ },
+ "code/00120625_56fd0e19e4b07b5f4ed018c2_step_001": {
+  "tool_calls": 30,
+  "exec_timeouts_90s": 18
+ },
+ "code/00560247_2ceaea8168d8e1d8b9eecd01_step_000": {
+  "tool_calls": 28,
+  "exec_timeouts_90s": 18
+ },
+ "code/00041105_6168cfabdf0946b393dfc666_step_000": {
+  "tool_calls": 32,
+  "exec_timeouts_90s": 7
+ },
+ "code/00171848_575855d1e4b06a2590ec9c23_step_000": {
+  "tool_calls": 30,
+  "exec_timeouts_90s": 19
+ },
+ "code/00053475_6da2925085034f7da42dfeb6_step_000": {
+  "tool_calls": 34,
+  "exec_timeouts_90s": 19
+ },
+ "code/00125538_7833b3d42626d5500f146c1d_step_000": {
+  "tool_calls": 31,
+  "exec_timeouts_90s": 17
+ },
+ "skills/00053475_6da2925085034f7da42dfeb6_step_000": {
+  "tool_calls": 40,
+  "exec_timeouts_90s": 6
+ },
+ "skills/00125538_7833b3d42626d5500f146c1d_step_000": {
+  "tool_calls": 30,
+  "exec_timeouts_90s": 7
+ },
+ "skills/00171848_575855d1e4b06a2590ec9c23_step_000": {
+  "tool_calls": 29,
+  "exec_timeouts_90s": 10
+ },
+ "skills/00041105_6168cfabdf0946b393dfc666_step_000": {
+  "tool_calls": 3,
+  "exec_timeouts_90s": 0
+ },
+ "skills/00560247_2ceaea8168d8e1d8b9eecd01_step_000": {
+  "tool_calls": 33,
+  "exec_timeouts_90s": 13
+ },
+ "skills/00067285_6d8f6cc2289143a98142169d_step_002": {
+  "tool_calls": 37,
+  "exec_timeouts_90s": 16
+ },
+ "skills/00120625_56fd0e19e4b07b5f4ed018c2_step_001": {
+  "tool_calls": 35,
+  "exec_timeouts_90s": 12
+ },
+ "skills/00013771_b025a0d3b3c44fa1975bc9c6_step_001": {
+  "tool_calls": 15,
+  "exec_timeouts_90s": 5
+ },
+ "skills/00165191_37a3be1d3de7a79c5b94f6a2_step_000": {
+  "tool_calls": 40,
+  "exec_timeouts_90s": 8
+ },
+ "skills/00438820_a3bf310c6c66b93633622223_step_002": {
+  "tool_calls": 35,
+  "exec_timeouts_90s": 12
+ },
+ "skills/00067884_346c607059004b94bda4ac3d_step_000": {
+  "tool_calls": 29,
+  "exec_timeouts_90s": 8
+ },
+ "skills/00134078_1d234a68cc4d071e39440057_step_000": {
+  "tool_calls": 35,
+  "exec_timeouts_90s": 13
+ },
+ "skills/00710155_3641b9cf981205286d42d072_step_001": {
+  "tool_calls": 26,
+  "exec_timeouts_90s": 7
+ },
+ "skills/00928992_62a68b373ac06a238508bce4_step_000": {
+  "tool_calls": 27,
+  "exec_timeouts_90s": 1
+ },
+ "skills/00078985_03913f7badd80f7271fa1b43_step_001": {
+  "tool_calls": 31,
+  "exec_timeouts_90s": 5
+ },
+ "skills/00360608_fbf00600e0e4132e5c238e76_step_011": {
+  "tool_calls": 34,
+  "exec_timeouts_90s": 13
+ },
+ "skills/00288479_3b42a5217dc6cc1e73aad1cb_step_000": {
+  "tool_calls": 32,
+  "exec_timeouts_90s": 14
+ },
+ "skills/00167988_2fe231e517344bfc6ec186da_step_001": {
+  "tool_calls": 33,
+  "exec_timeouts_90s": 7
+ },
+ "skills/00562295_b9d8011b361bd768233b5126_step_000": {
+  "tool_calls": 34,
+  "exec_timeouts_90s": 11
+ },
+ "skills/00794841_1301afb237bb122b2fc5a166_step_010": {
+  "tool_calls": 33,
+  "exec_timeouts_90s": 10
+ },
+ "skills/00004302_00e12f076c9f44728924a007_step_014": {
+  "tool_calls": 40,
+  "exec_timeouts_90s": 7
+ },
+ "skills/00490348_e586e0aa12ac0b63fc521157_step_000": {
+  "tool_calls": 31,
+  "exec_timeouts_90s": 14
+ }
+}

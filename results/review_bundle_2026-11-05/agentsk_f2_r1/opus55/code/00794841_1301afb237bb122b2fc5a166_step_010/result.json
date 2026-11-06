@@ -1,0 +1,80 @@
+{
+ "model": "claude-opus-5-5",
+ "toolset": "code",
+ "gt": "bench/cadbench/fresh2/00794841_1301afb237bb122b2fc5a166_step_010.stl",
+ "init": null,
+ "init_iou": 0.0,
+ "best_iou": 0.9745286734014316,
+ "n_steps": 1,
+ "sources": [
+  "code"
+ ],
+ "modes": [
+  "add"
+ ],
+ "tool_calls": 25,
+ "stop": "finish",
+ "seconds": 281.7,
+ "seconds_split": {
+  "setup": 1.6,
+  "model": 109.7,
+  "tools": 167.2
+ },
+ "tools": "v2",
+ "best_exec_iou": 0.9745773572020369,
+ "best_exec_valid": true,
+ "n_exec": 8,
+ "usage": {
+  "prompt_tokens": 302258,
+  "completion_tokens": 9576
+ },
+ "cost_usd": 0.3503,
+ "stl": "/orcd/pool/007/a_lin/cadfit/bench/runs/agentsk_f2_r1/opus55/code/00794841_1301afb237bb122b2fc5a166_step_010/agent_model.stl",
+ "iou_trace": [
+  [
+   28.5,
+   0.8551,
+   1
+  ],
+  [
+   87.5,
+   0.9574,
+   2
+  ],
+  [
+   97.2,
+   0.974,
+   1
+  ],
+  [
+   120.5,
+   0.974,
+   2
+  ],
+  [
+   135.7,
+   0.9745,
+   1
+  ],
+  [
+   164.8,
+   0.4394,
+   2
+  ],
+  [
+   244.4,
+   0.9745,
+   1
+  ],
+  [
+   256.4,
+   0.971,
+   2
+  ],
+  [
+   274.0,
+   0.9707,
+   1
+  ]
+ ]
+}

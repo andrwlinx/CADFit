@@ -1,0 +1,875 @@
+{
+ "parts": [
+  "00004302_00e12f076c9f44728924a007_step_014",
+  "00013771_b025a0d3b3c44fa1975bc9c6_step_001",
+  "00041105_6168cfabdf0946b393dfc666_step_000",
+  "00053475_6da2925085034f7da42dfeb6_step_000",
+  "00067285_6d8f6cc2289143a98142169d_step_002",
+  "00067884_346c607059004b94bda4ac3d_step_000",
+  "00077854_4516b6617d04375fa1183804_step_000",
+  "00078985_03913f7badd80f7271fa1b43_step_001",
+  "00086573_375de0662ed8a78cf0ad4095_step_000",
+  "00120625_56fd0e19e4b07b5f4ed018c2_step_001",
+  "00125538_7833b3d42626d5500f146c1d_step_000",
+  "00134078_1d234a68cc4d071e39440057_step_000",
+  "00165191_37a3be1d3de7a79c5b94f6a2_step_000",
+  "00167988_2fe231e517344bfc6ec186da_step_001",
+  "00171848_575855d1e4b06a2590ec9c23_step_000",
+  "00188456_7024b113c4b919dc0de33c71_step_001",
+  "00263390_a770f0adcd6fafc5e435cd92_step_000",
+  "00288479_3b42a5217dc6cc1e73aad1cb_step_000",
+  "00297151_d40fc96866cd51a51c9e78d8_step_003",
+  "00300195_184cfe98a683b513b423281c_step_000",
+  "00360608_fbf00600e0e4132e5c238e76_step_011",
+  "00415094_ef232b7c91c715e5afbf45d9_step_000",
+  "00421629_cc5afb7318db8edb1ba12d2d_step_000",
+  "00438820_a3bf310c6c66b93633622223_step_002",
+  "00490348_e586e0aa12ac0b63fc521157_step_000",
+  "00529996_acc4b3c0ff918c68003eef7a_step_005",
+  "00555973_228e826928336f530534dd1c_step_000",
+  "00560247_2ceaea8168d8e1d8b9eecd01_step_000",
+  "00562295_b9d8011b361bd768233b5126_step_000",
+  "00585079_cd28267708f5534ab157a08e_step_071",
+  "00586964_73ef370d5bd87fbc5c62578a_step_000",
+  "00621425_7b06ea4adb0ff52eff1114da_step_000",
+  "00710155_3641b9cf981205286d42d072_step_001",
+  "00762137_02216c8ffa137b472f92f048_step_000",
+  "00767348_fa92ba2c4e07cce3a988200c_step_001",
+  "00794841_1301afb237bb122b2fc5a166_step_010",
+  "00829121_04d0e5217a8acfba681fbe55_step_000",
+  "00867782_41aed573b420b13fae115377_step_004",
+  "00914699_832190ea6bacfdfd9c3eec5c_step_000",
+  "00928992_62a68b373ac06a238508bce4_step_000"
+ ],
+ "split": {
+  "00004302_00e12f076c9f44728924a007_step_014": "benchA",
+  "00053475_6da2925085034f7da42dfeb6_step_000": "benchA",
+  "00067285_6d8f6cc2289143a98142169d_step_002": "benchA",
+  "00067884_346c607059004b94bda4ac3d_step_000": "benchA",
+  "00078985_03913f7badd80f7271fa1b43_step_001": "benchA",
+  "00120625_56fd0e19e4b07b5f4ed018c2_step_001": "benchA",
+  "00125538_7833b3d42626d5500f146c1d_step_000": "benchA",
+  "00134078_1d234a68cc4d071e39440057_step_000": "benchA",
+  "00165191_37a3be1d3de7a79c5b94f6a2_step_000": "benchA",
+  "00167988_2fe231e517344bfc6ec186da_step_001": "benchA",
+  "00171848_575855d1e4b06a2590ec9c23_step_000": "benchA",
+  "00288479_3b42a5217dc6cc1e73aad1cb_step_000": "benchA",
+  "00360608_fbf00600e0e4132e5c238e76_step_011": "benchA",
+  "00438820_a3bf310c6c66b93633622223_step_002": "benchA",
+  "00490348_e586e0aa12ac0b63fc521157_step_000": "benchA",
+  "00560247_2ceaea8168d8e1d8b9eecd01_step_000": "benchA",
+  "00562295_b9d8011b361bd768233b5126_step_000": "benchA",
+  "00710155_3641b9cf981205286d42d072_step_001": "benchA",
+  "00794841_1301afb237bb122b2fc5a166_step_010": "benchA",
+  "00928992_62a68b373ac06a238508bce4_step_000": "benchA",
+  "00013771_b025a0d3b3c44fa1975bc9c6_step_001": "benchE",
+  "00041105_6168cfabdf0946b393dfc666_step_000": "benchE",
+  "00077854_4516b6617d04375fa1183804_step_000": "benchE",
+  "00086573_375de0662ed8a78cf0ad4095_step_000": "benchE",
+  "00188456_7024b113c4b919dc0de33c71_step_001": "benchE",
+  "00263390_a770f0adcd6fafc5e435cd92_step_000": "benchE",
+  "00297151_d40fc96866cd51a51c9e78d8_step_003": "benchE",
+  "00300195_184cfe98a683b513b423281c_step_000": "benchE",
+  "00415094_ef232b7c91c715e5afbf45d9_step_000": "benchE",
+  "00421629_cc5afb7318db8edb1ba12d2d_step_000": "benchE",
+  "00529996_acc4b3c0ff918c68003eef7a_step_005": "benchE",
+  "00555973_228e826928336f530534dd1c_step_000": "benchE",
+  "00585079_cd28267708f5534ab157a08e_step_071": "benchE",
+  "00586964_73ef370d5bd87fbc5c62578a_step_000": "benchE",
+  "00621425_7b06ea4adb0ff52eff1114da_step_000": "benchE",
+  "00762137_02216c8ffa137b472f92f048_step_000": "benchE",
+  "00767348_fa92ba2c4e07cce3a988200c_step_001": "benchE",
+  "00829121_04d0e5217a8acfba681fbe55_step_000": "benchE",
+  "00867782_41aed573b420b13fae115377_step_004": "benchE",
+  "00914699_832190ea6bacfdfd9c3eec5c_step_000": "benchE"
+ },
+ "agents_files": [
+  "results/closed/agentsk_f2_scores.json",
+  "results/closed/agentsk_f2_r1_scores.json",
+  "results/closed/agentsk_f2_r2_scores.json"
+ ],
+ "arms": {
+  "opus55/code": {
+   "benchA": 0.9719047246585029,
+   "benchE": 0.9778532776982676,
+   "all": 0.9748790011783852,
+   "ci95": [
+    0.964562489612834,
+    0.9836757864758814
+   ]
+  },
+  "opus55/code [harness]": {
+   "benchA": 0.8847707776605874,
+   "benchE": 0.9771759762448868,
+   "all": 0.9309733769527371,
+   "ci95": [
+    0.8560841779751046,
+    0.9828238011027903
+   ]
+  },
+  "opus55/skills": {
+   "benchA": 0.9641824990925895,
+   "benchE": 0.9179948752173872,
+   "all": 0.9410886871549884,
+   "ci95": [
+    0.8778135720214468,
+    0.9861071559126735
+   ]
+  },
+  "opus55/skills [harness]": {
+   "benchA": 0.8878341153125088,
+   "benchE": 0.9174091673506005,
+   "all": 0.9026216413315546,
+   "ci95": [
+    0.8108774205671508,
+    0.9759381645226091
+   ]
+  },
+  "sonnet55/code": {
+   "benchA": 0.9428293807766355,
+   "benchE": 0.9482118410208209,
+   "all": 0.9455206108987282,
+   "ci95": [
+    0.9314124636622966,
+    0.9587652249125511
+   ]
+  },
+  "sonnet55/code [harness]": {
+   "benchA": 0.8662898725925635,
+   "benchE": 0.9479244404384046,
+   "all": 0.907107156515484,
+   "ci95": [
+    0.8445051568433397,
+    0.9521602061922583
+   ]
+  },
+  "sonnet55/skills": {
+   "benchA": 0.9414925531196504,
+   "benchE": 0.9230298911061722,
+   "all": 0.9322612221129113,
+   "ci95": [
+    0.8767257208528548,
+    0.9654242108680318
+   ]
+  },
+  "sonnet55/skills [harness]": {
+   "benchA": 0.8525899492520435,
+   "benchE": 0.9226668105989777,
+   "all": 0.8876283799255106,
+   "ci95": [
+    0.7970919104043004,
+    0.9584839713351101
+   ]
+  },
+  "pipe/v3x3": {
+   "benchA": 0.9409919481003107,
+   "benchE": 0.9614818938456575,
+   "all": 0.9512369209729842,
+   "ci95": [
+    0.9283712644204393,
+    0.9684208106297586
+   ]
+  },
+  "pipe/trim(x2)": {
+   "benchA": 0.9469468857814785,
+   "benchE": 0.9724739932661599,
+   "all": 0.9597104395238192,
+   "ci95": [
+    0.9444138415451743,
+    0.97268186313578
+   ]
+  }
+ },
+ "agent_detail": {
+  "opus55/code": {
+   "episodes": 120,
+   "repeats": 3,
+   "delivered_valid": 120,
+   "verified_in_episode": 114,
+   "valid_but_unverified": 6,
+   "causes": {
+    "valid": 120
+   },
+   "stop": {
+    "budget": 19,
+    "finish": 95,
+    "time": 6
+   },
+   "mean_s": 414.3433333333333,
+   "median_s": 203.45,
+   "cost_per_episode": 0.2748575,
+   "cost_total": 32.98290000000001,
+   "repeat_means": [
+    0.9763745281749262,
+    0.970319170442299,
+    0.9779433049179305
+   ]
+  },
+  "opus55/skills": {
+   "episodes": 120,
+   "repeats": 3,
+   "delivered_valid": 115,
+   "verified_in_episode": 110,
+   "valid_but_unverified": 5,
+   "causes": {
+    "valid": 115,
+    "no output": 5
+   },
+   "stop": {
+    "budget": 7,
+    "finish": 100,
+    "time": 13
+   },
+   "mean_s": 557.2183333333334,
+   "median_s": 252.75,
+   "cost_per_episode": 0.16417416666666668,
+   "cost_total": 19.700899999999994,
+   "repeat_means": [
+    0.9303733163621796,
+    0.9345919271570854,
+    0.9583008179457
+   ]
+  },
+  "sonnet55/code": {
+   "episodes": 120,
+   "repeats": 3,
+   "delivered_valid": 120,
+   "verified_in_episode": 115,
+   "valid_but_unverified": 5,
+   "causes": {
+    "valid": 120
+   },
+   "stop": {
+    "budget": 9,
+    "finish": 105,
+    "time": 6
+   },
+   "mean_s": 298.93583333333333,
+   "median_s": 136.75,
+   "cost_per_episode": 0.15179,
+   "cost_total": 18.214800000000004,
+   "repeat_means": [
+    0.9455771360417623,
+    0.9447454399562474,
+    0.946239256698175
+   ]
+  },
+  "sonnet55/skills": {
+   "episodes": 120,
+   "repeats": 3,
+   "delivered_valid": 117,
+   "verified_in_episode": 111,
+   "valid_but_unverified": 6,
+   "causes": {
+    "valid": 117,
+    "no output": 3
+   },
+   "stop": {
+    "budget": 6,
+    "finish": 108,
+    "time": 6
+   },
+   "mean_s": 280.245,
+   "median_s": 104.05,
+   "cost_per_episode": 0.08750166666666667,
+   "cost_total": 10.500200000000005,
+   "repeat_means": [
+    0.9301249635353082,
+    0.9346352940707482,
+    0.9320234087326775
+   ]
+  }
+ },
+ "pairs": {
+  "sonnet55/skills - sonnet55/code": {
+   "mean": -0.013259388785816891,
+   "ci95": [
+    -0.06831662857434304,
+    0.01983247018555679
+   ],
+   "wins": 21,
+   "losses": 18
+  },
+  "opus55/skills - opus55/code": {
+   "mean": -0.033790314023396884,
+   "ci95": [
+    -0.09695687761979632,
+    0.009309446542317208
+   ],
+   "wins": 26,
+   "losses": 14
+  },
+  "opus55/code - sonnet55/code": {
+   "mean": 0.02935839027965705,
+   "ci95": [
+    0.017937743005694052,
+    0.04168213123302416
+   ],
+   "wins": 37,
+   "losses": 2
+  },
+  "opus55/skills - sonnet55/skills": {
+   "mean": 0.008827465042077053,
+   "ci95": [
+    -0.01925027974659796,
+    0.030382272688541302
+   ],
+   "wins": 34,
+   "losses": 4
+  },
+  "opus55/code - pipe/v3x3": {
+   "mean": 0.023642080205401098,
+   "ci95": [
+    0.0029271408706016606,
+    0.04777474085543497
+   ],
+   "wins": 25,
+   "losses": 15
+  },
+  "opus55/code - pipe/trim(x2)": {
+   "mean": 0.015168561654566056,
+   "ci95": [
+    -0.0013583210408497997,
+    0.032452650412466755
+   ],
+   "wins": 22,
+   "losses": 18
+  },
+  "opus55/skills - pipe/v3x3": {
+   "mean": -0.010148233817995789,
+   "ci95": [
+    -0.07469334618306103,
+    0.03633066831644031
+   ],
+   "wins": 27,
+   "losses": 12
+  },
+  "opus55/skills - pipe/trim(x2)": {
+   "mean": -0.01862175236883083,
+   "ci95": [
+    -0.08203028887296994,
+    0.02567615907105575
+   ],
+   "wins": 26,
+   "losses": 13
+  },
+  "sonnet55/code - pipe/v3x3": {
+   "mean": -0.005716310074255951,
+   "ci95": [
+    -0.027885303964045448,
+    0.019334525661779046
+   ],
+   "wins": 17,
+   "losses": 23
+  },
+  "sonnet55/code - pipe/trim(x2)": {
+   "mean": -0.014189828625090991,
+   "ci95": [
+    -0.033174043370002036,
+    0.005370646238891977
+   ],
+   "wins": 14,
+   "losses": 26
+  },
+  "sonnet55/skills - pipe/v3x3": {
+   "mean": -0.018975698860072842,
+   "ci95": [
+    -0.07774183072611163,
+    0.020414953211767835
+   ],
+   "wins": 15,
+   "losses": 21
+  },
+  "sonnet55/skills - pipe/trim(x2)": {
+   "mean": -0.027449217410907882,
+   "ci95": [
+    -0.08424324858178886,
+    0.008687860662557213
+   ],
+   "wins": 13,
+   "losses": 24
+  }
+ },
+ "per_part": {
+  "00004302_00e12f076c9f44728924a007_step_014": {
+   "opus55/code": 0.9926,
+   "opus55/code [harness]": 0.9937,
+   "opus55/skills": 0.9902,
+   "opus55/skills [harness]": 0.9901,
+   "sonnet55/code": 0.9864,
+   "sonnet55/code [harness]": 0.9854,
+   "sonnet55/skills": 0.9843,
+   "sonnet55/skills [harness]": 0.9838,
+   "pipe/v3x3": 0.8788,
+   "pipe/trim(x2)": 0.8695
+  },
+  "00013771_b025a0d3b3c44fa1975bc9c6_step_001": {
+   "opus55/code": 0.9925,
+   "opus55/code [harness]": 0.9922,
+   "opus55/skills": 0.9866,
+   "opus55/skills [harness]": 0.9858,
+   "sonnet55/code": 0.9821,
+   "sonnet55/code [harness]": 0.9821,
+   "sonnet55/skills": 0.9769,
+   "sonnet55/skills [harness]": 0.9761,
+   "pipe/v3x3": 0.9967,
+   "pipe/trim(x2)": 0.9967
+  },
+  "00041105_6168cfabdf0946b393dfc666_step_000": {
+   "opus55/code": 0.9842,
+   "opus55/code [harness]": 0.9842,
+   "opus55/skills": 0.9973,
+   "opus55/skills [harness]": 0.9973,
+   "sonnet55/code": 0.8837,
+   "sonnet55/code [harness]": 0.8837,
+   "sonnet55/skills": 0.9809,
+   "sonnet55/skills [harness]": 0.9809,
+   "pipe/v3x3": 0.9919,
+   "pipe/trim(x2)": 0.9948
+  },
+  "00053475_6da2925085034f7da42dfeb6_step_000": {
+   "opus55/code": 0.978,
+   "opus55/code [harness]": 0.978,
+   "opus55/skills": 0.9774,
+   "opus55/skills [harness]": 0.9774,
+   "sonnet55/code": 0.9774,
+   "sonnet55/code [harness]": 0.9774,
+   "sonnet55/skills": 0.977,
+   "sonnet55/skills [harness]": 0.977,
+   "pipe/v3x3": 0.8728,
+   "pipe/trim(x2)": 0.873
+  },
+  "00067285_6d8f6cc2289143a98142169d_step_002": {
+   "opus55/code": 0.9946,
+   "opus55/code [harness]": 0.9946,
+   "opus55/skills": 0.9937,
+   "opus55/skills [harness]": 0.9721,
+   "sonnet55/code": 0.9854,
+   "sonnet55/code [harness]": 0.9854,
+   "sonnet55/skills": 0.9927,
+   "sonnet55/skills [harness]": 0.9927,
+   "pipe/v3x3": 0.953,
+   "pipe/trim(x2)": 0.9529
+  },
+  "00067884_346c607059004b94bda4ac3d_step_000": {
+   "opus55/code": 0.9999,
+   "opus55/code [harness]": 0.9999,
+   "opus55/skills": 0.9999,
+   "opus55/skills [harness]": 0.9999,
+   "sonnet55/code": 0.9935,
+   "sonnet55/code [harness]": 0.9931,
+   "sonnet55/skills": 0.9935,
+   "sonnet55/skills [harness]": 0.9931,
+   "pipe/v3x3": 0.9944,
+   "pipe/trim(x2)": 0.9944
+  },
+  "00077854_4516b6617d04375fa1183804_step_000": {
+   "opus55/code": 0.9716,
+   "opus55/code [harness]": 0.9716,
+   "opus55/skills": 0.8828,
+   "opus55/skills [harness]": 0.8809,
+   "sonnet55/code": 0.9322,
+   "sonnet55/code [harness]": 0.9322,
+   "sonnet55/skills": 0.9112,
+   "sonnet55/skills [harness]": 0.9113,
+   "pipe/v3x3": 0.6171,
+   "pipe/trim(x2)": 0.7786
+  },
+  "00078985_03913f7badd80f7271fa1b43_step_001": {
+   "opus55/code": 0.9656,
+   "opus55/code [harness]": 0.9656,
+   "opus55/skills": 0.9626,
+   "opus55/skills [harness]": 0.9663,
+   "sonnet55/code": 0.9249,
+   "sonnet55/code [harness]": 0.9248,
+   "sonnet55/skills": 0.9176,
+   "sonnet55/skills [harness]": 0.9263,
+   "pipe/v3x3": 0.9347,
+   "pipe/trim(x2)": 0.9418
+  },
+  "00086573_375de0662ed8a78cf0ad4095_step_000": {
+   "opus55/code": 0.9955,
+   "opus55/code [harness]": 0.9954,
+   "opus55/skills": 0.9993,
+   "opus55/skills [harness]": 0.9993,
+   "sonnet55/code": 0.9316,
+   "sonnet55/code [harness]": 0.9312,
+   "sonnet55/skills": 0.9995,
+   "sonnet55/skills [harness]": 0.9995,
+   "pipe/v3x3": 0.9995,
+   "pipe/trim(x2)": 0.9995
+  },
+  "00120625_56fd0e19e4b07b5f4ed018c2_step_001": {
+   "opus55/code": 0.9948,
+   "opus55/code [harness]": 0.9947,
+   "opus55/skills": 0.9743,
+   "opus55/skills [harness]": 0.983,
+   "sonnet55/code": 0.8977,
+   "sonnet55/code [harness]": 0.8976,
+   "sonnet55/skills": 0.8737,
+   "sonnet55/skills [harness]": 0.8736,
+   "pipe/v3x3": 0.9889,
+   "pipe/trim(x2)": 0.9965
+  },
+  "00125538_7833b3d42626d5500f146c1d_step_000": {
+   "opus55/code": 0.9494,
+   "opus55/code [harness]": 0.9504,
+   "opus55/skills": 0.985,
+   "opus55/skills [harness]": 0.9851,
+   "sonnet55/code": 0.8631,
+   "sonnet55/code [harness]": 0.8626,
+   "sonnet55/skills": 0.9441,
+   "sonnet55/skills [harness]": 0.9441,
+   "pipe/v3x3": 0.975,
+   "pipe/trim(x2)": 0.9751
+  },
+  "00134078_1d234a68cc4d071e39440057_step_000": {
+   "opus55/code": 0.996,
+   "opus55/code [harness]": 0.996,
+   "opus55/skills": 0.9984,
+   "opus55/skills [harness]": 0.9984,
+   "sonnet55/code": 0.996,
+   "sonnet55/code [harness]": 0.996,
+   "sonnet55/skills": 0.9894,
+   "sonnet55/skills [harness]": 0.9894,
+   "pipe/v3x3": 0.9746,
+   "pipe/trim(x2)": 0.9961
+  },
+  "00165191_37a3be1d3de7a79c5b94f6a2_step_000": {
+   "opus55/code": 0.9902,
+   "opus55/code [harness]": 0.9903,
+   "opus55/skills": 0.9903,
+   "opus55/skills [harness]": 0.9903,
+   "sonnet55/code": 0.9779,
+   "sonnet55/code [harness]": 0.9779,
+   "sonnet55/skills": 0.9823,
+   "sonnet55/skills [harness]": 0.9821,
+   "pipe/v3x3": 0.9853,
+   "pipe/trim(x2)": 0.9893
+  },
+  "00167988_2fe231e517344bfc6ec186da_step_001": {
+   "opus55/code": 0.9901,
+   "opus55/code [harness]": 0.9901,
+   "opus55/skills": 0.9904,
+   "opus55/skills [harness]": 0.9904,
+   "sonnet55/code": 0.9721,
+   "sonnet55/code [harness]": 0.9721,
+   "sonnet55/skills": 0.9622,
+   "sonnet55/skills [harness]": 0.9568,
+   "pipe/v3x3": 0.9428,
+   "pipe/trim(x2)": 0.9414
+  },
+  "00171848_575855d1e4b06a2590ec9c23_step_000": {
+   "opus55/code": 0.9736,
+   "opus55/code [harness]": 0.973,
+   "opus55/skills": 0.9786,
+   "opus55/skills [harness]": 0.9782,
+   "sonnet55/code": 0.9634,
+   "sonnet55/code [harness]": 0.9633,
+   "sonnet55/skills": 0.9388,
+   "sonnet55/skills [harness]": 0.9388,
+   "pipe/v3x3": 0.9238,
+   "pipe/trim(x2)": 0.9238
+  },
+  "00188456_7024b113c4b919dc0de33c71_step_001": {
+   "opus55/code": 0.9905,
+   "opus55/code [harness]": 0.9906,
+   "opus55/skills": 0.991,
+   "opus55/skills [harness]": 0.9909,
+   "sonnet55/code": 0.9823,
+   "sonnet55/code [harness]": 0.9823,
+   "sonnet55/skills": 0.9882,
+   "sonnet55/skills [harness]": 0.9881,
+   "pipe/v3x3": 0.9951,
+   "pipe/trim(x2)": 0.9951
+  },
+  "00263390_a770f0adcd6fafc5e435cd92_step_000": {
+   "opus55/code": 0.8622,
+   "opus55/code [harness]": 0.8649,
+   "opus55/skills": 0.9911,
+   "opus55/skills [harness]": 0.9908,
+   "sonnet55/code": 0.8358,
+   "sonnet55/code [harness]": 0.8312,
+   "sonnet55/skills": 0.9428,
+   "sonnet55/skills [harness]": 0.9416,
+   "pipe/v3x3": 0.991,
+   "pipe/trim(x2)": 0.991
+  },
+  "00288479_3b42a5217dc6cc1e73aad1cb_step_000": {
+   "opus55/code": 0.9989,
+   "opus55/code [harness]": 0.9988,
+   "opus55/skills": 0.9991,
+   "opus55/skills [harness]": 0.999,
+   "sonnet55/code": 0.9973,
+   "sonnet55/code [harness]": 0.9973,
+   "sonnet55/skills": 0.9904,
+   "sonnet55/skills [harness]": 0.9903,
+   "pipe/v3x3": 0.982,
+   "pipe/trim(x2)": 0.982
+  },
+  "00297151_d40fc96866cd51a51c9e78d8_step_003": {
+   "opus55/code": 0.9958,
+   "opus55/code [harness]": 0.9958,
+   "opus55/skills": 0.9983,
+   "opus55/skills [harness]": 0.9983,
+   "sonnet55/code": 0.9865,
+   "sonnet55/code [harness]": 0.9865,
+   "sonnet55/skills": 0.9897,
+   "sonnet55/skills [harness]": 0.9897,
+   "pipe/v3x3": 0.9876,
+   "pipe/trim(x2)": 0.9876
+  },
+  "00300195_184cfe98a683b513b423281c_step_000": {
+   "opus55/code": 0.974,
+   "opus55/code [harness]": 0.974,
+   "opus55/skills": 0.6144,
+   "opus55/skills [harness]": 0.6133,
+   "sonnet55/code": 0.8643,
+   "sonnet55/code [harness]": 0.8643,
+   "sonnet55/skills": 0.9131,
+   "sonnet55/skills [harness]": 0.9131,
+   "pipe/v3x3": 0.9953,
+   "pipe/trim(x2)": 0.9953
+  },
+  "00360608_fbf00600e0e4132e5c238e76_step_011": {
+   "opus55/code": 0.9805,
+   "opus55/code [harness]": 0.9787,
+   "opus55/skills": 0.9852,
+   "opus55/skills [harness]": 0.9842,
+   "sonnet55/code": 0.9123,
+   "sonnet55/code [harness]": 0.9116,
+   "sonnet55/skills": 0.8763,
+   "sonnet55/skills [harness]": 0.8756,
+   "pipe/v3x3": 0.8849,
+   "pipe/trim(x2)": 0.9164
+  },
+  "00415094_ef232b7c91c715e5afbf45d9_step_000": {
+   "opus55/code": 0.9785,
+   "opus55/code [harness]": 0.9785,
+   "opus55/skills": 0.9888,
+   "opus55/skills [harness]": 0.9888,
+   "sonnet55/code": 0.9649,
+   "sonnet55/code [harness]": 0.9649,
+   "sonnet55/skills": 0.9604,
+   "sonnet55/skills [harness]": 0.9605,
+   "pipe/v3x3": 0.8944,
+   "pipe/trim(x2)": 0.8945
+  },
+  "00421629_cc5afb7318db8edb1ba12d2d_step_000": {
+   "opus55/code": 0.9932,
+   "opus55/code [harness]": 0.9909,
+   "opus55/skills": 0.9936,
+   "opus55/skills [harness]": 0.991,
+   "sonnet55/code": 0.9828,
+   "sonnet55/code [harness]": 0.9874,
+   "sonnet55/skills": 0.9921,
+   "sonnet55/skills [harness]": 0.9884,
+   "pipe/v3x3": 0.9687,
+   "pipe/trim(x2)": 0.9687
+  },
+  "00438820_a3bf310c6c66b93633622223_step_002": {
+   "opus55/code": 0.9886,
+   "opus55/code [harness]": 0.9889,
+   "opus55/skills": 0.9931,
+   "opus55/skills [harness]": 0.9942,
+   "sonnet55/code": 0.9016,
+   "sonnet55/code [harness]": 0.9016,
+   "sonnet55/skills": 0.9426,
+   "sonnet55/skills [harness]": 0.9426,
+   "pipe/v3x3": 0.9,
+   "pipe/trim(x2)": 0.9
+  },
+  "00490348_e586e0aa12ac0b63fc521157_step_000": {
+   "opus55/code": 0.9923,
+   "opus55/code [harness]": 0.9923,
+   "opus55/skills": 0.9921,
+   "opus55/skills [harness]": 0.992,
+   "sonnet55/code": 0.9308,
+   "sonnet55/code [harness]": 0.9307,
+   "sonnet55/skills": 0.8475,
+   "sonnet55/skills [harness]": 0.8475,
+   "pipe/v3x3": 0.8812,
+   "pipe/trim(x2)": 0.9115
+  },
+  "00529996_acc4b3c0ff918c68003eef7a_step_005": {
+   "opus55/code": 0.9956,
+   "opus55/code [harness]": 0.9958,
+   "opus55/skills": 0.9986,
+   "opus55/skills [harness]": 0.9969,
+   "sonnet55/code": 0.9741,
+   "sonnet55/code [harness]": 0.9746,
+   "sonnet55/skills": 0.9794,
+   "sonnet55/skills [harness]": 0.9778,
+   "pipe/v3x3": 0.9962,
+   "pipe/trim(x2)": 0.9962
+  },
+  "00555973_228e826928336f530534dd1c_step_000": {
+   "opus55/code": 0.9787,
+   "opus55/code [harness]": 0.9787,
+   "opus55/skills": 0.9977,
+   "opus55/skills [harness]": 0.9977,
+   "sonnet55/code": 0.9784,
+   "sonnet55/code [harness]": 0.9783,
+   "sonnet55/skills": 0.9977,
+   "sonnet55/skills [harness]": 0.9977,
+   "pipe/v3x3": 0.9977,
+   "pipe/trim(x2)": 0.9977
+  },
+  "00560247_2ceaea8168d8e1d8b9eecd01_step_000": {
+   "opus55/code": 0.9202,
+   "opus55/code [harness]": 0.0,
+   "opus55/skills": 0.971,
+   "opus55/skills [harness]": 0.0,
+   "sonnet55/code": 0.947,
+   "sonnet55/code [harness]": 0.3148,
+   "sonnet55/skills": 0.8925,
+   "sonnet55/skills [harness]": 0.0,
+   "pipe/v3x3": 0.9712,
+   "pipe/trim(x2)": 0.9723
+  },
+  "00562295_b9d8011b361bd768233b5126_step_000": {
+   "opus55/code": 0.8699,
+   "opus55/code [harness]": 0.9581,
+   "opus55/skills": 0.9892,
+   "opus55/skills [harness]": 0.9869,
+   "sonnet55/code": 0.9156,
+   "sonnet55/code [harness]": 0.9155,
+   "sonnet55/skills": 0.9558,
+   "sonnet55/skills [harness]": 0.9558,
+   "pipe/v3x3": 0.9558,
+   "pipe/trim(x2)": 0.9588
+  },
+  "00585079_cd28267708f5534ab157a08e_step_071": {
+   "opus55/code": 0.962,
+   "opus55/code [harness]": 0.9621,
+   "opus55/skills": 0.9702,
+   "opus55/skills [harness]": 0.9701,
+   "sonnet55/code": 0.9404,
+   "sonnet55/code [harness]": 0.9405,
+   "sonnet55/skills": 0.9488,
+   "sonnet55/skills [harness]": 0.9489,
+   "pipe/v3x3": 0.9447,
+   "pipe/trim(x2)": 0.9807
+  },
+  "00586964_73ef370d5bd87fbc5c62578a_step_000": {
+   "opus55/code": 0.9878,
+   "opus55/code [harness]": 0.9873,
+   "opus55/skills": 0.9944,
+   "opus55/skills [harness]": 0.9942,
+   "sonnet55/code": 0.9091,
+   "sonnet55/code [harness]": 0.9091,
+   "sonnet55/skills": 0.957,
+   "sonnet55/skills [harness]": 0.957,
+   "pipe/v3x3": 0.9955,
+   "pipe/trim(x2)": 0.9955
+  },
+  "00621425_7b06ea4adb0ff52eff1114da_step_000": {
+   "opus55/code": 0.9788,
+   "opus55/code [harness]": 0.9788,
+   "opus55/skills": 0.9972,
+   "opus55/skills [harness]": 0.9971,
+   "sonnet55/code": 0.9438,
+   "sonnet55/code [harness]": 0.9438,
+   "sonnet55/skills": 0.9784,
+   "sonnet55/skills [harness]": 0.9784,
+   "pipe/v3x3": 0.9982,
+   "pipe/trim(x2)": 0.9982
+  },
+  "00710155_3641b9cf981205286d42d072_step_001": {
+   "opus55/code": 0.974,
+   "opus55/code [harness]": 0.974,
+   "opus55/skills": 0.9917,
+   "opus55/skills [harness]": 0.9917,
+   "sonnet55/code": 0.9664,
+   "sonnet55/code [harness]": 0.9664,
+   "sonnet55/skills": 0.9889,
+   "sonnet55/skills [harness]": 0.9889,
+   "pipe/v3x3": 0.9958,
+   "pipe/trim(x2)": 0.9958
+  },
+  "00762137_02216c8ffa137b472f92f048_step_000": {
+   "opus55/code": 0.9551,
+   "opus55/code [harness]": 0.9551,
+   "opus55/skills": 0.9976,
+   "opus55/skills [harness]": 0.9976,
+   "sonnet55/code": 0.9444,
+   "sonnet55/code [harness]": 0.9444,
+   "sonnet55/skills": 0.9963,
+   "sonnet55/skills [harness]": 0.9963,
+   "pipe/v3x3": 0.9977,
+   "pipe/trim(x2)": 0.9977
+  },
+  "00767348_fa92ba2c4e07cce3a988200c_step_001": {
+   "opus55/code": 0.9875,
+   "opus55/code [harness]": 0.9875,
+   "opus55/skills": 0.9721,
+   "opus55/skills [harness]": 0.9721,
+   "sonnet55/code": 0.9763,
+   "sonnet55/code [harness]": 0.9763,
+   "sonnet55/skills": 0.9626,
+   "sonnet55/skills [harness]": 0.9625,
+   "pipe/v3x3": 0.9379,
+   "pipe/trim(x2)": 0.938
+  },
+  "00794841_1301afb237bb122b2fc5a166_step_010": {
+   "opus55/code": 0.9783,
+   "opus55/code [harness]": 0.9784,
+   "opus55/skills": 0.9782,
+   "opus55/skills [harness]": 0.9776,
+   "sonnet55/code": 0.8522,
+   "sonnet55/code [harness]": 0.8523,
+   "sonnet55/skills": 0.8934,
+   "sonnet55/skills [harness]": 0.8934,
+   "pipe/v3x3": 0.9166,
+   "pipe/trim(x2)": 0.9409
+  },
+  "00829121_04d0e5217a8acfba681fbe55_step_000": {
+   "opus55/code": 0.9989,
+   "opus55/code [harness]": 0.9905,
+   "opus55/skills": 0.9954,
+   "opus55/skills [harness]": 0.9926,
+   "sonnet55/code": 0.9965,
+   "sonnet55/code [harness]": 0.9881,
+   "sonnet55/skills": 0.9931,
+   "sonnet55/skills [harness]": 0.9931,
+   "pipe/v3x3": 0.9931,
+   "pipe/trim(x2)": 0.9931
+  },
+  "00867782_41aed573b420b13fae115377_step_004": {
+   "opus55/code": 0.9836,
+   "opus55/code [harness]": 0.9786,
+   "opus55/skills": 0.0,
+   "opus55/skills [harness]": 0.0,
+   "sonnet55/code": 0.9649,
+   "sonnet55/code [harness]": 0.9674,
+   "sonnet55/skills": 0.0,
+   "sonnet55/skills [harness]": 0.0,
+   "pipe/v3x3": 0.959,
+   "pipe/trim(x2)": 0.9679
+  },
+  "00914699_832190ea6bacfdfd9c3eec5c_step_000": {
+   "opus55/code": 0.9911,
+   "opus55/code [harness]": 0.9911,
+   "opus55/skills": 0.9934,
+   "opus55/skills [harness]": 0.9934,
+   "sonnet55/code": 0.9903,
+   "sonnet55/code [harness]": 0.9903,
+   "sonnet55/skills": 0.9922,
+   "sonnet55/skills [harness]": 0.9922,
+   "pipe/v3x3": 0.9723,
+   "pipe/trim(x2)": 0.9825
+  },
+  "00928992_62a68b373ac06a238508bce4_step_000": {
+   "opus55/code": 0.9105,
+   "opus55/code [harness]": 0.0,
+   "opus55/skills": 0.5432,
+   "opus55/skills [harness]": 0.0,
+   "sonnet55/code": 0.8955,
+   "sonnet55/code [harness]": 0.0,
+   "sonnet55/skills": 0.8867,
+   "sonnet55/skills [harness]": 0.0,
+   "pipe/v3x3": 0.9083,
+   "pipe/trim(x2)": 0.9075
+  }
+ }
+}
