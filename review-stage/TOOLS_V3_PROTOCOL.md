@@ -71,3 +71,10 @@ the study's spend passes $200.
   model decision ended them). The losses were uneven (Opus v2 41-51 a run, Opus v3 4-32), so
   every missing episode is rerun before any analysis. The resume runs the same frozen trees
   with 3 episodes at once per job instead of 8 (throughput only).
+- 2026-11-06 16:59 resume (new API key, 3 episodes at once per job): no API errors. Two gaps remained
+  (906/960): job tv_opus55_v2_r2 stopped at its preflight on node3900 (sandboxed replay of a box timed
+  out; no API call made) and one Opus v2 r1 code episode (00453345) crashed at its 30-minute deadline
+  when the frozen adapter did not catch the HTTP client's ReadTimeout during a streamed call (no answer
+  exported, no result written; the only such crash in 960 episodes). Both are infrastructure failures;
+  the missing 54 episodes are rerun from the same frozen v2 tree (node3900 and node4002 excluded) and
+  their tags re-scored before analysis.
