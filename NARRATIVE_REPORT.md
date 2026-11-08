@@ -11,7 +11,8 @@ validity of the shape and every solid, IoU of the executed solid against the tar
 and use it in three frozen, prospectively specified studies on CADBench hard-tier parts. (1) A
 reconstruction optimizer (CADFit) delivers a program that does not build or is OCC-invalid on
 41/300 held-out parts; making delivery execution-verified (pick the best program that actually
-builds valid CAD, repair if not) raises validity-gated IoU by +0.104 (preregistered primary
+builds valid CAD, repair if not) — the released pipeline obtains no valid replay on 41/300
+held-out parts (23 built-invalid, 7 build errors, 1 missing, 10 resource-limit failures) — raises validity-gated IoU by +0.104 (preregistered primary
 contrast), and later geometry fixes, precise extents and a silhouette trim add smaller,
 significant increments. (2) Under the same judge, frontier closed models (Claude Opus/Sonnet
 5.5) acting through a CAD harness with plain code reach 0.975 (Opus) on 40 reserved held-out
@@ -19,7 +20,7 @@ parts, above the optimizer's v3 (0.951); the optimizer's own stages exposed as a
 not help and caused deadline failures. (3) Profiling showed the tool cost was implementation
 overhead, not geometry; exact rewrites plus a per-check time cap ("tools v3"), developed only on
 development parts and evaluated on a new source-disjoint cohort, halve Opus's time with CADFit
-tools, remove no-output episodes, and make CADFit tools slightly but significantly better than
+tools, leave every Opus delivery valid (old CADFit tools: 1 no-output + 3 invalid of 120), and make CADFit tools slightly but significantly better than
 plain code; the preregistered primary (tools v3 vs v2 for Opus+CADFit tools) is not significant.
 
 ## Evaluation protocol (method)
@@ -42,6 +43,8 @@ execution-verified delivery (exec_verify.py: build each candidate program, keep 
 fuse/repair otherwise); v2 = dx + geometry fixes; v3 = v2 + precise extents; trim = v3 +
 silhouette trim as an extra exec-verify variant. v2, v3, trim: three seeds each.
 Results (post-recovery, frozen analysis script bench/analysis/v2_dev.py; results/heldout/):
+- d0 failures (post-recovery records): 23 built-invalid, 7 build errors, 1 missing, 10 resource-limit
+  (timeout/rc -9). Pre-recovery v2 3-seed mean 0.699 vs 0.930 recovered.
 - Gated IoU over 300: d0 0.7975 (valid 259/300), dx 0.9012 (293/300), v2 0.9296 (3-seed),
   v3 0.9359 (3-seed, 298/300 valid), trim 0.9450 (3-seed).  [h2_primary_local.json,
   h2_secondary_local_no_section.json]
