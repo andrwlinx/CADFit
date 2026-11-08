@@ -196,8 +196,117 @@ def tools():
     put('tCostTotal', f(sum(d['cost_total'] for d in t['detail'].values()), 2))
 
 
+def classify(r):
+    """valid / built-invalid / build error / missing / resource (timeout or rc -9) / setup (sandbox)."""
+    if r is None:
+        return 'missing'
+    if r.get('cad_valid'):
+        return 'valid'
+    e = str(r.get('cad_error') or '')
+    if 'ns_sandbox' in e:
+        return 'setup'
+    if e.startswith('timeout') or '(rc -9,' in e:
+        return 'resource'
+    if e == 'no program' or r.get('status') == 'no_model':
+        return 'missing'
+    return 'builtinvalid' if r.get('cad_built') else 'builderror'
+
+
+WORDS = {'valid': 'Valid', 'builtinvalid': 'BuiltInvalid', 'builderror': 'BuildError', 'missing': 'Missing',
+         'resource': 'Resource', 'setup': 'Setup'}
+
+
+def failures():
+    man = [it['file_id'] for it in json.load(open(os.path.join(ROOT, 'bench', 'cadbench', 'fresh2', 'manifest.json')))]
+    for tag, path in (('', ('tools_v3', 'h2_scores.json')), ('Pre', ('heldout', 'h2_scores_pre_recovery_merged.json'))):
+        m = load(*path)
+        if not m:
+            continue
+        for run, w in (('h2s0_d0', 'DZero'), ('h2s0_dx', 'DX'), ('h2s0_v2', 'VTwoS'), ('h2s1_v2', 'VTwoSs'),
+                       ('h2s2_v2', 'VTwoSss'), ('h2s0_v3', 'VThreeS'), ('h2s1_v3', 'VThreeSs'), ('h2s2_v3', 'VThreeSss')):
+            cnt = {k: 0 for k in WORDS}
+            for p in man:
+                cnt[classify(m[run].get(p))] += 1
+            for k, kw in WORDS.items():
+                put(f'f{tag}{w}{kw}', str(cnt[k]))
+        for k, w in (('v2', 'VTwo'), ('v3', 'VThree')):
+            put(f'h{tag}Mean{w}x', f(st.mean(st.mean(m[f'h2s{s}_{k}'][p]['iou_cad_gated'] for s in range(3)) for p in man)))
+            valids = [sum(bool(m[f'h2s{s}_{k}'][p].get('cad_valid')) for p in man) for s in range(3)]
+            put(f'h{tag}Valid{w}Lo', str(min(valids)))
+            put(f'h{tag}Valid{w}Hi', str(max(valids)))
+    cl = load('heldout', 'h2_env_cleared.json') or load('tools_v3', 'h2_env_cleared.json')
+    if cl:
+        tot = {}
+        for entry in cl:
+            if not entry.get('dry_run'):
+                for run, v in entry['runs'].items():
+                    tot[run] = len(v['cleared'])
+        put('hRecoveredTotal', str(sum(tot.values())))
+    for name, d in (('', load('heldout', 'h2_primary_local.json')), ('', load('heldout', 'h2_secondary_local_no_section.json'))):
+        for k, c in (d or {}).get('pairs', {}).items():
+            w = {'h2s0_dx:h2s0_d0': 'DXvsDZero', 'v2x3:h2s0_dx': 'VTwovsDX', 'v3x3:v2x3': 'VThreevsVTwo',
+                 'trimx3:v3x3': 'TrimvsVThree'}[k]
+            put(f'h{w}Neutral', str(300 - c['wins'] - c['losses']))
+
+
+def agent_failures():
+    c = load('closed', 'closed_vs_pipeline.json')
+    if c:
+        put('cValidUnverified', str(sum(d['valid_but_unverified'] for d in c['agent_detail'].values())))
+    t = load('tools_v3', 'tools_v3.json')
+    if t:
+        for k, d in t['detail'].items():
+            m, ts, v = k.split('/')
+            w = f"t{'Opus' if m == 'opus55' else 'Sonnet'}{'Code' if ts == 'code' else 'Skills'}{'VTwo' if v == 'v2' else 'VThree'}"
+            put(w + 'Invalid', str(d['episodes'] - d['delivered_valid'] - d['no_output']))
+    # Tools-v3 timing contrasts (descriptive): per-part mean minutes over the three repeats.
+    import random
+    sub = json.load(open(os.path.join(ROOT, 'bench', 'cadbench', 'fresh3_parts.json')))['parts']
+    split = {p: k for k, v in sub.items() for p in v}
+    parts = sorted(split)
+    for m, mw in (('opus55', 'Opus'), ('sonnet55', 'Sonnet')):
+        for ts, tw in (('code', 'Code'), ('skills', 'Skills')):
+            mins = {}
+            for v in ('v2', 'v3'):
+                reps = [load('tools_v3', f'tv_{v}_{r}_scores.json')['conditions'][f'{m}/{ts}'] for r in ('r0', 'r1', 'r2')]
+                mins[v] = {p: st.mean(x[p]['seconds'] for x in reps) / 60 for p in parts}
+            d = {p: mins['v3'][p] - mins['v2'][p] for p in parts}
+            rng = random.Random(0)
+            groups = [[d[p] for p in parts if split[p] == s] for s in sorted(set(split.values()))]
+            bs = sorted(sum(sum(rng.choices(g, k=len(g))) for g in groups) / len(parts) for _ in range(10000))
+            faster = sum(v < 0 for v in d.values())
+            slower = sum(v > 0 for v in d.values())
+            from math import comb
+            n, k = faster + slower, min(faster, slower)
+            pv = min(1.0, 2 * sum(comb(n, i) for i in range(k + 1)) / 2 ** n)
+            w = f'tTime{mw}{tw}'
+            put(w, f(st.mean(d.values()), 1, True))
+            put(w + 'CI', f'[{f(bs[250], 1, True)}, {f(bs[9750], 1, True)}]')
+            put(w + 'Faster', str(faster))
+            put(w + 'P', '$<10^{-4}$' if pv < 1e-4 else f'{pv:.2f}')
+
+
+def costs():
+    import glob as _g
+    d = os.path.join(R, 'review_bundle_2026-11-05', 'agentsk_f2', 'opus55_node4002_failed')
+    rs = [json.load(open(x)) for x in _g.glob(os.path.join(d, '*', '*', 'result.json'))]
+    diag = json.load(open(os.path.join(d, 'diagnosis.json'))) if os.path.exists(os.path.join(d, 'diagnosis.json')) else {}
+    put('cDiscardedRecords', str(len(rs)))
+    put('cDiscardedDiagnosed', str(len(diag)))
+    put('cDiscardedCost', f(sum(r.get('cost_usd') or 0 for r in rs), 2))
+    put('cDiscardedTimeoutEpisodes', str(sum(v['exec_timeouts_90s'] > 0 for v in diag.values())))
+    put('cDiscardedTimeouts', str(sum(v['exec_timeouts_90s'] for v in diag.values())))
+    fail = os.path.join(R, 'tools_v3', 'episodes', 'tv_api_failed')
+    rs = [json.load(open(x)) for x in _g.glob(os.path.join(fail, '*', '*', '*', '*', 'result.json'))]
+    put('tApiFailed', str(len(rs)))
+    put('tApiFailedCost', f(sum(r.get('cost_usd') or 0 for r in rs), 2))
+
+
 def main():
     heldout()
+    failures()
+    agent_failures()
+    costs()
     trim_decomposition()
     closed()
     tools()
