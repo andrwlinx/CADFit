@@ -77,23 +77,24 @@ For a run of points $x_a,\dots,x_b\in\mathbb{R}^2$ with $m=b-a+1$, let $S=\sum x
 \begin{table}[h]
 \centering
 \small
-\caption{Study 3, 40 fresh3 parts, three episodes per part and cell. Gated IoU (95\% interval); valid deliveries / episodes; no-output episodes; mean and median minutes per episode; API cost of the cell; episodes rerun after infrastructure failures (three per node instead of eight).}
+\caption{Study 3, 40 fresh3 parts, three episodes per part and cell. Gated IoU (95\% interval); valid deliveries / episodes; no-output episodes; mean and median minutes per episode; API cost of the cell (USD); episodes rerun after infrastructure failures (three per node instead of eight).}
 \label{tab:tools-cells}
 \setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{@{}llccccccc@{}}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}llcccccccc@{}}
 \toprule
-Model & Toolset, package & Gated IoU & 95\% interval & Valid & No out. & Mean min & Median min & Reruns \\
+Model & Toolset, package & Gated IoU & 95\% interval & Valid & No out. & Mean min & Median min & USD & Reruns \\
 \midrule
-Opus & code, original & \tOpusCodeVTwo & \tOpusCodeVTwoCI & \tOpusCodeVTwoValid & \tOpusCodeVTwoNoOut & \tOpusCodeVTwoMin & \tOpusCodeVTwoMed & \rOpusCodeVTwo \\
-Opus & code, revised & \tOpusCodeVThree & \tOpusCodeVThreeCI & \tOpusCodeVThreeValid & \tOpusCodeVThreeNoOut & \tOpusCodeVThreeMin & \tOpusCodeVThreeMed & \rOpusCodeVThree \\
-Opus & CADFit, original & \tOpusSkillsVTwo & \tOpusSkillsVTwoCI & \tOpusSkillsVTwoValid & \tOpusSkillsVTwoNoOut & \tOpusSkillsVTwoMin & \tOpusSkillsVTwoMed & \rOpusSkillsVTwo \\
-Opus & CADFit, revised & \tOpusSkillsVThree & \tOpusSkillsVThreeCI & \tOpusSkillsVThreeValid & \tOpusSkillsVThreeNoOut & \tOpusSkillsVThreeMin & \tOpusSkillsVThreeMed & \rOpusSkillsVThree \\
-Sonnet & code, original & \tSonnetCodeVTwo & \tSonnetCodeVTwoCI & \tSonnetCodeVTwoValid & \tSonnetCodeVTwoNoOut & \tSonnetCodeVTwoMin & \tSonnetCodeVTwoMed & \rSonnetCodeVTwo \\
-Sonnet & code, revised & \tSonnetCodeVThree & \tSonnetCodeVThreeCI & \tSonnetCodeVThreeValid & \tSonnetCodeVThreeNoOut & \tSonnetCodeVThreeMin & \tSonnetCodeVThreeMed & \rSonnetCodeVThree \\
-Sonnet & CADFit, original & \tSonnetSkillsVTwo & \tSonnetSkillsVTwoCI & \tSonnetSkillsVTwoValid & \tSonnetSkillsVTwoNoOut & \tSonnetSkillsVTwoMin & \tSonnetSkillsVTwoMed & \rSonnetSkillsVTwo \\
-Sonnet & CADFit, revised & \tSonnetSkillsVThree & \tSonnetSkillsVThreeCI & \tSonnetSkillsVThreeValid & \tSonnetSkillsVThreeNoOut & \tSonnetSkillsVThreeMin & \tSonnetSkillsVThreeMed & \rSonnetSkillsVThree \\
+Opus & code, original & \tOpusCodeVTwo & \tOpusCodeVTwoCI & \tOpusCodeVTwoValid & \tOpusCodeVTwoNoOut & \tOpusCodeVTwoMin & \tOpusCodeVTwoMed & \tOpusCodeVTwoCost & \rOpusCodeVTwo \\
+Opus & code, revised & \tOpusCodeVThree & \tOpusCodeVThreeCI & \tOpusCodeVThreeValid & \tOpusCodeVThreeNoOut & \tOpusCodeVThreeMin & \tOpusCodeVThreeMed & \tOpusCodeVThreeCost & \rOpusCodeVThree \\
+Opus & CADFit, original & \tOpusSkillsVTwo & \tOpusSkillsVTwoCI & \tOpusSkillsVTwoValid & \tOpusSkillsVTwoNoOut & \tOpusSkillsVTwoMin & \tOpusSkillsVTwoMed & \tOpusSkillsVTwoCost & \rOpusSkillsVTwo \\
+Opus & CADFit, revised & \tOpusSkillsVThree & \tOpusSkillsVThreeCI & \tOpusSkillsVThreeValid & \tOpusSkillsVThreeNoOut & \tOpusSkillsVThreeMin & \tOpusSkillsVThreeMed & \tOpusSkillsVThreeCost & \rOpusSkillsVThree \\
+Sonnet & code, original & \tSonnetCodeVTwo & \tSonnetCodeVTwoCI & \tSonnetCodeVTwoValid & \tSonnetCodeVTwoNoOut & \tSonnetCodeVTwoMin & \tSonnetCodeVTwoMed & \tSonnetCodeVTwoCost & \rSonnetCodeVTwo \\
+Sonnet & code, revised & \tSonnetCodeVThree & \tSonnetCodeVThreeCI & \tSonnetCodeVThreeValid & \tSonnetCodeVThreeNoOut & \tSonnetCodeVThreeMin & \tSonnetCodeVThreeMed & \tSonnetCodeVThreeCost & \rSonnetCodeVThree \\
+Sonnet & CADFit, original & \tSonnetSkillsVTwo & \tSonnetSkillsVTwoCI & \tSonnetSkillsVTwoValid & \tSonnetSkillsVTwoNoOut & \tSonnetSkillsVTwoMin & \tSonnetSkillsVTwoMed & \tSonnetSkillsVTwoCost & \rSonnetSkillsVTwo \\
+Sonnet & CADFit, revised & \tSonnetSkillsVThree & \tSonnetSkillsVThreeCI & \tSonnetSkillsVThreeValid & \tSonnetSkillsVThreeNoOut & \tSonnetSkillsVThreeMin & \tSonnetSkillsVThreeMed & \tSonnetSkillsVThreeCost & \rSonnetSkillsVThree \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 \section{Agent tools}

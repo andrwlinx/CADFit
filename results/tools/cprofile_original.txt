@@ -1,0 +1,41 @@
+part: bench/cadbench/fresh/00153120_0f4e90ea5d8add32e39298eb_step_000.stl
+fit_primitives: /Users/Andrewlin/.claude/jobs/3fd3ec2d/tmp/origmods/fit_primitives.py
+
+         69651346 function calls (69219792 primitive calls) in 83.600 seconds
+
+   Ordered by: cumulative time
+   List reduced from 2077 to 30 due to restriction <30>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        3    0.002    0.001   83.610   27.870 /Users/Andrewlin/CADFit/agent/skills.py:112(run)
+        2    0.014    0.007   67.249   33.624 /Users/Andrewlin/.claude/jobs/3fd3ec2d/tmp/origmods/fit_primitives.py:832(build_action_instances_from_entry)
+       54    1.225    0.023   45.617    0.845 /Users/Andrewlin/.claude/jobs/3fd3ec2d/tmp/origmods/fit_primitives.py:245(segment_greedy_fit)
+      108    5.288    0.049   44.022    0.408 /Users/Andrewlin/.claude/jobs/3fd3ec2d/tmp/origmods/fit_primitives.py:213(remove_duplicate_points_2d)
+        1    0.001    0.001   37.959   37.959 /Users/Andrewlin/CADFit/agent/skills.py:289(fit_extrude)
+  1423193   34.727    0.000   34.727    0.000 {built-in method numpy.array}
+        1    0.001    0.001   33.956   33.956 /Users/Andrewlin/CADFit/greedy_search.py:95(create_extrusion_from_translation)
+        1    0.000    0.000   33.880   33.880 /Users/Andrewlin/CADFit/agent/skills.py:241(extract_sketch)
+    60090    0.529    0.000   19.330    0.000 /Users/Andrewlin/.claude/jobs/3fd3ec2d/tmp/origmods/fit_primitives.py:89(fit_line_2d)
+    60093   17.488    0.000   17.704    0.000 /Users/Andrewlin/CADFit/.venv/lib/python3.10/site-packages/numpy/linalg/_linalg.py:1639(svd)
+        1    0.000    0.000   11.769   11.769 /Users/Andrewlin/CADFit/agent/skills.py:321(fit_revolve)
+        1    0.004    0.004   11.768   11.768 /Users/Andrewlin/.claude/jobs/3fd3ec2d/tmp/origmods/analyze_revolve_axis.py:661(process_single_sketch)
+        4    0.403    0.101   11.046    2.762 /Users/Andrewlin/.claude/jobs/3fd3ec2d/tmp/origmods/analyze_revolve_axis.py:335(compute_cd_for_rotations)
+        8    1.663    0.208   10.601    1.325 /Users/Andrewlin/.claude/jobs/3fd3ec2d/tmp/origmods/analyze_revolve_axis.py:285(rotate_points_around_axis)
+   676219    3.467    0.000    8.795    0.000 /Users/Andrewlin/CADFit/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1522(cross)
+  2028664    1.647    0.000    4.693    0.000 /Users/Andrewlin/CADFit/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1448(moveaxis)
+   418577    0.945    0.000    4.000    0.000 /Users/Andrewlin/CADFit/.venv/lib/python3.10/site-packages/numpy/linalg/_linalg.py:2575(norm)
+   947118    3.513    0.000    3.513    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+    60090    0.100    0.000    2.562    0.000 /Users/Andrewlin/.claude/jobs/3fd3ec2d/tmp/origmods/fit_primitives.py:190(try_circle_arc)
+  4057331    1.615    0.000    2.407    0.000 /Users/Andrewlin/CADFit/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1386(normalize_axis_tuple)
+        1    0.024    0.024    2.303    2.303 /Users/Andrewlin/CADFit/agent/skills.py:137(_register)
+        1    0.000    0.000    2.272    2.272 /Users/Andrewlin/CADFit/cadquery_ops.py:683(execute_cadquery_script)
+        1    0.000    0.000    2.262    2.262 /Users/Andrewlin/.local/share/uv/python/cpython-3.10-macos-aarch64-none/lib/python3.10/subprocess.py:1110(communicate)
+        1    0.000    0.000    2.262    2.262 /Users/Andrewlin/.local/share/uv/python/cpython-3.10-macos-aarch64-none/lib/python3.10/subprocess.py:1968(_communicate)
+        2    0.000    0.000    2.261    1.131 /Users/Andrewlin/.local/share/uv/python/cpython-3.10-macos-aarch64-none/lib/python3.10/selectors.py:403(select)
+        2    2.261    1.131    2.261    1.131 {method 'poll' of 'select.poll' objects}
+    58334    0.517    0.000    2.125    0.000 /Users/Andrewlin/.claude/jobs/3fd3ec2d/tmp/origmods/fit_primitives.py:103(fit_circle_2d)
+        1    0.009    0.009    1.682    1.682 /Users/Andrewlin/CADFit/analyze_loop_translation.py:653(process_single_sketch)
+       27    1.437    0.053    1.458    0.054 /Users/Andrewlin/CADFit/analyze_loop_translation.py:112(compute_cd_for_translations)
+    58334    0.803    0.000    1.095    0.000 /Users/Andrewlin/CADFit/.venv/lib/python3.10/site-packages/numpy/linalg/_linalg.py:2394(lstsq)
+
+
