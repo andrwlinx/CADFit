@@ -1,45 +1,45 @@
-\section{Optimizer stages as tools for open-weight agents}
+\section{Study 2: frontier agents under the same judge}
 \label{sec:agents}
 
-Having identified which geometric proposals survive execution, we test what LLM agents gain from access to the optimizer's operations, and whether a script with the same operations does as well.
+\paragraph{Harness.} An agent receives the target only through tools and edits a model step by step. After every change, the harness assembles the CadQuery program, executes and checks it as in \cref{sec:protocol}, and reports build status, validity and executed IoU; the delivered answer is the best executed valid program. The \textbf{code} toolset is \texttt{describe\_target} (size, volume, flat-face directions and offsets), \texttt{section} (exact cross-sections of target and model), \texttt{evaluate}, \texttt{add\_code}, \texttt{remove\_step}, \texttt{list\_steps} and \texttt{finish}: it gives target inspection and execution feedback, so it is not an unaided language-model baseline. The \textbf{CADFit} toolset adds the optimizer's stages: direction detection, sketch extraction on a plane with line/arc fitting, extrusion and revolve fitting, section extrusion, and candidate management. Each episode has 40 tool calls and 30 minutes.
 
-\paragraph{Harness.}
-An agent receives no image or mesh. It learns about the target only through tools, over an OpenAI-compatible tool-calling loop served by vLLM \citep{kwon2023vllm} on one GPU per model. Every toolset includes \texttt{describe\_target} (size, volume, flat faces), \texttt{section} (exact cross-section polygons of the target and the current model on an axis-aligned plane), \texttt{evaluate} (IoU against the target and where material is missing or extra), \texttt{add\_code} (union or cut of a solid built by agent-written CadQuery), \texttt{remove\_step}, \texttt{list\_steps} and \texttt{finish}. The \textbf{code} toolset is exactly this. The \textbf{skills} toolset adds five CADFit stages: \texttt{detect\_directions}; \texttt{extract\_sketch}, which slices the target at a plane, nests loops into profiles and fits lines and arcs; \texttt{fit\_extrude} (translation sweep, then extents); \texttt{fit\_revolve} (axis analysis); and \texttt{section\_extrude} (the whole-part proposal of \cref{sec:search}). Each stage's solids become candidates, scored against the target when created, which the agent can list, inspect and add. The \textbf{code+section} toolset adds only \texttt{section\_extrude} and the candidate tools; we run it for Gemma-4-31B only. The system prompts differ only in the tool paragraph and one strategy phrase. Episodes start from an empty model, allow 40 tool calls, 30 minutes and 16{,}384 generated tokens per turn, and return the best model seen, as judged by IoU against the target; a failed episode scores 0. Target-score feedback is part of the task, since the target mesh is the method's input. Agent-written code runs in a sandbox. Three implementation details make the skills differ from the frozen pipeline arms: even-odd loop nesting (the pipeline treated a material island inside a hole as a second hole), a $10^{-6}$ minimum profile area (the pipeline's $10^{-3}$ dropped all \areaDropped{} profiles of one slice), and a fix to how revolve profiles are split at the axis (a stepped shaft went from \revBefore{} to \revAfter{} IoU).
+\paragraph{Models and runs.} Claude Opus~5.5 (\texttt{claude-opus-5-5}) and Sonnet~5.5 (\texttt{claude-sonnet-5-5}) run through the Anthropic Messages API with adaptive thinking at effort high, at most 32k output tokens per turn, the full conversation history, and no server-side fallback to another model. Each model runs three independent episodes per part and toolset on the 40 reserved parts; every delivered program is re-judged offline by the same replay and judge as the optimizer. These comparisons were specified after the optimizer study and are exploratory; intervals are nominal.
 
-\paragraph{Models and parts.}
-Six open-weight models, each on one GPU, with model-card sampling and reasoning enabled where the model supports it: Gemma-4-31B \citep{gemma4}, Qwen3.6-35B-A3B and Qwen3.8-27B \citep{yang2025qwen3}, gpt-oss-120b and gpt-oss-20b \citep{openai2025gptoss}, and Devstral-Small-2-24B \citep{devstral2}. We use \nAgentParts{} parts (\nSampleA{} benchA, \nSampleE{} benchE) drawn by seed from the fresh cohort before any episode ran, with one episode per model, toolset and part.
-
-\paragraph{Scripted policies.}
-The \emph{unrestricted} policy calls \texttt{section\_extrude} on each axis, extracts mid-plane sketches along the detected directions, fits the three largest profiles per plane, and assembles greedily by best improvement. Its assembly scores every candidate union and cut against the target without spending calls: \policyTrials{} free trials per part on average. The \emph{budget-matched} policy charges each such trial as one of its 40 calls, plus one more call to add an accepted candidate; it keeps the first improving trial (candidates in IoU order, adds before cuts) and reserves 20 calls for assembly. The current model's own score, recomputed before each trial, is not charged. It used \policyMatchedCalls{} calls per part, \policyMatchedTrials{} of them trials. For comparison, an agent adding a candidate spends one call and sees the new IoU, and undoing a bad addition costs a second call; skills candidates arrive already scored against the target.
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/closed.pdf}
+\caption{Study 2, 40 reserved fresh2 parts, three episodes per part and condition. Left: gated IoU of the delivered program (mean over parts of the per-part mean; 95\% interval); dashed: the optimizer's v3 on the same parts. Middle: mean minutes per episode, hatched part waiting on the model. Right: mean API cost per episode. Runtime and cost are means without intervals.}
+\label{fig:closed}
+\end{figure}
 
 \begin{table}[t]
 \centering
 \small
-\caption{Agents on \nAgentParts{} fresh parts, mean \iouc{} (failed episodes score 0). Differences are paired over parts, with Bonferroni-corrected \bonfLevel\% bootstrap intervals ($\alpha=0.05/6$) below. References on the same parts: pipeline D \agentPipeSec; unrestricted scripted policy \policyCad{} (\policyTrials{} free target-score trials per part); budget-matched policy \policyMatchedCad. Win/loss counts and validity-gated scores: \cref{tab:agents_extra}.}
+\caption{Study 2 against the optimizer on the same 40 parts (gated IoU, 95\% interval). Valid: delivered programs that build valid / episodes; no-output episodes ended at the deadline with nothing delivered. Differences are paired over parts (better/worse); exploratory.}
 \label{tab:agents}
-\setlength{\tabcolsep}{5pt}
+\setlength{\tabcolsep}{4pt}
+\resizebox{\linewidth}{!}{%
 \begin{tabular}{@{}lcccccc@{}}
 \toprule
-model & code & skills & \shortstack{skills\\$-$ code} & \shortstack{skills\\$-$ pipeline D} & \shortstack{skills $-$\\unrestricted policy} & \shortstack{skills $-$\\matched policy} \\
+ & Gated IoU & 95\% interval & Valid & No output & Mean min & USD / episode \\
 \midrule
-Gemma-4-31B & \mGemmaCode & \mGemmaSkills & \shortstack{\mGemmaVsCodeDiff\\{\scriptsize \mGemmaVsCodeCI}} & \shortstack{\mGemmaVsPipeDiff\\{\scriptsize \mGemmaVsPipeCI}} & \shortstack{\mGemmaVsPolicyDiff\\{\scriptsize \mGemmaVsPolicyCI}} & \shortstack{\mGemmaVsMatchedDiff\\{\scriptsize \mGemmaVsMatchedCI}} \\[2pt]
-Qwen3.6-35B-A3B & \mQwenSixCode & \mQwenSixSkills & \shortstack{\mQwenSixVsCodeDiff\\{\scriptsize \mQwenSixVsCodeCI}} & \shortstack{\mQwenSixVsPipeDiff\\{\scriptsize \mQwenSixVsPipeCI}} & \shortstack{\mQwenSixVsPolicyDiff\\{\scriptsize \mQwenSixVsPolicyCI}} & \shortstack{\mQwenSixVsMatchedDiff\\{\scriptsize \mQwenSixVsMatchedCI}} \\[2pt]
-gpt-oss-120b & \mGptBigCode & \mGptBigSkills & \shortstack{\mGptBigVsCodeDiff\\{\scriptsize \mGptBigVsCodeCI}} & \shortstack{\mGptBigVsPipeDiff\\{\scriptsize \mGptBigVsPipeCI}} & \shortstack{\mGptBigVsPolicyDiff\\{\scriptsize \mGptBigVsPolicyCI}} & \shortstack{\mGptBigVsMatchedDiff\\{\scriptsize \mGptBigVsMatchedCI}} \\[2pt]
-Devstral-S-2-24B & \mDevstralCode & \mDevstralSkills & \shortstack{\mDevstralVsCodeDiff\\{\scriptsize \mDevstralVsCodeCI}} & \shortstack{\mDevstralVsPipeDiff\\{\scriptsize \mDevstralVsPipeCI}} & \shortstack{\mDevstralVsPolicyDiff\\{\scriptsize \mDevstralVsPolicyCI}} & \shortstack{\mDevstralVsMatchedDiff\\{\scriptsize \mDevstralVsMatchedCI}} \\[2pt]
-gpt-oss-20b & \mGptSmallCode & \mGptSmallSkills & \shortstack{\mGptSmallVsCodeDiff\\{\scriptsize \mGptSmallVsCodeCI}} & \shortstack{\mGptSmallVsPipeDiff\\{\scriptsize \mGptSmallVsPipeCI}} & \shortstack{\mGptSmallVsPolicyDiff\\{\scriptsize \mGptSmallVsPolicyCI}} & \shortstack{\mGptSmallVsMatchedDiff\\{\scriptsize \mGptSmallVsMatchedCI}} \\[2pt]
-Qwen3.8-27B & \mQwenEightCode & \mQwenEightSkills & \shortstack{\mQwenEightVsCodeDiff\\{\scriptsize \mQwenEightVsCodeCI}} & \shortstack{\mQwenEightVsPipeDiff\\{\scriptsize \mQwenEightVsPipeCI}} & \shortstack{\mQwenEightVsPolicyDiff\\{\scriptsize \mQwenEightVsPolicyCI}} & \shortstack{\mQwenEightVsMatchedDiff\\{\scriptsize \mQwenEightVsMatchedCI}} \\[2pt]
+Opus + code & \cOpusCode & \cOpusCodeCI & \cOpusCodeValid & \cOpusCodeNoOut & \cOpusCodeMin & \cOpusCodeCost \\
+Opus + CADFit tools & \cOpusSkills & \cOpusSkillsCI & \cOpusSkillsValid & \cOpusSkillsNoOut & \cOpusSkillsMin & \cOpusSkillsCost \\
+Sonnet + code & \cSonnetCode & \cSonnetCodeCI & \cSonnetCodeValid & \cSonnetCodeNoOut & \cSonnetCodeMin & \cSonnetCodeCost \\
+Sonnet + CADFit tools & \cSonnetSkills & \cSonnetSkillsCI & \cSonnetSkillsValid & \cSonnetSkillsNoOut & \cSonnetSkillsMin & \cSonnetSkillsCost \\
+\midrule
+optimizer d0 / dx & \cPipeDZero{} / \cPipeDX & & & & & \\
+optimizer v3 / + trim & \cPipeVThree{} / \cPipeTrim & \cPipeVThreeCI{} / \cPipeTrimCI & & & & \\
+\midrule
+Opus code $-$ v3 & \multicolumn{6}{l}{\cOpusCodeVsVThree{} \cOpusCodeVsVThreeCI, \cOpusCodeVsVThreeWL} \\
+Opus code $-$ trim & \multicolumn{6}{l}{\cOpusCodeVsTrim{} \cOpusCodeVsTrimCI, \cOpusCodeVsTrimWL} \\
+CADFit tools $-$ code & \multicolumn{6}{l}{Opus \cOpusSkillsVsCode{} \cOpusSkillsVsCodeCI; Sonnet \cSonnetSkillsVsCode{} \cSonnetSkillsVsCodeCI} \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
-\paragraph{The stages make every model a better CAD agent (Q3).}
-With the stages as tools, all six models improve over writing CadQuery alone (\cref{tab:agents}), by \skillsGainMin{} to \skillsGainMax{} \iouc, and every Bonferroni-corrected interval excludes zero. The largest gains go to the weakest code-writers: Devstral rises from \mDevstralCode{} to \mDevstralSkills{} and Qwen3.8 from \mQwenEightCode{} to \mQwenEightSkills. Validity gating lowers a skills score by at most \skillsGatedMaxDrop. Gemma-4-31B with skills reaches \mGemmaSkills, an observed \mGemmaVsPipeDiff{} relative to pipeline D on the same parts (\mGemmaVsPipeCI). Its three runs over the \nAgentParts{} parts score \gemmaRunOne, \gemmaRunTwo{} and \gemmaRunThree{} (mean \gemmaRunMean, range \gemmaRunMin--\gemmaRunMax); the first is the declared primary result, and the range describes three runs, not an interval.
+\paragraph{Results.} Opus with the code toolset scores \cOpusCode{} with \cOpusCodeValid{} valid deliveries (\cref{fig:closed}, \cref{tab:agents}). On the same parts the optimizer's v3 scores \cPipeVThree; the paired difference \cOpusCodeVsVThree{} \cOpusCodeVsVThreeCI{} excludes zero, while the difference from the optimizer with trim, \cOpusCodeVsTrim{} \cOpusCodeVsTrimCI, does not, so superiority over the full optimizer package is not established. Opus exceeds Sonnet with the code toolset by \cOpusVsSonnetCode{} \cOpusVsSonnetCodeCI, better on \cOpusVsSonnetCodeWL{} parts.
 
-\paragraph{Ablation: code plus section extrusion only (Gemma).}
-With only \texttt{section\_extrude} beyond the code tools, Gemma scores \gemmaCodesec. Relative to code alone the difference is \gemmaCodesecVsCodeDiff{} \gemmaCodesecVsCodeCI, and full skills minus code+section is \gemmaSkillsVsCodesecDiff{} \gemmaSkillsVsCodesecCI{} (nominal 95\% intervals).
+\paragraph{The optimizer's stages as tools.} With the CADFit toolset, both models score lower on average than with code (Opus \cOpusSkillsVsCode, Sonnet \cSonnetSkillsVsCode), and neither interval excludes zero. The difference is a failure tail, not worse programs: all \cDeliveredValid{} programs the agents delivered are valid, and every failure is an episode that reached its deadline with nothing delivered (\cOpusSkillsNoOut{} for Opus, \cSonnetSkillsNoOut{} for Sonnet, on three parts); in the three such episodes we inspected, the deadline arrived inside a single long tool call. Offline validity is not the same as in-episode verification: \cValidUnverified{} valid deliveries had not completed an executed check within their episode.
 
-\paragraph{Agents versus scripted policies.}
-The last two columns of \cref{tab:agents} compare each model's skills episodes with the two scripted policies. Against the unrestricted policy (\policyCad), every Bonferroni interval includes zero; Gemma's comes closest (\mGemmaVsPolicyDiff, [\mGemmaVsPolicyLo, \mGemmaVsPolicyHi]). Against the budget-matched policy (\policyMatchedCad), \policyVerdict.
-
-\paragraph{How the agents use the stages.}
-Averaged per model over its episodes, agents call \texttt{extract\_sketch} \useExtractMin--\useExtractMax{} times and \texttt{fit\_extrude} \useExtrudeMin--\useExtrudeMax{} times, but \texttt{fit\_revolve} at most \useRevolveMax{} times (\cref{app:tools}). Qwen3.8's most common failure is not geometric. At 16{,}384 tokens per turn, \qwenCodeNoTool{} of 20 Qwen3.8 code episodes terminated on a turn without a tool call. In all \qwenTraceN{} of them, the preceding reply had hit the token limit (the harness then asks the model to think briefly and call a tool), and the final reply was \qwenTraceMinK--\qwenTraceMaxK{} thousand characters of reasoning with no content (\cref{app:qwen}).
+\paragraph{Where the time goes.} Tool execution, not the model, dominates episodes: \texttt{add\_code}, whose cost is the executed check after every change, takes \cAddCodeShareLo--\cAddCodeShareHi\% of tool time in the code arms, and single calls of the CADFit stages reached \cMaxCall\,s. Mean minutes per episode are \cOpusCodeMin{} (Opus, code) to \cOpusSkillsMin{} (Opus, CADFit tools); the optimizer's v3 takes \hMinFortyVThree{} minutes per part on these parts, on different hardware and without API cost.

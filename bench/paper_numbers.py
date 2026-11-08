@@ -114,6 +114,10 @@ def trim_decomposition():
         fin = st.mean((t[p].get('gated') or 0.0) if p in t else 0.0 for p in parts)
         proper.append(fin - nt)
         repass.append(nt - base)
+    valids = [sum(bool((load('tools_v3', f'h2s{s}_v3_trim.json').get(p) or {}).get('gated')) for p in sorted(m['h2s0_v3']))
+              for s in range(3)]
+    put('hValidTrimLo', str(min(valids)))
+    put('hValidTrimHi', str(max(valids)))
     put('hTrimProperLo', f(min(proper), 4, True))
     put('hTrimProperHi', f(max(proper), 4, True))
     put('hRepassLo', f(min(repass), 4, True))
@@ -229,6 +233,7 @@ def failures():
                 cnt[classify(m[run].get(p))] += 1
             for k, kw in WORDS.items():
                 put(f'f{tag}{w}{kw}', str(cnt[k]))
+            put(f'g{tag}{w}', f(st.mean(m[run].get(p, {}).get('iou_cad_gated', 0.0) for p in man)))
         for k, w in (('v2', 'VTwo'), ('v3', 'VThree')):
             put(f'h{tag}Mean{w}x', f(st.mean(st.mean(m[f'h2s{s}_{k}'][p]['iou_cad_gated'] for s in range(3)) for p in man)))
             valids = [sum(bool(m[f'h2s{s}_{k}'][p].get('cad_valid')) for p in man) for s in range(3)]
