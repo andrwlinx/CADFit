@@ -1,0 +1,45 @@
+{
+ "model": "claude-sonnet-5-5",
+ "toolset": "code",
+ "gt": "bench/cadbench/fresh3/00548737_f1e4fb0316bad89fda061b4b_step_000.stl",
+ "init": null,
+ "init_iou": 0.0,
+ "best_iou": 0.9458992992529668,
+ "n_steps": 1,
+ "sources": [
+  "code"
+ ],
+ "modes": [
+  "add"
+ ],
+ "tool_calls": 12,
+ "stop": "api error: API 429: Error code: 429 - {'type': 'error', 'error': {'type': 'rate_limit_error', 'message': \"Number of concurrent requests across all models has exceeded your organization's limit. Wait for in-flight requests to complete and retry. Limits increase automatically as your organization moves up usage tiers.\"}, 'request_id': 'req_011CgnA9qQMsgtNDaTph6VG4'}",
+ "seconds": 77.1,
+ "seconds_split": {
+  "setup": 0.2,
+  "model": 53.8,
+  "tools": 20.9
+ },
+ "tools": "v2",
+ "best_exec_iou": 0.9458808191409795,
+ "best_exec_valid": true,
+ "n_exec": 2,
+ "usage": {
+  "prompt_tokens": 54008,
+  "completion_tokens": 3206
+ },
+ "cost_usd": 0.0671,
+ "stl": "/orcd/pool/007/a_lin/cadfit/bench/runs/tv_v2_src/bench/runs/tv_v2_r2/sonnet55/code/00548737_f1e4fb0316bad89fda061b4b_step_000/agent_model.stl",
+ "iou_trace": [
+  [
+   25.0,
+   0.9459,
+   1
+  ],
+  [
+   41.7,
+   0.9459,
+   2
+  ]
+ ]
+}

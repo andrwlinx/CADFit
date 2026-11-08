@@ -1,0 +1,30 @@
+{
+ "model": "claude-opus-5-5",
+ "toolset": "skills",
+ "gt": "bench/cadbench/fresh3/00078986_03913f7badd80f7271fa1b43_step_002.stl",
+ "init": null,
+ "init_iou": 0.0,
+ "best_iou": 0.0,
+ "n_steps": 0,
+ "sources": [],
+ "modes": [],
+ "tool_calls": 7,
+ "stop": "api error: API 200: {'type': 'error', 'error': {'details': None, 'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CgnDQetrzPSbZzsNytkcY'}",
+ "seconds": 47.1,
+ "seconds_split": {
+  "setup": 0.0,
+  "model": 45.7,
+  "tools": 0.3
+ },
+ "tools": "v2",
+ "best_exec_iou": -1.0,
+ "best_exec_valid": false,
+ "n_exec": 0,
+ "usage": {
+  "prompt_tokens": 34027,
+  "completion_tokens": 1238
+ },
+ "cost_usd": 0.0758,
+ "stl": null,
+ "iou_trace": []
+}

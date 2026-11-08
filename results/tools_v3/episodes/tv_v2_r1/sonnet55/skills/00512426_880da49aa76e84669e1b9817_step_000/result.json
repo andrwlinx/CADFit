@@ -1,0 +1,54 @@
+{
+ "model": "claude-sonnet-5-5",
+ "toolset": "skills",
+ "gt": "bench/cadbench/fresh3/00512426_880da49aa76e84669e1b9817_step_000.stl",
+ "init": null,
+ "init_iou": 0.0,
+ "best_iou": 0.9943629612940151,
+ "n_steps": 3,
+ "sources": [
+  "C0",
+  "code",
+  "code"
+ ],
+ "modes": [
+  "add",
+  "cut",
+  "cut"
+ ],
+ "tool_calls": 9,
+ "stop": "finish",
+ "seconds": 43.0,
+ "seconds_split": {
+  "setup": 0.0,
+  "model": 10.7,
+  "tools": 31.3
+ },
+ "tools": "v2",
+ "best_exec_iou": 0.9944907855902209,
+ "best_exec_valid": true,
+ "n_exec": 3,
+ "usage": {
+  "prompt_tokens": 28898,
+  "completion_tokens": 722
+ },
+ "cost_usd": 0.0197,
+ "stl": "/orcd/pool/007/a_lin/cadfit/bench/runs/tv_v2_src/bench/runs/tv_v2_r1/sonnet55/skills/00512426_880da49aa76e84669e1b9817_step_000/agent_model.stl",
+ "iou_trace": [
+  [
+   20.0,
+   0.961,
+   1
+  ],
+  [
+   29.0,
+   0.9774,
+   2
+  ],
+  [
+   36.4,
+   0.9944,
+   3
+  ]
+ ]
+}

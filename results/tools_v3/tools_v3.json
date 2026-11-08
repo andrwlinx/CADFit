@@ -1,0 +1,397 @@
+{
+ "parts": [
+  "00039096_a1d250c9514b402cb98c966a_step_000",
+  "00050065_8e7f73fb7fdc4713b07e67c9_step_000",
+  "00054600_9fd3c4214ffe4c9d995fcf80_step_006",
+  "00063452_79a000e5a97e4b56bfa4f496_step_000",
+  "00078986_03913f7badd80f7271fa1b43_step_002",
+  "00096362_e2cdb6453a28fd23c653bbec_step_002",
+  "00126975_7bce514c5644cbfa810de93e_step_001",
+  "00154539_dfd357f68d6a74a35cc75aa6_step_042",
+  "00164346_5749f861e4b0e44bdee4b8da_step_018",
+  "00195639_9e8a6d86bca21a008fba8501_step_000",
+  "00232460_e5bb9ab3aef64aeae07f5d39_step_002",
+  "00266715_7789809b8fe5d43f8bfff3ee_step_000",
+  "00272005_cd437a56d4637b80aa8ed9ed_step_000",
+  "00289316_5804b321ae2dad112b6e4d96_step_018",
+  "00337019_d9d757195919b0a5b3e97b4e_step_002",
+  "00366881_5f3346c8ced3de2d4135a272_step_000",
+  "00394559_95e5eabc1306712858de43f1_step_000",
+  "00438778_fcce780feede85fde731d1fa_step_003",
+  "00448150_b8795f97ff015afda4250ea7_step_000",
+  "00453345_c04e5356c686acf78cb33b33_step_010",
+  "00462202_58812738e8d2c810865740e8_step_000",
+  "00475172_74c6fd326cf7268c940f7e7c_step_006",
+  "00481411_5f9b7732ce7e40718a227559_step_000",
+  "00507358_7107762c8cad5dfb98a7df72_step_000",
+  "00512426_880da49aa76e84669e1b9817_step_000",
+  "00530001_112fcf7eab49fdaa5c6934d8_step_000",
+  "00548737_f1e4fb0316bad89fda061b4b_step_000",
+  "00632851_f1fb1933c3d4bbf7f3d053d0_step_000",
+  "00643117_1f07817213487e2955f523a0_step_001",
+  "00668687_f10472427294afc549c77ad0_step_001",
+  "00772624_50deb801d893cc2e86f1b756_step_000",
+  "00811964_83debd81ebc3f3860dfc1782_step_000",
+  "00849954_9612396a15ce1fded60e860a_step_000",
+  "00881503_80287faee5ea500db0cc3496_step_000",
+  "00885860_6951b3cfe717c7ae79fc337f_step_000",
+  "00894209_97ce786d74cef7ae0c33088e_step_011",
+  "00937842_ef4bb81c8b521fe1a3d41063_step_090",
+  "00940748_15d2460e65662c50c02ff183_step_002",
+  "00949163_445ac488a65ba2b02849acf3_step_000",
+  "00949928_5207b51e123c1f4aab0492ba_step_005"
+ ],
+ "split": {
+  "00548737_f1e4fb0316bad89fda061b4b_step_000": "benchA",
+  "00462202_58812738e8d2c810865740e8_step_000": "benchA",
+  "00453345_c04e5356c686acf78cb33b33_step_010": "benchA",
+  "00366881_5f3346c8ced3de2d4135a272_step_000": "benchA",
+  "00448150_b8795f97ff015afda4250ea7_step_000": "benchA",
+  "00050065_8e7f73fb7fdc4713b07e67c9_step_000": "benchA",
+  "00154539_dfd357f68d6a74a35cc75aa6_step_042": "benchA",
+  "00881503_80287faee5ea500db0cc3496_step_000": "benchA",
+  "00096362_e2cdb6453a28fd23c653bbec_step_002": "benchA",
+  "00195639_9e8a6d86bca21a008fba8501_step_000": "benchA",
+  "00394559_95e5eabc1306712858de43f1_step_000": "benchA",
+  "00481411_5f9b7732ce7e40718a227559_step_000": "benchA",
+  "00507358_7107762c8cad5dfb98a7df72_step_000": "benchA",
+  "00475172_74c6fd326cf7268c940f7e7c_step_006": "benchA",
+  "00937842_ef4bb81c8b521fe1a3d41063_step_090": "benchA",
+  "00811964_83debd81ebc3f3860dfc1782_step_000": "benchA",
+  "00054600_9fd3c4214ffe4c9d995fcf80_step_006": "benchA",
+  "00530001_112fcf7eab49fdaa5c6934d8_step_000": "benchA",
+  "00078986_03913f7badd80f7271fa1b43_step_002": "benchA",
+  "00849954_9612396a15ce1fded60e860a_step_000": "benchA",
+  "00039096_a1d250c9514b402cb98c966a_step_000": "benchE",
+  "00164346_5749f861e4b0e44bdee4b8da_step_018": "benchE",
+  "00643117_1f07817213487e2955f523a0_step_001": "benchE",
+  "00949928_5207b51e123c1f4aab0492ba_step_005": "benchE",
+  "00885860_6951b3cfe717c7ae79fc337f_step_000": "benchE",
+  "00668687_f10472427294afc549c77ad0_step_001": "benchE",
+  "00772624_50deb801d893cc2e86f1b756_step_000": "benchE",
+  "00512426_880da49aa76e84669e1b9817_step_000": "benchE",
+  "00632851_f1fb1933c3d4bbf7f3d053d0_step_000": "benchE",
+  "00949163_445ac488a65ba2b02849acf3_step_000": "benchE",
+  "00266715_7789809b8fe5d43f8bfff3ee_step_000": "benchE",
+  "00289316_5804b321ae2dad112b6e4d96_step_018": "benchE",
+  "00438778_fcce780feede85fde731d1fa_step_003": "benchE",
+  "00940748_15d2460e65662c50c02ff183_step_002": "benchE",
+  "00894209_97ce786d74cef7ae0c33088e_step_011": "benchE",
+  "00126975_7bce514c5644cbfa810de93e_step_001": "benchE",
+  "00337019_d9d757195919b0a5b3e97b4e_step_002": "benchE",
+  "00232460_e5bb9ab3aef64aeae07f5d39_step_002": "benchE",
+  "00272005_cd437a56d4637b80aa8ed9ed_step_000": "benchE",
+  "00063452_79a000e5a97e4b56bfa4f496_step_000": "benchE"
+ },
+ "cells": {
+  "opus55/code/v2": {
+   "benchA": 0.9636753567499918,
+   "benchE": 0.9823707377963595,
+   "all": 0.9730230472731757,
+   "ci95": [
+    0.9544099604016841,
+    0.9846987788570762
+   ]
+  },
+  "opus55/skills/v2": {
+   "benchA": 0.9305104309453407,
+   "benchE": 0.9700660734525264,
+   "all": 0.9502882521989335,
+   "ci95": [
+    0.8908288895282567,
+    0.9862269302954854
+   ]
+  },
+  "sonnet55/code/v2": {
+   "benchA": 0.939372474921185,
+   "benchE": 0.9579174794991779,
+   "all": 0.9486449772101815,
+   "ci95": [
+    0.9289424460427131,
+    0.9635897113095802
+   ]
+  },
+  "sonnet55/skills/v2": {
+   "benchA": 0.9489857612791377,
+   "benchE": 0.9261733557632236,
+   "all": 0.9375795585211806,
+   "ci95": [
+    0.8817588908354164,
+    0.9735047755986287
+   ]
+  },
+  "opus55/code/v3": {
+   "benchA": 0.983770586416029,
+   "benchE": 0.9838095604877692,
+   "all": 0.9837900734518992,
+   "ci95": [
+    0.9785702363544233,
+    0.9884229551276619
+   ]
+  },
+  "opus55/skills/v3": {
+   "benchA": 0.9842811021491569,
+   "benchE": 0.9896800307201301,
+   "all": 0.9869805664346435,
+   "ci95": [
+    0.9825150563845073,
+    0.990579849582765
+   ]
+  },
+  "sonnet55/code/v3": {
+   "benchA": 0.9370891937011806,
+   "benchE": 0.9518609462803846,
+   "all": 0.9444750699907827,
+   "ci95": [
+    0.9237126834132509,
+    0.9605022904973544
+   ]
+  },
+  "sonnet55/skills/v3": {
+   "benchA": 0.9630007080091789,
+   "benchE": 0.9743017772003708,
+   "all": 0.9686512426047749,
+   "ci95": [
+    0.9605380324900539,
+    0.9759874425914103
+   ]
+  }
+ },
+ "detail": {
+  "opus55/code/v2": {
+   "episodes": 120,
+   "delivered_valid": 119,
+   "verified_in_episode": 120,
+   "no_output": 0,
+   "stop": {
+    "budget": 14,
+    "finish": 91,
+    "time": 15
+   },
+   "mean_s": 438.6483333333333,
+   "median_s": 155.3,
+   "cost_total": 34.59160000000001,
+   "repeat_means": [
+    0.9820998582833218,
+    0.9569041827866056,
+    0.9800651007495995
+   ],
+   "model_time_share": 0.17385894657856243
+  },
+  "opus55/skills/v2": {
+   "episodes": 120,
+   "delivered_valid": 116,
+   "verified_in_episode": 119,
+   "no_output": 1,
+   "stop": {
+    "budget": 4,
+    "finish": 98,
+    "time": 18
+   },
+   "mean_s": 535.7958333333333,
+   "median_s": 208.14999999999998,
+   "cost_total": 19.131199999999996,
+   "repeat_means": [
+    0.9343079641966738,
+    0.9578361555271554,
+    0.9587206368729715
+   ],
+   "model_time_share": 0.07700353498320067
+  },
+  "sonnet55/code/v2": {
+   "episodes": 120,
+   "delivered_valid": 119,
+   "verified_in_episode": 120,
+   "no_output": 0,
+   "stop": {
+    "budget": 6,
+    "finish": 108,
+    "time": 6
+   },
+   "mean_s": 289.21999999999997,
+   "median_s": 90.15,
+   "cost_total": 14.712099999999998,
+   "repeat_means": [
+    0.9517780025628347,
+    0.9388514164429514,
+    0.9553055126247582
+   ],
+   "model_time_share": 0.18234290580306145
+  },
+  "sonnet55/skills/v2": {
+   "episodes": 120,
+   "delivered_valid": 116,
+   "verified_in_episode": 117,
+   "no_output": 3,
+   "stop": {
+    "budget": 2,
+    "finish": 115,
+    "time": 3
+   },
+   "mean_s": 257.8375,
+   "median_s": 110.0,
+   "cost_total": 8.0422,
+   "repeat_means": [
+    0.9520119933722686,
+    0.9466506212623309,
+    0.9140760609289423
+   ],
+   "model_time_share": 0.10337725049703723
+  },
+  "opus55/code/v3": {
+   "episodes": 120,
+   "delivered_valid": 120,
+   "verified_in_episode": 108,
+   "no_output": 0,
+   "stop": {
+    "budget": 12,
+    "finish": 107,
+    "time": 1
+   },
+   "mean_s": 317.06083333333333,
+   "median_s": 157.05,
+   "cost_total": 34.58040000000002,
+   "repeat_means": [
+    0.9838763696653882,
+    0.9830387186653081,
+    0.984455132025001
+   ],
+   "model_time_share": 0.2598579248318301
+  },
+  "opus55/skills/v3": {
+   "episodes": 120,
+   "delivered_valid": 120,
+   "verified_in_episode": 108,
+   "no_output": 0,
+   "stop": {
+    "budget": 8,
+    "finish": 109,
+    "time": 3
+   },
+   "mean_s": 253.885,
+   "median_s": 119.7,
+   "cost_total": 20.398000000000007,
+   "repeat_means": [
+    0.9865730980009074,
+    0.9879259623299176,
+    0.9864426389731054
+   ],
+   "model_time_share": 0.18276774523002634
+  },
+  "sonnet55/code/v3": {
+   "episodes": 120,
+   "delivered_valid": 119,
+   "verified_in_episode": 108,
+   "no_output": 0,
+   "stop": {
+    "budget": 6,
+    "finish": 114
+   },
+   "mean_s": 152.1225,
+   "median_s": 94.65,
+   "cost_total": 14.738700000000005,
+   "repeat_means": [
+    0.9507714915640573,
+    0.9541362755924582,
+    0.9285174428158325
+   ],
+   "model_time_share": 0.3554345107411833
+  },
+  "sonnet55/skills/v3": {
+   "episodes": 120,
+   "delivered_valid": 120,
+   "verified_in_episode": 108,
+   "no_output": 0,
+   "stop": {
+    "budget": 2,
+    "finish": 118
+   },
+   "mean_s": 157.10166666666666,
+   "median_s": 73.30000000000001,
+   "cost_total": 8.765899999999998,
+   "repeat_means": [
+    0.9696896788813985,
+    0.9633818805707276,
+    0.9728821683621987
+   ],
+   "model_time_share": 0.2042524631533732
+  }
+ },
+ "comparisons": {
+  "opus55/skills/v3 - opus55/skills/v2": {
+   "model": "opus55",
+   "role": "primary",
+   "mean": 0.036692314235709886,
+   "ci95": [
+    0.0018322315842642738,
+    0.09568987079956241
+   ],
+   "sign_p": 0.12144948495551944,
+   "wins": 22,
+   "losses": 12,
+   "holm_p": 0.24289896991103888
+  },
+  "opus55/skills/v3 - opus55/code/v3": {
+   "model": "opus55",
+   "role": "secondary",
+   "mean": 0.003190492982744331,
+   "ci95": [
+    0.0003810724428353673,
+    0.006367584036956258
+   ],
+   "sign_p": 0.009475304279476404,
+   "wins": 28,
+   "losses": 11,
+   "holm_p": 0.028425912838429213
+  },
+  "opus55/code/v3 - opus55/code/v2": {
+   "model": "opus55",
+   "role": "secondary",
+   "mean": 0.01076702617872346,
+   "ci95": [
+    0.0006856052940972523,
+    0.028456324790507703
+   ],
+   "sign_p": 0.7492586247608415,
+   "wins": 21,
+   "losses": 18,
+   "holm_p": 0.7492586247608415
+  },
+  "sonnet55/skills/v3 - sonnet55/skills/v2": {
+   "model": "sonnet55",
+   "role": "secondary",
+   "mean": 0.031071684083594273,
+   "ci95": [
+    -0.0013830309179065636,
+    0.08368493203183183
+   ],
+   "sign_p": 0.8641662404406816,
+   "wins": 18,
+   "losses": 16
+  },
+  "sonnet55/skills/v3 - sonnet55/code/v3": {
+   "model": "sonnet55",
+   "role": "secondary",
+   "mean": 0.024176172613992224,
+   "ci95": [
+    0.009736091986125992,
+    0.04473173332121795
+   ],
+   "sign_p": 0.01658900337497471,
+   "wins": 28,
+   "losses": 12
+  },
+  "sonnet55/code/v3 - sonnet55/code/v2": {
+   "model": "sonnet55",
+   "role": "secondary",
+   "mean": -0.004169907219398775,
+   "ci95": [
+    -0.008837602648192722,
+    -0.00015048244786110832
+   ],
+   "sign_p": 0.49955983320251107,
+   "wins": 15,
+   "losses": 20
+  }
+ }
+}

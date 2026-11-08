@@ -1,0 +1,47 @@
+{
+ "model": "claude-opus-5-5",
+ "toolset": "skills",
+ "gt": "bench/cadbench/fresh3/00448150_b8795f97ff015afda4250ea7_step_000.stl",
+ "init": null,
+ "init_iou": 0.0,
+ "best_iou": 0.9912482169181194,
+ "n_steps": 2,
+ "sources": [
+  "C0",
+  "code"
+ ],
+ "modes": [
+  "add",
+  "cut"
+ ],
+ "tool_calls": 8,
+ "stop": "api error: API 429: Error code: 429 - {'type': 'error', 'error': {'type': 'rate_limit_error', 'message': \"Number of concurrent requests across all models has exceeded your organization's limit. Wait for in-flight requests to complete and retry. Limits increase automatically as your organization moves up usage tiers.\"}, 'request_id': 'req_011CgnAFqw28FbNR8rumPg7k'}",
+ "seconds": 98.7,
+ "seconds_split": {
+  "setup": 0.1,
+  "model": 44.7,
+  "tools": 52.8
+ },
+ "tools": "v2",
+ "best_exec_iou": 0.9914665991172961,
+ "best_exec_valid": true,
+ "n_exec": 2,
+ "usage": {
+  "prompt_tokens": 44881,
+  "completion_tokens": 1119
+ },
+ "cost_usd": 0.0536,
+ "stl": "/orcd/pool/007/a_lin/cadfit/bench/runs/tv_v2_src/bench/runs/tv_v2_r0/opus55/skills/00448150_b8795f97ff015afda4250ea7_step_000/agent_model.stl",
+ "iou_trace": [
+  [
+   58.9,
+   0.9307,
+   1
+  ],
+  [
+   68.5,
+   0.9912,
+   2
+  ]
+ ]
+}

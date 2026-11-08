@@ -1,0 +1,60 @@
+{
+ "model": "claude-sonnet-5-5",
+ "toolset": "code",
+ "gt": "bench/cadbench/fresh3/00126975_7bce514c5644cbfa810de93e_step_001.stl",
+ "init": null,
+ "init_iou": 0.0,
+ "best_iou": 0.7586749763361962,
+ "n_steps": 1,
+ "sources": [
+  "code"
+ ],
+ "modes": [
+  "add"
+ ],
+ "tool_calls": 18,
+ "stop": "api error: API 200: {'type': 'error', 'error': {'details': None, 'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CgnDRpDUHSr2V6DyPbzoU'}",
+ "seconds": 616.3,
+ "seconds_split": {
+  "setup": 1.2,
+  "model": 86.2,
+  "tools": 523.9
+ },
+ "tools": "v2",
+ "best_exec_iou": 0.7586749764367621,
+ "best_exec_valid": true,
+ "n_exec": 5,
+ "usage": {
+  "prompt_tokens": 169460,
+  "completion_tokens": 6785
+ },
+ "cost_usd": 0.1392,
+ "stl": "/orcd/pool/007/a_lin/cadfit/bench/runs/tv_v2_src/bench/runs/tv_v2_r1/sonnet55/code/00126975_7bce514c5644cbfa810de93e_step_001/agent_model.stl",
+ "iou_trace": [
+  [
+   51.0,
+   0.2002,
+   1
+  ],
+  [
+   237.1,
+   0.2002,
+   2
+  ],
+  [
+   278.9,
+   0.2002,
+   3
+  ],
+  [
+   335.4,
+   0.2002,
+   2
+  ],
+  [
+   518.6,
+   0.7587,
+   1
+  ]
+ ]
+}

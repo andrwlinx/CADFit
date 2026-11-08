@@ -1,0 +1,30 @@
+{
+ "model": "claude-sonnet-5-5",
+ "toolset": "code",
+ "gt": "bench/cadbench/fresh3/00453345_c04e5356c686acf78cb33b33_step_010.stl",
+ "init": null,
+ "init_iou": 0.0,
+ "best_iou": 0.0,
+ "n_steps": 0,
+ "sources": [],
+ "modes": [],
+ "tool_calls": 2,
+ "stop": "api error: API 429: Error code: 429 - {'type': 'error', 'error': {'type': 'rate_limit_error', 'message': \"Number of concurrent requests across all models has exceeded your organization's limit. Wait for in-flight requests to complete and retry. Limits increase automatically as your organization moves up usage tiers.\"}, 'request_id': 'req_011CgnAAv7QvWMLHJ7u2wdbD'}",
+ "seconds": 91.9,
+ "seconds_split": {
+  "setup": 0.7,
+  "model": 21.4,
+  "tools": 68.1
+ },
+ "tools": "v2",
+ "best_exec_iou": -1.0,
+ "best_exec_valid": false,
+ "n_exec": 0,
+ "usage": {
+  "prompt_tokens": 3876,
+  "completion_tokens": 138
+ },
+ "cost_usd": 0.0033,
+ "stl": null,
+ "iou_trace": []
+}

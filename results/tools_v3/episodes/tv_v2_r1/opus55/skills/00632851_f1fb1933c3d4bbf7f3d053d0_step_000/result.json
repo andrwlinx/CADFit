@@ -1,0 +1,70 @@
+{
+ "model": "claude-opus-5-5",
+ "toolset": "skills",
+ "gt": "bench/cadbench/fresh3/00632851_f1fb1933c3d4bbf7f3d053d0_step_000.stl",
+ "init": null,
+ "init_iou": 0.0,
+ "best_iou": 0.9984098222215281,
+ "n_steps": 1,
+ "sources": [
+  "code"
+ ],
+ "modes": [
+  "add"
+ ],
+ "tool_calls": 25,
+ "stop": "finish",
+ "seconds": 261.1,
+ "seconds_split": {
+  "setup": 0.4,
+  "model": 70.8,
+  "tools": 184.3
+ },
+ "tools": "v2",
+ "best_exec_iou": 0.9988193886014425,
+ "best_exec_valid": true,
+ "n_exec": 7,
+ "usage": {
+  "prompt_tokens": 348881,
+  "completion_tokens": 6673
+ },
+ "cost_usd": 0.3243,
+ "stl": "/orcd/pool/007/a_lin/cadfit/bench/runs/tv_v2_src/bench/runs/tv_v2_r1/opus55/skills/00632851_f1fb1933c3d4bbf7f3d053d0_step_000/agent_model.stl",
+ "iou_trace": [
+  [
+   44.6,
+   0.9816,
+   1
+  ],
+  [
+   87.2,
+   0.982,
+   2
+  ],
+  [
+   111.5,
+   0.9817,
+   1
+  ],
+  [
+   150.3,
+   0.9895,
+   2
+  ],
+  [
+   172.7,
+   0.9895,
+   1
+  ],
+  [
+   209.6,
+   0.9941,
+   2
+  ],
+  [
+   236.5,
+   0.9984,
+   1
+  ]
+ ]
+}
