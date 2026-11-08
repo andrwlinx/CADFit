@@ -161,6 +161,33 @@
     0.9586265673021591
    ]
   },
+  "pipe/d0": {
+   "benchA": 0.6006152639647796,
+   "benchE": 0.9577051972412636,
+   "all": 0.7791602306030215,
+   "ci95": [
+    0.6753086941297088,
+    0.8764009640746799
+   ]
+  },
+  "pipe/dx": {
+   "benchA": 0.905798878743411,
+   "benchE": 0.9622004895654237,
+   "all": 0.9339996841544174,
+   "ci95": [
+    0.9024733995621943,
+    0.9590241958680069
+   ]
+  },
+  "pipe/v2x3": {
+   "benchA": 0.9429522135686663,
+   "benchE": 0.9601374796301205,
+   "all": 0.9515448465993934,
+   "ci95": [
+    0.9284958542499467,
+    0.9688813807179247
+   ]
+  },
   "pipe/v3x3": {
    "benchA": 0.9409919481003107,
    "benchE": 0.9614818938456575,
@@ -170,13 +197,13 @@
     0.9684208106297586
    ]
   },
-  "pipe/trim(x2)": {
-   "benchA": 0.9469468857814785,
-   "benchE": 0.9724739932661599,
-   "all": 0.9597104395238192,
+  "pipe/trim(x3)": {
+   "benchA": 0.9469399874888998,
+   "benchE": 0.9694309700292505,
+   "all": 0.9581854787590752,
    "ci95": [
-    0.9444138415451743,
-    0.97268186313578
+    0.940038047488963,
+    0.9727096816215368
    ]
   }
  },
@@ -317,6 +344,33 @@
    "wins": 34,
    "losses": 4
   },
+  "opus55/code - pipe/d0": {
+   "mean": 0.19571877057536366,
+   "ci95": [
+    0.09678990587220615,
+    0.3020654398971824
+   ],
+   "wins": 26,
+   "losses": 14
+  },
+  "opus55/code - pipe/dx": {
+   "mean": 0.04087931702396784,
+   "ci95": [
+    0.01403434669923181,
+    0.07236138113372814
+   ],
+   "wins": 25,
+   "losses": 15
+  },
+  "opus55/code - pipe/v2x3": {
+   "mean": 0.023334154578991774,
+   "ci95": [
+    0.002397204251895604,
+    0.0478877699664762
+   ],
+   "wins": 24,
+   "losses": 16
+  },
   "opus55/code - pipe/v3x3": {
    "mean": 0.023642080205401098,
    "ci95": [
@@ -326,14 +380,41 @@
    "wins": 25,
    "losses": 15
   },
-  "opus55/code - pipe/trim(x2)": {
-   "mean": 0.015168561654566056,
+  "opus55/code - pipe/trim(x3)": {
+   "mean": 0.01669352241931003,
    "ci95": [
-    -0.0013583210408497997,
-    0.032452650412466755
+    -0.0012516850111116474,
+    0.036392987819827576
    ],
    "wins": 22,
    "losses": 18
+  },
+  "opus55/skills - pipe/d0": {
+   "mean": 0.16192845655196678,
+   "ci95": [
+    0.04694584557874378,
+    0.2764202854879394
+   ],
+   "wins": 28,
+   "losses": 11
+  },
+  "opus55/skills - pipe/dx": {
+   "mean": 0.007089003000570954,
+   "ci95": [
+    -0.06202016541977773,
+    0.06100390081365895
+   ],
+   "wins": 28,
+   "losses": 11
+  },
+  "opus55/skills - pipe/v2x3": {
+   "mean": -0.010456159444405113,
+   "ci95": [
+    -0.07673502725969761,
+    0.036990595367713534
+   ],
+   "wins": 27,
+   "losses": 12
   },
   "opus55/skills - pipe/v3x3": {
    "mean": -0.010148233817995789,
@@ -344,14 +425,41 @@
    "wins": 27,
    "losses": 12
   },
-  "opus55/skills - pipe/trim(x2)": {
-   "mean": -0.01862175236883083,
+  "opus55/skills - pipe/trim(x3)": {
+   "mean": -0.017096791604086857,
    "ci95": [
-    -0.08203028887296994,
-    0.02567615907105575
+    -0.08131667047092117,
+    0.02804182123969322
    ],
    "wins": 26,
    "losses": 13
+  },
+  "sonnet55/code - pipe/d0": {
+   "mean": 0.1663603802957066,
+   "ci95": [
+    0.07021199785807877,
+    0.2704784001391142
+   ],
+   "wins": 22,
+   "losses": 18
+  },
+  "sonnet55/code - pipe/dx": {
+   "mean": 0.01152092674431079,
+   "ci95": [
+    -0.013401282032010273,
+    0.03950133177516446
+   ],
+   "wins": 20,
+   "losses": 20
+  },
+  "sonnet55/code - pipe/v2x3": {
+   "mean": -0.006024235700665276,
+   "ci95": [
+    -0.0284711497110137,
+    0.019165188529584327
+   ],
+   "wins": 19,
+   "losses": 21
   },
   "sonnet55/code - pipe/v3x3": {
    "mean": -0.005716310074255951,
@@ -362,14 +470,41 @@
    "wins": 17,
    "losses": 23
   },
-  "sonnet55/code - pipe/trim(x2)": {
-   "mean": -0.014189828625090991,
+  "sonnet55/code - pipe/trim(x3)": {
+   "mean": -0.012664867860347017,
    "ci95": [
-    -0.033174043370002036,
-    0.005370646238891977
+    -0.0326447608174346,
+    0.00879287014787299
    ],
-   "wins": 14,
-   "losses": 26
+   "wins": 15,
+   "losses": 25
+  },
+  "sonnet55/skills - pipe/d0": {
+   "mean": 0.1531009915098897,
+   "ci95": [
+    0.046835299845358704,
+    0.26137279380646633
+   ],
+   "wins": 23,
+   "losses": 14
+  },
+  "sonnet55/skills - pipe/dx": {
+   "mean": -0.0017384620415061003,
+   "ci95": [
+    -0.06464122252354923,
+    0.04477610016228847
+   ],
+   "wins": 22,
+   "losses": 15
+  },
+  "sonnet55/skills - pipe/v2x3": {
+   "mean": -0.019283624486482166,
+   "ci95": [
+    -0.07944838010039247,
+    0.020919549885859336
+   ],
+   "wins": 15,
+   "losses": 21
   },
   "sonnet55/skills - pipe/v3x3": {
    "mean": -0.018975698860072842,
@@ -380,11 +515,11 @@
    "wins": 15,
    "losses": 21
   },
-  "sonnet55/skills - pipe/trim(x2)": {
-   "mean": -0.027449217410907882,
+  "sonnet55/skills - pipe/trim(x3)": {
+   "mean": -0.02592425664616391,
    "ci95": [
-    -0.08424324858178886,
-    0.008687860662557213
+    -0.08395014953487265,
+    0.011367987151932268
    ],
    "wins": 13,
    "losses": 24
@@ -400,8 +535,11 @@
    "sonnet55/code [in-episode check]": 0.9864,
    "sonnet55/skills": 0.9843,
    "sonnet55/skills [in-episode check]": 0.9843,
+   "pipe/d0": 0.0,
+   "pipe/dx": 0.8598,
+   "pipe/v2x3": 0.8698,
    "pipe/v3x3": 0.8788,
-   "pipe/trim(x2)": 0.8695
+   "pipe/trim(x3)": 0.8792
   },
   "00013771_b025a0d3b3c44fa1975bc9c6_step_001": {
    "opus55/code": 0.9925,
@@ -412,8 +550,11 @@
    "sonnet55/code [in-episode check]": 0.9821,
    "sonnet55/skills": 0.9769,
    "sonnet55/skills [in-episode check]": 0.9769,
+   "pipe/d0": 0.9947,
+   "pipe/dx": 0.9947,
+   "pipe/v2x3": 0.9967,
    "pipe/v3x3": 0.9967,
-   "pipe/trim(x2)": 0.9967
+   "pipe/trim(x3)": 0.9967
   },
   "00041105_6168cfabdf0946b393dfc666_step_000": {
    "opus55/code": 0.9842,
@@ -424,8 +565,11 @@
    "sonnet55/code [in-episode check]": 0.8837,
    "sonnet55/skills": 0.9809,
    "sonnet55/skills [in-episode check]": 0.9809,
+   "pipe/d0": 0.9862,
+   "pipe/dx": 0.9862,
+   "pipe/v2x3": 0.9862,
    "pipe/v3x3": 0.9919,
-   "pipe/trim(x2)": 0.9948
+   "pipe/trim(x3)": 0.9919
   },
   "00053475_6da2925085034f7da42dfeb6_step_000": {
    "opus55/code": 0.978,
@@ -436,8 +580,11 @@
    "sonnet55/code [in-episode check]": 0.9774,
    "sonnet55/skills": 0.977,
    "sonnet55/skills [in-episode check]": 0.977,
+   "pipe/d0": 0.0,
+   "pipe/dx": 0.862,
+   "pipe/v2x3": 0.9282,
    "pipe/v3x3": 0.8728,
-   "pipe/trim(x2)": 0.873
+   "pipe/trim(x3)": 0.8728
   },
   "00067285_6d8f6cc2289143a98142169d_step_002": {
    "opus55/code": 0.9946,
@@ -448,8 +595,11 @@
    "sonnet55/code [in-episode check]": 0.9854,
    "sonnet55/skills": 0.9927,
    "sonnet55/skills [in-episode check]": 0.9927,
+   "pipe/d0": 0.9785,
+   "pipe/dx": 0.9786,
+   "pipe/v2x3": 0.9655,
    "pipe/v3x3": 0.953,
-   "pipe/trim(x2)": 0.9529
+   "pipe/trim(x3)": 0.953
   },
   "00067884_346c607059004b94bda4ac3d_step_000": {
    "opus55/code": 0.9999,
@@ -460,8 +610,11 @@
    "sonnet55/code [in-episode check]": 0.9935,
    "sonnet55/skills": 0.9935,
    "sonnet55/skills [in-episode check]": 0.9935,
+   "pipe/d0": 0.0,
+   "pipe/dx": 0.994,
+   "pipe/v2x3": 0.9945,
    "pipe/v3x3": 0.9944,
-   "pipe/trim(x2)": 0.9944
+   "pipe/trim(x3)": 0.9944
   },
   "00077854_4516b6617d04375fa1183804_step_000": {
    "opus55/code": 0.9716,
@@ -472,8 +625,11 @@
    "sonnet55/code [in-episode check]": 0.9322,
    "sonnet55/skills": 0.9112,
    "sonnet55/skills [in-episode check]": 0.9112,
+   "pipe/d0": 0.6567,
+   "pipe/dx": 0.6567,
+   "pipe/v2x3": 0.6097,
    "pipe/v3x3": 0.6171,
-   "pipe/trim(x2)": 0.7786
+   "pipe/trim(x3)": 0.7106
   },
   "00078985_03913f7badd80f7271fa1b43_step_001": {
    "opus55/code": 0.9656,
@@ -484,8 +640,11 @@
    "sonnet55/code [in-episode check]": 0.9249,
    "sonnet55/skills": 0.9176,
    "sonnet55/skills [in-episode check]": 0.9176,
+   "pipe/d0": 0.0,
+   "pipe/dx": 0.892,
+   "pipe/v2x3": 0.9215,
    "pipe/v3x3": 0.9347,
-   "pipe/trim(x2)": 0.9418
+   "pipe/trim(x3)": 0.9435
   },
   "00086573_375de0662ed8a78cf0ad4095_step_000": {
    "opus55/code": 0.9955,
@@ -496,8 +655,11 @@
    "sonnet55/code [in-episode check]": 0.9316,
    "sonnet55/skills": 0.9995,
    "sonnet55/skills [in-episode check]": 0.9995,
+   "pipe/d0": 0.9995,
+   "pipe/dx": 0.9995,
+   "pipe/v2x3": 0.9995,
    "pipe/v3x3": 0.9995,
-   "pipe/trim(x2)": 0.9995
+   "pipe/trim(x3)": 0.9995
   },
   "00120625_56fd0e19e4b07b5f4ed018c2_step_001": {
    "opus55/code": 0.9948,
@@ -508,8 +670,11 @@
    "sonnet55/code [in-episode check]": 0.8977,
    "sonnet55/skills": 0.8737,
    "sonnet55/skills [in-episode check]": 0.8737,
+   "pipe/d0": 0.9886,
+   "pipe/dx": 0.9887,
+   "pipe/v2x3": 0.9887,
    "pipe/v3x3": 0.9889,
-   "pipe/trim(x2)": 0.9965
+   "pipe/trim(x3)": 0.9965
   },
   "00125538_7833b3d42626d5500f146c1d_step_000": {
    "opus55/code": 0.9494,
@@ -520,8 +685,11 @@
    "sonnet55/code [in-episode check]": 0.8631,
    "sonnet55/skills": 0.9441,
    "sonnet55/skills [in-episode check]": 0.9441,
+   "pipe/d0": 0.5269,
+   "pipe/dx": 0.5269,
+   "pipe/v2x3": 0.975,
    "pipe/v3x3": 0.975,
-   "pipe/trim(x2)": 0.9751
+   "pipe/trim(x3)": 0.9751
   },
   "00134078_1d234a68cc4d071e39440057_step_000": {
    "opus55/code": 0.996,
@@ -532,8 +700,11 @@
    "sonnet55/code [in-episode check]": 0.996,
    "sonnet55/skills": 0.9894,
    "sonnet55/skills [in-episode check]": 0.9894,
+   "pipe/d0": 0.9688,
+   "pipe/dx": 0.9688,
+   "pipe/v2x3": 0.9688,
    "pipe/v3x3": 0.9746,
-   "pipe/trim(x2)": 0.9961
+   "pipe/trim(x3)": 0.9961
   },
   "00165191_37a3be1d3de7a79c5b94f6a2_step_000": {
    "opus55/code": 0.9902,
@@ -544,8 +715,11 @@
    "sonnet55/code [in-episode check]": 0.9779,
    "sonnet55/skills": 0.9823,
    "sonnet55/skills [in-episode check]": 0.9823,
+   "pipe/d0": 0.9794,
+   "pipe/dx": 0.9794,
+   "pipe/v2x3": 0.9774,
    "pipe/v3x3": 0.9853,
-   "pipe/trim(x2)": 0.9893
+   "pipe/trim(x3)": 0.9893
   },
   "00167988_2fe231e517344bfc6ec186da_step_001": {
    "opus55/code": 0.9901,
@@ -556,8 +730,11 @@
    "sonnet55/code [in-episode check]": 0.9721,
    "sonnet55/skills": 0.9622,
    "sonnet55/skills [in-episode check]": 0.9622,
+   "pipe/d0": 0.9464,
+   "pipe/dx": 0.9464,
+   "pipe/v2x3": 0.9482,
    "pipe/v3x3": 0.9428,
-   "pipe/trim(x2)": 0.9414
+   "pipe/trim(x3)": 0.9428
   },
   "00171848_575855d1e4b06a2590ec9c23_step_000": {
    "opus55/code": 0.9736,
@@ -568,8 +745,11 @@
    "sonnet55/code [in-episode check]": 0.9634,
    "sonnet55/skills": 0.9388,
    "sonnet55/skills [in-episode check]": 0.9388,
+   "pipe/d0": 0.9238,
+   "pipe/dx": 0.9238,
+   "pipe/v2x3": 0.9238,
    "pipe/v3x3": 0.9238,
-   "pipe/trim(x2)": 0.9238
+   "pipe/trim(x3)": 0.9238
   },
   "00188456_7024b113c4b919dc0de33c71_step_001": {
    "opus55/code": 0.9905,
@@ -580,8 +760,11 @@
    "sonnet55/code [in-episode check]": 0.9823,
    "sonnet55/skills": 0.9882,
    "sonnet55/skills [in-episode check]": 0.9882,
+   "pipe/d0": 0.9937,
+   "pipe/dx": 0.9937,
+   "pipe/v2x3": 0.9937,
    "pipe/v3x3": 0.9951,
-   "pipe/trim(x2)": 0.9951
+   "pipe/trim(x3)": 0.9951
   },
   "00263390_a770f0adcd6fafc5e435cd92_step_000": {
    "opus55/code": 0.8622,
@@ -592,8 +775,11 @@
    "sonnet55/code [in-episode check]": 0.8358,
    "sonnet55/skills": 0.9428,
    "sonnet55/skills [in-episode check]": 0.9428,
+   "pipe/d0": 0.9907,
+   "pipe/dx": 0.9907,
+   "pipe/v2x3": 0.9907,
    "pipe/v3x3": 0.991,
-   "pipe/trim(x2)": 0.991
+   "pipe/trim(x3)": 0.991
   },
   "00288479_3b42a5217dc6cc1e73aad1cb_step_000": {
    "opus55/code": 0.9989,
@@ -604,8 +790,11 @@
    "sonnet55/code [in-episode check]": 0.9973,
    "sonnet55/skills": 0.9904,
    "sonnet55/skills [in-episode check]": 0.9904,
+   "pipe/d0": 0.9851,
+   "pipe/dx": 0.9856,
+   "pipe/v2x3": 0.9935,
    "pipe/v3x3": 0.982,
-   "pipe/trim(x2)": 0.982
+   "pipe/trim(x3)": 0.982
   },
   "00297151_d40fc96866cd51a51c9e78d8_step_003": {
    "opus55/code": 0.9958,
@@ -616,8 +805,11 @@
    "sonnet55/code [in-episode check]": 0.9865,
    "sonnet55/skills": 0.9897,
    "sonnet55/skills [in-episode check]": 0.9897,
+   "pipe/d0": 0.9637,
+   "pipe/dx": 0.9637,
+   "pipe/v2x3": 0.9637,
    "pipe/v3x3": 0.9876,
-   "pipe/trim(x2)": 0.9876
+   "pipe/trim(x3)": 0.9876
   },
   "00300195_184cfe98a683b513b423281c_step_000": {
    "opus55/code": 0.974,
@@ -628,8 +820,11 @@
    "sonnet55/code [in-episode check]": 0.8643,
    "sonnet55/skills": 0.9131,
    "sonnet55/skills [in-episode check]": 0.9131,
+   "pipe/d0": 0.9953,
+   "pipe/dx": 0.9953,
+   "pipe/v2x3": 0.9953,
    "pipe/v3x3": 0.9953,
-   "pipe/trim(x2)": 0.9953
+   "pipe/trim(x3)": 0.9953
   },
   "00360608_fbf00600e0e4132e5c238e76_step_011": {
    "opus55/code": 0.9805,
@@ -640,8 +835,11 @@
    "sonnet55/code [in-episode check]": 0.9123,
    "sonnet55/skills": 0.8763,
    "sonnet55/skills [in-episode check]": 0.8763,
+   "pipe/d0": 0.0,
+   "pipe/dx": 0.8589,
+   "pipe/v2x3": 0.8849,
    "pipe/v3x3": 0.8849,
-   "pipe/trim(x2)": 0.9164
+   "pipe/trim(x3)": 0.912
   },
   "00415094_ef232b7c91c715e5afbf45d9_step_000": {
    "opus55/code": 0.9785,
@@ -652,8 +850,11 @@
    "sonnet55/code [in-episode check]": 0.9649,
    "sonnet55/skills": 0.9604,
    "sonnet55/skills [in-episode check]": 0.9604,
+   "pipe/d0": 0.8896,
+   "pipe/dx": 0.8915,
+   "pipe/v2x3": 0.8924,
    "pipe/v3x3": 0.8944,
-   "pipe/trim(x2)": 0.8945
+   "pipe/trim(x3)": 0.8944
   },
   "00421629_cc5afb7318db8edb1ba12d2d_step_000": {
    "opus55/code": 0.9932,
@@ -664,8 +865,11 @@
    "sonnet55/code [in-episode check]": 0.9828,
    "sonnet55/skills": 0.9921,
    "sonnet55/skills [in-episode check]": 0.9921,
+   "pipe/d0": 0.9638,
+   "pipe/dx": 0.9638,
+   "pipe/v2x3": 0.9649,
    "pipe/v3x3": 0.9687,
-   "pipe/trim(x2)": 0.9687
+   "pipe/trim(x3)": 0.9687
   },
   "00438820_a3bf310c6c66b93633622223_step_002": {
    "opus55/code": 0.9886,
@@ -676,8 +880,11 @@
    "sonnet55/code [in-episode check]": 0.9016,
    "sonnet55/skills": 0.9426,
    "sonnet55/skills [in-episode check]": 0.9426,
+   "pipe/d0": 0.8978,
+   "pipe/dx": 0.8978,
+   "pipe/v2x3": 0.8988,
    "pipe/v3x3": 0.9,
-   "pipe/trim(x2)": 0.9
+   "pipe/trim(x3)": 0.9
   },
   "00490348_e586e0aa12ac0b63fc521157_step_000": {
    "opus55/code": 0.9923,
@@ -688,8 +895,11 @@
    "sonnet55/code [in-episode check]": 0.9308,
    "sonnet55/skills": 0.8475,
    "sonnet55/skills [in-episode check]": 0.8475,
+   "pipe/d0": 0.0,
+   "pipe/dx": 0.8226,
+   "pipe/v2x3": 0.8691,
    "pipe/v3x3": 0.8812,
-   "pipe/trim(x2)": 0.9115
+   "pipe/trim(x3)": 0.9104
   },
   "00529996_acc4b3c0ff918c68003eef7a_step_005": {
    "opus55/code": 0.9956,
@@ -700,8 +910,11 @@
    "sonnet55/code [in-episode check]": 0.9741,
    "sonnet55/skills": 0.9794,
    "sonnet55/skills [in-episode check]": 0.9794,
+   "pipe/d0": 0.9962,
+   "pipe/dx": 0.9962,
+   "pipe/v2x3": 0.9962,
    "pipe/v3x3": 0.9962,
-   "pipe/trim(x2)": 0.9962
+   "pipe/trim(x3)": 0.9962
   },
   "00555973_228e826928336f530534dd1c_step_000": {
    "opus55/code": 0.9787,
@@ -712,8 +925,11 @@
    "sonnet55/code [in-episode check]": 0.9784,
    "sonnet55/skills": 0.9977,
    "sonnet55/skills [in-episode check]": 0.9977,
+   "pipe/d0": 0.9977,
+   "pipe/dx": 0.9977,
+   "pipe/v2x3": 0.9977,
    "pipe/v3x3": 0.9977,
-   "pipe/trim(x2)": 0.9977
+   "pipe/trim(x3)": 0.9977
   },
   "00560247_2ceaea8168d8e1d8b9eecd01_step_000": {
    "opus55/code": 0.9202,
@@ -724,8 +940,11 @@
    "sonnet55/code [in-episode check]": 0.3157,
    "sonnet55/skills": 0.8925,
    "sonnet55/skills [in-episode check]": 0.0,
+   "pipe/d0": 0.9706,
+   "pipe/dx": 0.9706,
+   "pipe/v2x3": 0.9712,
    "pipe/v3x3": 0.9712,
-   "pipe/trim(x2)": 0.9723
+   "pipe/trim(x3)": 0.9723
   },
   "00562295_b9d8011b361bd768233b5126_step_000": {
    "opus55/code": 0.8699,
@@ -736,8 +955,11 @@
    "sonnet55/code [in-episode check]": 0.9156,
    "sonnet55/skills": 0.9558,
    "sonnet55/skills [in-episode check]": 0.9558,
+   "pipe/d0": 0.9515,
+   "pipe/dx": 0.9515,
+   "pipe/v2x3": 0.9558,
    "pipe/v3x3": 0.9558,
-   "pipe/trim(x2)": 0.9588
+   "pipe/trim(x3)": 0.9588
   },
   "00585079_cd28267708f5534ab157a08e_step_071": {
    "opus55/code": 0.962,
@@ -748,8 +970,11 @@
    "sonnet55/code [in-episode check]": 0.9404,
    "sonnet55/skills": 0.9488,
    "sonnet55/skills [in-episode check]": 0.9488,
+   "pipe/d0": 0.9456,
+   "pipe/dx": 0.9455,
+   "pipe/v2x3": 0.9471,
    "pipe/v3x3": 0.9447,
-   "pipe/trim(x2)": 0.9807
+   "pipe/trim(x3)": 0.9831
   },
   "00586964_73ef370d5bd87fbc5c62578a_step_000": {
    "opus55/code": 0.9878,
@@ -760,8 +985,11 @@
    "sonnet55/code [in-episode check]": 0.9091,
    "sonnet55/skills": 0.957,
    "sonnet55/skills [in-episode check]": 0.957,
+   "pipe/d0": 0.9955,
+   "pipe/dx": 0.9955,
+   "pipe/v2x3": 0.9955,
    "pipe/v3x3": 0.9955,
-   "pipe/trim(x2)": 0.9955
+   "pipe/trim(x3)": 0.9955
   },
   "00621425_7b06ea4adb0ff52eff1114da_step_000": {
    "opus55/code": 0.9788,
@@ -772,8 +1000,11 @@
    "sonnet55/code [in-episode check]": 0.9438,
    "sonnet55/skills": 0.9784,
    "sonnet55/skills [in-episode check]": 0.9784,
+   "pipe/d0": 0.9978,
+   "pipe/dx": 0.9978,
+   "pipe/v2x3": 0.9978,
    "pipe/v3x3": 0.9982,
-   "pipe/trim(x2)": 0.9982
+   "pipe/trim(x3)": 0.9982
   },
   "00710155_3641b9cf981205286d42d072_step_001": {
    "opus55/code": 0.974,
@@ -784,8 +1015,11 @@
    "sonnet55/code [in-episode check]": 0.9664,
    "sonnet55/skills": 0.9889,
    "sonnet55/skills [in-episode check]": 0.9889,
+   "pipe/d0": 0.9958,
+   "pipe/dx": 0.9958,
+   "pipe/v2x3": 0.9958,
    "pipe/v3x3": 0.9958,
-   "pipe/trim(x2)": 0.9958
+   "pipe/trim(x3)": 0.9958
   },
   "00762137_02216c8ffa137b472f92f048_step_000": {
    "opus55/code": 0.9551,
@@ -796,8 +1030,11 @@
    "sonnet55/code [in-episode check]": 0.9444,
    "sonnet55/skills": 0.9963,
    "sonnet55/skills [in-episode check]": 0.9963,
+   "pipe/d0": 0.9977,
+   "pipe/dx": 0.9977,
+   "pipe/v2x3": 0.9977,
    "pipe/v3x3": 0.9977,
-   "pipe/trim(x2)": 0.9977
+   "pipe/trim(x3)": 0.9977
   },
   "00767348_fa92ba2c4e07cce3a988200c_step_001": {
    "opus55/code": 0.9875,
@@ -808,8 +1045,11 @@
    "sonnet55/code [in-episode check]": 0.9763,
    "sonnet55/skills": 0.9626,
    "sonnet55/skills [in-episode check]": 0.9626,
+   "pipe/d0": 0.924,
+   "pipe/dx": 0.924,
+   "pipe/v2x3": 0.924,
    "pipe/v3x3": 0.9379,
-   "pipe/trim(x2)": 0.938
+   "pipe/trim(x3)": 0.9389
   },
   "00794841_1301afb237bb122b2fc5a166_step_010": {
    "opus55/code": 0.9783,
@@ -820,8 +1060,11 @@
    "sonnet55/code [in-episode check]": 0.8522,
    "sonnet55/skills": 0.8934,
    "sonnet55/skills [in-episode check]": 0.8934,
+   "pipe/d0": 0.0,
+   "pipe/dx": 0.8137,
+   "pipe/v2x3": 0.9213,
    "pipe/v3x3": 0.9166,
-   "pipe/trim(x2)": 0.9409
+   "pipe/trim(x3)": 0.9328
   },
   "00829121_04d0e5217a8acfba681fbe55_step_000": {
    "opus55/code": 0.9989,
@@ -832,8 +1075,11 @@
    "sonnet55/code [in-episode check]": 0.9965,
    "sonnet55/skills": 0.9931,
    "sonnet55/skills [in-episode check]": 0.9931,
+   "pipe/d0": 0.9931,
+   "pipe/dx": 0.9931,
+   "pipe/v2x3": 0.9931,
    "pipe/v3x3": 0.9931,
-   "pipe/trim(x2)": 0.9931
+   "pipe/trim(x3)": 0.9931
   },
   "00867782_41aed573b420b13fae115377_step_004": {
    "opus55/code": 0.9836,
@@ -844,8 +1090,11 @@
    "sonnet55/code [in-episode check]": 0.9649,
    "sonnet55/skills": 0.0,
    "sonnet55/skills [in-episode check]": 0.0,
+   "pipe/d0": 0.9002,
+   "pipe/dx": 0.9884,
+   "pipe/v2x3": 0.9884,
    "pipe/v3x3": 0.959,
-   "pipe/trim(x2)": 0.9679
+   "pipe/trim(x3)": 0.9747
   },
   "00914699_832190ea6bacfdfd9c3eec5c_step_000": {
    "opus55/code": 0.9911,
@@ -856,8 +1105,11 @@
    "sonnet55/code [in-episode check]": 0.9903,
    "sonnet55/skills": 0.9922,
    "sonnet55/skills [in-episode check]": 0.9922,
+   "pipe/d0": 0.9723,
+   "pipe/dx": 0.9723,
+   "pipe/v2x3": 0.9723,
    "pipe/v3x3": 0.9723,
-   "pipe/trim(x2)": 0.9825
+   "pipe/trim(x3)": 0.9825
   },
   "00928992_62a68b373ac06a238508bce4_step_000": {
    "opus55/code": 0.9105,
@@ -868,8 +1120,11 @@
    "sonnet55/code [in-episode check]": 0.0,
    "sonnet55/skills": 0.8867,
    "sonnet55/skills [in-episode check]": 0.0,
+   "pipe/d0": 0.899,
+   "pipe/dx": 0.899,
+   "pipe/v2x3": 0.9073,
    "pipe/v3x3": 0.9083,
-   "pipe/trim(x2)": 0.9075
+   "pipe/trim(x3)": 0.9084
   }
  }
 }
