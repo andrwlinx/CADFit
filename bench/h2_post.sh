@@ -55,7 +55,7 @@ print('merged', len(out), 'runs')" ;;
       --trim $TRIMS --jobs 16 --out $R/h2_rejudge.json ;;
   surface)  # diagnostic surface agreement, fused occupied boundary, selected trim artifacts
     $PY bench/detail_scores.py --runs $RUNS --scores $R/h2_scores.json --trim $TRIMS --stl-dir $STLS \
-      --jobs 4 --out $R/h2_detail.json ;;
+      --jobs ${JOBS:-4} --out $R/h2_detail.json ;;
   timing)   # successful-attempt latency per run and part, attempts, concurrency, trim stage
     $PY bench/analysis/timing_export.py --manifest $MAN --runs $RUNS --logs "$R/arms_logs/h2s*_*.log" \
       --trim h2s0_v3=$R/h2s0_v3_trim.json h2s1_v3=$R/h2s1_v3_trim.json h2s2_v3=$R/h2s2_v3_trim.json \
