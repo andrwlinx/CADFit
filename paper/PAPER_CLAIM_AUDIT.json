@@ -1,100 +1,41 @@
 {
  "audit_skill": "paper-claim-audit",
- "verdict": "FAIL",
- "reason_code": "claim_mismatch",
- "summary": "All score numbers reproduce; FAIL for trim replay-limit disclosure, two missing brackets, delivery wording, figure hatching and missing equivalence evidence. Fixes applied after this audit; re-audit due in Phase 5.5.",
+ "verdict": "WARN",
+ "reason_code": "missing_evidence_non_numeric",
+ "summary": "Final re-audit (fresh thread 01a1b923-257c-75b2-b6e0-16e8cefe0c15): all 437 macros and every reported score, interval, delta, count, time and cost reproduce; WARN for configuration/chronology claims not recorded in result files, the disclosed trim replay-limit difference (common replay pending), and rerun provenance held in logs rather than episode records. Caption/wording items F04, F06, F10, F11, F12 fixed after the audit.",
  "audited_input_hashes": {
-  "main.tex": "sha256:ba2466d93eff39528f1b2a9a6527c43b8404d00d9f3f73d0ca5b0bb0c45fbd10",
-  "numbers.tex": "sha256:8fa5c463e5543e2960b429e5f597838032ca1655e311e3e4dbf7f10af5a37ca4",
-  "sections/0_abstract.tex": "sha256:079c1ccc065b2248868b0324caca15751146c7fbae19a0ccf57d4bb585693f14",
-  "sections/1_introduction.tex": "sha256:d9f8ca3288a75460937faf52fc10ece5665e1ec376115ea1332a9d24acb2d0dc",
-  "sections/2_related_work.tex": "sha256:8a92ea0a0147504b840f5e4f89d23934667a3c1dc4a3d7666221015aba25665e",
-  "sections/3_protocol.tex": "sha256:583b8217213dd83b0357163f34c7ae599cb1c1c78fc702b6376ee482ac546910",
-  "sections/4_optimizer.tex": "sha256:bd2caa45e79740e5b2f72ee9af85d8080552bbd413f086dfdf8f70a57117e77d",
-  "sections/5_agents.tex": "sha256:f7aabe68cc59b5a3b38ea0e2a9ee8f20145e24a99a1d150ef934ba6b501d4043",
-  "sections/6_tools.tex": "sha256:2b9527190792d0d9b6e803832065833e906570492dc83c99a8dd953740a76ecf",
-  "sections/7_discussion.tex": "sha256:c4298e0f0a96cd64099374f15c614ae9126bd03343a6db5d06a2db2b2fa37842",
-  "sections/8_reproducibility.tex": "sha256:3127b4fe4c4f49311403d9e416b3f1d19fc6fb66a8367ff7cc656321567f31e0",
-  "sections/A_appendix.tex": "sha256:0db91c363c729a286b05670533ce52184a36e8024e495f5e0aed7d889e88cd49",
+  "main.tex": "sha256:8cab529fefd23f2f3c21d8319a213b82611b0b2e6d0a923223e284f9447a4ce1",
+  "numbers.tex": "sha256:0885b21108d86820f2838bda7f3c11266018a19993ce729408431be6cbc78327",
+  "sections/0_abstract.tex": "sha256:806ded9ae5abe6f3b471e8bde936a60017debcc3b8e7755b1531d6a826ddfb2e",
+  "sections/1_introduction.tex": "sha256:a73a0edf1d7df085e7178ce4581386316ae945f0615b5b424d72131bcc6a0604",
+  "sections/2_related_work.tex": "sha256:3be6c558c59bbc9a3a3ca200198a03f0691ae100de40736c412b7efcc9112782",
+  "sections/3_protocol.tex": "sha256:7c7c2a3973650f6014fd865a118c55fdda84300d1bc6e44fbb5778455b5d225f",
+  "sections/4_optimizer.tex": "sha256:6e05dbd1808cc69dd21db77ef5eec5a8f4a7da9ef108d6f0ec3df15dd3c19db9",
+  "sections/5_agents.tex": "sha256:c502203bdcb6738d23c52bdd3837fe89e4d4a771380bc342e42cde8ca8e55b78",
+  "sections/6_tools.tex": "sha256:ebacac8fdd8f7db8c3e053517db1222e1f1b7d3b4873f7f085a8bd349773aefe",
+  "sections/7_discussion.tex": "sha256:ab582494f1f40bedc637437db968b48188a10b2c7fe3b95426a8d37a2ca59cd2",
+  "sections/8_reproducibility.tex": "sha256:9f9f45d1ef0e4f9c96c04055d4756cefa6d1a7d4e148205c4e94c8951e2ba4db",
+  "sections/A_appendix.tex": "sha256:a4e4e723ac33a2a94bc04fb775209ea358c3761c96b089da859aaaa01b399a6d",
   "/Users/Andrewlin/CADFit/results/heldout/h2_primary_local.json": "sha256:a325c513b6edd1759f3c00757fe64a2a2998efd13d398e247f9ebf135f92e864",
   "/Users/Andrewlin/CADFit/results/heldout/h2_secondary_local_no_section.json": "sha256:dde414cd3048f0480d46342807494f0168b6289c4321683d97ddf50db0c6a478",
   "/Users/Andrewlin/CADFit/results/closed/closed_vs_pipeline.json": "sha256:4454b991a44c49f80a1dff89ddfa8d91ac0fcf4479e189ca39e2a8544d85bd04",
-  "/Users/Andrewlin/CADFit/results/tools_v3/tools_v3.json": "sha256:8645f85c21bbd31ab82f9d050691859039ed98e162874856e42dc095ab961ea6"
+  "/Users/Andrewlin/CADFit/results/tools_v3/tools_v3.json": "sha256:8645f85c21bbd31ab82f9d050691859039ed98e162874856e42dc095ab961ea6",
+  "/Users/Andrewlin/CADFit/results/tools_v3/rerun_timing.json": "sha256:b054d0181dd29568a90ade4416c19e565e018037573ef8bee7f6ad289db10338",
+  "/Users/Andrewlin/CADFit/results/tools/equivalence.json": "sha256:76c20f0310f600a4871711bb36a52ae2ff0b124170288e010913dacdd14a5d9d"
  },
  "trace_path": ".aris/traces/paper-claim-audit/",
- "thread_id": "01a1b8fa-e4f3-7d62-ab7d-4441af96f960",
+ "thread_id": "01a1b923-257c-75b2-b6e0-16e8cefe0c15",
  "reviewer_model": "gpt-6-astra",
  "reviewer_reasoning": "ultra",
- "generated_at": "2026-11-08T02:48:12.785954Z",
+ "generated_at": "2026-11-08T03:23:42.571324Z",
  "details": {
-  "total_claims": "~110 records (O01-O21, A01-A17, T01-T23, D01-02, E01-E26, X01-X22)",
-  "mismatches": [
-   {
-    "id": "X01",
-    "status": "config_mismatch",
-    "issue": "trim records use the trim stage's 600 s replay, not the common 900 s",
-    "fix": "disclosed in Sec. 3 and 4; common re-judging pending"
-   },
-   {
-    "id": "X02-03",
-    "status": "ambiguous_mapping",
-    "issue": "median column = mean of per-run medians",
-    "fix": "caption defines aggregation"
-   },
-   {
-    "id": "X04-05",
-    "status": "number_mismatch",
-    "issue": "missing original brackets dx built-invalid 1[0], v2 seed2 2[1]",
-    "fix": "brackets added"
-   },
-   {
-    "id": "X06",
-    "status": "scope_overclaim",
-    "issue": "delivery described as always execution-verified",
-    "fix": "fallback described; 22 + 48 unverified reported"
-   },
-   {
-    "id": "X07",
-    "status": "ambiguous_mapping",
-    "issue": "abstract 'every delivered program valid' (479/480 in Study 3)",
-    "fix": "scoped to Opus"
-   },
-   {
-    "id": "X08",
-    "status": "number_mismatch",
-    "issue": "model-time hatching used normalized share",
-    "fix": "uses recorded model seconds"
-   },
-   {
-    "id": "X09",
-    "status": "ambiguous_mapping",
-    "issue": "tools field says v2 for all episodes",
-    "fix": "appendix explains version provenance by frozen-tree path"
-   },
-   {
-    "id": "X10",
-    "status": "ambiguous_mapping",
-    "issue": "source-model disjointness vs two shared document hashes",
-    "fix": "wording changed to model index; disclosed"
-   },
-   {
-    "id": "X11",
-    "status": "missing_evidence",
-    "issue": "equivalence tests not saved",
-    "fix": "bench/tools_equivalence.py -> results/tools/equivalence.json; macros"
-   },
-   {
-    "id": "X12-13,X16,X18-19,X22",
-    "status": "unsupported_claim",
-    "issue": "interpretive overreach / caption color",
-    "fix": "softened or removed"
-   },
-   {
-    "id": "X14-15,X17,X20",
-    "status": "missing_evidence",
-    "issue": "settings, logs, chronology not in result files",
-    "fix": "cited to code and protocol execution logs"
-   }
+  "total_claims": "~120 records",
+  "mismatches": [],
+  "open_warnings": [
+   "F01-F03, F13-F16: settings/chronology/development cohorts not in result files (cited to code and protocol logs)",
+   "F05: trim contrast includes 600 s stage replay; common replay running",
+   "F07-F09: rerun assignment and preflight/crash events recorded in execution logs, not episode records",
+   "F17: optimizer bootstrap settings not recorded in the analysis JSON"
   ],
   "result_files": [
    "results/heldout",

@@ -1,3 +1,17 @@
+# Paper Claim Audit Report (final, Phase 5.5)
+
+**Verdict: WARN** — Final re-audit (fresh thread 01a1b923-257c-75b2-b6e0-16e8cefe0c15): all 437 macros and every reported score, interval, delta, count, time and cost reproduce; WARN for configuration/chronology claims not recorded in result files, the disclosed trim replay-limit difference (common replay pending), and rerun provenance held in logs rather than episode records. Caption/wording items F04, F06, F10, F11, F12 fixed after the audit.
+
+Open warnings:
+- F01-F03, F13-F16: settings/chronology/development cohorts not in result files (cited to code and protocol logs)
+- F05: trim contrast includes 600 s stage replay; common replay running
+- F07-F09: rerun assignment and preflight/crash events recorded in execution logs, not episode records
+- F17: optimizer bootstrap settings not recorded in the analysis JSON
+
+---
+
+## Earlier audit (round 0)
+
 # Paper Claim Audit Report
 
 **Date**: 2026-11-08  
