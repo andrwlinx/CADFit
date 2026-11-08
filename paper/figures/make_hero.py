@@ -42,10 +42,11 @@ def panel_a(ax):
     def gated(run, p):
         return m[run].get(p, {}).get('iou_cad_gated', 0.0)
 
-    arms = [('released\n(d0)', ['h2s0_d0'], None), ('+exec.\nverify (dx)', ['h2s0_dx'], None),
-            ('+geometry\n(v2)', ['h2s0_v2', 'h2s1_v2', 'h2s2_v2'], None),
-            ('+extents\n(v3)', ['h2s0_v3', 'h2s1_v3', 'h2s2_v3'], None),
-            ('+trim', None, trims)]
+    arms = [('d0', ['h2s0_d0'], None), ('dx', ['h2s0_dx'], None),
+            ('v2', ['h2s0_v2', 'h2s1_v2', 'h2s2_v2'], None),
+            ('v3', ['h2s0_v3', 'h2s1_v3', 'h2s2_v3'], None),
+            ('trim', None, trims)]
+    ticks = []
     for i, (lab, runs, tr) in enumerate(arms):
         if tr is None:
             vals = {p: st.mean(gated(r, p) for r in runs) for p in parts}
@@ -55,28 +56,31 @@ def panel_a(ax):
             bad = st.mean(sum(((t[p].get('gated') or 0.0) if p in t else 0.0) == 0 for p in parts) for t in tr)
         mu = st.mean(vals.values())
         lo, hi = boot(vals, split, parts)
-        ax.bar(i, mu, 0.62, color=PIPE)
-        ax.errorbar(i, mu, yerr=[[mu - lo], [hi - mu]], color=INK, capsize=2.5, lw=0.8)
+        ax.errorbar(i, mu, yerr=[[mu - lo], [hi - mu]], fmt='o', color=PIPE, ecolor=INK, capsize=2.5, lw=0.8, ms=5)
         nb = f'{bad:.0f}' if abs(bad - round(bad)) < 0.05 else f'{bad:.1f}'
-        ax.text(i, hi + 0.004, f'{mu:.3f}\n{nb} inv.', ha='center', va='bottom', fontsize=7, linespacing=1.1)
-    ax.set_xticks(range(len(arms)), [a[0] for a in arms], fontsize=7)
+        ax.text(i, hi + 0.004, f'{mu:.3f}', ha='center', va='bottom', fontsize=7)
+        ticks.append(f'{lab}\n({nb})')
+    ax.set_xticks(range(len(arms)), ticks, fontsize=7)
+    ax.set_xlim(-0.5, len(arms) - 0.5)
     ax.set_ylim(0.70, 1.02)
     ax.set_ylabel('gated IoU of executed program')
     ax.set_title('(a) Optimizer, 300 held-out parts', fontsize=9)
+    ax.set_xlabel('arm (parts without a valid replay)', fontsize=7.5)
 
 
 def panel_b(ax):
     c = json.load(open(os.path.join(ROOT, 'results', 'closed', 'closed_vs_pipeline.json')))
-    rows = [('pipe/d0', 'pipeline d0', PIPE), ('pipe/v3x3', 'pipeline v3', PIPE), ('pipe/trim(x3)', 'pipeline + trim', PIPE),
-            ('sonnet55/skills', 'Sonnet + CADFit tools', AGENT_SKILLS), ('sonnet55/code', 'Sonnet + code', AGENT_CODE),
-            ('opus55/skills', 'Opus + CADFit tools', AGENT_SKILLS), ('opus55/code', 'Opus + code', AGENT_CODE)]
-    for i, (k, lab, col) in enumerate(rows):
+    rows = [('pipe/d0', 'optimizer d0', PIPE, 'D'), ('pipe/v3x3', 'optimizer v3', PIPE, 'D'),
+            ('pipe/trim(x3)', 'optimizer + trim', PIPE, 'D'),
+            ('sonnet55/skills', 'Sonnet + CADFit tools', AGENT_SKILLS, 's'), ('sonnet55/code', 'Sonnet + code', AGENT_CODE, 'o'),
+            ('opus55/skills', 'Opus + CADFit tools', AGENT_SKILLS, 's'), ('opus55/code', 'Opus + code', AGENT_CODE, 'o')]
+    for i, (k, lab, col, mk) in enumerate(rows):
         a = c['arms'][k]
-        ax.barh(i, a['all'], 0.62, color=col)
-        ax.errorbar(a['all'], i, xerr=[[a['all'] - a['ci95'][0]], [a['ci95'][1] - a['all']]], color=INK,
-                    capsize=2.5, lw=0.8)
+        ax.errorbar(a['all'], i, xerr=[[a['all'] - a['ci95'][0]], [a['ci95'][1] - a['all']]], fmt=mk, color=col,
+                    ecolor=INK, capsize=2.5, lw=0.8, ms=5)
         ax.text(a['ci95'][1] + 0.004, i, f"{a['all']:.3f}", va='center', fontsize=8)
     ax.set_yticks(range(len(rows)), [r[1] for r in rows], fontsize=7.5)
+    ax.set_ylim(-0.5, len(rows) - 0.5)
     ax.set_xlim(0.70, 1.02)
     ax.set_xlabel('gated IoU of delivered program')
     ax.set_title('(b) Agents vs optimizer, 40 parts', fontsize=9)

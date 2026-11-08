@@ -1,0 +1,1 @@
+Round 1 review: score 4/10, verdict No. Critical: d0 baseline misattributed as released CADFit. Major: rejudge vs replay; causal scope of tools package; judge/arm details; positioning. Full text in session transcript (task kxfkm5ivb).

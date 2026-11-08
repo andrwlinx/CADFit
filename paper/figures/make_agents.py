@@ -39,17 +39,17 @@ def closed():
         for i, (m, _) in enumerate(MODELS):
             x = i + (j - 0.5) * (w + 0.04)
             a, d = c['arms'][f'{m}/{t}'], c['agent_detail'][f'{m}/{t}']
-            axs[0].bar(x, a['all'], w, color=col, label=lab if i == 0 else None)
-            axs[0].errorbar(x, a['all'], yerr=[[a['all'] - a['ci95'][0]], [a['ci95'][1] - a['all']]], color=INK,
-                            capsize=2, lw=0.8)
+            axs[0].errorbar(x, a['all'], yerr=[[a['all'] - a['ci95'][0]], [a['ci95'][1] - a['all']]],
+                            fmt='o' if t == 'code' else 's', color=col, ecolor=INK, capsize=2, lw=0.8, ms=5,
+                            label=lab if i == 0 else None)
             eps = [json.load(open(f)) for tag in ('agentsk_f2', 'agentsk_f2_r1', 'agentsk_f2_r2')
                    for f in glob.glob(os.path.join(bundle, tag, m, t, '*', 'result.json'))]
             model_min = sum(e['seconds_split']['model'] for e in eps) / len(eps) / 60  # recorded model seconds
             mins = d['mean_s'] / 60
-            axs[1].bar(x, mins, w, color=col)
+            axs[1].bar(x, mins, w, color=col, edgecolor=INK if t == 'skills' else col, lw=0.6)
             axs[1].bar(x, model_min, w, fill=False, hatch='////', edgecolor='white', lw=0)
             axs[1].text(x, mins + 0.15, f'{mins:.1f}', ha='center', fontsize=7)
-            axs[2].bar(x, d['cost_per_episode'], w, color=col)
+            axs[2].bar(x, d['cost_per_episode'], w, color=col, edgecolor=INK if t == 'skills' else col, lw=0.6)
             axs[2].text(x, d['cost_per_episode'] + 0.005, f'{d["cost_per_episode"]:.2f}', ha='center', fontsize=7)
     v3 = c['arms']['pipe/v3x3']['all']
     axs[0].axhline(v3, color=MUTED, ls='--', lw=0.8)
@@ -74,23 +74,29 @@ def tools_v3():
               ('sonnet55', 'code', 'Sonnet\ncode'), ('sonnet55', 'skills', 'Sonnet\nCADFit')]
     fig, axs = plt.subplots(1, 2, figsize=(7.0, 2.3))
     w = 0.36
-    for j, (v, col, lab) in enumerate((('v2', OLD, 'tools v2'), ('v3', NEW, 'tools v3'))):
+    for j, (v, lab) in enumerate((('v2', 'original package'), ('v3', 'revised package'))):
         for i, (m, ts, _) in enumerate(groups):
             x = i + (j - 0.5) * (w + 0.04)
+            col = CODE if ts == 'code' else SKILLS
             a, d = t['cells'][f'{m}/{ts}/{v}'], t['detail'][f'{m}/{ts}/{v}']
-            axs[0].bar(x, a['all'], w, color=col, label=lab if i == 0 else None)
-            axs[0].errorbar(x, a['all'], yerr=[[a['all'] - a['ci95'][0]], [a['ci95'][1] - a['all']]], color=INK,
-                            capsize=2, lw=0.8)
+            axs[0].errorbar(x, a['all'], yerr=[[a['all'] - a['ci95'][0]], [a['ci95'][1] - a['all']]],
+                            fmt='o' if ts == 'code' else 's', color=col, mfc=col if v == 'v3' else 'white',
+                            ecolor=INK, capsize=2, lw=0.8, ms=5)
             mins = d['mean_s'] / 60
-            axs[1].bar(x, mins, w, color=col)
+            axs[1].bar(x, mins, w, color=col if v == 'v3' else 'white', edgecolor=col, lw=1.2, hatch=None)
             axs[1].text(x, mins + 0.15, f'{mins:.1f}', ha='center', fontsize=7)
+    from matplotlib.lines import Line2D
+    handles = [Line2D([], [], marker='o', ls='', color=CODE, label='code toolset'),
+               Line2D([], [], marker='s', ls='', color=SKILLS, label='CADFit toolset'),
+               Line2D([], [], marker='o', ls='', color=MUTED, mfc='white', label='original package'),
+               Line2D([], [], marker='o', ls='', color=MUTED, label='revised package')]
     axs[0].set_ylim(0.86, 1.0)
     axs[0].set_ylabel('gated IoU (delivered)')
     axs[1].set_ylabel('minutes per episode')
     for ax, title in zip(axs, ('Score', 'Time')):
         tidy(ax, title)
         ax.set_xticks(range(len(groups)), [g[2] for g in groups])
-    fig.legend(*axs[0].get_legend_handles_labels(), frameon=False, fontsize=7.5, loc='upper center', ncol=2)
+    fig.legend(handles=handles, frameon=False, fontsize=7.5, loc='upper center', ncol=4)
     fig.tight_layout(rect=(0, 0, 1, 0.92))
     fig.savefig(os.path.join(HERE, 'tools_v3.pdf'))
     fig.savefig(os.path.join(HERE, 'tools_v3.png'), dpi=200)

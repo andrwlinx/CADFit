@@ -495,22 +495,21 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 30.
  (umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-(sections/0_abstract) (sections/1_introduction [1
-
-]
+(sections/0_abstract) (sections/1_introduction
 File: figures/hero.pdf Graphic file (type pdf)
 <use figures/hero.pdf>
-) (sections/2_related_work
-[2]) (sections/3_protocol
-File: figures/detail.png Graphic file (type bmp)
-<figures/detail.png>
-) (sections/4_optimizer [3] [4]
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 3
-6.
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 1
+9.
  (ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
-))
-(sections/5_agents
+) [1
+
+])
+(sections/2_related_work) (sections/3_protocol [2]
+File: figures/detail.png Graphic file (type bmp)
+<figures/detail.png>
+) (sections/4_optimizer
+[3] [4]) (sections/5_agents
 LaTeX Font Info:    Trying to load font information for T1+pcr on input line 4.
 
  (t1pcr.fd
@@ -534,18 +533,21 @@ File: figures/tools_v3.pdf Graphic file (type pdf)
 <use figures/tools_v3.pdf>
  [7]) (sections/7_discussion)
 (sections/8_reproducibility) (main.bbl [8]
-Underfull \hbox (badness 3838) in paragraph at lines 66--71
+Underfull \hbox (badness 3838) in paragraph at lines 73--78
 []\T1/ptm/m/n/10 Dimitrios Mallis, Ah-met Ser-dar Ka-rad-eniz, Se-bas-tian Cava
 da, Danila Rukhovich, Niki
  []
 
-) (sections/A_appendix
+[9]) (sections/A_appendix
 Underfull \hbox (badness 10000) in paragraph at lines 3--4
 \T1/ptm/m/n/10 All co-horts are seeded draws from the CAD-Bench in-dex (hard ti
 er) by
  []
 
-[9]
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
 Underfull \hbox (badness 10000) in paragraph at lines 55--58
 \T1/ptm/m/n/10 Events not vis-i-ble in the re-sult files are recorded in the ex
 -e-cu-tion
@@ -557,8 +559,31 @@ Underfull \hbox (badness 10000) in paragraph at lines 55--58
 _PROTOCOL.md\T1/ptm/m/n/10 ,
  []
 
-[10]) [11] (main.aux)
+[10]
+Underfull \hbox (badness 3108) in paragraph at lines 69--70
+\T1/ptm/m/n/10 All arms run \T1/pcr/m/n/10 run_pipeline.py \T1/ptm/m/n/10 from 
+frozen source trees with these flags. Com-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 69--70
+\T1/ptm/m/n/10 mon to all: \T1/pcr/m/n/10 --persistent-cq --exact-union --cut-p
+hase --event-slices
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 69--70
+\T1/pcr/m/n/10 --detect-directions --translation-max-points 400 --beam 4
+ []
+
+
+Underfull \hbox (badness 1810) in paragraph at lines 69--70
+\T1/pcr/m/n/10 --section-extrude\T1/ptm/m/n/10 . d0 runs them from the pre-repa
+ir snap-shot (com-mit \T1/pcr/m/n/10 e260397\T1/ptm/m/n/10 )
+ []
+
+[11]) [12] (main.aux)
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 3D2A4306E8AF13AC4752FD42540ED86F;2213.
+(rerunfilecheck)             Checksum: BC94651D95B90D004DCDC6C69264CB6B;2560.
  )
-Output written on main.xdv (11 pages, 81656 bytes).
+Output written on main.xdv (12 pages, 90312 bytes).

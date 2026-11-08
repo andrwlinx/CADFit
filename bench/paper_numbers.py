@@ -74,14 +74,14 @@ def heldout():
         if not c:
             pending(f'h{w}', k)
             continue
-        put(f'h{w}', f(c['diff'], 3, True))
-        put(f'h{w}CI', ci(*c['ci95']))
+        put(f'h{w}', f(c['diff'], 4, True))
+        put(f'h{w}CI', ci(*c['ci95'], 4))
         put(f'h{w}WL', f"{c['wins']}/{c['losses']}")
         put(f'h{w}P', f"${pval(c['sign_p_holm'])}$")
         put(f'h{w}BothValid', f(c['both_valid_diff'], 4, True))
     if pre:
         c = pre['pairs']['h2s0_dx:h2s0_d0']
-        put('hPreDXvsDZero', f(c['diff'], 3, True))
+        put('hPreDXvsDZero', f(c['diff'], 4, True))
         put('hPreDXValid', f"{pre['runs']['h2s0_dx']['valid']}")
     pending('hTrimvsSection', 'trim vs section-only (running)')
     pending('hSection', 'section-only control (running)')
@@ -191,8 +191,8 @@ def tools():
              'sonnet55/skills/v3 - sonnet55/code/v3': 'SonnetSkillsVsCode', 'sonnet55/code/v3 - sonnet55/code/v2': 'SonnetCodeVersion'}
     for k, w in names.items():
         c = t['comparisons'][k]
-        put(f't{w}', f(c['mean'], 3, True))
-        put(f't{w}CI', ci(*c['ci95']))
+        put(f't{w}', f(c['mean'], 4, True))
+        put(f't{w}CI', ci(*c['ci95'], 4))
         put(f't{w}WL', f"{c['wins']}/{c['losses']}")
         put(f't{w}P', f"{c['sign_p']:.3f}")
         if 'holm_p' in c:
