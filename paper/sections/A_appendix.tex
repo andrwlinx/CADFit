@@ -58,7 +58,7 @@ Events not visible in the result files are recorded in the execution logs of the
 
 \section{Harness and settings}
 \label{app:harness}
-Agents see the target only through tools; frames are normalized (largest extent spans $[-1,1]$). Tool replies report the executed program's build status, validity and IoU after every change; the delivered answer is the best executed valid program (valid first, then IoU). Claude runs use the official SDK (configuration in \texttt{agent/anthropic\_chat.py} and \texttt{bench/claude\_job.sh}) with streaming, adaptive thinking, effort high, a 32k-token limit per turn, prompt caching, the full native message history (tool results are not truncated), and no server-side fallback; a refusal or API error ends an episode. Episodes run 3--8 at a time per CPU node (the \texttt{--jobs} setting of each submission). In Study 3 the two tool versions are identified by the frozen source tree each job ran from (output paths under \texttt{tv\_v2\_src} and \texttt{tv\_v3\_src}); the episode records' \texttt{tools} field names the harness mode, which is the same for both.
+Agents see the target only through tools; frames are normalized (largest extent spans $[-1,1]$). Tool replies report the executed program's build status, validity and IoU after every change; the delivered answer is the best executed valid program (valid first, then IoU). The delivered answer is the best executed valid program; if no check of a valid program finished within the episode, the current program is exported unverified and re-judged offline like every delivery. Claude runs use the official SDK (configuration in \texttt{agent/anthropic\_chat.py} and \texttt{bench/claude\_job.sh}) with streaming, adaptive thinking, effort high, a 32k-token limit per turn, prompt caching, the full native message history (tool results are not truncated), and no server-side fallback; a refusal or API error ends an episode. Episodes run 3--8 at a time per CPU node (the \texttt{--jobs} setting of each submission). In Study 3 the two tool versions are identified by the frozen source tree each job ran from (output paths under \texttt{tv\_v2\_src} and \texttt{tv\_v3\_src}); the episode records' \texttt{tools} field names the harness mode, which is the same for both.
 
 \section{Judge}
 \label{app:judge}
@@ -70,4 +70,32 @@ All arms run \texttt{run\_pipeline.py} from frozen source trees with these flags
 
 \section{Output-preserving rewrites}
 \label{app:rewrites}
-For a run of points $x_a,\dots,x_b\in\mathbb{R}^2$ with $m=b-a+1$, let $S=\sum x_i$ and $Q=\sum x_i x_i^{\top}$ over the run. The centred scatter matrix is $C=Q-SS^{\top}/m$, and the root-mean-square perpendicular distance of the best-fit line equals $\sqrt{\lambda_{\min}(C)/m}$, where $\lambda_{\min}(C)=\tfrac12(C_{11}+C_{22})-\sqrt{\tfrac14(C_{11}-C_{22})^2+C_{12}^2}$. This is the quantity the original code obtained from the SVD of the centred points (the smallest singular value squared). Prefix sums make it $O(1)$ per run. Only this error enters the segmenter's decisions for lines (a line's output is the run's end points); where the fast value lies within a relative $10^{-6}$ of the threshold or of the competing circle error it is compared with, the original SVD computation decides, so floating-point differences cannot flip a decision outside that band. Duplicate removal keeps a point unless it lies within the tolerance of an earlier kept point; the KD-tree version tests only candidate neighbours found within a slightly larger radius and applies the original distance test to them. Equivalence counts for all four rewrites are in \texttt{results/tools/equivalence.json}.
+For a run of points $x_a,\dots,x_b\in\mathbb{R}^2$ with $m=b-a+1$, let $S=\sum x_i$ and $Q=\sum x_i x_i^{\top}$ over the run. The centred scatter matrix is $C=Q-SS^{\top}/m$, and the root-mean-square perpendicular distance of the best-fit line equals $\sqrt{\lambda_{\min}(C)/m}$, where $\lambda_{\min}(C)=\tfrac12(C_{11}+C_{22})-\sqrt{\tfrac14(C_{11}-C_{22})^2+C_{12}^2}$. In exact arithmetic this equals the original code's value: with $\sigma_{\min}$ the smallest singular value of the centred points, $\lambda_{\min}(C)=\sigma_{\min}^2$ and the RMS distance is $\sigma_{\min}/\sqrt{m}$. Prefix sums make it $O(1)$ per run. Only this error enters the segmenter's decisions for lines (a line's output is the run's end points). In floating point the two computations can differ (the prefix-sum form subtracts large terms); as a safeguard, whenever the fast value lies within a relative $10^{-6}$ of the threshold or of the competing circle error, the original SVD computation decides. We do not have an error bound guaranteeing that differences stay inside that band; equivalence beyond the exact-arithmetic identity rests on the tests reported here. Duplicate removal keeps a point unless it lies within the tolerance of an earlier kept point; the KD-tree version tests only candidate neighbours found within a slightly larger radius and applies the original distance test to them. Equivalence counts for all four rewrites are in \texttt{results/tools/equivalence.json}.
+
+
+\section{Study 3: all cells}
+\begin{table}[h]
+\centering
+\small
+\caption{Study 3, 40 fresh3 parts, three episodes per part and cell. Gated IoU (95\% interval); valid deliveries / episodes; no-output episodes; mean and median minutes per episode; API cost of the cell; episodes rerun after infrastructure failures (three per node instead of eight).}
+\label{tab:tools-cells}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}llccccccc@{}}
+\toprule
+Model & Toolset, package & Gated IoU & 95\% interval & Valid & No out. & Mean min & Median min & Reruns \\
+\midrule
+Opus & code, original & \tOpusCodeVTwo & \tOpusCodeVTwoCI & \tOpusCodeVTwoValid & \tOpusCodeVTwoNoOut & \tOpusCodeVTwoMin & \tOpusCodeVTwoMed & \rOpusCodeVTwo \\
+Opus & code, revised & \tOpusCodeVThree & \tOpusCodeVThreeCI & \tOpusCodeVThreeValid & \tOpusCodeVThreeNoOut & \tOpusCodeVThreeMin & \tOpusCodeVThreeMed & \rOpusCodeVThree \\
+Opus & CADFit, original & \tOpusSkillsVTwo & \tOpusSkillsVTwoCI & \tOpusSkillsVTwoValid & \tOpusSkillsVTwoNoOut & \tOpusSkillsVTwoMin & \tOpusSkillsVTwoMed & \rOpusSkillsVTwo \\
+Opus & CADFit, revised & \tOpusSkillsVThree & \tOpusSkillsVThreeCI & \tOpusSkillsVThreeValid & \tOpusSkillsVThreeNoOut & \tOpusSkillsVThreeMin & \tOpusSkillsVThreeMed & \rOpusSkillsVThree \\
+Sonnet & code, original & \tSonnetCodeVTwo & \tSonnetCodeVTwoCI & \tSonnetCodeVTwoValid & \tSonnetCodeVTwoNoOut & \tSonnetCodeVTwoMin & \tSonnetCodeVTwoMed & \rSonnetCodeVTwo \\
+Sonnet & code, revised & \tSonnetCodeVThree & \tSonnetCodeVThreeCI & \tSonnetCodeVThreeValid & \tSonnetCodeVThreeNoOut & \tSonnetCodeVThreeMin & \tSonnetCodeVThreeMed & \rSonnetCodeVThree \\
+Sonnet & CADFit, original & \tSonnetSkillsVTwo & \tSonnetSkillsVTwoCI & \tSonnetSkillsVTwoValid & \tSonnetSkillsVTwoNoOut & \tSonnetSkillsVTwoMin & \tSonnetSkillsVTwoMed & \rSonnetSkillsVTwo \\
+Sonnet & CADFit, revised & \tSonnetSkillsVThree & \tSonnetSkillsVThreeCI & \tSonnetSkillsVThreeValid & \tSonnetSkillsVThreeNoOut & \tSonnetSkillsVThreeMin & \tSonnetSkillsVThreeMed & \rSonnetSkillsVThree \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Agent tools}
+\label{app:tools}
+\textbf{Code toolset}: \texttt{describe\_target} (size, volume, flat-face directions and offsets), \texttt{section} (exact cross-section polygons of target and current model on an axis-aligned plane), \texttt{evaluate} (current executed IoU and where material is missing or extra), \texttt{add\_code} (a CadQuery snippet defining \texttt{result}, added or cut), \texttt{remove\_step}, \texttt{list\_steps}, \texttt{finish}. \textbf{CADFit toolset} adds \texttt{detect\_directions}, \texttt{extract\_sketch} (slice on a plane, nest loops into profiles, fit lines and arcs), \texttt{fit\_extrude} and \texttt{fit\_revolve} (candidates from a sketch with their IoU), \texttt{section\_extrude}, \texttt{list\_candidates}, \texttt{show\_candidate} and \texttt{add\_candidate}. The system prompts and the JSON tool schemas are in \texttt{agent/agent\_loop.py} and \texttt{agent/cad\_tools.py} of the supplementary code.

@@ -505,7 +505,7 @@ File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 ) [1
 
 ])
-(sections/2_related_work) (sections/3_protocol [2]
+(sections/2_related_work [2]) (sections/3_protocol
 File: figures/detail.png Graphic file (type bmp)
 <figures/detail.png>
 ) (sections/4_optimizer
@@ -532,8 +532,8 @@ File: figures/closed.pdf Graphic file (type pdf)
 File: figures/tools_v3.pdf Graphic file (type pdf)
 <use figures/tools_v3.pdf>
  [7]) (sections/7_discussion)
-(sections/8_reproducibility) (main.bbl [8]
-Underfull \hbox (badness 3838) in paragraph at lines 73--78
+(sections/8_reproducibility) [8] (main.bbl
+Underfull \hbox (badness 3838) in paragraph at lines 79--84
 []\T1/ptm/m/n/10 Dimitrios Mallis, Ah-met Ser-dar Ka-rad-eniz, Se-bas-tian Cava
 da, Danila Rukhovich, Niki
  []
@@ -547,7 +547,7 @@ er) by
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-
+[10]
 Underfull \hbox (badness 10000) in paragraph at lines 55--58
 \T1/ptm/m/n/10 Events not vis-i-ble in the re-sult files are recorded in the ex
 -e-cu-tion
@@ -559,7 +559,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 55--58
 _PROTOCOL.md\T1/ptm/m/n/10 ,
  []
 
-[10]
+[11]
 Underfull \hbox (badness 3108) in paragraph at lines 69--70
 \T1/ptm/m/n/10 All arms run \T1/pcr/m/n/10 run_pipeline.py \T1/ptm/m/n/10 from 
 frozen source trees with these flags. Com-
@@ -582,8 +582,14 @@ Underfull \hbox (badness 1810) in paragraph at lines 69--70
 ir snap-shot (com-mit \T1/pcr/m/n/10 e260397\T1/ptm/m/n/10 )
  []
 
-[11]) [12] (main.aux)
+[12])
+Underfull \hbox (badness 2088) in paragraph at lines 101--50
+\T1/ptm/m/n/10 The sys-tem prompts and the JSON tool schemas are in \T1/pcr/m/n
+/10 agent/agent_loop.py \T1/ptm/m/n/10 and
+ []
+
+[13] (main.aux)
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: BC94651D95B90D004DCDC6C69264CB6B;2560.
+(rerunfilecheck)             Checksum: A77C65DFB7FACD6A68074E7FAEFA5864;2807.
  )
-Output written on main.xdv (12 pages, 90312 bytes).
+Output written on main.xdv (13 pages, 97776 bytes).

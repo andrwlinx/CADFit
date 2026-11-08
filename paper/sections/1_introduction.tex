@@ -1,7 +1,7 @@
 \section{Introduction}
 \label{sec:intro}
 
-A mesh-to-CAD system delivers a program. A designer opens it, edits its sketches and features, and a CAD kernel turns it into a solid. Optimization-based reconstructors such as CADFit \citep{nehme2026cadfit} search over extrusion and revolve candidates fitted to slices of the target mesh and keep the composition with the highest volumetric IoU, computed on meshes; the program is written out at the end, and whether it builds the scored geometry is not part of the search's number. Agentic systems face the same gap whenever an agent's tools return geometry rather than a checked program.
+Optimization-based mesh-to-CAD reconstructors such as CADFit \citep{nehme2026cadfit} keep the composition of fitted extrusions and revolves with the highest volumetric IoU, computed on meshes, and write out a CAD program at the end. The search's score does not say whether that program builds the scored geometry, yet the program is the product: a designer edits its sketches and features, and a CAD kernel turns it into a solid. Agentic systems face the same gap whenever an agent's tools return geometry rather than a checked program.
 
 We close the gap at evaluation time. Each system's delivered program is executed in a sandbox, every solid it builds must be OCC-valid, the executed solid is scored with a judge that does not depend on how clean its tessellation is, and any failed delivery scores zero with every part kept in the denominator (\cref{sec:protocol}). Each study fixes its arms, cohort and analysis before it runs; cohorts exclude every model index used before; every amendment and rerun is recorded with its date and cause.
 

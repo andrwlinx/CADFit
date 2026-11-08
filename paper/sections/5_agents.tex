@@ -1,11 +1,11 @@
 \section{Study 2: frontier agents under the same judge}
 \label{sec:agents}
 
-\paragraph{Harness.} An agent receives the target only through tools and edits a model step by step. After every change, the harness assembles the CadQuery program, executes and checks it as in \cref{sec:protocol}, and reports build status, validity and executed IoU; the delivered answer is the best executed valid program, or, if no check of a valid program finished within the episode, the current program unverified (it is still re-judged offline like every other delivery). The \textbf{code} toolset is \texttt{describe\_target} (size, volume, flat-face directions and offsets), \texttt{section} (exact cross-sections of target and model), \texttt{evaluate}, \texttt{add\_code}, \texttt{remove\_step}, \texttt{list\_steps} and \texttt{finish}: it gives target inspection and execution feedback, so it is not an unaided language-model baseline. The \textbf{CADFit} toolset adds the optimizer's stages: direction detection, sketch extraction on a plane with line/arc fitting, extrusion and revolve fitting, section extrusion, and candidate management. Each episode has 40 tool calls and 30 minutes.
+\paragraph{Harness.} An agent receives the target only through tools and edits a model step by step. After every change, the harness assembles the CadQuery program, executes and checks it as in \cref{sec:protocol}, and reports build status, validity and executed IoU; the delivered answer is the best executed valid program, or, if no check of a valid program finished within the episode, the current program unverified (it is still re-judged offline like every other delivery). The \textbf{code} toolset is \texttt{describe\_target} (size, volume, flat-face directions and offsets), \texttt{section} (exact cross-sections of target and model), \texttt{evaluate}, \texttt{add\_code}, \texttt{remove\_step}, \texttt{list\_steps} and \texttt{finish}: it gives target inspection and execution feedback. The \textbf{CADFit} toolset adds the optimizer's stages: direction detection, sketch extraction on a plane with line/arc fitting, extrusion and revolve fitting, section extrusion, and candidate management. Each episode has 40 tool calls and 30 minutes.
 
 \paragraph{Models and runs.} Claude Opus~5.5 (\texttt{claude-opus-5-5}) and Sonnet~5.5 (\texttt{claude-sonnet-5-5}) run through the Anthropic Messages API with adaptive thinking at effort high, at most 32k output tokens per turn, the full conversation history, and no server-side fallback to another model. Each model runs three independent episodes per part and toolset on the 40 reserved parts; every delivered program is re-judged offline by the same replay and judge as the optimizer. These comparisons were specified after the optimizer study and are exploratory; intervals are nominal.
 
-\begin{figure}[t]
+\begin{figure}[tb]
 \centering
 \includegraphics[width=\linewidth]{figures/closed.pdf}
 \caption{Study 2, 40 reserved fresh2 parts, three episodes per part and condition. Left: gated IoU of the delivered program (mean over parts of the per-part mean; 95\% interval); dashed: the optimizer's v3 on the same parts. Middle: mean minutes per episode, hatched part waiting on the model. Right: mean API cost per episode. Runtime and cost are means without intervals.}
@@ -28,8 +28,10 @@ Opus + CADFit tools & \cOpusSkills & \cOpusSkillsCI & \cOpusSkillsValid & \cOpus
 Sonnet + code & \cSonnetCode & \cSonnetCodeCI & \cSonnetCodeValid & \cSonnetCodeNoOut & \cSonnetCodeMin & \cSonnetCodeCost \\
 Sonnet + CADFit tools & \cSonnetSkills & \cSonnetSkillsCI & \cSonnetSkillsValid & \cSonnetSkillsNoOut & \cSonnetSkillsMin & \cSonnetSkillsCost \\
 \midrule
-optimizer d0 / dx & \cPipeDZero{} / \cPipeDX & & & & & \\
-optimizer v3 / + trim & \cPipeVThree{} / \cPipeTrim & \cPipeVThreeCI{} / \cPipeTrimCI & & & & \\
+optimizer d0 & \cPipeDZero & \cPipeDZeroCI & & & & \\
+optimizer dx & \cPipeDX & \cPipeDXCI & & & & \\
+optimizer v3 & \cPipeVThree & \cPipeVThreeCI & & & & \\
+optimizer + trim & \cPipeTrim & \cPipeTrimCI & & & & \\
 \midrule
 Opus code $-$ v3 & \multicolumn{6}{l}{\cOpusCodeVsVThree{} \cOpusCodeVsVThreeCI, \cOpusCodeVsVThreeWL} \\
 Opus code $-$ trim & \multicolumn{6}{l}{\cOpusCodeVsTrim{} \cOpusCodeVsTrimCI, \cOpusCodeVsTrimWL} \\

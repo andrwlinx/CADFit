@@ -87,6 +87,11 @@ def heldout():
     pending('hSection', 'section-only control (running)')
     pending('hRejudge', 'independent rejudge (running)')
     pending('hSurface', 'surface agreement (running)')
+    tc = [load('heldout', f'h2s{s}_v3_trim_common.json') for s in range(3)]
+    if all(tc):
+        put('hTrimCommon', f(st.mean(st.mean(t[p].get('iou_cad_gated', 0.0) for t in tc) for p in tc[0]), 3))
+    else:
+        pending('hTrimCommon', 'common-protocol replay of trim programs (running)')
     if tim:
         for k, w in (('h2s0_d0', 'DZero'), ('h2s0_dx', 'DX')):
             put(f'hMin{w}', f(tim[k]['mean_min'], 1))
@@ -334,7 +339,28 @@ def equivalence():
         put('eProfileParts', str(len(p['parts'])))
 
 
+def reruns():
+    r = load('tools_v3', 'rerun_timing.json')
+    if not r:
+        return
+    w = {'opus55/code/v2': 'OpusCodeVTwo', 'opus55/skills/v2': 'OpusSkillsVTwo', 'sonnet55/code/v2': 'SonnetCodeVTwo',
+         'sonnet55/skills/v2': 'SonnetSkillsVTwo', 'opus55/code/v3': 'OpusCodeVThree', 'opus55/skills/v3': 'OpusSkillsVThree',
+         'sonnet55/code/v3': 'SonnetCodeVThree', 'sonnet55/skills/v3': 'SonnetSkillsVThree'}
+    for k, v in r['reruns'].items():
+        put(f'r{w[k]}', str(v))
+    put('rTotal', str(sum(r['reruns'].values())))
+    for k, kw in (('opus55/skills', 'OpusSkills'), ('opus55/code', 'OpusCode'), ('sonnet55/skills', 'SonnetSkills'),
+                  ('sonnet55/code', 'SonnetCode')):
+        x = r['first_launch_timing'][k]
+        put(f'rFirst{kw}', f(x['diff'], 1, True))
+        put(f'rFirst{kw}CI', f"[{f(x['ci'][0], 1, True)}, {f(x['ci'][1], 1, True)}]")
+        put(f'rFirst{kw}Parts', str(x['parts']))
+        put(f'rFirst{kw}Faster', str(x['faster']))
+        put(f'rFirst{kw}P', f"{x['p']:.2f}")
+
+
 def main():
+    reruns()
     equivalence()
     heldout()
     failures()
