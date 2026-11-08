@@ -44,10 +44,10 @@ def closed():
                             capsize=2, lw=0.8)
             eps = [json.load(open(f)) for tag in ('agentsk_f2', 'agentsk_f2_r1', 'agentsk_f2_r2')
                    for f in glob.glob(os.path.join(bundle, tag, m, t, '*', 'result.json'))]
-            share = sum(e['seconds_split']['model'] for e in eps) / sum(sum(e['seconds_split'].values()) for e in eps)
+            model_min = sum(e['seconds_split']['model'] for e in eps) / len(eps) / 60  # recorded model seconds
             mins = d['mean_s'] / 60
             axs[1].bar(x, mins, w, color=col)
-            axs[1].bar(x, mins * share, w, fill=False, hatch='////', edgecolor='white', lw=0)
+            axs[1].bar(x, model_min, w, fill=False, hatch='////', edgecolor='white', lw=0)
             axs[1].text(x, mins + 0.15, f'{mins:.1f}', ha='center', fontsize=7)
             axs[2].bar(x, d['cost_per_episode'], w, color=col)
             axs[2].text(x, d['cost_per_episode'] + 0.005, f'{d["cost_per_episode"]:.2f}', ha='center', fontsize=7)

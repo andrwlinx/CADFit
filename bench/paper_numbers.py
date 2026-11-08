@@ -264,6 +264,15 @@ def agent_failures():
             m, ts, v = k.split('/')
             w = f"t{'Opus' if m == 'opus55' else 'Sonnet'}{'Code' if ts == 'code' else 'Skills'}{'VTwo' if v == 'v2' else 'VThree'}"
             put(w + 'Invalid', str(d['episodes'] - d['delivered_valid'] - d['no_output']))
+    if t:
+        unv = 0
+        for v in ('v2', 'v3'):
+            for r in ('r0', 'r1', 'r2'):
+                for cond in load('tools_v3', f'tv_{v}_{r}_scores.json')['conditions'].values():
+                    unv += sum(bool(x.get('cad_valid')) and not x.get('verified_in_episode') for x in cond.values())
+        put('tValidUnverified', str(unv))
+        put('tDeliveredValid', str(sum(d['delivered_valid'] for d in t['detail'].values())))
+        put('tEpisodes', str(sum(d['episodes'] for d in t['detail'].values())))
     # Tools-v3 timing contrasts (descriptive): per-part mean minutes over the three repeats.
     import random
     sub = json.load(open(os.path.join(ROOT, 'bench', 'cadbench', 'fresh3_parts.json')))['parts']
@@ -307,7 +316,26 @@ def costs():
     put('tApiFailedCost', f(sum(r.get('cost_usd') or 0 for r in rs), 2))
 
 
+def equivalence():
+    e = load('tools', 'equivalence.json')
+    if not e:
+        return pending('eDedup', 'equivalence tests')
+    put('eDedup', f"{e['dedup']['identical']}/{e['dedup']['cases']}")
+    put('eRotation', f"{e['rotation']['bit_identical']}/{e['rotation']['cases']}")
+    put('eJudge', f"{e['judge']['identical']}/{e['judge']['pairs']}")
+    put('eFit', f"{e['fitting']['identical']}/{e['fitting']['sketches']}")
+    put('eFitParts', str(e['fitting']['parts']))
+    put('eFitOld', f(e['fitting']['seconds_old'], 0))
+    put('eFitNew', f(e['fitting']['seconds_new'], 0))
+    p = load('tools', 'profile_v2_local.json')
+    if p:
+        ex = [c for r in p['parts'].values() for c in r['calls'] if c['tool'] == 'extract_sketch']
+        put('eExtractFitShare', f(100 * sum(c.get('fit', 0) for c in ex) / sum(c['seconds'] for c in ex), 1))
+        put('eProfileParts', str(len(p['parts'])))
+
+
 def main():
+    equivalence()
     heldout()
     failures()
     agent_failures()

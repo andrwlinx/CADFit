@@ -1,0 +1,24 @@
+{
+ "old_commit": "f4435df",
+ "stl_dir": "bench/cadbench/fresh",
+ "dedup": {
+  "cases": 300,
+  "identical": 300
+ },
+ "rotation": {
+  "cases": 200,
+  "bit_identical": 200
+ },
+ "judge": {
+  "pairs": 18,
+  "identical": 18
+ },
+ "fitting": {
+  "parts": 8,
+  "planes_per_part": 9,
+  "sketches": 162,
+  "identical": 162,
+  "seconds_old": 505.7,
+  "seconds_new": 18.3
+ }
+}

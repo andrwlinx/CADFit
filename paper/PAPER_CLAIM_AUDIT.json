@@ -1,0 +1,108 @@
+{
+ "audit_skill": "paper-claim-audit",
+ "verdict": "FAIL",
+ "reason_code": "claim_mismatch",
+ "summary": "All score numbers reproduce; FAIL for trim replay-limit disclosure, two missing brackets, delivery wording, figure hatching and missing equivalence evidence. Fixes applied after this audit; re-audit due in Phase 5.5.",
+ "audited_input_hashes": {
+  "main.tex": "sha256:ba2466d93eff39528f1b2a9a6527c43b8404d00d9f3f73d0ca5b0bb0c45fbd10",
+  "numbers.tex": "sha256:8fa5c463e5543e2960b429e5f597838032ca1655e311e3e4dbf7f10af5a37ca4",
+  "sections/0_abstract.tex": "sha256:079c1ccc065b2248868b0324caca15751146c7fbae19a0ccf57d4bb585693f14",
+  "sections/1_introduction.tex": "sha256:d9f8ca3288a75460937faf52fc10ece5665e1ec376115ea1332a9d24acb2d0dc",
+  "sections/2_related_work.tex": "sha256:8a92ea0a0147504b840f5e4f89d23934667a3c1dc4a3d7666221015aba25665e",
+  "sections/3_protocol.tex": "sha256:583b8217213dd83b0357163f34c7ae599cb1c1c78fc702b6376ee482ac546910",
+  "sections/4_optimizer.tex": "sha256:bd2caa45e79740e5b2f72ee9af85d8080552bbd413f086dfdf8f70a57117e77d",
+  "sections/5_agents.tex": "sha256:f7aabe68cc59b5a3b38ea0e2a9ee8f20145e24a99a1d150ef934ba6b501d4043",
+  "sections/6_tools.tex": "sha256:2b9527190792d0d9b6e803832065833e906570492dc83c99a8dd953740a76ecf",
+  "sections/7_discussion.tex": "sha256:c4298e0f0a96cd64099374f15c614ae9126bd03343a6db5d06a2db2b2fa37842",
+  "sections/8_reproducibility.tex": "sha256:3127b4fe4c4f49311403d9e416b3f1d19fc6fb66a8367ff7cc656321567f31e0",
+  "sections/A_appendix.tex": "sha256:0db91c363c729a286b05670533ce52184a36e8024e495f5e0aed7d889e88cd49",
+  "/Users/Andrewlin/CADFit/results/heldout/h2_primary_local.json": "sha256:a325c513b6edd1759f3c00757fe64a2a2998efd13d398e247f9ebf135f92e864",
+  "/Users/Andrewlin/CADFit/results/heldout/h2_secondary_local_no_section.json": "sha256:dde414cd3048f0480d46342807494f0168b6289c4321683d97ddf50db0c6a478",
+  "/Users/Andrewlin/CADFit/results/closed/closed_vs_pipeline.json": "sha256:4454b991a44c49f80a1dff89ddfa8d91ac0fcf4479e189ca39e2a8544d85bd04",
+  "/Users/Andrewlin/CADFit/results/tools_v3/tools_v3.json": "sha256:8645f85c21bbd31ab82f9d050691859039ed98e162874856e42dc095ab961ea6"
+ },
+ "trace_path": ".aris/traces/paper-claim-audit/",
+ "thread_id": "01a1b8fa-e4f3-7d62-ab7d-4441af96f960",
+ "reviewer_model": "gpt-6-astra",
+ "reviewer_reasoning": "ultra",
+ "generated_at": "2026-11-08T02:48:12.785954Z",
+ "details": {
+  "total_claims": "~110 records (O01-O21, A01-A17, T01-T23, D01-02, E01-E26, X01-X22)",
+  "mismatches": [
+   {
+    "id": "X01",
+    "status": "config_mismatch",
+    "issue": "trim records use the trim stage's 600 s replay, not the common 900 s",
+    "fix": "disclosed in Sec. 3 and 4; common re-judging pending"
+   },
+   {
+    "id": "X02-03",
+    "status": "ambiguous_mapping",
+    "issue": "median column = mean of per-run medians",
+    "fix": "caption defines aggregation"
+   },
+   {
+    "id": "X04-05",
+    "status": "number_mismatch",
+    "issue": "missing original brackets dx built-invalid 1[0], v2 seed2 2[1]",
+    "fix": "brackets added"
+   },
+   {
+    "id": "X06",
+    "status": "scope_overclaim",
+    "issue": "delivery described as always execution-verified",
+    "fix": "fallback described; 22 + 48 unverified reported"
+   },
+   {
+    "id": "X07",
+    "status": "ambiguous_mapping",
+    "issue": "abstract 'every delivered program valid' (479/480 in Study 3)",
+    "fix": "scoped to Opus"
+   },
+   {
+    "id": "X08",
+    "status": "number_mismatch",
+    "issue": "model-time hatching used normalized share",
+    "fix": "uses recorded model seconds"
+   },
+   {
+    "id": "X09",
+    "status": "ambiguous_mapping",
+    "issue": "tools field says v2 for all episodes",
+    "fix": "appendix explains version provenance by frozen-tree path"
+   },
+   {
+    "id": "X10",
+    "status": "ambiguous_mapping",
+    "issue": "source-model disjointness vs two shared document hashes",
+    "fix": "wording changed to model index; disclosed"
+   },
+   {
+    "id": "X11",
+    "status": "missing_evidence",
+    "issue": "equivalence tests not saved",
+    "fix": "bench/tools_equivalence.py -> results/tools/equivalence.json; macros"
+   },
+   {
+    "id": "X12-13,X16,X18-19,X22",
+    "status": "unsupported_claim",
+    "issue": "interpretive overreach / caption color",
+    "fix": "softened or removed"
+   },
+   {
+    "id": "X14-15,X17,X20",
+    "status": "missing_evidence",
+    "issue": "settings, logs, chronology not in result files",
+    "fix": "cited to code and protocol execution logs"
+   }
+  ],
+  "result_files": [
+   "results/heldout",
+   "results/closed",
+   "results/tools_v3",
+   "results/heldout_pre_recovery",
+   "results/review_bundle_2026-11-05",
+   "results/tools"
+  ]
+ }
+}
