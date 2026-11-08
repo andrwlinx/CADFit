@@ -1,224 +1,212 @@
 #!/usr/bin/env python3
 """
-results/*.json -> paper/numbers.tex: one LaTeX macro per reported number, so no result
-number is typed by hand in paper/sections/*.tex.
+Write paper/numbers.tex: every result number the paper prints, as a LaTeX macro, generated
+from the committed result files (PAPER_ACCEPTANCE_CONTRACT.md A2). A value whose source file
+does not exist yet renders as \\pending{<what>} (visible in the PDF).
 
-  python3 bench/paper_stats.py && python3 bench/paper_numbers.py
-
-Rounding: 3 decimals; an interval endpoint whose 3-decimal rounding would read 0.000 or
-flip sign is printed with 4 significant digits instead (contract assertion 2).
+  .venv/bin/python bench/paper_numbers.py            # -> paper/numbers.tex
 """
 import json
 import os
+import statistics as st
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RES = os.path.join(ROOT, 'results')
-ARMS = {'A_base': 'Base', 'B_rules': 'Rules', 'C_beam': 'Beam', 'D_beam_sections': 'Sec'}
-MODELS = {'gemma4-31b': 'Gemma', 'qwen36-35b-a3b': 'QwenSix', 'gptoss-120b': 'GptBig',
-          'devstral2-24b': 'Devstral', 'gptoss-20b': 'GptSmall', 'qwen38-27b': 'QwenEight'}
-L = []
+R = os.path.join(ROOT, 'results')
+OUT = os.path.join(ROOT, 'paper', 'numbers.tex')
+macros = {}
 
 
-def num(x, signed=False):
-    s = f'{x:+.3f}' if signed else f'{x:.3f}'
-    if x != 0 and (float(s) == 0 or (float(s) > 0) != (x > 0)):
-        s = f'{x:+.4g}' if signed else f'{x:.4g}'
-    return s.replace('-', '\\ensuremath{-}')  # a typeset minus, not a hyphen
+def load(*path):
+    p = os.path.join(R, *path)
+    return json.load(open(p)) if os.path.exists(p) else None
+
+
+def f(x, d=3, sign=False):
+    s = f'{x:+.{d}f}' if sign else f'{x:.{d}f}'
+    return s.replace('-', '\\textminus{}') if s.startswith('-') else s
+
+
+def ci(lo, hi, d=3):
+    return f'[{f(lo, d, True)}, {f(hi, d, True)}]'
 
 
 def put(name, value):
     assert name.isalpha(), name
-    L.append(f'\\newcommand{{\\{name}}}{{{value}}}')
+    macros[name] = value
 
 
-def put_paired(prefix, p):
-    put(prefix + 'Diff', num(p['diff'], True))
-    put(prefix + 'Lo', num(p['ci_lo'], True))
-    put(prefix + 'Hi', num(p['ci_hi'], True))
-    put(prefix + 'CI', f"[{num(p['ci_lo'], True)}, {num(p['ci_hi'], True)}]")
-    put(prefix + 'Wins', str(p['wins']))
-    put(prefix + 'Losses', str(p['losses']))
+def pending(name, what):
+    put(name, f'\\pending{{{what}}}')
 
 
-def fresh():
-    F = json.load(open(os.path.join(RES, 'fresh_arms.json')))
-    put('nFresh', str(F['n_parts']))
-    for k, n in ARMS.items():
-        a = F['arms'][k]
-        put(f'arm{n}Iou', num(a['iou']))
-        put(f'arm{n}Cad', num(a['iou_cad']))
-        put(f'arm{n}Gated', num(a['iou_cad_valid_gated']))
-        put(f'arm{n}Cd', f"{a['cd_measured']:.4f}")
-        put(f'arm{n}CdN', str(a['cd_n']))
-        put(f'arm{n}Gap', num(a['gap']))
-        put(f'arm{n}GapUnbuilt', num(a['gap_from_unbuilt']))
-        put(f'arm{n}GapBuilt', num(a['gap_from_built']))
-        put(f'arm{n}Unbuilt', str(a['cad_unbuilt']))
-        put(f'arm{n}BuiltInvalid', str(a['cad_built_invalid']))
-        put(f'arm{n}Bad', str(a['cad_bad']))
-        for sp, s in (('benchA', 'SplitA'), ('benchE', 'SplitE')):
-            put(f'arm{n}{s}Iou', num(a['by_split'][sp]['iou']))
-            put(f'arm{n}{s}Cad', num(a['by_split'][sp]['iou_cad']))
-    for sp, s in (('benchA', 'SplitA'), ('benchE', 'SplitE')):
-        put(f'n{s}', str(F['arms']['A_base']['by_split'][sp]['n']))
-    put('bestOfIou', num(F['arms']['best_of_C_and_sections']['iou']))
-    put('bestOfCad', num(F['arms']['best_of_C_and_sections']['iou_cad']))
-    put('sectionsOnlyIou', num(F['arms']['sections_only']['iou']))
-    P = F['paired']
-    steps = {'B_rules-A_base': 'RulesBase', 'C_beam-B_rules': 'BeamRules',
-             'D_beam_sections-C_beam': 'SecBeam', 'D_beam_sections-A_base': 'SecBase'}
-    mets = {'iou': 'Iou', 'iou_cad': 'Cad', 'iou_cad_valid_gated': 'Gated', 'cad_gain_minus_mesh_gain': 'Shrink'}
-    for s, sn in steps.items():
-        for m, mn in mets.items():
-            put_paired(f'd{sn}{mn}', P[f'{s}/{m}'])
-    for sp, s in (('benchA', 'SplitA'), ('benchE', 'SplitE')):
-        for m, mn in (('iou', 'Iou'), ('iou_cad', 'Cad')):
-            put_paired(f'dSecBase{s}{mn}', P[f'D_beam_sections-A_base/{m}/{sp}'])
-    for sp, s in (('benchA', 'SplitA'), ('benchE', 'SplitE')):
-        put_paired(f'dSecBeam{s}Cad', P[f'D_beam_sections-C_beam/iou_cad/{sp}'])
-    put('rulesGatedLossesZero', str(F['B_rules-A_base_gated_losses']['to_zero']))
-    put_paired('dSecBestOfCad', P['D_beam_sections-best_of/iou_cad'])
-    put_paired('dSecBestOfIou', P['D_beam_sections-best_of/iou'])
+def pval(p):
+    return '<10^{-4}' if p < 1e-4 else f'{p:.3f}' if p >= 0.001 else f'{p:.4f}'
 
 
-def agents():
-    A = json.load(open(os.path.join(RES, 'agent_skills.json')))
-    put('nAgentParts', str(A['n_parts']))
-    put('bonfLevel', f"{100 * (1 - A['bonferroni_alpha']):.2f}")
-    C = A['conditions']
-    put('agentPipeSec', num(C['pipeline/beamsec']['iou_cad']))
-    put('agentPipeSecGated', num(C['pipeline/beamsec']['iou_cad_valid_gated']))
-    put('agentPipeBeam', num(C['pipeline/beamkh']['iou_cad']))
-    put('agentPipeBeamGated', num(C['pipeline/beamkh']['iou_cad_valid_gated']))
-    put('agentPipeBestOf', num(C['pipeline/best_of_beam_section']['iou_cad']))
-    put('policyCad', num(C['no-llm-policy/skills']['iou_cad']))
-    put('policyGated', num(C['no-llm-policy/skills']['iou_cad_valid_gated']))
-    put('policyTrials', f"{A['policy_trial_evaluations_mean']:.0f}")
-    gains = []
-    for m, n in MODELS.items():
-        r = A['models'][m]
-        put(f'm{n}Skills', num(r['skills']))
-        put(f'm{n}Code', num(r['code']))
-        put(f'm{n}SkillsGated', num(C[f'{m}/skills']['iou_cad_valid_gated']))
-        put(f'm{n}CodeGated', num(C[f'{m}/code']['iou_cad_valid_gated']))
-        put_paired(f'm{n}VsCode', r['skills_vs_code_bonf'])
-        put_paired(f'm{n}VsPolicy', r['skills_vs_policy_bonf'])
-        put_paired(f'm{n}VsPolicyNominal', r['skills_vs_policy'])
-        put_paired(f'm{n}VsPipe', r['skills_vs_beamsec_bonf'])
-        gains.append(r['skills_vs_code_bonf']['diff'])
-    idx = json.load(open(os.path.join(ROOT, 'bench', 'cadbench', 'index.json')))
-    split = {r['file_id']: k for k, v in idx.items() for r in v}
-    put('nSampleA', str(sum(split.get(p) == 'benchA' for p in A['parts'])))
-    put('nSampleE', str(sum(split.get(p) == 'benchE' for p in A['parts'])))
-    drops = [C[f'{m}/skills']['iou_cad'] - C[f'{m}/skills']['iou_cad_valid_gated'] for m in MODELS]
-    put('skillsGatedMaxDrop', num(max(drops)))
-    put('skillsGainMin', num(min(gains)))
-    put('skillsGainMax', num(max(gains)))
-    q = A['models']['qwen38-27b']
-    put('qwenCodeNoTool', str(q['code_stops'].get('no tool call', 0)))
-    put('qwenSkillsNoTool', str(q['skills_stops'].get('no tool call', 0)))
-    s = A.get('qwen38_32k_posthoc')
-    if s:
-        for t, tn in (('skills', 'Skills'), ('code', 'Code')):
-            put(f'qwenPosthoc{tn}', num(s[t]['iou_cad_32k']))
+def heldout():
+    prim = load('heldout', 'h2_primary_local.json')
+    sec = load('heldout', 'h2_secondary_local_no_section.json')
+    pre = load('heldout', 'h2_primary_pre_recovery_local.json')
+    tim = load('heldout', 'h2_timing_summary.json')
+    for name, d in (('Prim', prim), ('Sec', sec), ('Pre', pre)):
+        if d is None:
+            pending(f'h{name}', f'{name} stats')
+    arms = {}
+    for d in (prim, sec):
+        arms.update(d.get('runs', {}) if d else {})
+    words = {'h2s0_d0': 'DZero', 'h2s0_dx': 'DX', 'v2x3': 'VTwo', 'v3x3': 'VThree', 'trimx3': 'Trim'}
+    for k, w in words.items():
+        a = arms.get(k)
+        if not a:
+            pending(f'h{w}', k)
+            continue
+        put(f'h{w}', f(a['mean_gated']))
+        put(f'h{w}A', f(a['benchA']))
+        put(f'h{w}E', f(a['benchE']))
+        put(f'h{w}Valid', f"{a['valid']}")
+    pairs = {}
+    for d in (prim, sec):
+        pairs.update(d.get('pairs', {}) if d else {})
+    names = {'h2s0_dx:h2s0_d0': 'DXvsDZero', 'v2x3:h2s0_dx': 'VTwovsDX', 'v3x3:v2x3': 'VThreevsVTwo',
+             'trimx3:v3x3': 'TrimvsVThree'}
+    for k, w in names.items():
+        c = pairs.get(k)
+        if not c:
+            pending(f'h{w}', k)
+            continue
+        put(f'h{w}', f(c['diff'], 3, True))
+        put(f'h{w}CI', ci(*c['ci95']))
+        put(f'h{w}WL', f"{c['wins']}/{c['losses']}")
+        put(f'h{w}P', f"${pval(c['sign_p_holm'])}$")
+        put(f'h{w}BothValid', f(c['both_valid_diff'], 4, True))
+    if pre:
+        c = pre['pairs']['h2s0_dx:h2s0_d0']
+        put('hPreDXvsDZero', f(c['diff'], 3, True))
+        put('hPreDXValid', f"{pre['runs']['h2s0_dx']['valid']}")
+    pending('hTrimvsSection', 'trim vs section-only (running)')
+    pending('hSection', 'section-only control (running)')
+    pending('hRejudge', 'independent rejudge (running)')
+    pending('hSurface', 'surface agreement (running)')
+    if tim:
+        for k, w in (('h2s0_d0', 'DZero'), ('h2s0_dx', 'DX')):
+            put(f'hMin{w}', f(tim[k]['mean_min'], 1))
+            put(f'hMed{w}', f(tim[k]['median_min'], 1))
+            put(f'hHours{w}', f(tim[k]['total_h'], 0))
+        for k, w in (('v2', 'VTwo'), ('v3', 'VThree')):
+            rs = [tim[f'h2s{s}_{k}'] for s in range(3)]
+            put(f'hMin{w}', f(st.mean(r['mean_min'] for r in rs), 1))
+            put(f'hMed{w}', f(st.mean(r['median_min'] for r in rs), 1))
+            put(f'hHours{w}', f(st.mean(r['total_h'] for r in rs), 0))
+            put(f'hMinForty{w}', f(st.mean(r['mean40_min'] for r in rs), 1))
 
 
-def extra():
-    p = os.path.join(RES, 'agent_extra.json')
-    if not os.path.exists(p):  # jobs still running: every macro extra() defines, as a visible placeholder
-        names = ['gemmaRunOne', 'gemmaRunTwo', 'gemmaRunThree', 'gemmaRunMean', 'gemmaRunMin', 'gemmaRunMax',
-                 'gemmaCodesec', 'gemmaCodesecGated', 'policyMatchedCad', 'policyMatchedGated',
-                 'policyMatchedTrials', 'policyMatchedCalls']
-        for pre in ['gemmaCodesecVsCode', 'gemmaSkillsVsCodesec'] + [f'm{n}VsMatched' for n in MODELS.values()]:
-            names += [pre + x for x in ('Diff', 'Lo', 'Hi', 'CI', 'Wins', 'Losses')]
-        for k in names + ['policyVerdict']:
-            put(k, '\\textbf{PENDING}')
-        return
-    E = json.load(open(p))
-    runs = E['gemma_skills_runs']
-    for k, v in zip(('One', 'Two', 'Three'), runs):
-        put(f'gemmaRun{k}', num(v))
-    put('gemmaRunMean', num(sum(runs) / len(runs)))
-    put('gemmaRunMin', num(min(runs)))
-    put('gemmaRunMax', num(max(runs)))
-    put('gemmaCodesec', num(E['gemma_codesec']))
-    put('gemmaCodesecGated', num(E['gemma_codesec_gated']))
-    put_paired('gemmaCodesecVsCode', E['codesec_vs_code'])
-    put_paired('gemmaSkillsVsCodesec', E['skills_vs_codesec'])
-    put('policyMatchedCad', num(E['policy_matched']))
-    put('policyMatchedGated', num(E['policy_matched_gated']))
-    put('policyMatchedTrials', f"{E['policy_matched_trials_mean']:.1f}")
-    put('policyMatchedCalls', f"{E['policy_matched_calls_mean']:.1f}")
-    for m, n in MODELS.items():
-        put_paired(f'm{n}VsMatched', E['vs_matched_bonf'][m])
-    # Contract C15: an LLM benefit over the budget-matched policy only where the Bonferroni lower bound > 0.
-    names = {'gemma4-31b': 'Gemma-4-31B', 'qwen36-35b-a3b': 'Qwen3.6-35B-A3B', 'gptoss-120b': 'gpt-oss-120b',
-             'devstral2-24b': 'Devstral-Small-2-24B', 'gptoss-20b': 'gpt-oss-20b', 'qwen38-27b': 'Qwen3.8-27B'}
-    up = [names[m] for m in MODELS if E['vs_matched_bonf'][m]['ci_lo'] > 0]
-    down = [names[m] for m in MODELS if E['vs_matched_bonf'][m]['ci_hi'] < 0]
-    if up:
-        v = (', '.join(up) + (' scores' if len(up) == 1 else ' score') +
-             ' above it with a Bonferroni interval excluding zero; for the other models an advantage is not established')
-    else:
-        v = 'no agent\\textquotesingle s advantage over it is established at this sample size'
-    if down:
-        v += '; ' + ', '.join(down) + (' scores' if len(down) == 1 else ' score') + ' below it'
-    put('policyVerdict', v)
+def trim_decomposition():
+    m = load('tools_v3', 'h2_scores.json')
+    if not m:
+        return pending('hTrimProper', 'trim decomposition')
+    proper, repass = [], []
+    for s in range(3):
+        t = load('tools_v3', f'h2s{s}_v3_trim.json')
+        v3 = m[f'h2s{s}_v3']
+        parts = sorted(v3)
+        base = st.mean(v3[p]['iou_cad_gated'] for p in parts)
+        nt = st.mean((t[p].get('gated_no_trim') or 0.0) if p in t else 0.0 for p in parts)
+        fin = st.mean((t[p].get('gated') or 0.0) if p in t else 0.0 for p in parts)
+        proper.append(fin - nt)
+        repass.append(nt - base)
+    put('hTrimProperLo', f(min(proper), 4, True))
+    put('hTrimProperHi', f(max(proper), 4, True))
+    put('hRepassLo', f(min(repass), 4, True))
+    put('hRepassHi', f(max(repass), 4, True))
 
 
-def facts():
-    D = json.load(open(os.path.join(RES, 'dev_facts.json')))
-    c = D['persistent_cq']
-    put('cqStartupPct', f"{100 * c['import_cadquery_s'] / c['median_call_s']:.0f}")
-    put('cqCallSec', f"{c['median_call_s']:.2f}")
-    put('cqImportSec', f"{c['import_cadquery_s']:.2f}")
-    put('objBelieved', f"{D['objective_case']['search_believed']:.3f}")
-    put('objStrict', f"{D['objective_case']['strict_judge']:.3f}")
-    put('areaDropped', str(D['area_filter_case']['profiles_dropped']))
-    put('revBefore', f"{D['revolve_split_case']['before']:.3f}")
-    put('revAfter', f"{D['revolve_split_case']['after']:.3f}")
+def closed():
+    c = load('closed', 'closed_vs_pipeline.json')
+    if not c:
+        return pending('cOpusCode', 'closed-model results')
+    words = {'opus55/code': 'OpusCode', 'opus55/skills': 'OpusSkills', 'sonnet55/code': 'SonnetCode',
+             'sonnet55/skills': 'SonnetSkills', 'pipe/d0': 'PipeDZero', 'pipe/dx': 'PipeDX',
+             'pipe/v2x3': 'PipeVTwo', 'pipe/v3x3': 'PipeVThree', 'pipe/trim(x3)': 'PipeTrim'}
+    for k, w in words.items():
+        a = c['arms'][k]
+        put(f'c{w}', f(a['all']))
+        put(f'c{w}A', f(a['benchA']))
+        put(f'c{w}E', f(a['benchE']))
+        put(f'c{w}CI', f"[{f(a['ci95'][0])}, {f(a['ci95'][1])}]")
+    for k, w in (('opus55/code', 'OpusCode'), ('opus55/skills', 'OpusSkills'),
+                 ('sonnet55/code', 'SonnetCode'), ('sonnet55/skills', 'SonnetSkills')):
+        d = c['agent_detail'][k]
+        put(f'c{w}Valid', f"{d['delivered_valid']}/{d['episodes']}")
+        put(f'c{w}NoOut', f"{d['causes'].get('no output', 0)}")
+        put(f'c{w}Min', f(d['mean_s'] / 60, 1))
+        put(f'c{w}Med', f(d['median_s'] / 60, 1))
+        put(f'c{w}Cost', f(d['cost_per_episode'], 2))
+        put(f'c{w}Unverified', f"{d['valid_but_unverified']}")
+    pairs = {'opus55/code - pipe/v3x3': 'OpusCodeVsVThree', 'opus55/code - pipe/trim(x3)': 'OpusCodeVsTrim',
+             'opus55/code - sonnet55/code': 'OpusVsSonnetCode', 'opus55/skills - opus55/code': 'OpusSkillsVsCode',
+             'sonnet55/skills - sonnet55/code': 'SonnetSkillsVsCode', 'sonnet55/code - pipe/v3x3': 'SonnetCodeVsVThree'}
+    for k, w in pairs.items():
+        p = c['pairs'][k]
+        put(f'c{w}', f(p['mean'], 3, True))
+        put(f'c{w}CI', ci(*p['ci95']))
+        put(f'c{w}WL', f"{p['wins']}/{p['losses']}")
+    det = c['agent_detail']
+    put('cDeliveredValid', str(sum(d['delivered_valid'] for d in det.values())))
+    put('cDelivered', str(sum(d['episodes'] - d['causes'].get('no output', 0) for d in det.values())))
+    put('cCostRetained', f(sum(d['cost_total'] for d in det.values()), 2))
+    ts = load('closed', 'agentsk_f2_tool_seconds.json')
+    if ts:
+        share = {}
+        for m in ('opus55', 'sonnet55'):
+            tot = sum(v['total_s'] for k, v in ts.items() if k.startswith(f'{m}/code/'))
+            share[m] = ts[f'{m}/code/add_code']['total_s'] / tot
+        put('cAddCodeShareLo', f(100 * min(share.values()), 0))
+        put('cAddCodeShareHi', f(100 * max(share.values()), 0))
+        put('cMaxCall', f(max(v['max_s'] for v in ts.values()), 0))
 
 
-def misc():
-    R = json.load(open(os.path.join(RES, 'refine_study.json')))
-    pipe = R['pipeline']['agentfr1.log']
-    put('refN', str(pipe['n']))
-    put('refPipe', num(pipe['iou']))
-    ag = R['RedHatAI__Qwen3.8-27B-INT4/refine']
-    put('refAgentOne', num(ag['agentfr1.log']['iou']))
-    put('refAgentTwo', num(ag['agentfr2.log']['iou']))
-    put('refAgentOneWL', ag['agentfr1.log']['wl'].replace('/', '--'))
-    put('refAgentTwoWL', ag['agentfr2.log']['wl'].replace('/', '--'))
-    put('refNoop', num(R['noop/refine']['agentfr1.log']['iou']))
-    put('refSearch', num(R['search/refine']['agentfr1.log']['iou']))
-    put('refSearchWL', R['search/refine']['agentfr1.log']['wl'].replace('/', '--'))
-    Q = json.load(open(os.path.join(RES, 'qwen38_traces.json')))
-    put('qwenTraceN', str(Q['code']['episodes_no_tool_call']))
-    put('qwenTraceMinK', f"{Q['code']['final_reasoning_chars_min'] / 1000:.1f}")
-    put('qwenTraceMaxK', f"{Q['code']['final_reasoning_chars_max'] / 1000:.1f}")
-    T = json.load(open(os.path.join(RES, 'tool_usage.json')))
-    for tool, tn in (('extract_sketch', 'Extract'), ('fit_extrude', 'Extrude'), ('fit_revolve', 'Revolve'),
-                     ('section_extrude', 'SecExt'), ('section', 'Section')):
-        v = [T[m]['per_episode'].get(tool, 0.0) for m in MODELS]
-        put(f'use{tn}Min', f'{min(v):.1f}')
-        put(f'use{tn}Max', f'{max(v):.1f}')
-    F = json.load(open(os.path.join(ROOT, 'bench', 'runs', 'fresh_scores.json')))['fresh_beamkh']
-    built = [(v['iou'] - (v.get('iou_cad') or 0)) for v in F.values() if v.get('cad_built')]
-    put('beamMaxBuiltGap', num(max(built)))
-    G = json.load(open(os.path.join(ROOT, 'bench', 'runs', 'fresh_scores.json')))['fresh_beamsec']
-    gaps = sorted((((v['iou'] - (v.get('iou_cad') or 0)), v) for v in G.values() if v.get('cad_built') and v.get('cad_valid')), key=lambda t: t[0])
-    put('secMaxBuiltGap', num(gaps[-1][0]))
-    put('secMaxBuiltGapMesh', num(gaps[-1][1]['iou']))
-    put('secMaxBuiltGapCad', num(gaps[-1][1]['iou_cad']))
+def tools():
+    t = load('tools_v3', 'tools_v3.json')
+    if not t:
+        return pending('tOpusSkillsVThree', 'tools-v3 results')
+    for m, mw in (('opus55', 'Opus'), ('sonnet55', 'Sonnet')):
+        for ts, tw in (('code', 'Code'), ('skills', 'Skills')):
+            for v, vw in (('v2', 'VTwo'), ('v3', 'VThree')):
+                k = f'{m}/{ts}/{v}'
+                a, d = t['cells'][k], t['detail'][k]
+                w = f't{mw}{tw}{vw}'
+                put(w, f(a['all']))
+                put(w + 'CI', f"[{f(a['ci95'][0])}, {f(a['ci95'][1])}]")
+                put(w + 'Valid', f"{d['delivered_valid']}/{d['episodes']}")
+                put(w + 'NoOut', str(d['no_output']))
+                put(w + 'Min', f(d['mean_s'] / 60, 1))
+                put(w + 'Med', f(d['median_s'] / 60, 1))
+                put(w + 'Cost', f(d['cost_total'], 2))
+    names = {'opus55/skills/v3 - opus55/skills/v2': 'OpusSkillsVersion', 'opus55/skills/v3 - opus55/code/v3': 'OpusSkillsVsCode',
+             'opus55/code/v3 - opus55/code/v2': 'OpusCodeVersion', 'sonnet55/skills/v3 - sonnet55/skills/v2': 'SonnetSkillsVersion',
+             'sonnet55/skills/v3 - sonnet55/code/v3': 'SonnetSkillsVsCode', 'sonnet55/code/v3 - sonnet55/code/v2': 'SonnetCodeVersion'}
+    for k, w in names.items():
+        c = t['comparisons'][k]
+        put(f't{w}', f(c['mean'], 3, True))
+        put(f't{w}CI', ci(*c['ci95']))
+        put(f't{w}WL', f"{c['wins']}/{c['losses']}")
+        put(f't{w}P', f"{c['sign_p']:.3f}")
+        if 'holm_p' in c:
+            put(f't{w}Holm', f"{c['holm_p']:.3f}")
+    put('tCostTotal', f(sum(d['cost_total'] for d in t['detail'].values()), 2))
+
+
+def main():
+    heldout()
+    trim_decomposition()
+    closed()
+    tools()
+    lines = ['% Generated by bench/paper_numbers.py from results/ -- do not edit by hand.',
+             '\\providecommand{\\pending}[1]{\\textcolor{red}{[pending: #1]}}']
+    lines += [f'\\newcommand{{\\{k}}}{{{v}}}' for k, v in sorted(macros.items())]
+    open(OUT, 'w').write('\n'.join(lines) + '\n')
+    print(f'{len(macros)} macros -> {OUT}; pending: {sum("pending" in v for v in macros.values())}')
 
 
 if __name__ == '__main__':
-    fresh()
-    agents()
-    extra()
-    facts()
-    misc()
-    out = os.path.join(ROOT, 'paper', 'numbers.tex')
-    open(out, 'w').write('% generated by bench/paper_numbers.py from results/*.json -- do not edit\n'
-                         + '\n'.join(L) + '\n')
-    print(f'{len(L)} macros -> {out}')
+    main()

@@ -1,169 +1,139 @@
-# NARRATIVE_REPORT — CADFit++: measurement, geometric proposals, and CAD skills for open-model agents
+# Narrative report — Execute the Program (rebuilt 2026-11-07)
 
-All numbers below are recomputed by `bench/paper_stats.py` into `results/fresh_arms.json`,
-`results/agent_skills.json`, `results/refine_study.json`. CIs are paired percentile bootstrap over
-parts (10,000 resamples, seed 0). "IoU" = volumetric IoU of the output mesh vs. the ground truth
-(normalized frame, largest extent → [-1,1]); "IoU(CAD)" = the same judge on the solid obtained by
-*executing the final CadQuery program* in a fresh sandboxed process (0 if it does not build).
+Supersedes NARRATIVE_REPORT.pre_2026-11-07.md. Every number below cites its file. "Pending"
+marks preregistered outputs not yet computed (they are running on ORCD); the paper must use
+visible placeholders for them.
 
-## 1. Problem and setting
+## One-paragraph story
+The output of mesh-to-CAD reconstruction is a program, so it should be judged by executing it.
+We build an execution-based evaluation (sandboxed replay of the delivered CadQuery program, OCC
+validity of the shape and every solid, IoU of the executed solid against the target, invalid = 0)
+and use it in three frozen, prospectively specified studies on CADBench hard-tier parts. (1) A
+reconstruction optimizer (CADFit) delivers a program that does not build or is OCC-invalid on
+41/300 held-out parts; making delivery execution-verified (pick the best program that actually
+builds valid CAD, repair if not) raises validity-gated IoU by +0.104 (preregistered primary
+contrast), and later geometry fixes, precise extents and a silhouette trim add smaller,
+significant increments. (2) Under the same judge, frontier closed models (Claude Opus/Sonnet
+5.5) acting through a CAD harness with plain code reach 0.975 (Opus) on 40 reserved held-out
+parts, above the optimizer's v3 (0.951); the optimizer's own stages exposed as agent tools did
+not help and caused deadline failures. (3) Profiling showed the tool cost was implementation
+overhead, not geometry; exact rewrites plus a per-check time cap ("tools v3"), developed only on
+development parts and evaluated on a new source-disjoint cohort, halve Opus's time with CADFit
+tools, remove no-output episodes, and make CADFit tools slightly but significantly better than
+plain code; the preregistered primary (tools v3 vs v2 for Opus+CADFit tools) is not significant.
 
-Mesh-to-CAD: given a watertight triangle mesh, output an executable, editable CAD program
-(CadQuery: sketch → extrude/revolve, union/cut) whose solid matches the mesh. CADFit
-(Nehme, Whalen, Ahmed; arXiv 2605.01171) does this by IoU-driven optimization: it slices the
-mesh into planar sketches, fits line/arc primitives, proposes extrusion/revolve candidates
-(translation CD sweep, revolve-axis analysis), and greedily composes them with booleans,
-followed by backward pruning and residual refinement.
+## Evaluation protocol (method)
+- Judge: bench/score.py robust_iou — exact manifold booleans when both meshes are closed and
+  consistent, else seeded Monte-Carlo with generalized winding number (Jacobson 2013); GT
+  normalized to [-1,1]. Executed program: bench/cad_replay.py in a sandbox (bwrap / sandbox-exec),
+  OCC isValid on the shape and on every solid; 900 s replay limit. Metric: validity-gated IoU
+  (iou_cad_gated): IoU of the executed solid if it builds valid, else 0; missing output = 0.
+- Statistics: paired over parts; split-stratified bootstrap (benchA/benchE) 95% intervals;
+  exact sign tests; Holm within declared families. Repeats averaged within part.
+- Cohorts (bench/fetch_cadbench.py, seeded, source-model disjoint): dev (60), fresh (60) and
+  others used for development; fresh2 (300: 150 benchA-hard + 150 benchE-hard) held-out for the
+  pipeline; 40 of fresh2 reserved for agent studies (bench/cadbench/fresh2_subset.json, drawn
+  before any fresh2 outcome); fresh3 (40, drawn after the tools-v3 code and protocol were frozen,
+  excluding every source model in any earlier set) for the tools study.
 
-Benchmark: CADBench (`DeCoDELab/CADBench`, Hugging Face; same lab), splits benchA and benchE,
-"hard" tier (face-count tier; benchA-hard = ABC shapes with 138–12,292 B-rep faces). benchA-hard
-geometry is 77.6% planar area, 18.5% cylindrical; 83.2% of planar area has an axis-aligned normal
-(`bench/gt_surface_stats.py`, 158 GT STEP files). Gotcha: split names and file prefixes are swapped
-(benchA = `bench1B-*`, benchE = `bench1A-*`).
+## Study 1 — held-out pipeline (review-stage/HELDOUT_PROTOCOL.md)
+Arms (frozen trees): d0 = released pipeline + infrastructure/seed patches; dx = d0 +
+execution-verified delivery (exec_verify.py: build each candidate program, keep the best valid,
+fuse/repair otherwise); v2 = dx + geometry fixes; v3 = v2 + precise extents; trim = v3 +
+silhouette trim as an extra exec-verify variant. v2, v3, trim: three seeds each.
+Results (post-recovery, frozen analysis script bench/analysis/v2_dev.py; results/heldout/):
+- Gated IoU over 300: d0 0.7975 (valid 259/300), dx 0.9012 (293/300), v2 0.9296 (3-seed),
+  v3 0.9359 (3-seed, 298/300 valid), trim 0.9450 (3-seed).  [h2_primary_local.json,
+  h2_secondary_local_no_section.json]
+- PRIMARY dx − d0: +0.1037 [+0.0709, +0.1376], 43 better / 4 worse, Holm p < 1e-4.
+- Secondary (Holm over 3 shown; the 4th, trim − section-only, is PENDING): v2 − dx +0.0284
+  [+0.0127, +0.0465] 57/20 p_holm 1e-4; v3 − v2 +0.0063 [+0.0005, +0.0127] 69/38 p_holm 0.0035;
+  trim − v3 +0.0091 [+0.0048, +0.0134] 90/1 p_holm < 1e-4.
+- Sensitivity, original pre-recovery files (results/heldout_pre_recovery/,
+  h2_primary_pre_recovery_local.json): dx − d0 = −0.7951 — entirely the 299 sandbox-setup
+  failures of dx's original scoring (dx valid 1/300). Reported side by side.
+- Recovery amendment (post-outcome measurement amendment, dated 2026-11-05): replay failures of
+  class setup (sandbox) or resource (rc −9 / 900 s timeout) got one terminal recovery pass, same
+  judge and limit, in all 8 runs; 531 eligible (299 dx setup, 222 v2-seed2 timeouts, 10 d0
+  resource). d0's 10 failed again (stay 0); dx and v2-seed2 recovered (dx 293/300 valid; v2-seed2
+  298/300). One dx recovery job ran on a faulty node and was cancelled before writing results.
+- Trim caveats: the trim variant includes a second fuse/repair pass before trimming (seed-2
+  00057691: 0.883 before trim from repair alone); one seed-0 trim replay timeout (00403399) kept
+  as frozen 0. Decomposition (gated_no_trim, all 300 parts): second fuse/repair pass alone
+  −0.0031 / +0.0000 / +0.0029 (seeds 0/1/2; seed 0 negative from the 00403399 timeout); trim
+  proper +0.0089 / +0.0089 / +0.0096; total +0.0058 / +0.0089 / +0.0126.
+- Runtime (results/heldout/h2_timing_summary.json; 3 parts per node in parallel, CPU only):
+  mean/median min per part — d0 7.5/3.7, dx 16.0/5.5, v2 12.6–14.4/6.2–6.6, v3 14.6–15.6/7.1–7.3;
+  totals 38 h (d0) to 78 h (v3) per 300-part run. Reserved 40: v3 mean 9.7–10.9 min.
+- PENDING (ORCD): section-only control (h2_section_control.json), independent rejudge (seed 1,
+  4x samples), surface agreement on the fused boundary, official stats outputs.
+- Development history (not evidence for held-out claims): dev5/dev7 results in results/,
+  AUTO_REVIEW.md (e.g. dev7 three-seed v3 − v2 +0.0087; trim +0.0050 15 better/0 worse).
 
-**Fresh cohort (the evaluation set):** 30 benchA-hard + 30 benchE-hard, seeded draw taken after all
-earlier sets (test/dev/smoke) and excluding every file_id ever downloaded — never inspected
-during development. All headline numbers are on this cohort. One run per (method, part).
+## Study 2 — closed models on the 40 reserved fresh2 parts
+Harness (agent/agent_loop.py, tools v2, CADFIT_AGENT_EXEC=1): every model change is executed and
+judged; delivered answer = best executed valid program. Toolsets: "code" = describe_target,
+section, evaluate, add_code, remove_step, list_steps, finish (geometric observations + execution
+feedback — not an unaided LLM); "skills" adds CADFit stages (detect_directions, extract_sketch,
+fit_extrude, fit_revolve, section_extrude, candidates). Budget 40 calls / 30 min; Claude via the
+Anthropic Messages API (agent/anthropic_chat.py): adaptive thinking, effort high, 32k max tokens
+per turn, full native history, no server fallbacks. Three independent episodes per part;
+every delivered program re-judged offline by score.py's CAD replay.
+Results (results/closed/closed_vs_pipeline.json; repeats averaged within part):
+- Opus/code 0.9749 [0.9646, 0.9837], valid 120/120, mean 6.9 min, $0.275/episode
+- Opus/skills 0.9411 [0.8778, 0.9861], 115/120 (5 no-output), 9.3 min, $0.164
+- Sonnet/code 0.9455 [0.9314, 0.9588], 120/120, 5.0 min, $0.152
+- Sonnet/skills 0.9323 [0.8767, 0.9654], 117/120 (3 no-output), 4.7 min, $0.088
+- Pipeline on the same 40: d0 0.7792, dx 0.9340, v2 0.9515, v3 0.9512, trim (3 seeds) 0.9582.
+- Opus/code − v3 +0.0236 [+0.0029, +0.0478] 25/15; − trim +0.0167 [−0.0013, +0.0364] 22/18.
+  Opus/code − Sonnet/code +0.0294 [+0.0179, +0.0417] 37/2. Skills − code: Opus −0.0338
+  [−0.0970, +0.0093]; Sonnet −0.0133 [−0.0683, +0.0198] (exploratory, 12+ comparisons).
+- All 472 delivered programs valid; the 8 failures are no-output deadline episodes on 3 parts
+  (00867782 all six skills episodes; 00300195, 00928992 one Opus-skills each). Earlier
+  "all agents invalid" readings of 00560247/00928992 were verification timeouts; offline replay
+  shows valid deliveries (e.g. Sonnet/code 00560247 0.947).
+- Tool time (results/closed/agentsk_f2_tool_seconds.json): add_code 84–89% of code-arm tool
+  time; skills arm dominated by extract_sketch / fit_extrude / add_candidate; single calls up to
+  ~1,770 s. Model (API) time 8–19% of episode time.
+- Discarded run: first Opus run on node4002 — 43/44 episodes with 90 s executed-call timeouts
+  (578 total), $8.95; set aside (agentsk_f2/opus55_node4002_failed/diagnosis.json), rerun;
+  preflight added.
 
-## 2. Contribution 1 — Measurement: what the CADFit objective and judge get wrong
+## Study 3 — tools v3 (review-stage/TOOLS_V3_PROTOCOL.md, frozen before runs)
+Changes developed and checked only on development parts (bench/profile_tools.py):
+exact — KD-tree duplicate removal in profile fitting (identical on 300 random cases), O(1)
+running-sum line error with exact SVD fallback near thresholds (identical on all 162 dev
+sketches; fitting 559 s → 19 s), vectorized revolve rotation (bit-identical; fit_revolve
+11.7 → 1.2 s), target loaded once per process in the judge (18/18 identical); behavioural — a
+120 s cap per executed check, unchecked steps never delivered while a checked valid program exists.
+Design: {v2, v3 frozen trees} × {code, skills} × {Opus, Sonnet} × 40 fresh3 parts × 3 episodes
+= 960 episodes; delivered programs re-judged offline. Execution log: API credit exhaustion and
+rate limits mid-run (239 episodes ended on API errors, moved aside, rerun); one node preflight
+stop (53 episodes) and one deadline ReadTimeout crash, rerun. Final 960/960.
+Results (results/tools_v3/tools_v3.json):
+- Opus code v2 0.9730 [0.9544, 0.9847] 119/120 7.3 min | Opus skills v2 0.9503 [0.8908, 0.9862]
+  116/120 8.9 min | Opus code v3 0.9838 [0.9786, 0.9884] 120/120 5.3 min | Opus skills v3 0.9870
+  [0.9825, 0.9906] 120/120 4.2 min. Sonnet: code v2 0.9486, skills v2 0.9376 (3 no-output),
+  code v3 0.9445, skills v3 0.9687 [0.9605, 0.9760] 120/120, 2.6 min.
+- PRIMARY Opus skills v3 − v2: +0.0367 [+0.0018, +0.0957], 22/12, sign p 0.121, Holm 0.243 —
+  NOT significant by the declared test.
+- Opus skills v3 − code v3: +0.0032 [+0.0004, +0.0064], 28/11, Holm 0.028 (significant, small).
+- Opus code v3 − v2: +0.0108 [+0.0007, +0.0285], 21/18, Holm 0.749.
+- Sonnet (secondary, uncorrected): skills v3 − code v3 +0.0242 [+0.0097, +0.0447] 28/12 p 0.017;
+  skills v3 − v2 +0.0311 [−0.0014, +0.0837] p 0.86; code v3 − v2 −0.0042 [−0.0088, −0.0002] p 0.50.
+- Time (descriptive): Opus skills −4.70 min/part [−6.58, −2.93], faster on 33/40, sign p 1.4e-5;
+  other cells −1.7 to −2.3 min with bootstrap intervals excluding 0 but sign tests not significant.
+- Replication: Opus code v2 on fresh3 0.973 vs 0.975 on fresh2.
 
-Found while developing (dev/smoke sets) and confirmed by an external Codex review:
+## Figures available (bench/figures/v2_2026-10-23/)
+simple_closed_models.png (Study 2), simple_tools_v3.png (Study 3), detail_00642725.png /
+detail_00232213.png (input mesh → broken program → repaired program → detail map; development
+parts), simple_runtime.png, simple_results.png, pipeline_v2.png. Held-out pipeline figure: to make.
 
-1. **Biased search objective.** Stock greedy concatenates candidate STLs; overlapping compounds fail
-   the single-body check, so the whole model is alpha-wrapped before IoU is taken. Alpha-wrap fills
-   concave detail (smoke part 00053793: search believed 0.954, strict judge 0.982), the bias varies
-   per candidate, so it changes which candidates are accepted. Fix: `--exact-union` (manifold3d exact
-   union of cached per-candidate solids).
-2. **Judge fills cavities.** Body-wise union of split bodies included negative-volume cavity shells
-   (00344388: 0.9758 → 0.9862; 00014841: 0.9102 → 0.9475 after the fix).
-3. **Mesh fidelity ≠ executable CAD.** With exact-union scoring the reported mesh comes from manifold
-   booleans; the combined CadQuery program was never executed. We add CAD replay: run the final program
-   in a fresh sandboxed process, check OCC validity of the shape and every solid, tessellate, judge.
-4. **Self-intersecting lofts** pass watertight/winding/`isValid()` checks but cancel volume (one made
-   greedy believe 0.998 on a part whose true score was 0.776); rejected by an alpha-wrap volume ratio test.
-5. **Silent failures:** trimesh API change drops fallback slices (7 times on 4 smoke parts); pipeline
-   reports success when greedy crashes; alpha-wrap segfaults kill the pipeline (now isolated).
-
-**Headline measurement result (fresh 60, `results/fresh_arms.json`):** the mesh–CAD gap grows with
-search strength. Mean IoU vs IoU(CAD), and parts whose program does not build or is OCC-invalid:
-
-| arm | IoU | IoU(CAD) | CAD unbuilt or invalid (of 60) |
-|---|---|---|---|
-| A base (corrected stock) | 0.820 | 0.822 | 2 |
-| B + rules | 0.877 | 0.830 | 6 |
-| C + beam | 0.880 | 0.799 | 9 |
-| D + beam + section proposals | 0.938 | 0.889 | 5 |
-
-Paired mesh-IoU gains are significant at every step (B−A +0.056 [+0.027,+0.098]; C−B +0.003
-[+0.0004,+0.007]; D−C +0.058 [+0.026,+0.101]; D−A +0.117 [+0.070,+0.175]). On IoU(CAD) only D−C is
-significant (+0.089 [+0.008,+0.174]); B−A (+0.009 [−0.058,+0.070]) and C−B (−0.031 [−0.095,+0.029])
-are not, and D−A is +0.067 [−0.012,+0.144]. Message: a large part of apparent search gains on mesh
-IoU does not survive executing the program; evaluation of mesh-to-CAD must execute the program.
-
-## 3. Contribution 2 — CADFit++ search: rules, beam, and whole-part section proposals
-
-Flag-gated additions (stock reproducible):
-- **Rules (arm B):** `--persistent-cq` (90% of each CadQuery call was interpreter startup; byte-identical
-  STLs), `--exact-union`, `--cut-phase` (subtract candidate solids while IoU improves — near-zero-IoU
-  candidates are hole tools), `--event-slices` (slice between consecutive heights of axis-normal planar
-  faces so thin layers get their own section), `--detect-directions` (Gauss-map extrusion directions:
-  cluster face normals, cross products of cluster pairs, scored by wall area; oblique prism recovered
-  within 0.012°), `--translation-max-points 400`.
-- **Beam (arm C):** beam search (width 4) over compositions on exact IoU, motivated by path dependence
-  (a worse greedy start can end better after refinement).
-- **Section proposals (arm D):** for each axis, the mid-bounding-box cross-section of the target,
-  simplified (0.002) and extruded through the full extent, added as candidates. Origin: an external
-  reviewer found this trivial control beat an LLM agent (control 0.748 vs agent 0.700 mean of 3 on 10
-  hard test parts; designed post hoc). We froze the recipe on dev and folded it into the pipeline.
-
-Results (fresh 60): D is the best arm on both metrics (IoU 0.938, IoU(CAD) 0.889, CD 0.0104).
-benchE-hard benefits most (IoU(CAD) 0.777 → 0.918, A → D). The standalone "best of C and sections"
-control (pick the better of arm C's model and the best section extrusion per part) gives IoU 0.953 /
-IoU(CAD) 0.902; D − best-of on IoU(CAD) = −0.014 [−0.080, +0.053] (not distinguishable). Section
-extrusions alone (best axis per part, no search) reach IoU 0.842, above the corrected base arm (0.820).
-Message: on this benchmark (mostly axis-aligned 2.5D), whole-part section proposals are a strong prior
-the stock proposal generator lacked; beam adds little on its own.
-
-## 4. Contribution 3 — CADFit stages as tools for open-weight LLM agents
-
-Agentic loop (OpenAI-compatible tool calling, vLLM 0.31 on H200s): the agent sees the target mesh
-(stats, renders via tools), can call `evaluate` (exact IoU vs target, precision, coverage) and add/cut
-candidates or CadQuery code; the episode answer is the best model seen by that IoU (ground-truth
-feedback, same for every condition). Budget: 40 tool calls, 30 min. From scratch: no pipeline output.
-
-Two toolsets per model, same budget:
-- **code:** write CadQuery, evaluate, read sections (exact profiles).
-- **skills:** + CADFit stages wrapped as tools: `detect_directions`, `extract_sketch(normal, offset)`
-  (slice → loop nesting → line/arc fit), `fit_extrude(sketch)` (translation CD sweep → extents),
-  `fit_revolve(sketch)` (revolve-axis analysis), `section_extrude(axis)`.
-Implementation details that mattered: even-odd loop nesting (pipeline grouping called an island in a
-hole a second hole), keeping profiles ≥1e-6 area (pipeline's 1e-3 dropped all 67 profiles of one part),
-a revolve-profile split bug fixed for the skill (stepped shaft 0.408 → 0.994; frozen pipeline arms do not
-have this fix), tool results capped at 8,000 chars as valid JSON, agent code sandboxed (bwrap or a
-user-namespace sandbox with read-only remounts, verified, then capability drop).
-
-Six open-weight models, each on one GPU: Gemma-4-31B-it, Qwen3.6-35B-A3B (FP8), gpt-oss-120b,
-Devstral-Small-2-24B, gpt-oss-20b, Qwen3.8-27B (FP8). Model-card sampling, thinking on, 16k tokens per turn.
-20 parts drawn (`random.Random(1)`) from the fresh cohort before any run (12 benchA, 8 benchE).
-Control: **no-LLM skills policy** — a script that calls section_extrude on x/y/z, mid-plane sketches,
-fits the 3 largest profiles per plane, then greedy union/cut assembly; it additionally scores ~69
-candidate unions/cuts per part against the GT without spending tool calls (a ceiling-style control
-with more oracle access than an agent). References: pipeline arms C, D, best-of on the same 20 parts.
-
-Results (mean IoU(CAD), 20 parts, failures = 0; `results/agent_skills.json`):
-
-| model | skills | code | skills − code [Bonferroni 99.17% CI] | wins–losses |
-|---|---|---|---|---|
-| Gemma-4-31B | 0.892 | 0.593 | +0.299 [+0.135, +0.481] | 17–3 |
-| Qwen3.6-35B-A3B | 0.854 | 0.465 | +0.389 [+0.208, +0.565] | 17–3 |
-| gpt-oss-120b | 0.812 | 0.557 | +0.256 [+0.112, +0.419] | 18–2 |
-| Devstral-Small-2-24B | 0.776 | 0.305 | +0.471 [+0.316, +0.612] | 19–1 |
-| gpt-oss-20b | 0.732 | 0.422 | +0.311 [+0.105, +0.520] | 15–5 |
-| Qwen3.8-27B | 0.730 | 0.307 | +0.423 [+0.179, +0.664] | 15–3 |
-| no-LLM skills policy | 0.810 | | | |
-| pipeline D (beam+sections) | 0.904 | | | |
-| pipeline C (beam) | 0.860 | | | |
-| best-of C and sections | 0.896 | | | |
-
-- Skills > code for all six models, every Bonferroni CI excludes 0.
-- Gemma-4 + skills vs pipeline D: −0.012, Bonferroni CI [−0.050, +0.043]; 6–10 parts. Not shown
-  different; within ~0.05. (Not an equivalence test.)
-- LLM vs no-LLM policy: Gemma +0.083 (95% CI [+0.013, +0.188]; Bonferroni [0.000, +0.233]; sign test
-  10–4, p = 0.18) — not significant after correction. Others: −0.080 … +0.044, none significant.
-  At this sample size the study does not distinguish LLM planning from the scripted policy: the
-  skills-vs-code gap is shown, any planning contribution is neither shown nor ruled out.
-- Failure modes: Qwen3.8 at 16k/turn ends 16/20 code episodes with no tool call (thinking exhausts the
-  turn). Post-hoc 32k sensitivity (decided after seeing outcomes; not part of the study): skills
-  0.730 → 0.783, code 0.307 → 0.541. gpt-oss-20b: 3 episodes lost to leaked harmony tokens (HTTP 500).
-- Tool use (skills): extract_sketch 1.8–4.9 and fit_extrude 1.6–6.8 calls/episode; fit_revolve ≤0.3 —
-  the parts barely exercise revolves.
-
-Earlier study (refine, not from scratch): Qwen3.8-27B-INT4 refining arm C's output on the 19 fresh parts
-with judge IoU < 0.90 (gate fixed before running), 2 repeats, mesh IoU: pipeline 0.751; agent 0.797 and
-0.807 (W/L 2/3 and 4/3 vs pipeline at ±0.01); no-op re-export 0.749; equal-time scripted search 0.756
-(W/L 8/2). Mean gain driven by few parts; not consistent per part. (`results/refine_study.json`)
-
-## 5. Related work pointers
-
-CADFit (2605.01171); CADBench; ABC dataset (Koch et al. 2019); DeepCAD (Wu et al. 2021); Fusion 360
-Gallery (Willis et al. 2021); Point2Cyl (Uy et al. 2022); CAD-Recode / CAD-as-code LLM methods; CADFather
-(arXiv 2610.09127, LLM CAD agent, concurrent); generalized winding numbers (Jacobson et al. 2013);
-manifold3d; CadQuery; OpenCascade; vLLM; tool-using LLM agents (ReAct, Toolformer, SWE-agent).
-
-## 6. Limitations (real)
-
-- One episode/run per cell; CIs reflect part sampling only.
-- 20 parts for the agent study; 60 for the pipeline; hard tier of two CADBench splits only; axis-aligned
-  2.5D dominates (revolve skill barely used).
-- Agent answers and the policy are selected with ground-truth IoU (as is the pipeline's own objective);
-  absolute numbers assume the target mesh is available — true for mesh-to-CAD, but the agent never has to
-  decide when it is done without that feedback.
-- The no-LLM policy has extra free GT evaluations (~69/part); agents pay per evaluate call.
-- The agent fit_revolve has a bug fix the frozen pipeline arms lack.
-- Section proposals originated from a post-hoc control designed after seeing agent results on test parts;
-  the recipe was frozen on dev and evaluated on the fresh cohort.
-
-## 7. Figures available
-- `bench/figures/agent_skills_iou_cad.png` — bar chart of IoU(CAD) per condition (20 parts).
-- Data for: arm ladder (mesh vs CAD IoU, 60 parts), skills vs code paired scatter, per-split bars.
-- Method diagram needed: pipeline stages → skills exposed as tools → agent loop.
+## Limitations to state
+Post-outcome recovery amendment; infrastructure exclusions/reruns (node faults, API credit/rate
+limits); 40-part agent cohorts (power for < 0.01 effects limited); fresh2's other 260 parts were
+seen in pipeline outcomes (fresh3 is the clean cohort); the code baseline includes target
+inspection and execution feedback; Claude settings (32k tokens/turn, full history) differ from the
+open-model harness; one benchmark (CADBench hard tier, two splits); IoU-centric endpoint (surface
+agreement pending); closed-model results tied to specific model versions and API.
