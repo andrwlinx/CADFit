@@ -4,3 +4,4 @@ bench/cadbench/**/*.step
 
 # Meshes shared by the lab via Google Drive (0000.zip)
 bench/drive/
+.DS_Store
