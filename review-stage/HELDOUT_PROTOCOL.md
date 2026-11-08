@@ -125,3 +125,8 @@ validity rates and "valid in every repeat" are reported.
   job (28015491) was scheduled on node4002, the node whose replays timed out in the discarded Opus run;
   it was cancelled before writing its score file (completed evaluations it cached stand; failures were
   not cached by that code) and resubmitted excluding node4002 (28032524). Same single pass.
+- **Per-part caches for section control and rejudge (2026-11-08; I/O only).** The section-only job ran
+  into the 12 h limit on mit_normal and lost its work (no per-part results); section_control.py and
+  rejudge.py now cache each part's result, as score.py and trim_posthoc.py already do. Values are
+  unchanged. The section step is resubmitted on mit_preemptable (2-day limit) from h2_src_c3 with the
+  cached script copied in (h2_src_c4 is not created; only these two I/O changes are added).

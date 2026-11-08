@@ -50,10 +50,19 @@ def one(job):
         return name, part, out
     if not stl or not os.path.exists(stl):
         return name, part, {**out, 'error': f'delivered STL missing: {stl}'}
+    # Per-part result cache next to the delivered STL (I/O only, values unchanged): a job stopped
+    # at its time limit resumes. Valid while the STL is not newer than the cache.
+    cache = stl + '.rejudge_s1.json'
+    if os.path.exists(cache) and os.path.getmtime(cache) >= os.path.getmtime(stl):
+        return name, part, {**out, **json.load(open(cache))}
     import score
     j = score.robust_iou(gt, stl, seed=1, min_union=40000, max_batches=20)
-    return name, part, {**out, 'iou_cad_gated': float(j['iou']), 'method': j.get('method'), 'se': j.get('se'),
-                        'union_samples': j.get('union_samples'), 'stl': stl}
+    rec = {'iou_cad_gated': float(j['iou']), 'method': j.get('method'), 'se': j.get('se'),
+           'union_samples': j.get('union_samples'), 'stl': stl}
+    tmp = f'{cache}.{os.getpid()}'
+    json.dump(rec, open(tmp, 'w'))
+    os.replace(tmp, cache)
+    return name, part, {**out, **rec}
 
 
 def main():

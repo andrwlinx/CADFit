@@ -32,7 +32,11 @@ sys.path.insert(0, HERE)
 
 
 def one(job):
-    part, gt, outdir = job
+    part, gt, outdir, cache = job
+    # Per-part result cache (I/O only, values unchanged): a job stopped at its time limit resumes.
+    cpath = os.path.join(cache, part + '.json')
+    if os.path.exists(cpath):
+        return part, json.load(open(cpath))
     import trimesh
     import iou
     import score
@@ -54,6 +58,9 @@ def one(job):
             if j > best['iou']:
                 best = {'iou': j, 'kind': c['kind']}
             os.unlink(stl)
+    tmp = f'{cpath}.{os.getpid()}'
+    json.dump(best, open(tmp, 'w'))
+    os.replace(tmp, cpath)
     return part, best
 
 
@@ -64,12 +71,16 @@ def main():
     ap.add_argument('--scores', required=True, help='score.py --cad output that includes this run')
     ap.add_argument('--out', required=True)
     ap.add_argument('--jobs', type=int, default=16)
+    ap.add_argument('--cache', default=None, help='per-part result folder (default: scratch/section_cache_<run>)')
     a = ap.parse_args()
     name = os.path.basename(a.run.rstrip('/'))
     pipe = json.load(open(a.scores))[name]
     parts = sorted(p for p in pipe)
+    os.makedirs(os.path.join(ROOT, 'scratch'), exist_ok=True)
     outdir = tempfile.mkdtemp(prefix='secctl_', dir=os.path.join(ROOT, 'scratch'))
-    jobs = [(p, os.path.join(a.stl_dir, p + '.stl'), outdir) for p in parts]
+    cache = a.cache or os.path.join(ROOT, 'scratch', f'section_cache_{name}')
+    os.makedirs(cache, exist_ok=True)
+    jobs = [(p, os.path.join(a.stl_dir, p + '.stl'), outdir, cache) for p in parts]
     with ProcessPoolExecutor(a.jobs) as ex:
         sec = dict(ex.map(one, jobs))
     res = {}
