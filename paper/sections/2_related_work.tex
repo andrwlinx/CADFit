@@ -2,15 +2,15 @@
 \label{sec:related}
 
 \paragraph{Mesh- and point-cloud-to-CAD.}
-Learned methods map geometry to construction sequences: DeepCAD \citep{wu2021deepcad} and Point2Cyl \citep{uy2022point2cyl} predict sketch-and-extrude structure, zone graphs \citep{xu2021zonegraphs} search over extrusion sequences, and CAD-Recode \citep{rukhovich2025cadrecode} decodes point clouds into CadQuery code that is executed for evaluation. CADFit \citep{nehme2026cadfit} optimizes instead: it fits extrusion and revolve candidates to slices of the mesh and composes them greedily to maximize volumetric IoU. Datasets include ABC \citep{koch2019abc}, Fusion 360 Gallery \citep{willis2021fusion360} and DeepCAD; CADBench \citep{doris2026cadbench} unifies them with face-count tiers and metrics for fidelity, executability and compactness. Our contribution is an audit-and-repair study of one optimizer under an executed, validity-gated endpoint, with each repair tested on held-out parts.
+Learned methods map geometry to construction sequences: DeepCAD \citep{wu2021deepcad} predicts sketch-and-extrude sequences, Point2Cyl \citep{uy2022point2cyl} predicts extrusion-cylinder decompositions, zone graphs \citep{xu2021zonegraphs} search over extrusion sequences from B-reps, and CAD-Recode \citep{rukhovich2025cadrecode} decodes point clouds into CadQuery code that is executed for evaluation. CADFit \citep{nehme2026cadfit} optimizes instead: it fits extrusion and revolve candidates to slices of the mesh, validates them with a CAD kernel, and composes them greedily to maximize volumetric IoU. Datasets include ABC \citep{koch2019abc}, Fusion 360 Gallery \citep{willis2021fusion360} and DeepCAD; CADBench \citep{doris2026cadbench} unifies them with face-count tiers and metrics for fidelity, executability and compactness. Our contribution is an audit-and-repair study of one optimizer under an executed, validity-gated endpoint, with each repair tested on held-out parts.
 
 \paragraph{Iterative and agentic CAD generation.}
-Tool-using language models \citep{yao2023react,schick2023toolformer} and agent--computer interfaces \citep{yang2024sweagent} motivate CAD agents that act, observe and revise. CADReasoner \citep{kabisov2026cadreasoner} trains a model to edit a runnable CadQuery program from the geometric discrepancy of its previous output, and IterCAD \citep{hu2026itercad} trains a multimodal agent against an executable CAD sandbox. CAD-Assistant \citep{mallis2025cadassistant} plans FreeCAD actions with CAD-specific tools, and CADFather \citep{savrasov2026cadfather} coordinates learned and algorithmic proposal tools with a vision-language assistant, executes the proposed programs and keeps the best valid one. CADSmith \citep{barkley2026cadsmith} wraps text-to-CadQuery generation in nested loops that fix execution errors and check geometry programmatically, and RA-CAD \citep{yan2026racad} learns to critique a program after executing it. We use frozen closed models without training, take the tools from one optimizer, and compare two tool packages on a cohort drawn after both were frozen.
+Tool-using language models \citep{yao2023react,schick2023toolformer} and agent--computer interfaces \citep{yang2024sweagent} motivate CAD agents that act, observe and revise. CADReasoner \citep{kabisov2026cadreasoner} trains a model to edit a runnable CadQuery program from the geometric discrepancy of its previous output, and IterCAD \citep{hu2026itercad} trains a multimodal agent against an executable CAD sandbox and keeps invalid generations in the denominator of its recall curve. CAD-Assistant \citep{mallis2025cadassistant} plans FreeCAD actions with CAD-specific tools, and CADFather \citep{savrasov2026cadfather} coordinates learned and algorithmic proposal tools with a vision-language assistant, executes the proposed programs and keeps the best valid one. CADSmith \citep{barkley2026cadsmith} wraps text-to-CadQuery generation in nested loops that fix execution errors and check geometry programmatically, and RA-CAD \citep{yan2026racad} learns to critique a program after executing it. We use frozen closed models without training, take the tools from one optimizer, and compare two tool packages on a cohort drawn after both were frozen.
 
 \begin{table}[t]
 \centering
 \small
-\caption{Positioning by evaluation design. \emph{Search signal}: what the system optimizes or selects on. \emph{Final replay}: the reported score is computed on the solid built by re-executing the final delivered program. \emph{Zero-inclusive}: failed deliveries enter the fidelity average as zero. \emph{Prospective}: arms and analysis fixed before a cohort drawn for the study. n.r.: not reported in that work.}
+\caption{Positioning by evaluation design. \emph{Search signal}: what the system optimizes or selects on. \emph{Final replay}: the reported score is computed on the solid built by a separate re-execution of the final delivered program (candidate execution during search does not count). \emph{Zero-inclusive}: failed deliveries enter the fidelity average as zero. \emph{Prospective}: arms and analysis fixed before a cohort drawn for the study. n.r.: not reported in that work.}
 \label{tab:related}
 \setlength{\tabcolsep}{3.5pt}
 \resizebox{\linewidth}{!}{%
@@ -18,10 +18,11 @@ Tool-using language models \citep{yao2023react,schick2023toolformer} and agent--
 \toprule
 Work & Input & Search signal & Final replay & Zero-inclusive & Prospective \\
 \midrule
-CADFit & mesh & mesh IoU; kernel validity reported & n.r. & n.r. & n.r. \\
-CAD-Recode & point cloud & learned decoder & yes & n.r. & n.r. \\
-CADReasoner & renders, points & executed output & yes & n.r. & n.r. \\
-CADFather & mesh & executed programs & yes & n.r. & n.r. \\
+CADFit & mesh & IoU-guided fitting, kernel validation & n.r. & n.r. & n.r. \\
+CAD-Recode & point cloud & decoder; best of 10 by Chamfer & n.r. & n.r. & n.r. \\
+CADReasoner & renders, points & discrepancy of executed candidates & n.r. & n.r. & n.r. \\
+IterCAD & multimodal & sandbox feedback & n.r. & recall curve only & n.r. \\
+CADFather & mesh & validity first, then IoU/GMS & n.r. & ablation score only & n.r. \\
 This work & mesh & mesh IoU (optimizer), executed IoU (agents) & yes & yes & yes \\
 \bottomrule
 \end{tabular}}

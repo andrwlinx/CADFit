@@ -1,0 +1,28 @@
+{
+ "audit_skill": "citation-audit",
+ "verdict": "WARN",
+ "reason_code": "fixes_applied_after_fail",
+ "summary": "Fresh audit (thread 01a1b92c-2d81-75d1-8933-bf4be4c2b4ae): 22/22 cited works exist; 14 KEEP, 8 FIX, 0 REPLACE/REMOVE. Verdict FAIL for the positioning table and overbroad context; all FIX items applied after the audit (Manifold author Lalish; software entries dated by access; Jacobson pages; arXiv versions pinned; CADFit framing as reported vs audited implementation; Point2Cyl/zone-graph wording; finite-precision Boolean IoU; winding numbers need consistent orientation; table: final replay n.r. for prior works, CAD-Recode best-of-10 selection, CADReasoner signal, CADFather and IterCAD failure-inclusive reporting). Not re-audited after fixes.",
+ "audited_input_hashes": {
+  "references.bib": "sha256:e9b59cbb1963525ddf54a1a2d856bc900a456b948e1d4bc1d9c5b6187ec48586"
+ },
+ "thread_id": "01a1b92c-2d81-75d1-8933-bf4be4c2b4ae",
+ "reviewer_model": "gpt-6-astra",
+ "reviewer_reasoning": "xhigh",
+ "generated_at": "2026-11-08T03:30:36.992599Z",
+ "details": {
+  "cited_keys": 22,
+  "keep": 14,
+  "fix": 8,
+  "replace": 0,
+  "remove": 0,
+  "uncited_entries": [
+   "kwon2023vllm",
+   "openai2025gptoss",
+   "yang2025qwen3",
+   "portaneri2022alphawrap",
+   "gemma4",
+   "devstral2"
+  ]
+ }
+}
