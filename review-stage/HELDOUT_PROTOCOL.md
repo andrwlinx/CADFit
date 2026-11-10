@@ -130,3 +130,12 @@ validity rates and "valid in every repeat" are reported.
   rejudge.py now cache each part's result, as score.py and trim_posthoc.py already do. Values are
   unchanged. The section step is resubmitted on mit_preemptable (2-day limit) from h2_src_c3 with the
   cached script copied in (h2_src_c4 is not created; only these two I/O changes are added).
+- **Common-protocol replay of trim programs (added after review, 2026-11-07; not preregistered).**
+  bench/trim_common_replay.py replays each seed's delivered trim program with score.py (900 s, sandbox,
+  per-solid validity). Seed 2's first run (node3005) hit 32 sandbox-setup failures (stderr listing
+  another job's /tmp/.../mounts; the 300-character tail had cut the "ns_sandbox" marker, so they were
+  cached as build errors). score.py now keeps both ends of stderr and classifies these as setup; the
+  32 cached records were removed and seed 2 rerun excluding node3005 (job 28626177). Seed 0 timed out at
+  2 days and was resubmitted (replay records cached). The rejudge job (28032513) started before its
+  per-part cache existed; if it times out, rejudge2 (28619447, afternotok) reruns it with the cache and
+  stats2 (28619448) follows.
