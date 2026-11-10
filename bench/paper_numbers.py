@@ -45,7 +45,7 @@ def pval(p):
 
 def heldout():
     prim = load('heldout', 'h2_primary_local.json')
-    sec = load('heldout', 'h2_secondary_local_no_section.json')
+    sec = load('heldout', 'h2_secondary_local.json') or load('heldout', 'h2_secondary_local_no_section.json')
     pre = load('heldout', 'h2_primary_pre_recovery_local.json')
     tim = load('heldout', 'h2_timing_summary.json')
     for name, d in (('Prim', prim), ('Sec', sec), ('Pre', pre)):
@@ -68,7 +68,7 @@ def heldout():
     for d in (prim, sec):
         pairs.update(d.get('pairs', {}) if d else {})
     names = {'h2s0_dx:h2s0_d0': 'DXvsDZero', 'v2x3:h2s0_dx': 'VTwovsDX', 'v3x3:v2x3': 'VThreevsVTwo',
-             'trimx3:v3x3': 'TrimvsVThree'}
+             'trimx3:v3x3': 'TrimvsVThree', 'trimx3:section': 'TrimvsSection'}
     for k, w in names.items():
         c = pairs.get(k)
         if not c:
@@ -83,8 +83,14 @@ def heldout():
         c = pre['pairs']['h2s0_dx:h2s0_d0']
         put('hPreDXvsDZero', f(c['diff'], 4, True))
         put('hPreDXValid', f"{pre['runs']['h2s0_dx']['valid']}")
-    pending('hTrimvsSection', 'trim vs section-only (running)')
-    pending('hSection', 'section-only control (running)')
+    if 'trimx3:section' not in pairs:
+        pending('hTrimvsSection', 'trim vs section-only (running)')
+    sc = load('heldout', 'h2_section_control.json')
+    if sc:
+        vals = [r.get('section_cad_gated', r.get('sections_cad', r.get('sections', 0.0))) for r in sc.values()]
+        put('hSection', f(st.mean(vals)))
+    else:
+        pending('hSection', 'section-only control (running)')
     pending('hRejudge', 'independent rejudge (running)')
     pending('hSurface', 'surface agreement (running)')
     tc = [load('heldout', f'h2s{s}_v3_trim_common.json') for s in range(3)]
@@ -252,10 +258,11 @@ def failures():
                 for run, v in entry['runs'].items():
                     tot[run] = len(v['cleared'])
         put('hRecoveredTotal', str(sum(tot.values())))
-    for name, d in (('', load('heldout', 'h2_primary_local.json')), ('', load('heldout', 'h2_secondary_local_no_section.json'))):
+    for name, d in (('', load('heldout', 'h2_primary_local.json')),
+                    ('', load('heldout', 'h2_secondary_local.json') or load('heldout', 'h2_secondary_local_no_section.json'))):
         for k, c in (d or {}).get('pairs', {}).items():
             w = {'h2s0_dx:h2s0_d0': 'DXvsDZero', 'v2x3:h2s0_dx': 'VTwovsDX', 'v3x3:v2x3': 'VThreevsVTwo',
-                 'trimx3:v3x3': 'TrimvsVThree'}[k]
+                 'trimx3:v3x3': 'TrimvsVThree', 'trimx3:section': 'TrimvsSection'}[k]
             put(f'h{w}Neutral', str(300 - c['wins'] - c['losses']))
 
 

@@ -202,6 +202,12 @@ def chamfer(gt_path, recon_path, n=20000, seed=0):
     return float(0.5 * (cKDTree(b).query(a)[0].mean() + cKDTree(a).query(b)[0].mean()))
 
 
+def _ends(text, n=200):
+    """Both ends of a long stderr: the cause (e.g. 'ns_sandbox: could not make read-only') is at
+    the start, the traceback tail at the end; keeping only the tail hid sandbox failures."""
+    return text if len(text) <= 2 * n else f'{text[:n]} ... {text[-n:]}'
+
+
 def env_failure(error):
     """The replay failures eligible for one recovery evaluation (HELDOUT_PROTOCOL.md,
     amendment 2026-11-05): 'setup' = the sandbox could not be set up (no evaluation took
@@ -210,7 +216,7 @@ def env_failure(error):
     cached; bench/h2_env_clear.py clears an eligible part once, and the recovery result
     is terminal."""
     e = str(error or '')
-    if 'ns_sandbox' in e:
+    if 'ns_sandbox' in e or ('/mounts/' in e and 'replay crashed' in e):
         return 'setup'
     if e == 'timeout 900s' or '(rc -9,' in e:
         return 'resource'
@@ -250,7 +256,7 @@ def cad_replay(recon, timeout=900):
         except (IndexError, json.JSONDecodeError):
             # no record: the replay process crashed (e.g. an OCC segfault) — it does not build
             rec = {'built': False, 'valid': False,
-                   'error': f'replay crashed (rc {p.returncode}, attempt {attempt + 1}): {p.stderr.strip()[-300:]}'}
+                   'error': f'replay crashed (rc {p.returncode}, attempt {attempt + 1}): {_ends(p.stderr.strip())}'}
             if lines:
                 break  # it printed something else: a real failure, not a silent death
     json.dump(rec, open(rec_path, 'w'))

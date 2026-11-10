@@ -513,7 +513,7 @@ LaTeX Font Info:    Trying to load font information for T1+pcr on input line 17
  (t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 ) [3])
-(sections/4_optimizer [4]) (sections/5_agents
+(sections/4_optimizer [4]) (sections/5_agents [5]
 Underfull \hbox (badness 10000) in paragraph at lines 6--7
  []\T1/ptm/b/n/10 Models and runs.[] \T1/ptm/m/n/10 Claude Opus 5.5 (\T1/pcr/m/
 n/10 claude-opus-5-5\T1/ptm/m/n/10 ) and Son-net 5.5
@@ -525,10 +525,9 @@ Underfull \hbox (badness 1043) in paragraph at lines 6--7
 e An-thropic Mes-sages API with adap-tive think-ing
  []
 
-[5]
 File: figures/closed.pdf Graphic file (type pdf)
 <use figures/closed.pdf>
-) (sections/6_tools [6]
+[6]) (sections/6_tools
 File: figures/tools_v3.pdf Graphic file (type pdf)
 <use figures/tools_v3.pdf>
  [7]) (sections/7_discussion) [8]
@@ -549,9 +548,6 @@ Underfull \hbox (badness 10000) in paragraph at lines 3--4
 \T1/ptm/m/n/10 All co-horts are seeded draws from the CAD-Bench in-dex (hard ti
 er) by
  []
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
 
 [10]
 Underfull \hbox (badness 10000) in paragraph at lines 55--58
@@ -598,4 +594,4 @@ Underfull \hbox (badness 2088) in paragraph at lines 102--50
 Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: A77C65DFB7FACD6A68074E7FAEFA5864;2807.
  )
-Output written on main.xdv (13 pages, 98736 bytes).
+Output written on main.xdv (13 pages, 98528 bytes).
