@@ -139,3 +139,8 @@ validity rates and "valid in every repeat" are reported.
   2 days and was resubmitted (replay records cached). The rejudge job (28032513) started before its
   per-part cache existed; if it times out, rejudge2 (28619447, afternotok) reruns it with the cache and
   stats2 (28619448) follows.
+- **2026-11-13.** A cluster event cancelled surface (28619445), trimcommon0 (28619446) and rejudge2
+  (28619447) at 2026-11-11 08:12:56 (and with them stats2). Per-part caches kept their progress (rejudge
+  1,188 records). Resubmitted: surface 28918331, trimcommon0 28918332, rejudge3 28918333, stats3 28918334.
+  Common-protocol trim replay: seed 1 0.9478 (300 valid) and seed 2 0.9458 (299 valid), equal to the
+  trim stage's own records for those seeds.
